@@ -6,7 +6,7 @@ Requires at least: 2.5
 Tested up to: 2.8.2
 Stable tag: 0.5
 
-Improves user experience and performance via: database cache, page cache, minify support with content delivery network support, media library import and more.
+Dramatically improve the user experience of your blog. Add page caching, database caching, minify and content delivery network functionality and more to WordPress.
 
 == Description ==
 
