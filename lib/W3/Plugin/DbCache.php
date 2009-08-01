@@ -77,7 +77,7 @@ class W3_Plugin_DbCache extends W3_Plugin
         $hostname = gethostbyaddr($_SERVER['SERVER_ADDR']);
         
         if (is_a($wpdb, 'W3_Db')) {
-            echo '<div style="text-align: left;font-size: 10px;">';
+            echo '<div style="text-align:left;font-size:10px;">';
             echo sprintf("Served from: %s<br />\n", $hostname);
             echo sprintf("Total queries: %d<br />\n", $wpdb->query_total);
             echo sprintf("Cached queries: %d<br />\n", $wpdb->query_hits);

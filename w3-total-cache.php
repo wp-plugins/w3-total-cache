@@ -1,5 +1,4 @@
 <?php
-
 /*
 Plugin Name: W3 Total Cache
 Description: Dramatically improve the user experience of your blog. Add transparent page caching, database caching, minify and content delivery network functionality and more to WordPress.
@@ -7,6 +6,28 @@ Version: 0.5
 Plugin URI: http://www.w3-edge.com/wordpress-plugins/w3-total-cache/
 Author: Frederick Townes
 Author URI: http://www.linkedin.com/in/w3edge
+*/
+
+/*  Copyright 2009 Frederick Townes <ftownes@w3-edge.com>
+	Portions of this distribution are copyrighted by:
+		Copyright (c) 2008 Ryan Grove <ryan@wonko.com>
+		Copyright (c) 2008 Steve Clay <steve@mrclay.org>
+	All rights reserved.
+
+	W3 Total Cache is distributed under the GNU General Public License, Version 2,
+	June 1991. Copyright (C) 1989, 1991 Free Software Foundation, Inc., 51 Franklin
+	St, Fifth Floor, Boston, MA 02110, USA
+
+	THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+	ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+	WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+	DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+	ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+	(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+	LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+	ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+	(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /**
