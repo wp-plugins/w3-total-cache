@@ -96,7 +96,7 @@
           <li><a href="#q78">Which web servers do you support?</a></li>
           <li><a href="#q79">Do I need to enable mod_gzip, mod_rewrite or install any <acronym title="Hypertext Transfer Protocol">HTTP</acronym> compression software on my server?</a></li>
           <li><a href="#q80">Is this plugin compatible with varnish or squid?</a></li>
-          <li><a href="#q81">My server is state of the art with 15,000 <acronym title="Rotations per Minute">RPM</acronym> drives in <acronym title="Redundant Array of Independent Disks">RAID</acronym>, why do I need to cache anything in memory?</a></li>
+          <li><a href="#q81">My server is state of the art with 15,000 <acronym title="Rotations per Minute">RPM</acronym> <acronym title="Redundant Array of Independent Disks">RAID</acronym>, why do I need to cache anything in memory?</a></li>
           <li><a href="#q82">Why would I choose <acronym title="Alternative PHP Cache">APC</acronym> over memcached or vice versa?</a></li>
           <li><a href="#q83">I already use <acronym title="Hypertext Transfer Protocol">HTTP</acronym> compression on my server, why does it matter if I minify my code?</a></li>
           <li><a href="#q84">How much memory (<acronym title="Random Access Memory">RAM</acronym>) do I need to delegate to caching?</a></li>
@@ -104,7 +104,6 @@
           <li><a href="#q86">What version of mySQL is needed?</a></li>
           <li><a href="#q87">And I need mod_rewrite (or equivalent for my web server) installed too, no?</a></li>
           <li><a href="#q88">How much hardware do I have to throw at something like this before I see a benefit?</a></li>
-
           <li><a href="#q89">Is this plugin server cluster and load balancer friendly?</a></li>
           <li><a href="#q90">I'm a web hosting provider and I heard about this plugin from my clients, is this plugin safe for a shared hosting environment?</a></li>
           <li><a href="#q91">What is the intended impact of this plugin on the web hosting landscape?</a></li>
@@ -277,7 +276,7 @@
       Not yet, we are considering support for add-ons. Meanwhile, please <a href="mailto:wordpressexperts@w3-edge.com">reach out to us</a> and let us know what you think would benefit the community.</p>
     <p align="right"><a href="#toc">back to top</a></p>
     <p id="q41"><strong>Who do I thank for all of this?</strong><br />
-      It's would be quite difficult to reference all of the innovative minds that have shared their thoughts, code and experiences in the blogosphere over the years, but here are some names to get you started:</p>
+      It's quite difficult to recall all of the innovators that have shared their thoughts, code and experiences in the blogosphere over the years, but here are some names to get you started:</p>
     <ul>
       <li><a href="http://mrclay.org/" target="_blank">Steve Clay</a></li>
       <li><a href="http://wonko.com/" target="_blank">Ryan Grove</a></li>
@@ -436,8 +435,8 @@ No, you can drag and drop them into the desired order on the minify settings pag
     <p id="q80"><strong>Is this plugin compatible with varnish or squid?</strong><br />
       We are still testing the performance of this plugin with <a href="http://varnish.projects.linpro.no/" target="_blank">varnish</a>. It currently appears that varnish is not necessary when this plugin fully utilized, even when using apache versus litespeed or lig<acronym title="Hypertext Transfer Protocol">HTTP</acronym>d due to the concurrency achieved by memory access for all objects required to handle requests. We have not tested <a href="http://www.squid-cache.org/" target="_blank">squid</a> with our plugin.</p>
     <p align="right"><a href="#toc">back to top</a></p>
-    <p id="q81"><strong>My server is state of the art with 15,000 <acronym title="Rotations per Minute">RPM</acronym> drives in <acronym title="Redundant Array of Independent Disks">RAID</acronym>, why do I need to cache anything in memory?</strong><br />
-      Even if your server was using an array of solid state disks (<acronym title="Solid State Disk">SSD</acronym>), your server's <acronym title="Random Access Memory">RAM</acronym> is still going to be faster and introduce less overhead to access than even the fastest solid state drives on a <acronym title="Peripheral Component Interconnect Express">PCIe</acronym> bus. If you didn't invest in <acronym title="Solid State Disk">SSD</acronym>s for your server, then you're even worse off &mdash; at least an order of magnitude speed difference in read operations in <acronym title="Random Access Memory">RAM</acronym> versus <acronym title="Hard Disk Drive">HDD</acronym>. For write operations the latency differences is even more pronounced. <acronym title="Random Access Memory">RAM</acronym> is the winner hands down. We won't even discuss the blocking and arbitration issues that happen with disk arrays under certain circumstances.</p>
+    <p id="q81"><strong>My server is state of the art with 15,000 RPM RAID, why do I need to cache anything in memory?</strong><br />
+      Even if your server was using an array of solid state disks (SSD), your server's <acronym title="Random Access Memory">RAM</acronym> is still going to be faster and introduce less overhead to access than even the fastest solid state drives on a PCIe bus. If you didn't invest in solid state disks for your server, then even worse off - at least an order of magnitude speed difference in read operations in <acronym title="Random Access Memory">RAM</acronym> versus HDD. For write operations delta the latency differences is even more pronounced. <acronym title="Random Access Memory">RAM</acronym> is the winner hands down. We won't even discuss the blocking and arbitration issues that happen with disk arrays under certain circumstances.</p>
     <p align="right"><a href="#toc">back to top</a></p>
     <p id="q82"><strong>Why would I choose <acronym title="Alternative PHP Cache">APC</acronym> over memcached or vice versa?</strong><br />
       There's no straight answer for this one. Since WordPress is a PHP-based application, we encourage everyone to install <acronym title="Alternative PHP Cache">APC</acronym> and subsequently realize a minimum of 10x performance gain. It will obviously make our plugin faster as well, so again please check out the installation instructions if you do not already use <acronym title="Alternative PHP Cache">APC</acronym>. Once installed, you can select <acronym title="Alternative PHP Cache">APC</acronym> as your caching engine in our plugin and get back to blogging.</p>
@@ -477,7 +476,7 @@ No, you can drag and drop them into the desired order on the minify settings pag
       </strong>Not yet. The next release has ~30 more features and one of them is the remedy to data security concerns for a shared (virtual) hosting environment.</p>
     <p align="right"><a href="#toc">back to top</a></p>
     <p id="q91"><strong>What is the intended impact of this plugin on the web hosting landscape?</strong><br />
-      We feel that shared or virtual hosting providers will begin offering secure containers (similar to what <a href="http://mediatemple.net/" target="_blank">mediatemple.net</a> does for mySQL and <acronym title="Ruby on Rails">RoR</acronym> etc) for <acronym title="Alternative PHP Cache">APC</acronym> and memcached. Whoever brings this offering to market first will lower the bar for more web sites/applications (and startups) to build better performing applications with greater ease. The same hosting provider would also possess a new value added service, thereby realizing a competitive advantage in a highly competitive marketplace. Not to mention be able to increase the density of domains per server (or cluster) without shortchanging customers.</p>
+      We feel that shared or virtual hosting providers will begin offering secure containers (similar to what <a href="http://mediatemple.net/" target="_blank">mediatemple.net</a> does for mySQL and Ruby etc) for <acronym title="Alternative PHP Cache">APC</acronym> and memcached. Whoever brings this offering to market first will lower the bar for more web sites/applications (and startups) to build better performing applications with greater ease. The same hosting provider would also possess a new value added service, thereby realizing a competitive advantage in a highly competitive marketplace. Not to mention be able to increase the density of domains per server (or cluster) without shortchanging customers.</p>
     <p>One day hopefully this plugin will contribute to making web servers greener and reduce the ecological footprint of the web by reducing the computational effort required to deliver high performance rich user experiences.</p>
     <p align="right"><a href="#toc">back to top</a></p>
   </div>
