@@ -1,6 +1,5 @@
 === Plugin Name ===
 Contributors: Frederick Townes
-Author Home Page: http://www.w3-edge.com/
 Tags: cache, caching, page cache, css cache, js cache, db cache, http compression, gzip, deflate, minify, CDN, content delivery network, media library, w3 total cache, wp cache, wp super cache, performance, speed
 Requires at least: 2.5
 Tested up to: 2.8.2
