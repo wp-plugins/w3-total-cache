@@ -1,5 +1,5 @@
 === Plugin Name ===
-Contributors: Frederick Townes
+Contributors: fredericktownes
 Tags: user experience, cache, caching, page cache, css cache, js cache, db cache, database cache, http compression, gzip, deflate, minify, CDN, content delivery network, media library, wp cache, wp super cache, w3 total cache, performance, speed
 Requires at least: 2.5
 Tested up to: 2.8.2

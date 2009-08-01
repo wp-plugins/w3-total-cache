@@ -172,7 +172,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
     function favorite_actions($actions)
     {
         $actions['options-general.php?page=' . W3_PLUGIN_FILE . '&amp;flush_all'] = array(
-            'Empty cache', 
+            'Empty W3TC Caches', 
             'manage_options'
         );
         
@@ -184,7 +184,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
      */
     function footer()
     {
-        echo '<div style="text-align: center;">Site Optimization <a href="http://www.w3-edge.com/wordpress-plugins/" rel="external">WordPress Plugins</a> by W3 EDGE</div>';
+        echo '<div>Performance Optimization <a href="http://www.w3-edge.com/wordpress-plugins/" rel="external">WordPress Plugins</a> by W3 EDGE</div>';
     }
     
     /**
@@ -426,14 +426,14 @@ class W3_Plugin_TotalCache extends W3_Plugin
         }
         
         if ($config->get_boolean('dbcache.enabled') && ! $this->check_db()) {
-            $errors[] = '<strong>Database caching</strong> are not available. <strong>db.php</strong> is not installed. Either the wp-content directory is not write-able or you have another caching plugin installed.';
+            $errors[] = '<strong>Database caching</strong> is not available. <strong>db.php</strong> is not installed. Either the wp-content directory is not write-able or you have another caching plugin installed.';
         }
         
         if ($config->get_boolean('pgcache.enabled')) {
             if (! $this->check_advanced_cache()) {
-                $errors[] = '<strong>Page caching</strong> are not available. <strong>advanced-cache.php</strong> is not installed. Either the <strong>wp-content</strong> directory is not write-able or you have another caching plugin installed.';
+                $errors[] = '<strong>Page caching</strong> is not available. <strong>advanced-cache.php</strong> is not installed. Either the <strong>wp-content</strong> directory is not write-able or you have another caching plugin installed.';
             } elseif (! defined('WP_CACHE')) {
-                $errors[] = '<strong>Page caching</strong> are not available. <strong>WP_CACHE</strong> constant is not defined in wp-config.php.';
+                $errors[] = '<strong>Page caching</strong> is not available. <strong>WP_CACHE</strong> constant is not defined in wp-config.php.';
             }
         }
         
@@ -441,7 +441,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
             $notes[] = 'The plugin is in quick setup mode, our recommended defaults are set. Simply satisfy all warnings and enable the plugin to get started or customize all of the settings you wish.';
             
             if ($tab == 'cdn') {
-                $notes[] = 'It appears this is the first time you are using this feature. Unless you wish to first import attachments in your posts that are not already in the media library, please start a "manual export to CDN" and only enable this module after pending attachments have been successfully uploaded.';
+                $notes[] = 'It appears this is the first time you are using this feature. Unless you wish to first import attachments in your posts that are not already in the media library, please start a "manual export to <acronym title="Content Delivery Network">CDN</acronym>" and only enable this module after pending attachments have been successfully uploaded.';
             }
         }
         
@@ -843,7 +843,8 @@ Features and benefits include:
 	- Reduced HTTP Transactions, DNS lookups, reduced document load time
 	- Transparent content delivery network (CDN) support with automated media
 		library import
-	- Bandwidth savings via HTTP compression (gzip / deflate) for HTML, CSS and JS
+	- Bandwidth savings via Minify and HTTP compression (gzip / deflate) for HTML, CSS
+		and JS
 	- Minification (concatenation, white space removal) of inline, external or 3rd
 		party JS and CSS with scheduled updates
 	- Optional embedding of JS just above </body>
