@@ -5,7 +5,7 @@ Requires at least: 2.5
 Tested up to: 2.8.2
 Stable tag: 0.5
 
-Here is a short description of the plugin.  This should be no more than 150 chars.  No markup here.
+Improves user experience and performance via: database cache, page cache, minify support with content delivery network support, media library import and more.
 
 == Description ==
 
