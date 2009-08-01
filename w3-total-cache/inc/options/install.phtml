@@ -1,0 +1,157 @@
+<h3 id="install">Installation</h3>
+<ol>
+  <li>Disable and remove any other caching plugin you may be using &mdash; most plugins have uninstall procedures you can follow. For high traffic blogs it's best to do this during low traffic periods or whenever your site administrator recommends.</li>
+  <li>Unzip and upload the plugin to your plugins folder, usually wp-content/plugins/ when done wp-content/plugins/w3-total-cache/ directory should exist. If you have WordPress MU you will need to install this in wp-contnet/mu-plugins/w3-total-cache/.</li>
+  <li>Locate and activate the plugin on the plugins page and click through to the General Settings page.</li>
+  <li>The plugin by default is configured to provide the features and functionality we recommend. If you use a shared or virtual hosting provider memory caching will likely not be available, you may want to ask your hosting provider what options may exist for you. However if you have a virtual dedicated or dedicated server, you may already have APC or memcached installed and the plugin will identify them.</li>
+  <li>Select your caching preferences for page, database and minify. If memcached is used this will require you to confirm or modify the default settings and add any additional memcached servers you wish to use.</li>
+  <li>If you already have a content delivery network provider, proceed to the <acronym title="Content Delivery Network">CDN</acronym> settings page and populate the fields and set your preferences. By default options we encourage will already be selected. If you're not running a version of WordPress with the Media Library feature, we have a Media Library import tool, that will migrate your objects to appropriate locations according to your blog settings and allow you to fully take advantage of <acronym title="Content Delivery Network">CDN</acronym> functionality as well get you back on the upgrade path.</li>
+  <li>To utilize <a href="http://www.danga.com/memcached/" target="_blank">memcached</a> or <a href="http://pecl.php.net/package/APC" target="_blank">APC</a> first make sure you have either one of them installed. We have included quick <a href="#APC">APC</a> and <a href="#memcached">memcached</a> + <a href="#memcache">memcache</a> installation guides for those with virtual dedicated or dedicated servers. For those in shared hosting environments, please contact your provider to see if either of these are supported. If they do not, consider moving to a virtual dedicated server for your site; using this plugin it will make it a great investment.</li>
+  <li>To utilize <acronym title="Content Delivery Network">CDN</acronym> functionality, sign up with a content delivery network, there are many out there like <a href="http://www.simplecdn.com/" target="_blank">SimpleCDN</a>, <a href="http://www.limelightnetworks.com/" target="_blank">Limelight</a>, <a href="http://www.edgecast.com/" target="_blank">EdgeCast</a> and <a href="https://s3.amazonaws.com/" target="_blank">Amazon Simple Storage Service (Amazon S3)</a> or <a href="http://aws.amazon.com/cloudfront/" target="_blank">Amazon CloudFront</a> that can be used. Choose the one that fits with your budget and needs.<br />
+    <br />
+    Populate the <a href="/wp-admin/options-general.php?page=w3-total-cache/w3-total-cache.php&tab=cdn"><acronym title="Content Delivery Network">CDN</acronym> Settings</a> page with your credentials and preferences.<br />
+    <br />
+    If you do not have a <acronym title="Content Delivery Network">CDN</acronym> provider, you can create and use a subdomain instead, e.g. subdomain.domain.com to improve server response, pipelining performance and progressive render.</li>
+  <li>On the <a href="/wp-admin/options-general.php?page=w3-total-cache/w3-total-cache.php&tab=minify">Minify Settings</a> page all of the recommended settings are preset. However you will have to specify any <acronym title="Cascading Style Sheet">CSS</acronym> and <acronym title="JavaScript">JS</acronym> files in the respective sections, view your site's <acronym title="Hypertext Markup Language">HTML</acronym> source and search for .<acronym title="Cascading Style Sheet">css</acronym> and .<acronym title="JavaScript">js</acronym> files. In the case of <acronym title="JavaScript">JS</acronym> files you can determine the type and location of the embedding using the drop down menu. Avoid the inclusion of packed or obfuscated <acronym title="JavaScript">JS</acronym> files in this step. </li>
+  <li>If memcached or APC is available, configure the options on the <a href="/wp-admin/options-general.php?page=w3-total-cache/w3-total-cache.php&tab=dbcache">Database Cache Settings</a> page, the defaults will likely be what you need. </li>
+  <li>If memcached or APC is available, configure the options on the <a href="/wp-admin/options-general.php?page=w3-total-cache/w3-total-cache.php&tab=pgcache">Page Cache Settings</a> page, the defaults will likely be what you need.</li>
+  <li>Enable the plugin on the <a href="/wp-admin/options-general.php?page=w3-total-cache/w3-total-cache.php&tab=general">General Settings</a> page.</li>
+  <li>In the case where the "Rewrite <acronym>URL</acronym> Structure" (under Minify Settings) is desired, and apache is not used, the file located in wp-content/plugins/w3-total-cache/wp-content/uploads/w3tc-cache/.htaccess contains directives that must be created for the directory: wp-content/uploads/w3tc-cache/. </li>
+</ol>
+Check out the <acronym title="Frequently Asked Questions">FAQ</acronym> for more details on <a href="/wp-admin/options-general.php?page=w3-total-cache/w3-total-cache.php&tab=faq">usage</a>.
+<p><strong>Quick Tips:</strong><br />
+  Web server restarts will destroy your APC cache, which means it will have to be rebuilt over time and your site's performance will suffer during this period. Memcached is the recommended caching method for high traffic servers requiring frequent restarts. Consider using memcached for objects that must persist across web server restarts or that you wish to share amongst your pool of servers (or cluster), e.g.: database objects or page cache. APC should still be installed in any case to maximize WordPress performance.</p>
+<p>Note: We assume you have an account with the appropriate permissions to perform software upgrades/installation. Some mirrors may not have your the necessary packages, in such cases you may have to do a manual installation. These instructions are for CentOS, however we can provide more based on <a href="mailto:wordpressexperts@w3-edge.com">your requests</a>.</p>
+<p><strong>PREPARATION:</strong><br />
+  <em>Time required: 1 minute</em></p>
+<ol>
+  <li><a href="http://www.google.com/search?q=installing%20yum&amp;output=search&amp;tbs=qdr:y&amp;tbo=1" target="_blank">Install yum</a> for your operating system if you don't already have it. Before getting started, be sure things are up-to-date and run:<br />
+    # yum -y update</li>
+  <li>Install <acronym title="PHP Extension Community Library">PECL</acronym>:<br />
+    # yum install php-pear</li>
+  <li>Install the <acronym title="Hypertext Preprocessor">PHP</acronym> Development package:<br />
+    # yum install php-devel</li>
+  <li>Install apxs with the following command:<br />
+    # yum install httpd-devel</li>
+</ol>
+<p id="memcached"><strong>MEMCACHED (DAEMON) INSTALLATION:</strong><br />
+  <em>Time required: 4 minutes</em></p>
+<ol>
+  <li>Try to install with yum:<br />
+    # yum install libevent<br />
+    <br />
+    If this succeeds skip to #5. If this fails, then let's compile. Download and extract the <a href="http://www.monkey.org/~provos/libevent/" target="_blank">latest stable version</a>:<br />
+    # cd /usr/local/src<br />
+    # wget <a href="http://monkey.org/~provos/libevent-1.4.12-stable.tar.gz">http://monkey.org/~provos/libevent-1.4.12-stable.tar.gz</a><br />
+    # gunzip -c libevent-1.4.12-stable.tar.gz | tar xf -<br />
+    # cd libevent-1.4.12-stable</li>
+  <li>Let's compile:<br />
+    # ./configure<br />
+    # make<br />
+    # make install</li>
+  <li>In the output you should see:<br />
+    <br />
+    Libraries have been installed in:<br />
+    /usr/local/lib<br />
+    <br />
+    If so you can:<br />
+    # echo "/usr/local/lib/" &gt; /etc/ld.so.conf.d/libevent.conf</li>
+  <li>Configure your server for the new install:<br />
+    # ldconfig –v</li>
+  <li>Now find the <a href="http://www.danga.com/memcached/download.bml" target="_blank">latest stable memcached</a>, download and extract:<br />
+    # cd /usr/local/src<br />
+    # wget <a href="http://memcached.googlecode.com/files/memcached-1.4.0.tar.gz" target="_blank">http://memcached.googlecode.com/files/memcached-1.4.0.tar.gz</a><br />
+    # gunzip -c memcached-1.4.0.tar.gz | tar xf -<br />
+    # cd memcached-1.4.0</li>
+  <li>Let's compile:<br />
+    # ./configure</li>
+  <li>We can optionally create memcached.conf in: /etc/:<br />
+    # cp -p /var/www/vhosts/domain.com/httpdocs/wp-content/plugins/w3-total-cache/ini/memcached.conf /etc/</li>
+  <li>Start memcached:<br />
+    # /usr/local/bin/memcached -d -m 128 -p 11211 -u nobody</li>
+  <li>Make sure that memcached is configured to your needs and that it starts when your server starts. A nice tutorial for debian users is <a href="http://www.lullabot.com/articles/how_install_memcache_debian_etch" target="_blank">here</a>.</li>
+</ol>
+<p>For windows users we recommend checking the following sites for more installation tips:</p>
+<ul>
+  <li><a href="http://pureform.wordpress.com/2008/01/10/installing-memcache-on-windows-for-php/" target="_blank">Installing memcache on Windows for <acronym title="Hypertext Preprocessor">PHP</acronym></a></li>
+  <li><a href="http://pecl4win.php.net/ext.php/php_memcache.dll" target="_blank"><acronym title="PHP Extension Community Library">PECL</acronym> memcached Extensions</a> </li>
+</ul>
+<p id="memcache"><strong><acronym title="PHP Extension Community Library">PECL</acronym> MEMCACHE MODULE INSTALLATION:</strong><br />
+  <em>Time required: 2 minutes</em></p>
+<ol>
+  <li>Either using <acronym title="PHP Extension Community Library">PECL</acronym>:<br />
+    # pecl install memcache</li>
+  <li>Or via compilation. Download the file and extract:<br />
+    # cd /usr/local/src/<br />
+    # wget <a href="http://pecl.php.net/get/memcache-2.2.4.tgz">http://pecl.php.net/get/memcache-2.2.4.tgz</a><br />
+    # gunzip -c memcache-2.2.4.tgz | tar xf -<br />
+    # cd memcache-2.2.4</li>
+  <li>Now we start to compile:<br />
+    # ./configure<br />
+    # make<br />
+    # make install</li>
+  <li>If the output is like this:<br />
+    Installing shared extensions: /usr/lib/php/modules/<br />
+    <br />
+    Then:<br />
+    # echo "extension=memcache.so" &gt; /etc/php.d/memcache.ini<br />
+    <br />
+    or you can also use the memcache.ini file we prepared for you:<br />
+    # cp -p /var/www/vhosts/domain.com/httpdocs/wp-content/plugins/w3-total-cache/ini/apc.ini /etc/php.d/</li>
+  <li>Finally restart apache:<br />
+    # /etc/init.d/httpd restart</li>
+  <li>Memcache should now be available. You can verify by creating a .<acronym title="Hypertext Preprocessor">php</acronym> script containing the following code and opening the page in your browser:<br />
+    &lt;?php phpinfo(); ?&gt;</li>
+</ol>
+<p id="APC"><strong>APC INSTALLATION VIA YUM OR <acronym title="PHP Extension Community Library">PECL: </acronym></strong><br />
+  <em>Time required: 1 minute</em></p>
+<ol>
+  <li>Install APC using the <acronym title="PHP Extension Community Library">PECL</acronym> command:<br />
+    # pecl install apc<br />
+    <br />
+    or using yum:<br />
+    # yum install php-pecl-apc</li>
+  <li>You'll need to make sure your web server is aware of the new module, in the case of apache:<br />
+    # echo "extension=apc.so" &gt; /etc/php.d/apc.ini<br />
+    <br />
+    or customize /etc/php.d/apc.ini using our included sample config file:<br />
+    # cp -p /var/www/vhosts/domain.com/httpdocs/wp-content/plugins/w3-total-cache/ini/apc.ini /etc/php.d/</li>
+  <li>When ready, restart apache:<br />
+    # /etc/init.d/httpd restart</li>
+  <li>APC should now be available. You can verify by creating a .<acronym title="Hypertext Preprocessor">php</acronym> script containing the following code and opening the page in your browser:<br />
+    &lt;?php phpinfo(); ?&gt;</li>
+</ol>
+<p>For windows users we recommend checking the following sites for more installation tips:</p>
+<ul>
+  <li><a href="http://www.sitebuddy.com/PHP/Accelerators/apc_windows_binaries_builds" target="_blank">APC binaries for <acronym title="Hypertext Preprocessor">PHP</acronym> 5.x (windows builds)</a> </li>
+  <li><a href="http://pecl4win.php.net/ext.php/php_apc.dll" target="_blank"><acronym title="PHP Extension Community Library">PECL</acronym> APC Extensions</a> </li>
+</ul>
+<p><strong>APC INSTALLATION VIA COMPILATION: </strong><br />
+  <em>Time required: 2 minutes</em></p>
+<ol>
+  <li>Find the <a href="http://pecl.php.net/package/APC">latest stable version</a> of APC</li>
+  <li>Download the file and extract:<br />
+    # cd /usr/local/src<br />
+    # wget <a href="http://pecl.php.net/get/APC-3.0.19.tgz">http://pecl.php.net/get/APC-3.0.19.tgz</a><br />
+    # gunzip -c APC-3.0.19.tgz | tar xf -<br />
+    # cd APC-3.0.19</li>
+  <li>Locate phpize and note the path returned:<br />
+    # whereis phpize</li>
+  <li>Locate php-config and note the path returned:<br />
+    # whereis php-config</li>
+  <li>Locate apxs and note the path returned:<br />
+    # whereis apxs</li>
+  <li>Use the output from #4, #5 and #6 to update the paths accordingly if needed to make the following command so the module can be compiled:<br />
+    # ./configure --enable-apc --enable-apc-mmap --with-apxs=/usr/bin/phpize --with-php-config=/usr/bin/php-config</li>
+  <li># make</li>
+  <li># make install<br />
+    <br />
+    The result should be similar to:<br />
+    Installing shared extensions: /usr/lib/php/modules/</li>
+  <li>Now we need to create apc.ini in: /etc/php.d/:<br />
+    # cp -p /var/www/vhosts/domain.com/httpdocs/wp-content/plugins/w3-total-cache/ini/apc.ini /etc/php.d/</li>
+  <li>Now restart apache when ready:<br />
+    # /etc/init.d/httpd restart</li>
+  <li>APC which should now be available. You can verify by creating a .<acronym title="Hypertext Preprocessor">php</acronym> script containing the following code and opening the page in your browser:<br />
+    &lt;?php phpinfo(); ?&gt;</li>
+</ol>
