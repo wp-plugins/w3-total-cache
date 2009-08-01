@@ -172,7 +172,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
     function favorite_actions($actions)
     {
         $actions['options-general.php?page=' . W3_PLUGIN_FILE . '&amp;flush_all'] = array(
-            'Empty W3TC Caches', 
+            'Empty Caches', 
             'manage_options'
         );
         
@@ -850,7 +850,7 @@ Features and benefits include:
 	- Optional embedding of JS just above </body>
 	- Support for caching pages, posts, feeds, database objects, CSS, JS in memory
 		with APC or memcached or both
-	- Caching of RSS/Atom Feeds (Comments, Page and site), URIs with query string
+	- Caching of RSS/Atom Feeds (comments, page and site), URIs with query string
 		variables (like search result pages), Database queries, Pages, Posts, CSS and JS
 	- Complete header management including Etags
 	- Increased web server concurrency and reduced resource consumption, increased scale

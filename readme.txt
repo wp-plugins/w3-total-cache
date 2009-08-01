@@ -20,7 +20,7 @@ Features and benefits include:
 * Minification (concatenation, white space removal) of inline, external or 3rd party JS and CSS with scheduled updates
 * Optional embedding of JS just above &lt;/body&gt;
 * Support for caching pages, posts, feeds, database objects, CSS, JS in memory with APC or memcached or both
-* Caching of RSS/Atom Feeds (Comments, Page and site), URIs with query string variables (like search result pages), Database queries, Pages, Posts, CSS and JS
+* Caching of RSS/Atom Feeds (comments, page and site), URIs with query string variables (like search result pages), Database queries, Pages, Posts, CSS and JS
 * Complete header management including Etags
 * Increased web server concurrency and reduced resource consumption, increased scale
 
@@ -30,11 +30,11 @@ In essence, anything that can be automated to squeeze out every bit of server pe
 
 1. Disable and remove any other caching plugin you may be using - most plugins have uninstall procedures you can follow. For high traffic blogs it's best to do this during low traffic periods or whenever your site administrator recommends.
 1. Unzip and upload the plugin to your plugins folder, usually wp-content/plugins/ when done wp-content/plugins/w3-total-cache/ directory should exist. If you have WordPress MU you will need to install this in wp-contnet/mu-plugins/w3-total-cache/.
-1. Locate and activate the plugin on the plugins page and click through to the General Settings page.
+1. Locate and activate the plugin on the plugins page and click through to the General Settings tab.
 1. The plugin by default is configured to provide the features and functionality we recommend. If you use a shared or virtual hosting provider memory caching will likely not be available, you may want to ask your hosting provider what options may exist for you. However if you have a virtual dedicated or dedicated server, you may already have APC or memcached installed and the plugin will identify them.
 1. Select your caching preferences for page, database and minify. If memcached is used this will require you to confirm or modify the default settings and add any additional memcached servers you wish to use.
-1. If you already have a content delivery network provider, proceed to the CDN settings page and populate the fields and set your preferences. By default options we encourage will already be selected. If you're not running a version of WordPress with the Media Library feature, we have a Media Library import tool, that will migrate your objects to appropriate locations according to your blog settings and allow you to fully take advantage of CDN functionality as well get you back on the upgrade path.
-1. To take advantage of memory caching, review the installation instructions included on the installation page of the plugin to be sure that everything is in place.
+1. If you already have a content delivery network provider, proceed to the CDN Settings tab and populate the fields and set your preferences. By default options we encourage will already be selected. If you're not running a version of WordPress with the Media Library feature, we have a Media Library Import Tool, that will migrate your objects to appropriate locations according to your blog settings and allow you to fully take advantage of CDN functionality as well get you back on the upgrade path.
+1. To take advantage of memory caching, review the installation instructions included on the installation tab of the plugin to be sure that everything is in place.
 
 
 == Frequently Asked Questions ==
