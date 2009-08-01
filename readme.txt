@@ -1,5 +1,5 @@
 === Plugin Name ===
-Contributors: fredericktownes
+Contributors: Frederick Townes
 Tags: cache, caching, page cache, css cache, js cache, db cache, http compression, gzip, deflate, minify, CDN, content delivery network, media library, w3 total cache, wp cache, wp super cache, performance, speed
 Requires at least: 2.5
 Tested up to: 2.8.2
@@ -28,12 +28,12 @@ In essence, anything that can be automated to squeeze out every bit of server pe
 
 == Installation ==
 
-1. Disable and remove any other caching plugin you may be using – most plugins have uninstall procedures you can follow. For high traffic blogs it’s best to do this during low traffic periods or whenever your site administrator recommends.
+1. Disable and remove any other caching plugin you may be using - most plugins have uninstall procedures you can follow. For high traffic blogs it's best to do this during low traffic periods or whenever your site administrator recommends.
 1. Unzip and upload the plugin to your plugins folder, usually wp-content/plugins/ when done wp-content/plugins/w3-total-cache/ directory should exist. If you have WordPress MU you will need to install this in wp-contnet/mu-plugins/w3-total-cache/.
 1. Locate and activate the plugin on the plugins page and click through to the General Settings page.
 1. The plugin by default is configured to provide the features and functionality we recommend. If you use a shared or virtual hosting provider memory caching will likely not be available, you may want to ask your hosting provider what options may exist for you. However if you have a virtual dedicated or dedicated server, you may already have APC or memcached installed and the plugin will identify them.
 1. Select your caching preferences for page, database and minify. If memcached is used this will require you to confirm or modify the default settings and add any additional memcached servers you wish to use.
-1. If you already have a content delivery network provider, proceed to the CDN settings page and populate the fields and set your preferences. By default options we encourage will already be selected. If you’re not running a version of WordPress with the Media Library feature, we have a Media Library import tool, that will migrate your objects to appropriate locations according to your blog settings and allow you to fully take advantage of CDN functionality as well get you back on the upgrade path.
+1. If you already have a content delivery network provider, proceed to the CDN settings page and populate the fields and set your preferences. By default options we encourage will already be selected. If you're not running a version of WordPress with the Media Library feature, we have a Media Library import tool, that will migrate your objects to appropriate locations according to your blog settings and allow you to fully take advantage of CDN functionality as well get you back on the upgrade path.
 1. To take advantage of memory caching, review the installation instructions included on the installation page of the plugin to be sure that everything is in place.
 
 
@@ -47,17 +47,17 @@ Anyone that wants to provide an optimal user experience to their readers.
 
 Most of the popular cache plugins available do a great job and serve their purpose very well. Our plugin remedies numerous performance reducing aspects of any web site going far beyond merely reducing CPU usage and bandwidth consumption for HTML pages alone. The plugin requires no theme modifications or programming compromises to reap the benefits.
 
-= I’ve never heard of any of this stuff; my blog is fine, no one complains about the speed. Why should I install this? =
+= I've never heard of any of this stuff; my blog is fine, no one complains about the speed. Why should I install this? =
 
-Rarely do readers take the time to complain. They typically just stop browsing earlier than you’d prefer and may not return altogether. It’s in every web site owner’s best interest is to make sure that the performance of your blog is not hindering its success.
+Rarely do readers take the time to complain. They typically just stop browsing earlier than you'd prefer and may not return altogether. It's in every web site owner's best interest is to make sure that the performance of your blog is not hindering its success.
 
 = And how many years of university do I need to use this thing? =
 
--4 - That’s right; a youngster in junior high school can get started with this plugin. Seriously, if you did your own WordPress install or have ever installed a plugin before you’re in good shape. If you need help, let us know or perhaps we’ll make some videos or the like.
+-4 - That's right; a youngster in junior high school can get started with this plugin. Seriously, if you did your own WordPress install or have ever installed a plugin before you're in good shape. If you need help, let us know or perhaps we'll make some videos or the like.
 
-= But even Matt Mullenweg doesn’t agree that additional caching is so important, why bother? =
+= But even Matt Mullenweg doesn't agree that additional caching is so important, why bother? =
 
-You’re right, [Matt did say that](http://ma.tt/2008/03/wordpress-is-open-source/#comment-439787). However, this plugin provides more than just “caching”. Because he is correct, the web is dynamic and must remain so. But as we explain throughout this FAQ, our goal is to improve the performance of any blog and we deliver. Furthermore, the techniques we use, are well documented from past [WordCamp presentations](http://www.slideshare.net/bazza/high-performance-wordpress), we simply have combined them in a way that we have found stands up to the highest traffic situations.
+You're right, [Matt did say that](http://ma.tt/2008/03/wordpress-is-open-source/#comment-439787). However, this plugin provides more than just "caching". Because he is correct, the web is dynamic and must remain so. But as we explain throughout this FAQ, our goal is to improve the performance of any blog and we deliver. Furthermore, the techniques we use, are well documented from past [WordCamp presentations](http://www.slideshare.net/bazza/high-performance-wordpress), we simply have combined them in a way that we have found stands up to the highest traffic situations.
 
 = Which WordPress versions are supported? =
 
@@ -73,17 +73,17 @@ Indeed it does.
 
 = Does this plugin work with BuddyPress (bbPress)? =
 
-Not sure, we’ll get to that soon.
+Not sure, we'll get to that soon.
 
 = What about comments? Does the plugin slow down the rate at which comments appear? =
 
-On the contrary, as with any other action a user can perform on a site, faster performance will encourage more of it. The cache is so quickly rebuilt in memory that it’s no trouble to show visitors the most current version of a post that’s experiencing Digg, Slashdot, Drudge Report, Yahoo Buzz or Twitter effect.
+On the contrary, as with any other action a user can perform on a site, faster performance will encourage more of it. The cache is so quickly rebuilt in memory that it's no trouble to show visitors the most current version of a post that's experiencing Digg, Slashdot, Drudge Report, Yahoo Buzz or Twitter effect.
 
 = Why would I want to cache my feeds? =
 
-We feel that caching objects after the first request and checking for updates before responding subsequent requests (which is kind of how web browsers work too) creates more opportunities for interesting applications and mashups where the blogosphere doesn’t require institutional investment to be able to handle developers making hundreds of requests every day the same way we use Google, Twitter and Facebook (for example) APIs today. Think about it, even when major search engines crawl your site, they have to be “gentle” so they don’t bring it down, let’s turn the paradigm around so that every blog can deliver content in real-time in various ways.
+We feel that caching objects after the first request and checking for updates before responding subsequent requests (which is kind of how web browsers work too) creates more opportunities for interesting applications and mashups where the blogosphere doesn't require institutional investment to be able to handle developers making hundreds of requests every day the same way we use Google, Twitter and Facebook (for example) APIs today. Think about it, even when major search engines crawl your site, they have to be "gentle" so they don't bring it down, let's turn the paradigm around so that every blog can deliver content in real-time in various ways.
 
-= I don’t understand what a CDN has to do with caching, that’s completely different, no? =
+= I don't understand what a CDN has to do with caching, that's completely different, no? =
 
 Technically no, a CDN is a high performance cache that stores static assets (your theme files, media library etc) in various locations throughout the world in order to provide low latency access to them by readers in those regions. So indeed a CDN is a high performance cache, many of which actually store your frequently requested assets in memory for fastest possible response.
 
@@ -93,7 +93,7 @@ Yes, indirectly - if you have a lot of bloggers working with you, you will find 
 
 = Which web servers do you support? =
 
-We are aware of no incompatibilities with [apache](http://httpd.apache.org/) 1.3+ or [IIS](http://www.iis.net/) 5+. We are still testing [nginx](http://nginx.net/), [litespeed](http://litespeedtech.com/products/webserver/overview/) and [lighttpd](http://www.lighttpd.net/). If you have thoughts or an opinion, we’re [interested in hearing](mailto:wordpressexperts@w3-edge.com).
+We are aware of no incompatibilities with [apache](http://httpd.apache.org/) 1.3+ or [IIS](http://www.iis.net/) 5+. We are still testing [nginx](http://nginx.net/), [litespeed](http://litespeedtech.com/products/webserver/overview/) and [lighttpd](http://www.lighttpd.net/). If you have thoughts or an opinion, we're [interested in hearing](mailto:wordpressexperts@w3-edge.com).
 
 = Is this plugin compatible with varnish or squid? =
 
@@ -103,7 +103,7 @@ We are still testing the performance of this plugin with [varnish](http://varnis
 
 Yes, built from the ground up with scale and current hosting paradigms in mind.
 
-= Aren’t there any troubleshooting tips? =
+= Aren't there any troubleshooting tips? =
 
 No, however we do have an extensive FAQ in the plugin.
 
