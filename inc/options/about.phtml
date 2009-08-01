@@ -1,17 +1,32 @@
-<h3 id="about">About</h3> 
-<p>User experience is an important aspect of every web site and all web sites can benefit from effective caching and file size reduction. We have applied web site optimization methods typically used with high traffic sites and simplified their implementation. Coupling these methods either <a href="http://www.danga.com/memcached/" target="_blank">memcached</a> and/or <a href="http://pecl.php.net/package/APC" target="_blank">APC</a> and the <acronym title="Content Delivery Network">CDN</acronym> of your choosing to provide the following benefits:</p> 
-<ul style="list-style-type:disc;list-style-position:inside;"> 
-    <li>Bandwidth savings.</li> 
-    <li>Improved server scale and reliability under heavy load.</li> 
-    <li>Improved user experience resulting in: increased conversions, increased time on site, increased page views etc.</li> 
-    <li>Reduction of <acronym title="Hypertext Transfer Protocol">HTTP</acronym> requests, reducing total document load time.</li> 
-    <li>Optimized handling of headers for improved file caching.</li> 
-    <li>Non-blocking load of multiple <acronym title="Cascading Style Sheets">CSS</acronym> and <acronym title="JavaScript">JS</acronym> files.</li> 
-    <li>Detailed site-wide and per page statistics.</li> 
-    <li>Transparent integration of content delivery networks for media library and theme files.</li> 
-    <li>Minified <acronym title="Hypertext Mark-up Language">HTML</acronym>, <acronym title="Cascading Style Sheets">CSS</acronym> and <acronym title="JavaScript">JS</acronym>. All white space and comments in your files will be removed before they are served. Now you don't have to change your development style to optimize your site performance.</li> 
-    <li>Gzipped or deflated <acronym title="Hypertext Mark-up Language">HTML</acronym>, <acronym title="Cascading Style Sheets">CSS</acronym> and <acronym title="JavaScript">JS</acronym> in memory, providing the fastest possible server response.</li> 
-    <li>Page caching in memory, providing improved server performance, response time and server scale.</li> 
-    <li>Database object memory caching, providing the fastest possible response, reduced server load and server scale.</li> 
-</ul> 
-<p>Your users have less data to download, you can now handle more requests with your existing equipment and you don't have to change how you do anything; just set it and forget it.</p>
+<h3 id="about">About</h3>
+<div id="w3tc">
+	<p>User experience is an important aspect of every web site and all web sites can benefit from effective caching and file size reduction. We have applied web site optimization methods typically used with high traffic sites and simplified their implementation. Coupling these methods either <a href="http://www.danga.com/memcached/" target="_blank">memcached</a> and/or <a href="http://pecl.php.net/package/APC" target="_blank"><acronym title="Alternative PHP Cache">APC</acronym></a> and the <acronym title="Content Delivery Network">CDN</acronym> of your choosing to provide the following benefits:</p>
+	<ul>
+	  <li>Improved progressive render (non-blocking <acronym title="Cascading Style Sheet">CSS</acronym> and <acronym title="JavaScript">JS</acronym> embedding)</li>
+	  <li>Reduced <acronym title="Hypertext Transfer Protocol">HTTP</acronym> Transactions, <acronym title="Domain Name System">DNS</acronym> lookups, reduced  document load time</li>
+	  <li>Transparent content delivery network (<acronym title="Content Delivery Network">CDN</acronym>) support with automated media library import</li>
+	  <li>Bandwidth savings via Minify and <acronym title="Hypertext Transfer Protocol">HTTP</acronym> compression (<acronym title="GNU zip">gzip</acronym> / deflate) for <acronym title="Hypertext Markup Language">HTML</acronym>, <acronym title="Cascading Style Sheet">CSS</acronym> and <acronym title="JavaScript">JS</acronym></li>
+	  <li>Minification (concatenation, white space  removal) of inline, external or 3rd party <acronym title="JavaScript">JS</acronym> and <acronym title="Cascading Style Sheet">CSS</acronym> with scheduled updates</li>
+	  <li>Optional embedding of <acronym title="JavaScript">JS</acronym> just above &lt;/body&gt;</li>
+	  <li>Support for caching pages, posts, feeds,  database objects, <acronym title="Cascading Style Sheet">CSS</acronym>, <acronym title="JavaScript">JS</acronym> in memory with <a href="http://pecl.php.net/apc">APC</a> or <a href="http://www.danga.com/memcached/">memcached</a> or both</li>
+	  <li>Caching of <acronym title="Really Simple Syndication">RSS</acronym>/Atom Feeds (Comments, Page and  site), <acronym title="Uniform Resource Identifier">URI</acronym>s with query string variables (like search result pages), Database  queries, Pages, Posts, <acronym title="Cascading Style Sheet">CSS</acronym> and <acronym title="JavaScript">JS</acronym></li>
+	  <li>Complete header management including <a href="http://en.wikipedia.org/wiki/HTTP_ETag">Etags</a></li>
+	  <li>Increased web server concurrency and reduced  resource consumption, increased scale</li>
+	</ul>
+	<p>Your users have less data to download, you can now handle more requests with your existing equipment and you don't have to change how you do anything; just set it and forget it.</p>
+	<p><strong>Who do I thank for all of this?</strong><br />
+	  It's would be quite difficult to reference all of the innovative minds that have shared their thoughts, code and experiences in the blogosphere over the years, but here are some names to get you started:</p>
+	<ul>
+	  <li><a href="http://mrclay.org/" target="_blank">Steve Clay</a></li>
+	  <li><a href="http://wonko.com/" target="_blank">Ryan Grove</a></li>
+	  <li><a href="http://www.nczonline.net/blog/2009/06/23/loading-javascript-without-blocking/" target="_blank">Nicholas Zakas</a> </li>
+	  <li><a href="http://stevesouders.com/" target="_blank">Steve Souders</a></li>
+	  <li><a href="http://rtdean.livejournal.com/" target="_blank">Ryan Dean</a></li>
+	  <li><a href="http://gravitonic.com/" target="_blank">Andrei Zmievski</a></li>
+	  <li>George Schlossnagle</li>
+	  <li>Daniel Cowgill</li>
+	  <li><a href="http://toys.lerdorf.com/" target="_blank">Rasmus Lerdorf</a></li>
+	  <li><a href="http://t3.dotgnu.info/" target="_blank">Gopal Vijayaraghavan</a></li>
+	</ul>
+	<p>Please reach out to all of these people and support their projects if you're so inclined.</p>
+</div>
