@@ -28,7 +28,21 @@
 .w3tc-cdn-status {
 	padding: 5px;
 }
+#w3tc acronym {
+	border-bottom:1px dotted #ccc;
+}
+#w3tc ul {
+	list-style-type:disc;
+	list-style-position:inside;
+}
 /* FAQ BEGIN */
+#w3tc blockquote {
+	font-style:italic;
+	width:700px;
+}
+#w3tc blockquote cite {
+	font-style:normal;
+}
 #w3tc h5 {
 	margin:0
 }

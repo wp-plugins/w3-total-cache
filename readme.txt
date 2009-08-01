@@ -1,6 +1,6 @@
 === Plugin Name ===
 Contributors: Frederick Townes
-Tags: cache, caching, page cache, css cache, js cache, db cache, http compression, gzip, deflate, minify, CDN, content delivery network, media library, w3 total cache, wp cache, wp super cache, performance, speed
+Tags: user experience, cache, caching, page cache, css cache, js cache, db cache, database cache, http compression, gzip, deflate, minify, CDN, content delivery network, media library, wp cache, wp super cache, w3 total cache, performance, speed
 Requires at least: 2.5
 Tested up to: 2.8.2
 Stable tag: 0.5
@@ -18,7 +18,7 @@ Features and benefits include:
 * Transparent content delivery network (CDN) support with automated media library import
 * Bandwidth savings via HTTP compression (gzip / deflate) for HTML, CSS and JS
 * Minification (concatenation, white space removal) of inline, external or 3rd party JS and CSS with scheduled updates
-* Optional embedding of JS just above </body>
+* Optional embedding of JS just above &lt;/body&gt;
 * Support for caching pages, posts, feeds, database objects, CSS, JS in memory with APC or memcached or both
 * Caching of RSS/Atom Feeds (Comments, Page and site), URIs with query string variables (like search result pages), Database queries, Pages, Posts, CSS and JS
 * Complete header management including Etags
