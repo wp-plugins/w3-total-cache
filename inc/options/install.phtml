@@ -47,8 +47,7 @@
 			# cd libevent-1.4.12-stable</li>
 		  <li>Let's compile:<br />
 			# ./configure<br />
-			# make<br />
-			# make install</li>
+			# make && make install</li>
 		  <li>In the output you should see:<br />
 			<br />
 			Libraries have been installed in:<br />
@@ -64,12 +63,15 @@
 			# gunzip -c memcached-1.4.0.tar.gz | tar xf -<br />
 			# cd memcached-1.4.0</li>
 		  <li>Let's compile:<br />
-			# ./configure</li>
+			# ./configure<br />
+			# make && make install</li>
 		  <li>We can optionally create memcached.conf in /etc/:<br />
 			# cp -p /var/www/vhosts/domain.com/httpdocs/wp-content/plugins/w3-total-cache/ini/memcached.conf /etc/</li>
-		  <li>Start memcached:<br />
-			# /usr/local/bin/memcached -d -m 128 -p 11211 -u nobody</li>
-		  <li>Make sure that memcached is configured to your needs and that it starts when your server starts. A nice tutorial for debian users is <a href="http://www.lullabot.com/articles/how_install_memcache_debian_etch" target="_blank">here</a>.</li>
+		  <li>Let's make sure memcached is starts automatically if you ever reboot your server:<br />
+			# touch /etc/init.d/memcached<br />
+			# echo '#!/bin/sh -e' >> /etc/init.d/memcached<br />
+			# echo '/usr/local/bin/memcached -d -m 128 -p 11211 -u nobody' >> /etc/init.d/memcached<br />
+			# chmod u+x /etc/init.d/memcached</li>
 		</ol>
 		<p>For windows users we recommend checking the following sites for more installation tips:</p>
 		<ul>
@@ -80,17 +82,17 @@
 		<p id="memcache"><strong><acronym title="PHP Extension Community Library">PECL</acronym> Memcache Module Installation:</strong><br />
 		  <em>Time required: 2 minutes</em></p>
 		<ol>
-		  <li>Either using <acronym title="PHP Extension Community Library">PECL</acronym>:<br />
+		  <li>Either use <acronym title="PHP Extension Community Library">PECL</acronym> (and skip to #4 if successful):<br />
 			# pecl install memcache</li>
 		  <li>Or via compilation. Download the file and extract:<br />
 			# cd /usr/local/src/<br />
-			# wget <a href="http://pecl.php.net/get/memcache-2.2.4.tgz">http://pecl.php.net/get/memcache-2.2.4.tgz</a><br />
-			# gunzip -c memcache-2.2.4.tgz | tar xf -<br />
-			# cd memcache-2.2.4</li>
+			# wget <a href="http://pecl.php.net/get/memcache-2.2.5.tgz">http://pecl.php.net/get/memcache-2.2.5.tgz</a><br />
+			# gunzip -c memcache-2.2.5.tgz | tar xf -<br />
+			# cd memcache-2.2.5</li>
 		  <li>Now we start to compile:<br />
+			# phpize<br />
 			# ./configure<br />
-			# make<br />
-			# make install</li>
+			# make && make install</li>
 		  <li>If the output is like this:<br />
 			Installing shared extensions: /usr/lib/php/modules/<br />
 			<br />
@@ -146,19 +148,22 @@
 			# whereis apxs</li>
 		  <li>Use the output from #4, #5 and #6 to update the paths accordingly if needed to make the following command so the module can be compiled:<br />
 			# ./configure --enable-apc --enable-apc-mmap --with-apxs=/usr/bin/phpize --with-php-config=/usr/bin/php-config<br />
-			# make<br />
-			# make instal<br />
+			# make && make install<br />
 		  <br />The result should be similar to:<br />
 			Installing shared extensions: /usr/lib/php/modules/</li>
 		  <li>Use our customed <acronym title="Alternative PHP Cache">APC</acronym> settings by overwriting apc.ini in /etc/php.d/:<br />
 			# cp -p /var/www/vhosts/domain.com/httpdocs/wp-content/plugins/w3-total-cache/ini/apc.ini /etc/php.d/</li>
 		  <li>Restart apache when ready:<br />
 			# /etc/init.d/httpd restart</li>
-		  <li><acronym title="Alternative PHP Cache">APC</acronym> which should now be available. You can verify by creating a .<acronym title="Hypertext Preprocessor">php</acronym> script containing the following code and searching for "<acronym title="Alternative PHP Cache">APC</acronym>" after opening the page in your browser:<br />
+		  <li><acronym title="Alternative PHP Cache">APC</acronym> should now be available. You can verify by creating a .<acronym title="Hypertext Preprocessor">php</acronym> script containing the following code and searching for "<acronym title="Alternative PHP Cache">APC</acronym>" after opening the page in your browser:<br />
 			&lt;?php phpinfo(); ?&gt;</li>
 		</ol>
 		<hr />
-		<p><strong>Note(s):</strong><br />
-		  Web server restarts will empty your <acronym title="Alternative PHP Cache">APC</acronym> cache, which means it will have to be rebuilt over time and your site's performance will suffer during this period. Memcached is the recommended caching method for high traffic servers requiring frequent restarts. Consider using memcached for objects that must persist across web server restarts or that you wish to share amongst your pool of servers (or cluster), e.g.: database objects or page cache. <acronym title="Alternative PHP Cache">APC</acronym> should still be installed in any case to maximize WordPress performance.</p>
-		<p>We assume you have an account with the appropriate permissions to perform software upgrades/installation. Some mirrors may not have your the necessary packages, in such cases you may have to do a manual installation. These instructions are for CentOS, however we can provide more based on <a href="mailto:wordpressexperts@w3-edge.com">your requests</a>.</p>
+		<p><strong>Note(s):</strong></p>
+		<ul>
+		  <li>These instructions are for CentOS, however we can provide others based on <a href="mailto:wordpressexperts@w3-edge.com">your requests</a>.</li>
+		  <li>Restarting the web server will empty your <acronym title="Alternative PHP Cache">APC</acronym> cache, which means it will have to be rebuilt over time and your site's performance will suffer during this period. Still, <acronym title="Alternative PHP Cache">APC</acronym> should be installed in any case to maximize WordPress performance.</li>
+		  <li>Consider using memcached for objects that must persist across web server restarts or that you wish to share amongst your pool of servers (or cluster), e.g.: database objects or page cache.</li>
+		  <li>Some yum mirrors may not have your the necessary packages, in such cases you may have to do a manual installation.</li>
+		</ul>
 </div>
