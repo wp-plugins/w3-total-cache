@@ -141,13 +141,10 @@
 			# wget <a href="http://pecl.php.net/get/APC-3.0.19.tgz">http://pecl.php.net/get/APC-3.0.19.tgz</a><br />
 			# gunzip -c APC-3.0.19.tgz | tar xf -<br />
 			# cd APC-3.0.19</li>
-		  <li>Locate phpize and note the path returned:<br />
-			# whereis phpize</li>
-		  <li>Locate php-config and note the path returned:<br />
+		  <li>Note the paths returned for the following commands:<br />
+			# whereis phpize<br />
 			# whereis php-config</li>
-		  <li>Locate apxs and note the path returned:<br />
-			# whereis apxs</li>
-		  <li>Use the output from #4, #5 and #6 to update the paths accordingly if needed to make the following command so the module can be compiled:<br />
+		  <li>Use the output from #2 to modify the --with-apxs and --with-php-config flags in the following compile command:<br />
 			# phpize<br />
 			# ./configure --enable-apc --enable-apc-mmap --with-apxs=/usr/bin/phpize --with-php-config=/usr/bin/php-config<br />
 			# make && make install<br />
