@@ -14,15 +14,14 @@ W3 Total Cache improves the user experience of your blog by caching frequent ope
 Features and benefits include:
 
 * Improved progressive render (non-blocking CSS and JS embedding)
-* Reduced HTTP Transactions, DNS lookups, reduced document load time
 * Transparent content delivery network (CDN) support with automated media library import
 * Bandwidth savings via Minify and HTTP compression (gzip / deflate) for HTML, CSS and JS
 * Minification (concatenation, white space removal) of inline, external or 3rd party JS and CSS with scheduled updates
-* Optional embedding of JS just above &lt;/body&gt;
-* Support for caching pages, posts, feeds, database objects, CSS, JS in memory with APC or memcached or both
-* Caching of RSS/Atom Feeds (comments, page and site), URIs with query string variables (like search result pages), Database queries, Pages, Posts, CSS and JS
-* Complete header management including Etags
+* Caching of RSS/Atom feeds (comments, page and site), URIs with query string variables (like search result pages), database objects, pages, posts, CSS and JS in memory with APC or memcached or both
 * Increased web server concurrency and reduced resource consumption, increased scale
+* Reduced HTTP Transactions, DNS lookups, reduced document load time
+* Complete header management including Etags
+* Optional embedding of JS just above &lt;/body&gt;
 
 In essence, anything that can be automated to squeeze out every bit of server performance and minimize bandwidth utilization has been done, leaving your readers with an optimized user experience.
 
