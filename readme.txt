@@ -16,7 +16,7 @@ Features and benefits include:
 * Improved progressive render (non-blocking CSS and JS embedding)
 * Reduced HTTP Transactions, DNS lookups, reduced document load time
 * Transparent content delivery network (CDN) support with automated media library import
-* Bandwidth savings via HTTP compression (gzip / deflate) for HTML, CSS and JS
+* Bandwidth savings via Minify and HTTP compression (gzip / deflate) for HTML, CSS and JS
 * Minification (concatenation, white space removal) of inline, external or 3rd party JS and CSS with scheduled updates
 * Optional embedding of JS just above &lt;/body&gt;
 * Support for caching pages, posts, feeds, database objects, CSS, JS in memory with APC or memcached or both
