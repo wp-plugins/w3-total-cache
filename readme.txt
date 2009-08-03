@@ -34,7 +34,7 @@ In essence, anything that can be automated to squeeze out every bit of server pe
 1. If you already have a content delivery network provider, proceed to the CDN Settings tab and populate the fields and set your preferences. If you're not running a version of WordPress with the Media Library feature, use the Media Library Import Tool to migrate your post images etc to appropriate locations. If you do not have a CDN provider, you can create and use a subdomain instead, e.g. subdomain.domain.com to improve server response, pipelining performance and progressive render.
 1. On the Minify Settings tab all of the recommended settings are preset. Specify any CSS and JS files in the respective sections, view your site's HTML source and search for .css and .js files. In the case of JS files you can determine the type and location of the embedding using the drop down menu. Avoid the inclusion of packed or obfuscated JS files in this step.
 1. Enable the plugin on the General Settings tab.
-1. Your done! Get back to blogging!
+1. You're done! Get back to blogging!
 
 == Frequently Asked Questions ==
 
