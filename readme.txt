@@ -5,7 +5,7 @@ Requires at least: 2.5
 Tested up to: 2.8.2
 Stable tag: 0.5
 
-Dramatically improve the user experience of your blog. Add page caching, database caching, minify and content delivery network functionality and more to WordPress.
+Dramatically improve the user experience of your blog. Add page caching, database caching, minify and content delivery network functionality and more.
 
 == Description ==
 
