@@ -9,7 +9,9 @@ Dramatically improve the user experience of your blog. Add page caching, databas
 
 == Description ==
 
-W3 Total Cache improves the user experience of your blog by caching frequent operations, reducing the weight of various theme files and providing transparent content delivery network integration. The goal is to improve the user experience for the readers of your blog without having to change WordPress, your theme, your plugins or how you produce your content. When fully utilized, your blog will be able to sustain extremely high traffic spikes without requiring hardware upgrades or removing features or functionality from your theme.
+W3 Total Cache improves the user experience of your blog by caching frequent operations, reducing the weight of various theme files and providing transparent content delivery network integration.
+
+The goal is to improve the user experience for the readers of your blog without having to change WordPress, your theme, your plugins or how you produce your content. When fully utilized, your blog will be able to sustain extremely high traffic spikes without requiring hardware upgrades or removing features or functionality from your theme.
 
 Features and benefits include:
 
