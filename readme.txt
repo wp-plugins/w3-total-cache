@@ -2,16 +2,14 @@
 Contributors: fredericktownes
 Tags: user experience, cache, caching, page cache, css cache, js cache, db cache, database cache, http compression, gzip, deflate, minify, CDN, content delivery network, media library, wp cache, wp super cache, w3 total cache, performance, speed
 Requires at least: 2.5
-Tested up to: 2.8.2
-Stable tag: 0.5
+Tested up to: 2.8.4
+Stable tag: 0.6
 
-Dramatically improve the user experience of your blog. Add page caching, database caching, minify and content delivery network functionality and more.
+Dramatically improve the user experience of your blog. Add page caching, database caching, minify and content delivery network functionality and more to WordPress.
 
 == Description ==
 
-W3 Total Cache improves the user experience of your blog by caching frequent operations, reducing the weight of various theme files and providing transparent content delivery network integration.
-
-The goal is to improve the user experience for the readers of your blog without having to change WordPress, your theme, your plugins or how you produce your content. When fully utilized, your blog will be able to sustain extremely high traffic spikes without requiring hardware upgrades or removing features or functionality from your theme.
+W3 Total Cache improves the user experience of your blog by caching frequent operations, reducing the weight of various theme files and providing transparent content delivery network integration. The goal is to improve the user experience for the readers of your blog without having to change WordPress, your theme, your plugins or how you produce your content. When fully utilized, your blog will be able to sustain extremely high traffic spikes without requiring hardware upgrades or removing features or functionality from your theme.
 
 Features and benefits include:
 
@@ -113,6 +111,14 @@ In general, due to the manner in which this plugin works the only issues with yo
 Install the plugin to read the full FAQ.
 
 == Changelog ==
+
+= 0.6 =
+* Improved error message notifications
+* FAQ and installation instructions corrections/adjustments
+* Added “Debug Mode” listing all settings and queries with statistics
+* Resolved bug in minification of feeds
+* Support for multiple wordpress installations added
+* Improved cache stability for large objects
 
 = 0.5 =
 * Initial release.
