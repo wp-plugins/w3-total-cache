@@ -11,9 +11,4 @@ require_once W3_PLUGIN_DIR . '/inc/define.php';
 require_once W3_PLUGIN_DIR . '/lib/W3/PgCache.php';
 
 $w3_pgcache = W3_PgCache::instance();
-
-if ($w3_pgcache->can_cache()) {
-    $w3_pgcache->process();
-} else {
-    $w3_pgcache->log();
-}
+$w3_pgcache->process();

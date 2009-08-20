@@ -35,6 +35,13 @@ require_once dirname(__FILE__) . '/../Plugin.php';
 class W3_Plugin_Cdn extends W3_Plugin
 {
     /**
+     * Array of replaced URLs
+     *
+     * @var array
+     */
+    var $replaced_urls = array();
+    
+    /**
      * Run plugin
      */
     function run()
@@ -75,7 +82,7 @@ class W3_Plugin_Cdn extends W3_Plugin
                 'cron_queue_process'
             ));
             
-            if (($this->_config->get_boolean('cdn.process.includes', true) || $this->_config->get_boolean('cdn.process.theme', true) || $this->_config->get_boolean('cdn.process.minify', true) || $this->_config->get_boolean('cdn.process.custom', true)) && ! is_admin()) {
+            if (($this->_config->get_boolean('cdn.includes.enable', true) || $this->_config->get_boolean('cdn.theme.enable', true) || $this->_config->get_boolean('cdn.minify.enable', true) || $this->_config->get_boolean('cdn.custom.enable', true) || $this->_config->get_boolean('cdn.debug')) && ! is_admin()) {
                 ob_start(array(
                     &$this, 
                     'ob_callback'
@@ -165,6 +172,7 @@ class W3_Plugin_Cdn extends W3_Plugin
     function generate_attachment_metadata($metadata)
     {
         $files = $this->get_metadata_files($metadata);
+        
         $this->upload($files, true);
         
         return $metadata;
@@ -241,33 +249,34 @@ class W3_Plugin_Cdn extends W3_Plugin
      */
     function ob_callback($buffer)
     {
+        if (! w3_is_xml($buffer)) {
+            return $buffer;
+        }
+        
         $siteurl = get_option('siteurl');
         $regexps = array();
         
-        if ($this->_config->get_boolean('cdn.process.includes', true)) {
-            $mask = $this->_config->get_string('cdn.files.includes');
+        if ($this->_config->get_boolean('cdn.includes.enable', true)) {
+            $mask = $this->_config->get_string('cdn.includes.files');
             if (! empty($mask)) {
                 $regexps[] = '~' . preg_quote($siteurl) . '(/wp-includes/(' . $this->get_regexp_by_mask($mask) . '))~U';
             }
         }
         
-        if ($this->_config->get_boolean('cdn.process.theme', true)) {
+        if ($this->_config->get_boolean('cdn.theme.enable', true)) {
             $stylesheet = get_stylesheet();
-            $mask = $this->_config->get_string('cdn.files.theme');
+            $mask = $this->_config->get_string('cdn.theme.files');
             if (! empty($mask)) {
-                $regexp = '~' . preg_quote($siteurl) . '(/wp-content/themes/' . preg_quote($stylesheet) . '/(' . $this->get_regexp_by_mask($mask) . '))~U';
-                $regexps[] = $regexp;
-                //$buffer .= '<!-- '.$regexp.' -->';
-                
+                $regexps[] = '~' . preg_quote($siteurl) . '(/wp-content/themes/' . preg_quote($stylesheet) . '/(' . $this->get_regexp_by_mask($mask) . '))~U';
             }
         }
         
-        if ($this->_config->get_boolean('cdn.process.minify', true)) {
+        if ($this->_config->get_boolean('cdn.minify.enable', true)) {
             $regexps[] = '~' . preg_quote($siteurl) . '(/' . preg_quote(W3_PLUGIN_MINIFY_MIN_DIRNAME) . '/include(-footer)?(-nb)?\.(css|js))~';
         }
         
-        if ($this->_config->get_boolean('cdn.process.custom', true)) {
-            $files = $this->_config->get_array('cdn.files.custom');
+        if ($this->_config->get_boolean('cdn.custom.enable', true)) {
+            $files = $this->_config->get_array('cdn.custom.files');
             if (! empty($files)) {
                 $files_quoted = array();
                 foreach ($files as $file) {
@@ -277,14 +286,15 @@ class W3_Plugin_Cdn extends W3_Plugin
             }
         }
         
-        $domain = $this->_config->get_string('cdn.domain');
+        foreach ($regexps as $regexp) {
+            $buffer = preg_replace_callback($regexp, array(
+                &$this, 
+                'link_replace_callback'
+            ), $buffer);
+        }
         
-        if (! empty($domain)) {
-            $cdnurl = 'http://' . $domain;
-            
-            foreach ($regexps as $regexp) {
-                $buffer = preg_replace($regexp, $cdnurl . '\\1', $buffer);
-            }
+        if ($this->_config->get_boolean('cdn.debug')) {
+            $buffer .= "\r\n\r\n" . $this->get_debug_info();
         }
         
         return $buffer;
@@ -543,6 +553,10 @@ class W3_Plugin_Cdn extends W3_Plugin
     {
         global $wpdb;
         
+        $count = 0;
+        $total = 0;
+        $results = array();
+        
         $sql = sprintf('SELECT
         		pm.meta_value AS file,
                 pm2.meta_value AS metadata
@@ -565,11 +579,11 @@ class W3_Plugin_Cdn extends W3_Plugin
         
         $posts = $wpdb->get_results($sql);
         
-        $count = count($posts);
-        $total = $this->get_library_objects_count();
-        
         if ($posts) {
+            $count = count($posts);
+            $total = $this->get_attachments_count();
             $files = array();
+            
             foreach ($posts as $post) {
                 if (! empty($post->metadata)) {
                     $metadata = @unserialize($post->metadata);
@@ -588,11 +602,134 @@ class W3_Plugin_Cdn extends W3_Plugin
     }
     
     /**
-     * Returns library objects count
+     * Imports library
+     *
+     * @param integer $limit
+     * @param integer $offset
+     * @param integer $count
+     * @param integer $total
+     * @param array $results
+     * @return boolean
+     */
+    function import_library($limit = null, $offset = null, &$count = null, &$total = null, &$results = array())
+    {
+        global $wpdb;
+        
+        $count = 0;
+        $total = 0;
+        $results = array();
+        
+        $sql = sprintf('SELECT
+        		post_content
+            FROM
+                %sposts
+            WHERE
+                post_status = "publish"
+                AND post_type = "post"
+                AND (post_content LIKE "%%src=%%"
+                	OR post_content LIKE "%%href=%%")
+       ', $wpdb->prefix);
+        
+        if ($limit) {
+            $sql .= sprintf(' LIMIT %d', $limit);
+            
+            if ($offset) {
+                $sql .= sprintf(' OFFSET %d', $offset);
+            }
+        }
+        
+        $posts = $wpdb->get_results($sql);
+        
+        if ($posts) {
+            $count = count($posts);
+            $total = $this->get_import_posts_count();
+            
+            $siteurl = get_option('siteurl');
+            $upload_info = wp_upload_dir();
+            $upload_dir = ltrim(str_replace($siteurl, '', $upload_info['baseurl']), '/');
+            $regexp = $this->get_regexp_by_mask($this->_config->get_string('cdn.import.files'));
+            $import_external = $this->_config->get_boolean('cdn.import.external');
+            
+            foreach ($posts as $post) {
+                $matches = null;
+                
+                if (preg_match_all('~(href|src)=[\'"]?([^\'"<>\s]+)[\'"]?~', $post->post_content, $matches, PREG_SET_ORDER)) {
+                    foreach ($matches as $match) {
+                        $src = ltrim(str_replace($siteurl, '', $match[2]), '/');
+                        $file = sprintf('%s/%s', $upload_info['path'], basename($src));
+                        $dst = str_replace(ABSPATH, '', $file);
+                        $result = false;
+                        $error = '';
+                        $download_result = null;
+                        
+                        if (preg_match('~(' . $regexp . ')$~', $src)) {
+                            if (! file_exists($file)) {
+                                if (w3_is_url($src)) {
+                                    if ($import_external) {
+                                        $download_result = $this->download($src, $file);
+                                    } else {
+                                        $error = 'External file import is disabled';
+                                    }
+                                } elseif (strstr($src, $upload_dir) === false) {
+                                    $download_result = @copy(ABSPATH . $src, $file);
+                                } else {
+                                    $error = 'Source file already exists';
+                                }
+                                
+                                if ($download_result !== null) {
+                                    if ($download_result) {
+                                        $title = basename($file);
+                                        $guid = $upload_info['url'] . '/' . $title;
+                                        $mime_type = $this->get_mime_type($file);
+                                        
+                                        $GLOBALS['wp_rewrite'] = & new WP_Rewrite();
+                                        
+                                        $id = wp_insert_attachment(array(
+                                            'post_mime_type' => $mime_type, 
+                                            'guid' => $guid, 
+                                            'post_title' => $title, 
+                                            'post_content' => ''
+                                        ), $file);
+                                        
+                                        if (! is_wp_error($id)) {
+                                            require_once ABSPATH . 'wp-admin/includes/image.php';
+                                            wp_update_attachment_metadata($id, wp_generate_attachment_metadata($id, $file));
+                                            
+                                            $result = true;
+                                            $error = 'OK';
+                                        } else {
+                                            $error = 'Unable to insert attachment';
+                                        }
+                                    
+                                    } else {
+                                        $error = 'Unable to download file';
+                                    }
+                                }
+                            } else {
+                                $error = 'Destination file already exists';
+                            }
+                        } else {
+                            $error = 'File type is not supported';
+                        }
+                        
+                        $results[] = array(
+                            'src' => $src, 
+                            'dst' => $dst, 
+                            'result' => $result, 
+                            'error' => $error
+                        );
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Returns attachments count
      *
      * @return integer
      */
-    function get_library_objects_count()
+    function get_attachments_count()
     {
         global $wpdb;
         
@@ -609,11 +746,34 @@ class W3_Plugin_Cdn extends W3_Plugin
     }
     
     /**
+     * Returns import posts count
+     *
+     * @return integer
+     */
+    function get_import_posts_count()
+    {
+        global $wpdb;
+        
+        $sql = sprintf('SELECT
+        		COUNT(*)
+            FROM
+                %sposts
+            WHERE
+                post_status = "publish"
+                AND post_type = "post"
+                AND (post_content LIKE "%%src=%%"
+                	OR post_content LIKE "%%href=%%")
+                ', $wpdb->prefix);
+        
+        return $wpdb->get_var($sql);
+    }
+    
+    /**
      * Exports includes to CDN
      */
     function get_files_includes()
     {
-        $files = $this->search_files(W3_PLUGIN_CDN_INCLUDES_DIR, 'wp-includes', $this->_config->get_string('cdn.files.includes'));
+        $files = $this->search_files(W3_PLUGIN_CDN_INCLUDES_DIR, 'wp-includes', $this->_config->get_string('cdn.includes.files'));
         
         return $files;
     }
@@ -624,7 +784,7 @@ class W3_Plugin_Cdn extends W3_Plugin
     function get_files_theme()
     {
         $stylesheet = get_stylesheet();
-        $files = $this->search_files(W3_PLUGIN_CDN_THEMES_DIR . $stylesheet, 'wp-content/themes/' . $stylesheet, $this->_config->get_string('cdn.files.theme'));
+        $files = $this->search_files(W3_PLUGIN_CDN_THEMES_DIR . $stylesheet, 'wp-content/themes/' . $stylesheet, $this->_config->get_string('cdn.theme.files'));
         
         return $files;
     }
@@ -688,16 +848,9 @@ class W3_Plugin_Cdn extends W3_Plugin
      */
     function get_files_custom()
     {
-        $files = $this->_config->get_array('cdn.files.custom');
+        $files = $this->_config->get_array('cdn.custom.files');
         
         return $files;
-    }
-    
-    /**
-     * Import objects from post to media library
-     */
-    function import_library()
-    {
     }
     
     /**
@@ -750,7 +903,7 @@ class W3_Plugin_Cdn extends W3_Plugin
     function link_replace_callback($matches)
     {
         global $wpdb;
-        static $queue = null, $cdnurl = null;
+        static $queue = null, $domain = null, $debug = null;
         
         if ($queue === null) {
             $sql = sprintf('SELECT file FROM %s', $wpdb->prefix . W3_PLUGIN_CDN_TABLE_QUEUE);
@@ -761,16 +914,25 @@ class W3_Plugin_Cdn extends W3_Plugin
             return $matches[0];
         }
         
-        if ($cdnurl === null) {
+        if ($domain === null) {
             $domain = $this->_config->get_string('cdn.domain');
-            if (empty($domain)) {
-                return $matches[0];
-            }
-            
-            $cdnurl = 'http://' . $domain;
         }
         
-        return $cdnurl . $matches[1];
+        if ($debug === null) {
+            $debug = $this->_config->get_boolean('cdn.debug');
+        }
+        
+        if (empty($domain)) {
+            return $matches[0];
+        }
+        
+        $url = sprintf('http://%s%s', $domain, $matches[1]);
+        
+        if ($debug) {
+            $this->replaced_urls[] = $url;
+        }
+        
+        return $url;
     }
     
     /**
@@ -826,14 +988,98 @@ class W3_Plugin_Cdn extends W3_Plugin
             '\]', 
             ';'
         ), array(
-            '.*', 
-            '.', 
+            '[^\s]*', 
+            '[^\s]', 
             '[', 
             ']', 
             '|'
         ), preg_quote($mask));
         
         return $regexp;
+    }
+    
+    /**
+     * Returns file mime type
+     *
+     * @param string $file
+     * @return string
+     */
+    function get_mime_type($file)
+    {
+        $mime_types = array(
+            'jpg|jpeg|jpe' => 'image/jpeg', 
+            'gif' => 'image/gif', 
+            'png' => 'image/png', 
+            'bmp' => 'image/bmp', 
+            'tif|tiff' => 'image/tiff', 
+            'ico' => 'image/x-icon', 
+            'asf|asx|wax|wmv|wmx' => 'video/asf', 
+            'avi' => 'video/avi', 
+            'divx' => 'video/divx', 
+            'mov|qt' => 'video/quicktime', 
+            'mpeg|mpg|mpe' => 'video/mpeg', 
+            'txt|c|cc|h' => 'text/plain', 
+            'rtx' => 'text/richtext', 
+            'css' => 'text/css', 
+            'htm|html' => 'text/html', 
+            'mp3|m4a' => 'audio/mpeg', 
+            'mp4|m4v' => 'video/mp4', 
+            'ra|ram' => 'audio/x-realaudio', 
+            'wav' => 'audio/wav', 
+            'ogg' => 'audio/ogg', 
+            'mid|midi' => 'audio/midi', 
+            'wma' => 'audio/wma', 
+            'rtf' => 'application/rtf', 
+            'js' => 'application/javascript', 
+            'pdf' => 'application/pdf', 
+            'doc|docx' => 'application/msword', 
+            'pot|pps|ppt|pptx' => 'application/vnd.ms-powerpoint', 
+            'wri' => 'application/vnd.ms-write', 
+            'xla|xls|xlsx|xlt|xlw' => 'application/vnd.ms-excel', 
+            'mdb' => 'application/vnd.ms-access', 
+            'mpp' => 'application/vnd.ms-project', 
+            'swf' => 'application/x-shockwave-flash', 
+            'class' => 'application/java', 
+            'tar' => 'application/x-tar', 
+            'zip' => 'application/zip', 
+            'gz|gzip' => 'application/x-gzip', 
+            'exe' => 'application/x-msdownload', 
+            // openoffice formats
+            'odt' => 'application/vnd.oasis.opendocument.text', 
+            'odp' => 'application/vnd.oasis.opendocument.presentation', 
+            'ods' => 'application/vnd.oasis.opendocument.spreadsheet', 
+            'odg' => 'application/vnd.oasis.opendocument.graphics', 
+            'odc' => 'application/vnd.oasis.opendocument.chart', 
+            'odb' => 'application/vnd.oasis.opendocument.database', 
+            'odf' => 'application/vnd.oasis.opendocument.formula'
+        );
+        
+        $file_ext = strrchr($file, '.');
+        
+        if ($file_ext) {
+            $file_ext = ltrim($file_ext, '.');
+            foreach ($mime_types as $extension => $mime_type) {
+                $exts = explode('|', $extension);
+                foreach ($exts as $ext) {
+                    if ($file_ext == $ext) {
+                        return $mime_type;
+                    }
+                }
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Returns file from thumb file
+     *
+     * @param string $thumb
+     * @return string
+     */
+    function get_file_from_thumb($thumb)
+    {
+        return preg_replace('~\-\d{2,4}x\d{2,4}\.(jpg|png|gif)$~', '.\\1', $thumb);
     }
     
     /**
@@ -867,5 +1113,28 @@ class W3_Plugin_Cdn extends W3_Plugin
         }
         
         return $cdn;
+    }
+    
+    /**
+     * Returns debug info
+     * 
+     * @return string
+     */
+    function get_debug_info()
+    {
+        $debug_info = "<!-- W3 Total Cache: CDN debug info:\r\n";
+        $debug_info .= sprintf("%s%s\r\n", str_pad('Engine: ', 20), $this->_config->get_string('cdn.engine'));
+        
+        if (count($this->replaced_urls)) {
+            $debug_info .= "Replaced URLs:\r\n";
+            
+            foreach ($this->replaced_urls as $replaced_url) {
+                $debug_info .= sprintf("%s\r\n", $replaced_url);
+            }
+        }
+        
+        $debug_info .= '-->';
+        
+        return $debug_info;
     }
 }

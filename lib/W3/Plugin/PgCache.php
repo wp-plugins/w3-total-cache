@@ -110,10 +110,15 @@ class W3_Plugin_PgCache extends W3_Plugin
      */
     function activate()
     {
-        $this->update_wp_config();
+        if (! $this->update_wp_config()) {
+            die('<strong>' . ABSPATH . 'wp-config.php</strong> could not be written, please edit config and add:<br /><strong style="color:#f00;">define(\'WP_CACHE\', true);</strong> before <strong style="color:#f00;">require_once(ABSPATH . \'wp-settings.php\');</strong><br />then re-activate plugin.');
+        }
         
-        @copy(W3_PLUGIN_CONTENT_DIR . '/advanced-cache.php', WP_CONTENT_DIR . '/advanced-cache.php');
-        @chmod(WP_CONTENT_DIR . '/advanced-cache.php', 0666);
+        if (@copy(W3_PLUGIN_CONTENT_DIR . '/advanced-cache.php', WP_CONTENT_DIR . '/advanced-cache.php')) {
+            @chmod(WP_CONTENT_DIR . '/advanced-cache.php', 0666);
+        } else {
+            w3_writable_error(WP_CONTENT_DIR . '/advanced-cache.php');
+        }
     }
     
     /**
@@ -131,7 +136,9 @@ class W3_Plugin_PgCache extends W3_Plugin
      */
     function update_wp_config()
     {
-        if (defined('WP_CACHE')) {
+        static $updated = false;
+        
+        if (defined('WP_CACHE') || $updated) {
             return true;
         }
         
@@ -139,14 +146,16 @@ class W3_Plugin_PgCache extends W3_Plugin
             return false;
         }
         
-        $config_data = preg_replace('~<\?(php)?~', "\\0\r\n/** Enable W3 Total Cache **/\r\ndefine('WP_CACHE', true); // Added by W3 Total Cache\r\n", $config_data, 1);
-        
         if (! ($fp = @fopen(ABSPATH . 'wp-config.php', 'w'))) {
             return false;
         }
         
+        $config_data = preg_replace('~<\?(php)?~', "\\0\r\n/** Enable W3 Total Cache **/\r\ndefine('WP_CACHE', true); // Added by W3 Total Cache\r\n", $config_data, 1);
+        
         @fputs($fp, $config_data);
         @fclose($fp);
+        
+        $updated = true;
         
         return true;
     }

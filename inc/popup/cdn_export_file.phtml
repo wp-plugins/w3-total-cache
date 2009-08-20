@@ -5,11 +5,15 @@ var files = [
 	
 <?php endforeach; ?>
 ];
+
+jQuery(function() {
+	Cdn_Export_File.init(files);	
+});
 </script>
 
 <table cellspacing="5">
 	<tr>
-		<td>Total files:</th>
+		<td>Total files:</td>
 		<td><?php echo $files_count; ?></td>
 	</tr>
 	<tr>

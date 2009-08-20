@@ -15,7 +15,7 @@ require MINIFY_MIN_DIR . '/config.php';
 // setup include path
 set_include_path($min_libPath . PATH_SEPARATOR . get_include_path());
 
-require 'Minify.php';
+require $min_libPath . '/Minify.php';
 
 Minify::$uploaderHoursBehind = $min_uploaderHoursBehind;
 Minify::setCache(
@@ -28,6 +28,7 @@ if ($min_documentRoot) {
 } elseif (0 === stripos(PHP_OS, 'win')) {
     Minify::setDocRoot(); // IIS may need help
 }
+$_SERVER['DOCUMENT_ROOT'] = rtrim($_SERVER['DOCUMENT_ROOT'], '/\\');
 
 $min_serveOptions['minifierOptions']['text/css']['symlinks'] = $min_symlinks;
 
@@ -36,9 +37,9 @@ if ($min_allowDebugFlag && isset($_GET['debug'])) {
 }
 
 if ($min_errorLogger) {
-    require_once 'Minify/Logger.php';
+    require_once $min_libPath . '/Minify/Logger.php';
     if (true === $min_errorLogger) {
-        require_once 'FirePHP.php';
+        require_once $min_libPath . '/FirePHP.php';
         Minify_Logger::setLogger(FirePHP::getInstance(true));
     } else {
         Minify_Logger::setLogger($min_errorLogger);
@@ -50,7 +51,7 @@ if (preg_match('/&\\d/', $_SERVER['QUERY_STRING'])) {
     $min_serveOptions['maxAge'] = 31536000;
 }
 if (isset($_GET['g'])) {
-    // well need groups config
+    // we'll need groups config
     $min_serveOptions['minApp']['groups'] = (require MINIFY_MIN_DIR . '/groupsConfig.php');
 }
 if (isset($_GET['f']) || isset($_GET['g'])) {

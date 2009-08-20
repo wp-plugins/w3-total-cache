@@ -1,6 +1,13 @@
-function w3tc_popup(url, name)
+function w3tc_popup(url, name, width, height)
 {
-	return window.open(url, name, 'width=800,height=600,status=no,toolbar=no,menubar=no,scrollbars=yes');
+	if (width === undefined) {
+		width = 800;
+	}
+	if (height === undefined) {
+		height = 600;
+	}
+	
+	return window.open(url, name, 'width=' + width + ',height=' + height +',status=no,toolbar=no,menubar=no,scrollbars=yes');
 }
 
 jQuery(function($) {
@@ -32,11 +39,13 @@ jQuery(function($) {
 			if (enabled) {
 				$(this).next(':hidden').remove();
 			} else {
-				var me = $(this);
-				me.after($('<input />').attr({
-					type: 'hidden',
-					name: me.attr('name'),
-				}).val(me.val()));
+				var me = $(this), t = me.attr('type');
+				if ((t != 'radio' && t != 'checkbox') || this.checked) {
+					me.after($('<input />').attr({
+						type: 'hidden',
+						name: me.attr('name')
+					}).val(me.val()));
+				}
 			}
 		});
 	}
@@ -183,6 +192,10 @@ jQuery(function($) {
 	
 	$('#cdn_export_library').click(function() {
 		w3tc_popup('options-general.php?page=w3-total-cache/w3-total-cache.php&w3tc_action=cdn_export_library', 'cdn_export_library');
+	});
+	
+	$('#cdn_import_library').click(function() {
+		w3tc_popup('options-general.php?page=w3-total-cache/w3-total-cache.php&w3tc_action=cdn_import_library', 'cdn_import_library');
 	});
 	
 	$('#cdn_queue').click(function() {

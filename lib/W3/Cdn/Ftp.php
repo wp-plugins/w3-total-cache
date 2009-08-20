@@ -47,7 +47,7 @@ class W3_Cdn_Ftp extends W3_Cdn_Base
         
         if (! @ftp_login($this->_ftp, $this->_config['user'], $this->_config['pass'])) {
             $this->_disconnect();
-            $error = 'Bad login or password';
+            $error = 'Incorrect login or password';
             
             return false;
         }
@@ -98,7 +98,7 @@ class W3_Cdn_Ftp extends W3_Cdn_Base
         
         foreach ($files as $local_path => $remote_path) {
             if (! file_exists($local_path)) {
-                $results[] = $this->get_result($local_path, $remote_path, W3_CDN_RESULT_ERROR, "File doesn't exists");
+                $results[] = $this->get_result($local_path, $remote_path, W3_CDN_RESULT_ERROR, 'Source file not found');
                 continue;
             }
             

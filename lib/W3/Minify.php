@@ -204,6 +204,57 @@ class W3_Minify
     }
     
     /**
+     * Returns debug info
+     */
+    function get_debug_info()
+    {
+        $debug_info = "<!-- W3 Total Cache: Minify debug info:\r\n";
+        $debug_info .= sprintf("%s%s\r\n", str_pad('Engine: ', 20), $this->_config->get_string('minify.engine'));
+        
+        $css_groups = $this->_get_groups('css');
+        
+        if (count($css_groups)) {
+            $debug_info .= "Stylesheet info:\r\n";
+            $debug_info .= sprintf("%s | %s | % s | %s\r\n", str_pad('Group', 15, ' ', STR_PAD_BOTH), str_pad('Last modified', 19, ' ', STR_PAD_BOTH), str_pad('Size', 12, ' ', STR_PAD_LEFT), 'Path');
+            
+            foreach ($css_groups as $css_group => $css_files) {
+                foreach ($css_files as $css_file => $css_file_path) {
+                    if (w3_is_url($css_file)) {
+                        $css_file_info = sprintf('%s (%s)', $css_file, $css_file_path);
+                    } else {
+                        $css_file_path = $css_file_info = ABSPATH . ltrim($css_file, '/');
+                    }
+                    
+                    $debug_info .= sprintf("%s | %s | % s | %s\r\n", str_pad($css_group, 15, ' ', STR_PAD_BOTH), str_pad(date('Y-m-d H:i:s', filemtime($css_file_path)), 19, ' ', STR_PAD_BOTH), str_pad(filesize($css_file_path), 12, ' ', STR_PAD_LEFT), $css_file_info);
+                }
+            }
+        }
+        
+        $js_groups = $this->_get_groups('js');
+        
+        if (count($js_groups)) {
+            $debug_info .= "JavaScript info:\r\n";
+            $debug_info .= sprintf("%s | %s | % s | %s\r\n", str_pad('Group', 15, ' ', STR_PAD_BOTH), str_pad('Last modified', 19, ' ', STR_PAD_BOTH), str_pad('Size', 12, ' ', STR_PAD_LEFT), 'Path');
+            
+            foreach ($js_groups as $js_group => $js_files) {
+                foreach ($js_files as $js_file => $js_file_path) {
+                    if (w3_is_url($js_file)) {
+                        $js_file_info = sprintf('%s (%s)', $js_file, $js_file_path);
+                    } else {
+                        $js_file_path = $js_file_info = ABSPATH . ltrim($js_file, '/');
+                    }
+                    
+                    $debug_info .= sprintf("%s | %s | % s | %s\r\n", str_pad($js_group, 15, ' ', STR_PAD_BOTH), str_pad(date('Y-m-d H:i:s', filemtime($js_file_path)), 19, ' ', STR_PAD_BOTH), str_pad(filesize($js_file_path), 12, ' ', STR_PAD_LEFT), $js_file_info);
+                }
+            }
+        }
+        
+        $debug_info .= '-->';
+        
+        return $debug_info;
+    }
+    
+    /**
      * Returns minify groups
      *
      * @param string $type
@@ -229,12 +280,12 @@ class W3_Minify
         foreach ($groups as $group => $config) {
             if (isset($config['files'])) {
                 foreach ((array) $config['files'] as $file) {
-                    if (preg_match('~^https?://~', $file)) {
+                    if (w3_is_url($file)) {
                         if (($precached_file = $this->_precache_file($file, $type))) {
-                            $result[$group][] = $precached_file;
+                            $result[$group][$file] = $precached_file;
                         }
                     } else {
-                        $result[$group][] = '//' . $file;
+                        $result[$group][$file] = '//' . $file;
                     }
                 }
             }
@@ -270,9 +321,9 @@ class W3_Minify
             return $file_path;
         }
         
-        if (($file_data = @file_get_contents($file)) && ($fp = @fopen($file_path, 'w'))) {
-            @fputs($fp, $file_data);
-            @fclose($fp);
+        if (($file_data = file_get_contents($file)) && ($fp = fopen($file_path, 'w'))) {
+            fputs($fp, $file_data);
+            fclose($fp);
             
             return $file_path;
         }

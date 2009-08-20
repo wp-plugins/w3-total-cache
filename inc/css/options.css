@@ -1,22 +1,22 @@
 #icon-w3tc-logo {
 	background:url(../images/logo.png) no-repeat;
 	float:left;
-	height:36px;
+	height: 36px;
 	width:36px
 }
 .w3tc-options-menu-selected {
 	font-weight:bold
 }
 .w3tc-enabled {
-	color:#090;
+	color: #090;
 	font-weight:bold
 }
 .w3tc-disabled {
-	color:#f00;
+	color: #f00;
 	font-weight:bold
 }
 .w3tc-empty {
-	font-weight:bold;
+	font-weight: bold;
 	font-style:italic
 }
 .w3tc-success {
@@ -35,7 +35,6 @@
 	list-style-type:disc;
 	list-style-position:inside
 }
-/* FAQ BEGIN */
 #w3tc blockquote {
 	font-style:italic;
 	width:700px
@@ -84,4 +83,6 @@
 	padding:10px;
 	width:760px
 }
-/* FAQ END */
+#w3tc #about, #w3tc #install {
+	width: 760px;
+}

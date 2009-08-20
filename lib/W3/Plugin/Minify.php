@@ -6,7 +6,7 @@
 require_once dirname(__FILE__) . '/../Plugin.php';
 
 if (! defined('W3_PLUGIN_MINIFY_MIN_DIRNAME')) {
-    define('W3_PLUGIN_MINIFY_MIN_DIRNAME', 'wp-content/uploads/w3tc-cache');
+    define('W3_PLUGIN_MINIFY_MIN_DIRNAME', 'wp-content/w3tc-cache');
 }
 
 if (! defined('W3_PLUGIN_MINIFY_MIN_DIR')) {
@@ -72,11 +72,29 @@ class W3_Plugin_Minify extends W3_Plugin
      */
     function activate()
     {
-        @mkdir(W3_PLUGIN_MINIFY_MIN_DIR, 0777);
-        @copy(W3_PLUGIN_MINIFY_MIN_CONTENT_DIR . '/.htaccess', W3_PLUGIN_MINIFY_MIN_DIR . '/.htaccess');
-        @copy(W3_PLUGIN_MINIFY_MIN_CONTENT_DIR . '/index.php', W3_PLUGIN_MINIFY_MIN_DIR . '/index.php');
-        @chmod(W3_PLUGIN_MINIFY_MIN_DIR . '/.htaccess', 0666);
-        @chmod(W3_PLUGIN_MINIFY_MIN_DIR . '/index.php', 0666);
+        if (! is_dir(W3_PLUGIN_MINIFY_MIN_DIR)) {
+            if (@mkdir(W3_PLUGIN_MINIFY_MIN_DIR, 0777)) {
+                @chmod(W3_PLUGIN_MINIFY_MIN_DIR, 0777);
+            } else {
+                w3_writable_error(W3_PLUGIN_MINIFY_MIN_DIR);
+            }
+        }
+        
+        $file_htaccess = W3_PLUGIN_MINIFY_MIN_DIR . '/.htaccess';
+        
+        if (@copy(W3_PLUGIN_MINIFY_MIN_CONTENT_DIR . '/.htaccess', $file_htaccess)) {
+            @chmod($file_htaccess, 0666);
+        } else {
+            w3_writable_error($file_htaccess);
+        }
+        
+        $file_index = W3_PLUGIN_MINIFY_MIN_DIR . '/index.php';
+        
+        if (@copy(W3_PLUGIN_MINIFY_MIN_CONTENT_DIR . '/index.php', $file_index)) {
+            @chmod($file_index, 0666);
+        } else {
+            w3_writable_error($file_index);
+        }
     }
     
     /**
@@ -106,6 +124,10 @@ class W3_Plugin_Minify extends W3_Plugin
      */
     function ob_callback($buffer)
     {
+        if (! w3_is_xml($buffer)) {
+            return $buffer;
+        }
+        
         $head_prepend = '';
         
         if ($this->_config->get_boolean('minify.css.enable', true)) {
@@ -173,7 +195,7 @@ class W3_Plugin_Minify extends W3_Plugin
         foreach ($groups as $config) {
             if (isset($config['files'])) {
                 foreach ((array) $config['files'] as $file) {
-                    if (preg_match('~^https?://~i', $file)) { 
+                    if (w3_is_url($file)) {
                         $urls[] = $file;
                     } else {
                         $urls[] = get_option('siteurl') . '/' . $file;
@@ -205,7 +227,7 @@ class W3_Plugin_Minify extends W3_Plugin
         foreach ($groups as $config) {
             if (isset($config['files'])) {
                 foreach ((array) $config['files'] as $file) {
-                    if (preg_match('~^https?://~', $file)) {
+                    if (w3_is_url($file)) {
                         $urls[] = $file;
                     } else {
                         $urls[] = get_option('siteurl') . '/' . $file;
@@ -233,7 +255,7 @@ class W3_Plugin_Minify extends W3_Plugin
         $content = preg_replace("~\n+~", "\r\n", $content);
         $content = preg_replace('~"\s+/>~', '"/>', $content);
         $content = preg_replace("~(</?\\w+>)\r\n~", "\\1", $content);
-        $content = preg_replace('~^\s+~m', '', $content);
+        $content = preg_replace('~^\s+~m', ' ', $content);
         $content = preg_replace("~[\t ]+~", ' ', $content);
         $content = str_replace('> <', '><', $content);
         

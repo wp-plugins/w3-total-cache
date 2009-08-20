@@ -45,17 +45,15 @@ class W3_Plugin_TotalCache extends W3_Plugin
             'admin_menu'
         ));
         
+        add_filter('plugin_action_links_' . W3_PLUGIN_FILE, array(
+            &$this, 
+            'plugin_action_links'
+        ));
+        
         add_filter('favorite_actions', array(
             &$this, 
             'favorite_actions'
         ));
-        
-        if (is_admin()) {
-            add_action('init', array(
-                &$this, 
-                'init'
-            ));
-        }
         
         if ($this->_config->get_boolean('common.support', true) && $this->_config->get_string('common.support.type', 'footer') == 'footer') {
             add_action('wp_footer', array(
@@ -64,24 +62,19 @@ class W3_Plugin_TotalCache extends W3_Plugin
             ));
         }
         
-        if (isset($_REQUEST['w3tc_action'])) {
-            $action = trim($_REQUEST['w3tc_action']);
-            
-            if (method_exists(&$this, $action)) {
-                call_user_func(array(
-                    &$this, 
-                    $action
-                ));
-                die();
-            }
-        }
-        
         @header('X-Powered-By: ' . W3_PLUGIN_POWERED_BY);
         
-        ob_start(array(
-            &$this, 
-            'ob_callback'
-        ));
+        if (is_admin()) {
+            add_action('init', array(
+                &$this, 
+                'init'
+            ));
+        } else {
+            ob_start(array(
+                &$this, 
+                'ob_callback'
+            ));
+        }
         
         /**
          * Run DbCache plugin
@@ -110,6 +103,21 @@ class W3_Plugin_TotalCache extends W3_Plugin
         require_once W3_PLUGIN_DIR . '/lib/W3/Plugin/Minify.php';
         $w3_plugin_minify = W3_Plugin_Minify::instance();
         $w3_plugin_minify->run();
+        
+        /**
+         * Run plugin action
+         */
+        if (isset($_REQUEST['w3tc_action'])) {
+            $action = trim($_REQUEST['w3tc_action']);
+            
+            if (method_exists($this, $action)) {
+                call_user_func(array(
+                    &$this, 
+                    $action
+                ));
+                die();
+            }
+        }
     }
     
     /**
@@ -134,8 +142,21 @@ class W3_Plugin_TotalCache extends W3_Plugin
      */
     function activate()
     {
-        @copy(W3_CONFIG_DEFAULT_PATH, W3_CONFIG_PATH);
-        @chmod(W3_CONFIG_PATH, 0666);
+        $uploadsDir = WP_CONTENT_DIR . '/uploads';
+        
+        if (! is_dir($uploadsDir)) {
+            if (@mkdir($uploadsDir, 0777)) {
+                @chmod($uploadsDir, 0777);
+            } else {
+                w3_writable_error($uploadsDir);
+            }
+        }
+        
+        if (@copy(W3_CONFIG_DEFAULT_PATH, W3_CONFIG_PATH)) {
+            @chmod(W3_CONFIG_PATH, 0666);
+        } else {
+            w3_writable_error(W3_CONFIG_PATH);
+        }
     }
     
     /**
@@ -167,6 +188,18 @@ class W3_Plugin_TotalCache extends W3_Plugin
     }
     
     /**
+     * Plugin action links filter
+     *
+     * @return array
+     */
+    function plugin_action_links($links)
+    {
+        $links[] = '<a class="edit" href="options-general.php?page=' . W3_PLUGIN_FILE . '"><strong>Settings</strong></a>';
+        
+        return $links;
+    }
+    
+    /**
      * favorite_actions filter
      */
     function favorite_actions($actions)
@@ -184,7 +217,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
      */
     function footer()
     {
-        echo '<div>Performance Optimization <a href="http://www.w3-edge.com/wordpress-plugins/" rel="external">WordPress Plugins</a> by W3 EDGE</div>';
+        echo '<div style="text-align: center;">Performance Optimization <a href="http://www.w3-edge.com/wordpress-plugins/" rel="external">WordPress Plugins</a> by W3 EDGE</div>';
     }
     
     /**
@@ -252,6 +285,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
                 'pgcache.accept.files' => 'array', 
                 'pgcache.reject.uri' => 'array', 
                 'pgcache.reject.ua' => 'array', 
+                'pgcache.reject.cookie' => 'array', 
                 'pgcache.mobile.check' => 'boolean', 
                 'pgcache.mobile.whitelist' => 'array', 
                 'pgcache.mobile.browsers' => 'array', 
@@ -291,13 +325,15 @@ class W3_Plugin_TotalCache extends W3_Plugin
                 'cdn.enabled' => 'boolean', 
                 'cdn.engine' => 'string', 
                 'cdn.domain' => 'string', 
-                'cdn.process.includes' => 'boolean', 
-                'cdn.process.theme' => 'boolean', 
-                'cdn.process.minify' => 'boolean', 
-                'cdn.process.custom' => 'boolean', 
-                'cdn.files.includes' => 'string', 
-                'cdn.files.theme' => 'string', 
-                'cdn.files.custom' => 'array', 
+                'cdn.includes.enable' => 'boolean', 
+                'cdn.includes.files' => 'string', 
+                'cdn.theme.enable' => 'boolean', 
+                'cdn.theme.files' => 'string', 
+                'cdn.minify.enable' => 'boolean', 
+                'cdn.custom.enable' => 'boolean', 
+                'cdn.custom.files' => 'array', 
+                'cdn.import.external' => 'boolean', 
+                'cdn.import.files' => 'string', 
                 'cdn.limit.queue' => 'integer', 
                 'cdn.ftp.host' => 'string', 
                 'cdn.ftp.user' => 'string', 
@@ -380,6 +416,15 @@ class W3_Plugin_TotalCache extends W3_Plugin
                 ));
             }
             
+            if ($tab == 'general') {
+                $debug = W3_Request::get_boolean('debug');
+                
+                $config->set('dbcache.debug', $debug);
+                $config->set('pgcache.debug', $debug);
+                $config->set('minify.debug', $debug);
+                $config->set('cdn.debug', $debug);
+            }
+            
             $config->set('common.defaults', false);
             
             if ($config->save()) {
@@ -418,6 +463,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
         /**
          * Do some checks
          */
+        
         $check_memcache = $this->check_memcache();
         $check_apc = $this->check_apc();
         
@@ -441,7 +487,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
             $notes[] = 'The plugin is in quick setup mode, our recommended defaults are set. Simply satisfy all warnings and enable the plugin to get started or customize all of the settings you wish.';
             
             if ($tab == 'cdn') {
-                $notes[] = 'It appears this is the first time you are using this feature. Unless you wish to first import attachments in your posts that are not already in the media library, please start a "manual export to <acronym title="Content Delivery Network">CDN</acronym>" and only enable this module after pending attachments have been successfully uploaded.';
+                $notes[] = '<strong>It appears this is the first time you are using this feature. Unless you wish to first import attachments in your posts that are not already in the media library, please start a "manual export to <acronym title="Content Delivery Network">CDN</acronym>" and only enable this module after pending attachments have been successfully uploaded.</strong>';
             }
         }
         
@@ -471,7 +517,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
             case 'upload':
             case 'delete':
                 break;
-                
+            
             default:
                 $cdn_queue_tab = 'upload';
         }
@@ -511,20 +557,20 @@ class W3_Plugin_TotalCache extends W3_Plugin
         
         $w3_plugin_cdn = & W3_Plugin_Cdn::instance();
         
-        $total = $w3_plugin_cdn->get_library_objects_count();
+        $total = $w3_plugin_cdn->get_attachments_count();
         $title = 'Media library export';
         
         include W3_PLUGIN_DIR . '/inc/popup/common/header.phtml';
-        include W3_PLUGIN_DIR . '/inc/popup/cdn_export_table.phtml';
+        include W3_PLUGIN_DIR . '/inc/popup/cdn_export_library.phtml';
         include W3_PLUGIN_DIR . '/inc/popup/common/footer.phtml';
     }
     
     /**
-     * CDN exprt library process
+     * CDN export library process
      */
     function cdn_export_library_process()
     {
-        set_time_limit(300);
+        set_time_limit(1000);
         
         require_once dirname(__FILE__) . '/../Request.php';
         require_once dirname(__FILE__) . '/Cdn.php';
@@ -555,7 +601,61 @@ class W3_Plugin_TotalCache extends W3_Plugin
     }
     
     /**
-     * CDN export includes action
+     * CDN import library action
+     */
+    function cdn_import_library()
+    {
+        require_once dirname(__FILE__) . '/Cdn.php';
+        
+        $w3_plugin_cdn = & W3_Plugin_Cdn::instance();
+        
+        $total = $w3_plugin_cdn->get_import_posts_count();
+        $cdn_host = $this->_config->get_string('cdn.domain');
+        
+        $title = 'Media library import';
+        
+        include W3_PLUGIN_DIR . '/inc/popup/common/header.phtml';
+        include W3_PLUGIN_DIR . '/inc/popup/cdn_import_library.phtml';
+        include W3_PLUGIN_DIR . '/inc/popup/common/footer.phtml';
+    }
+    
+    /**
+     * CDN import library process
+     */
+    function cdn_import_library_process()
+    {
+        set_time_limit(1000);
+        
+        require_once dirname(__FILE__) . '/../Request.php';
+        require_once dirname(__FILE__) . '/Cdn.php';
+        
+        $w3_plugin_cdn = & W3_Plugin_Cdn::instance();
+        
+        $limit = W3_Request::get_integer('limit');
+        $offset = W3_Request::get_integer('offset');
+        
+        $count = null;
+        $total = null;
+        $results = array();
+        
+        $w3_plugin_cdn->import_library($limit, $offset, $count, $total, $results);
+        
+        echo sprintf("{limit: %d, offset: %d, count: %d, total: %s, results: [\r\n", $limit, $offset, $count, $total);
+        
+        $results_count = count($results);
+        foreach ($results as $index => $result) {
+            echo sprintf("\t{src: '%s', dst: '%s', result: %d, error: '%s'}", addslashes($result['src']), addslashes($result['dst']), addslashes($result['result']), addslashes($result['error']));
+            if ($index < $results_count - 1) {
+                echo ',';
+            }
+            echo "\r\n";
+        }
+        
+        echo ']}';
+    }
+    
+    /**
+     * CDN export action
      */
     function cdn_export()
     {
@@ -599,7 +699,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
      */
     function cdn_export_process()
     {
-        set_time_limit(300);
+        set_time_limit(1000);
         
         require_once dirname(__FILE__) . '/../Request.php';
         require_once dirname(__FILE__) . '/Cdn.php';
@@ -813,7 +913,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
     {
         global $wpdb;
         
-        if (strstr($buffer, '<html') === false) {
+        if (! w3_is_xml($buffer)) {
             return $buffer;
         }
         
@@ -822,7 +922,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
         $time = timer_stop();
         
         if ($this->_config->get_boolean('common.support')) {
-            $buffer .= sprintf("\r\n<!--Served from: %s @ %s in %.3f seconds by W3 Total Cache -->", $host, $date, $time);
+            $buffer .= sprintf("\r\n<!-- Served from: %s @ %s in %.3f seconds by W3 Total Cache -->", $host, $date, $time);
         } else {
             $buffer .= <<<DATA
 <!--
@@ -870,7 +970,7 @@ DATA;
             }
             
             if ($this->_config->get_boolean('dbcache.enabled', true) && is_a($wpdb, 'W3_Db')) {
-                $buffer .= sprintf("Database Caching %d/%d queries in %.3f seconds using %s\r\n", $wpdb->query_total, $wpdb->query_hits, $wpdb->time_total, $this->_config->get_string('dbcache.engine', 'N/A'));
+                $buffer .= sprintf("Database Caching %d/%d queries in %.3f seconds using %s\r\n", $wpdb->query_hits, $wpdb->query_total, $wpdb->time_total, $this->_config->get_string('dbcache.engine', 'N/A'));
             }
             
             if ($this->_config->get_boolean('cdn.enabled', true)) {
@@ -878,6 +978,18 @@ DATA;
             }
             
             $buffer .= sprintf("\r\nServed from: %s @ %s in %.3f seconds -->", $host, $date, $time);
+        }
+        
+        if ($this->_config->get_boolean('dbcache.enabled', true) && $this->_config->get_boolean('dbcache.debug') && is_a($wpdb, 'W3_Db')) {
+            $buffer .= "\r\n\r\n" . $wpdb->get_debug_info();
+        }
+        
+        if ($this->_config->get_boolean('minify.enabled', true) && $this->_config->get_boolean('minify.debug')) {
+            require_once dirname(__FILE__) . '/../Minify.php';
+            
+            $w3_minify = W3_Minify::instance();
+            
+            $buffer .= "\r\n\r\n" . $w3_minify->get_debug_info();
         }
         
         return $buffer;

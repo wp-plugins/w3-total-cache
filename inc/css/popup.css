@@ -140,3 +140,7 @@ a:hover {
 .tab-selected {
 	font-weight: bold;
 }
+.rules {
+	width: 100%;
+	font-size: 9px;
+}

@@ -17,11 +17,32 @@ class W3_PgCache
     var $_config = null;
     
     /**
+     * Caching flag
+     *
+     * @var boolean
+     */
+    var $_caching = false;
+    
+    /**
      * Compression availability flag
      *
      * @var boolean
      */
     var $_compression = false;
+    
+    /**
+     * Page key
+     *
+     * @var string
+     */
+    var $_page_key = '';
+    
+    /**
+     * Time start 
+     *
+     * @var double
+     */
+    var $_time_start = 0;
     
     /**
      * PHP5 Constructor
@@ -45,41 +66,57 @@ class W3_PgCache
      */
     function process()
     {
+        if ($this->_config->get_boolean('pgcache.debug')) {
+            $this->_time_start = w3_microtime();
+        }
+        
+        $this->_caching = $this->_can_cache();
         $this->_compression = ($this->_config->get_boolean('pgcache.compress', true) ? $this->_get_compression() : false);
-        $page_key = $this->_get_page_key($this->_compression);
+        $this->_page_key = $this->_get_page_key($this->_compression);
         
-        /**
-         * Check if page is cached
-         */
-        $cache = $this->_get_cache();
-        
-        if (is_array(($data = $cache->get($page_key)))) {
+        if ($this->_caching) {
             /**
-             * Handle 404 error
+             * Check if page is cached
              */
-            if ($data['404']) {
-                header('HTTP/1.1 404 Not Found');
-            } elseif (! empty($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
-                $if_modified_since = strtotime(preg_replace('/;.*$/', '', $_SERVER['HTTP_IF_MODIFIED_SINCE']));
-                if ($if_modified_since >= $data['time']) {
-                    header("HTTP/1.1 304 Not Modified");
+            $cache = $this->_get_cache();
+            
+            if (is_array(($data = $cache->get($this->_page_key)))) {
+                @header('X-Powered-By: ' . W3_PLUGIN_POWERED_BY);
+                
+                /**
+                 * Handle 404 error
+                 */
+                if ($data['404']) {
+                    header('HTTP/1.1 404 Not Found');
+                } elseif (! empty($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
+                    $if_modified_since = strtotime(preg_replace('/;.*$/', '', $_SERVER['HTTP_IF_MODIFIED_SINCE']));
+                    if ($if_modified_since >= $data['time']) {
+                        header("HTTP/1.1 304 Not Modified");
+                    }
                 }
+                
+                /**
+                 * Append debug info to content if debug mode is enabled
+                 */
+                if ($this->_config->get_boolean('pgcache.debug')) {
+                    $time_total = w3_microtime() - $this->_time_start;
+                    $debug_info = $this->_get_debug_info(true, true, $time_total, $data['headers']);
+                    $this->_append_content($data, "\r\n\r\n" . $debug_info);
+                }
+                
+                /**
+                 * Send cached headers
+                 */
+                foreach ((array) $data['headers'] as $header_name => $header_value) {
+                    header($header_name . ': ' . $header_value);
+                }
+                
+                /**
+                 * Send content
+                 */
+                echo $data['content'];
+                exit();
             }
-            
-            /**
-             * Send cached headers
-             */
-            foreach ((array) $data['headers'] as $header_name => $header_value) {
-                header($header_name . ': ' . $header_value);
-            }
-            
-            $this->log(true, true);
-            
-            /**
-             * Send content
-             */
-            echo $data['content'];
-            exit();
         }
         
         /**
@@ -99,39 +136,8 @@ class W3_PgCache
      */
     function ob_callback($buffer)
     {
-        /**
-         * Don't cache 404 pages
-         */
-        if (! $this->_config->get_boolean('pgcache.cache.404', true) && is_404()) {
+        if (empty($buffer) || ! $this->_can_cache2() || ! w3_is_xml($buffer)) {
             return $buffer;
-        }
-        
-        /**
-         * Don't cache homepage
-         */
-        if (! $this->_config->get_boolean('pgcache.cache.home', true) && is_home()) {
-            return $buffer;
-        }
-        
-        /**
-         * Don't cache feed
-         */
-        if (! $this->_config->get_boolean('pgcache.cache.feed', true) && is_feed()) {
-            return $buffer;
-        }
-        
-        /**
-         * Skip if user is logged in
-         */
-        if (! $this->_config->get_boolean('pgcache.cache.logged', true) && is_user_logged_in()) {
-            return $buffer;
-        }
-        
-        /**
-         * Skip if buffer is empty
-         */
-        if ($buffer == '') {
-            return '';
         }
         
         /**
@@ -162,15 +168,7 @@ class W3_PgCache
             /**
              * Set headers to cache
              */
-            $headers = $this->_config->get_array('pgcache.cache.headers');
-            
-            foreach ($this->_get_response_headers() as $header_name => $header_value) {
-                foreach ($headers as $known_header_name) {
-                    if (strcasecmp($header_name, $known_header_name) == 0) {
-                        $data['headers'][$header_name] = $header_value;
-                    }
-                }
-            }
+            $data['headers'] = $this->_get_data_headers($compression);
             
             if ($compression !== false) {
                 /**
@@ -181,22 +179,11 @@ class W3_PgCache
                 } else {
                     $data['content'] = gzdeflate($buffer);
                 }
-                
-                $data['headers']['Content-Encoding'] = $compression;
-                $data['headers']['Vary'] = 'Accept-Encoding, Cookie';
             } else {
                 /**
                  * Otherwise cache plain
                  */
                 $data['content'] = $buffer;
-                $data['headers']['Vary'] = 'Cookie';
-            }
-            
-            /**
-             * Set last modified header
-             */
-            if (isset($data['headers']['Last-Modified'])) {
-                $data['headers']['Last-Modified'] = gmdate('D, d M Y H:i:s', $data['time']) . ' GMT';
             }
             
             /**
@@ -233,68 +220,16 @@ class W3_PgCache
             $this->set_map('home', $map);
         }
         
-        $this->log(true, false);
+        /**
+         * Append debug info if debug mode is enabled
+         */
+        if ($this->_config->get_boolean('pgcache.debug')) {
+            $time_total = w3_microtime() - $this->_time_start;
+            $debug_info = $this->_get_debug_info(true, false, $time_total, $data_array[$this->_compression]['headers']);
+            $this->_append_content($data_array[$this->_compression], "\r\n\r\n" . $debug_info);
+        }
         
         return $data_array[$this->_compression]['content'];
-    }
-    
-    /**
-     * Checks if can we do cache logic
-     *
-     * @return boolean
-     */
-    function can_cache()
-    {
-        /**
-         * Skip if disabled
-         */
-        if (! $this->_config->get_boolean('pgcache.enabled', true)) {
-            return false;
-        }
-        
-        /**
-         * Skip if posting
-         */
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            return false;
-        }
-        
-        /**
-         * Skip if session defined
-         */
-        if (defined('SID') && SID != '') {
-            return false;
-        }
-        
-        /**
-         * Skip if there is query in the request uri
-         */
-        if (! $this->_config->get_boolean('pgcache.cache.query', true) && strstr($_SERVER['REQUEST_URI'], '?') !== false) {
-            return false;
-        }
-        
-        /**
-         * Check request URI
-         */
-        if (! in_array($_SERVER['PHP_SELF'], $this->_config->get_array('pgcache.accept.files')) && ! $this->_check_request_uri()) {
-            return false;
-        }
-        
-        /**
-         * Check User Agent
-         */
-        if (! $this->_check_ua()) {
-            return false;
-        }
-        
-        /**
-         * Check WordPress cookies
-         */
-        if (! $this->_check_cookies()) {
-            return false;
-        }
-        
-        return true;
     }
     
     /**
@@ -384,24 +319,6 @@ class W3_PgCache
     }
     
     /**
-     * Put log data into log file
-     *
-     * @param boolean $caching
-     * @param boolean $cached
-     */
-    function log($caching = false, $cached = false)
-    {
-        if ($this->_config->get_boolean('pgcache.debug')) {
-            $data = sprintf("[%s] %s \"%s\" [%s]\n", date('r'), $_SERVER['REMOTE_ADDR'], $_SERVER['REQUEST_URI'], ($caching ? ($cached ? 'cached' : 'not cached') : 'not caching'));
-            
-            if (($fp = @fopen(WP_CONTENT_DIR . '/w3-pagecache.log', 'a'))) {
-                @fputs($fp, $data);
-                @fclose($fp);
-            }
-        }
-    }
-    
-    /**
      * Returns onject instance
      *
      * @return W3_PgCache
@@ -416,6 +333,110 @@ class W3_PgCache
         }
         
         return $instance;
+    }
+    
+    /**
+     * Checks if can we do cache logic
+     *
+     * @return boolean
+     */
+    function _can_cache()
+    {
+        /**
+         * Skip if disabled
+         */
+        if (! $this->_config->get_boolean('pgcache.enabled', true)) {
+            return false;
+        }
+        
+        /**
+         * Skip if posting
+         */
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            return false;
+        }
+        
+        /**
+         * Skip if session defined
+         */
+        if (defined('SID') && SID != '') {
+            return false;
+        }
+        
+        /**
+         * Skip if there is query in the request uri
+         */
+        if (! $this->_config->get_boolean('pgcache.cache.query', true) && strstr($_SERVER['REQUEST_URI'], '?') !== false) {
+            return false;
+        }
+        
+        /**
+         * Check request URI
+         */
+        if (! in_array($_SERVER['PHP_SELF'], $this->_config->get_array('pgcache.accept.files')) && ! $this->_check_request_uri()) {
+            return false;
+        }
+        
+        /**
+         * Check User Agent
+         */
+        if (! $this->_check_ua()) {
+            return false;
+        }
+        
+        /**
+         * Check WordPress cookies
+         */
+        if (! $this->_check_cookies()) {
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Checks if can we do cache logic
+     *
+     * @return boolean
+     */
+    function _can_cache2()
+    {
+        /**
+         * Skip if caching is disabled
+         */
+        if (! $this->_caching) {
+            return false;
+        }
+        
+        /**
+         * Don't cache 404 pages
+         */
+        if (! $this->_config->get_boolean('pgcache.cache.404', true) && is_404()) {
+            return false;
+        }
+        
+        /**
+         * Don't cache homepage
+         */
+        if (! $this->_config->get_boolean('pgcache.cache.home', true) && is_home()) {
+            return false;
+        }
+        
+        /**
+         * Don't cache feed
+         */
+        if (! $this->_config->get_boolean('pgcache.cache.feed', true) && is_feed()) {
+            return false;
+        }
+        
+        /**
+         * Skip if user is logged in
+         */
+        if (! $this->_config->get_boolean('pgcache.cache.logged', true) && is_user_logged_in()) {
+            return false;
+        }
+        
+        return true;
     }
     
     /**
@@ -509,6 +530,14 @@ class W3_PgCache
             }
         }
         
+        foreach ($this->_config->get_array('pgcache.reject.cookie') as $reject_cookie) {
+            foreach (array_keys($_COOKIE) as $cookie_name) {
+                if (strstr($cookie_name, $reject_cookie) !== false) {
+                    return false;
+                }
+            }
+        }
+        
         return true;
     }
     
@@ -562,6 +591,39 @@ class W3_PgCache
     }
     
     /**
+     * Returns array of data headers
+     *
+     * @param string $compression
+     * @return array
+     */
+    function _get_data_headers($compression)
+    {
+        $data_headers = array();
+        $cache_headers = $this->_config->get_array('pgcache.cache.headers');
+        
+        foreach ($this->_get_response_headers() as $header_name => $header_value) {
+            foreach ($cache_headers as $cache_header_name) {
+                if (strcasecmp($header_name, $cache_header_name) == 0) {
+                    $data_headers[$header_name] = $header_value;
+                }
+            }
+        }
+        
+        if ($compression !== false) {
+            $data_headers['Content-Encoding'] = $compression;
+            $data_headers['Vary'] = 'Accept-Encoding, Cookie';
+        } else {
+            $data_headers['Vary'] = 'Cookie';
+        }
+        
+        if (isset($data_headers['Last-Modified'])) {
+            $data_headers['Last-Modified'] = gmdate('D, d M Y H:i:s') . ' GMT';
+        }
+        
+        return $data_headers;
+    }
+    
+    /**
      * Returns mobile type
      *
      * @return string
@@ -593,7 +655,7 @@ class W3_PgCache
      */
     function _get_page_key($compression = false)
     {
-        $key = 'page_' . md5($_SERVER['REQUEST_URI']);
+        $key = sprintf('w3tc_%s_page_%s', md5($_SERVER['HTTP_HOST']), md5($_SERVER['REQUEST_URI']));
         
         if ($this->_config->get_boolean('pgcache.mobile.check') && ($mobile_type = $this->_get_mobile_type()) != '') {
             $key .= '_' . $mobile_type;
@@ -614,7 +676,7 @@ class W3_PgCache
      */
     function _get_map_key($namespace)
     {
-        $key = 'map_' . $namespace;
+        $key = sprintf('w3tc_%s_map_%s', md5($_SERVER['HTTP_HOST']), $namespace);
         
         return $key;
     }
@@ -639,5 +701,63 @@ class W3_PgCache
         }
         
         return 0;
+    }
+    
+    /**
+     * Returns debug info
+     *
+     * @param boolean $cache
+     * @param boolean $status
+     * @param double $time
+     * @param array $headers
+     * @return string
+     */
+    function _get_debug_info($cache, $status, $time, $headers)
+    {
+        $debug_info = "<!-- W3 Total Cache: Page cache debug info:\r\n";
+        $debug_info .= sprintf("%s%s\r\n", str_pad('Engine: ', 20), $this->_config->get_string('pgcache.engine'));
+        $debug_info .= sprintf("%s%s\r\n", str_pad('Key: ', 20), $this->_page_key);
+        $debug_info .= sprintf("%s%s\r\n", str_pad('Caching: ', 20), ($cache ? 'enabled' : 'disabled'));
+        $debug_info .= sprintf("%s%s\r\n", str_pad('Status: ', 20), ($status ? 'cached' : 'not cached'));
+        $debug_info .= sprintf("%s%.3fs\r\n", str_pad('Time: ', 20), $time);
+        
+        if (count($headers)) {
+            $debug_info .= "Headers info:\r\n";
+            
+            foreach ($headers as $header_name => $header_value) {
+                $debug_info .= sprintf("%s%s\r\n", str_pad($header_name . ': ', 20), $header_value);
+            }
+        }
+        
+        $debug_info .= '-->';
+        
+        return $debug_info;
+    }
+    
+    /**
+     * Appends content to data content
+     *
+     * @param array $data
+     * @param string $content
+     */
+    function _append_content(&$data, $content)
+    {
+        switch ($this->_compression) {
+            case false:
+                $data['content'] .= $content;
+                break;
+            
+            case 'gzip':
+                $data['content'] = gzdecode($data['content']);
+                $data['content'] .= $content;
+                $data['content'] = gzencode($data['content']);
+                break;
+            
+            case 'deflate':
+                $data['content'] = gzinflate($data['content']);
+                $data['content'] .= $content;
+                $data['content'] = gzdeflate($data['content']);
+                break;
+        }
     }
 }
