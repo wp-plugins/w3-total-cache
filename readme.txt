@@ -115,7 +115,7 @@ Install the plugin to read the full FAQ.
 = 0.6 =
 * Improved error message notifications
 * FAQ and installation instructions corrections/adjustments
-* Added “Debug Mode” listing all settings and queries with statistics
+* Added "Debug Mode" listing all settings and queries with statistics
 * Resolved bug in minification of feeds
 * Support for multiple wordpress installations added
 * Improved cache stability for large objects
