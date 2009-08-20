@@ -1,0 +1,73 @@
+<h3>Page Cache Settings</h3>
+
+<p>Page Caching is currently <span class="w3tc-<?php if ($config->get_boolean('pgcache.enabled')): ?>enabled">enabled<?php else: ?>disabled">disabled<?php endif; ?></span>.</p>
+
+<form action="options-general.php?page=<?php echo urldecode(W3_PLUGIN_FILE); ?>&amp;tab=<?php echo $tab; ?>" method="post">
+    <table class="form-table">
+    	<tr>
+    		<th style="width: 250px;"><label for="pgcache_memcached_servers">Memcached Hostname:Port / IP:Port:</label></th>
+    		<td>
+    			<input id="pgcache_memcached_servers" type="text" name="pgcache.memcached.servers" value="<?php echo htmlspecialchars(implode(',', $config->get_array('pgcache.memcached.servers'))); ?>" size="100"<?php if ($config->get_string('pgcache.engine', 'memcached') != 'memcached'): ?> disabled="disabled"<?php endif; ?> />
+    			<br /><span class="description">Multiple servers may be used and seperated by a comma; e.g. 192.168.1.100:11211, domain.com:22122</span>		
+    		</td>
+    	</tr>
+    	<tr>
+    		<th><label for="pgcache_lifetime">Maximum lifetime of cache objects:</label></th>
+    		<td><input id="pgcache_lifetime" type="text" name="pgcache.lifetime" value="<?php echo $config->get_integer('pgcache.lifetime'); ?>" size="8" /> seconds</td>
+    	</tr>
+    	<tr>
+    		<th colspan="2">
+    			<input type="hidden" name="pgcache.cache.logged" value="0" />
+    			<label><input type="checkbox" name="pgcache.cache.logged" value="1"<?php checked($config->get_boolean('pgcache.cache.logged')); ?> /> Cache pages for logged in users</label>			
+    		</th>
+    	</tr>
+    	<tr>
+    		<th colspan="2">
+    			<input type="hidden" name="pgcache.compress" value="0" />
+					<label><input type="checkbox" name="pgcache.compress" value="1"<?php checked($config->get_boolean('pgcache.compress')); ?> /> <acronym title="Hypertext Transfer Protocol">HTTP</acronym> compression (<acronym title="GNU zip">gzip</acronym> / deflate)</label>
+    		</th>
+    	</tr>
+    	<tr>
+    		<th colspan="2">
+    			<input type="hidden" name="pgcache.cache.home" value="0" />
+    			<label><input type="checkbox" name="pgcache.cache.home" value="1"<?php checked($config->get_boolean('pgcache.cache.home')); ?> /> Cache the home page</label>
+    		</th>
+    	</tr>
+    	<tr>
+    		<th colspan="2">
+    			<input type="hidden" name="pgcache.cache.feed" value="0" />
+    			<label><input type="checkbox" name="pgcache.cache.feed" value="1"<?php checked($config->get_boolean('pgcache.cache.feed')); ?> /> Cache <acronym title="Really Simple Syndication">RSS</acronym> feeds (site, post, post comments)</label>		
+    		</th>
+    	</tr>
+    	<tr>
+    		<th colspan="2">
+    			<input type="hidden" name="pgcache.cache.query" value="0" />
+    			<label><input type="checkbox" name="pgcache.cache.query" value="1"<?php checked($config->get_boolean('pgcache.cache.query')); ?> /> Cache <acronym title="Uniform Resource Identifier">URI</acronym>s with query string variables</label>
+    		</th>
+    	</tr>
+    	<tr>
+    		<th valign="top"><label for="pgcache_reject_ua">Rejected User Agents:</label></th>
+    		<td><textarea id="pgcache_reject_ua" name="pgcache.reject.ua" cols="30" rows="5"><?php echo htmlspecialchars(implode("\r\n", $config->get_array('pgcache.reject.ua'))); ?></textarea></td>
+    	</tr>
+    	<tr>
+    		<th valign="top"><label for="pgcache_reject_cookie">Rejected Cookies:</label></th>
+    		<td><textarea id="pgcache_reject_cookie" name="pgcache.reject.cookie" cols="30" rows="5"><?php echo htmlspecialchars(implode("\r\n", $config->get_array('pgcache.reject.cookie'))); ?></textarea></td>
+    	</tr>
+    	<tr>
+    		<th valign="top"><label for="pgcache_reject_uri">Never cache the following pages:</label></th>
+    		<td><textarea id="pgcache_reject_uri" name="pgcache.reject.uri" cols="30" rows="5"><?php echo htmlspecialchars(implode("\r\n", $config->get_array('pgcache.reject.uri'))); ?></textarea></td>
+    	</tr>
+    	<tr>
+    		<th valign="top"><label for="pgcache_accept_files">Caching exception list:</label></th>
+    		<td><textarea id="pgcache_accept_files" name="pgcache.accept.files" cols="30" rows="5"><?php echo htmlspecialchars(implode("\r\n", $config->get_array('pgcache.accept.files'))); ?></textarea></td>
+    	</tr>
+    	<tr>
+    		<th valign="top"><label for="pgcache_cache_headers">Specify page headers:</label></th>
+    		<td><textarea id="pgcache_cache_headers" name="pgcache.cache.headers" cols="30" rows="5"><?php echo htmlspecialchars(implode("\r\n", $config->get_array('pgcache.cache.headers'))); ?></textarea></td>
+    	</tr>
+    </table>
+    
+    <p class="submit">
+    	<input type="submit" name="Submit" class="button-primary" value="Save changes" />
+    </p>
+</form>
