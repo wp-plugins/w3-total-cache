@@ -114,10 +114,12 @@ class W3_Plugin_PgCache extends W3_Plugin
             die('<strong>' . ABSPATH . 'wp-config.php</strong> could not be written, please edit config and add:<br /><strong style="color:#f00;">define(\'WP_CACHE\', true);</strong> before <strong style="color:#f00;">require_once(ABSPATH . \'wp-settings.php\');</strong><br />then re-activate plugin.');
         }
         
-        if (@copy(W3_PLUGIN_CONTENT_DIR . '/advanced-cache.php', WP_CONTENT_DIR . '/advanced-cache.php')) {
-            @chmod(WP_CONTENT_DIR . '/advanced-cache.php', 0666);
-        } else {
-            w3_writable_error(WP_CONTENT_DIR . '/advanced-cache.php');
+        if (! $this->locked()) {
+            if (@copy(W3_PLUGIN_CONTENT_DIR . '/advanced-cache.php', WP_CONTENT_DIR . '/advanced-cache.php')) {
+                @chmod(WP_CONTENT_DIR . '/advanced-cache.php', 0666);
+            } else {
+                w3_writable_error(WP_CONTENT_DIR . '/advanced-cache.php');
+            }
         }
     }
     
@@ -126,7 +128,9 @@ class W3_Plugin_PgCache extends W3_Plugin
      */
     function deactivate()
     {
-        @unlink(WP_CONTENT_DIR . '/advanced-cache.php');
+        if (! $this->locked()) {
+            @unlink(WP_CONTENT_DIR . '/advanced-cache.php');
+        }
     }
     
     /**

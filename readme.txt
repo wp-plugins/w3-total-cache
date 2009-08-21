@@ -3,7 +3,7 @@ Contributors: fredericktownes
 Tags: user experience, cache, caching, page cache, css cache, js cache, db cache, database cache, http compression, gzip, deflate, minify, CDN, content delivery network, media library, wp cache, wp super cache, w3 total cache, performance, speed
 Requires at least: 2.5
 Tested up to: 2.8.4
-Stable tag: 0.6
+Stable tag: 0.7
 
 Dramatically improve the user experience of your blog. Add page caching, database caching, minify and content delivery network functionality and more to WordPress.
 
@@ -111,6 +111,12 @@ In general, due to the manner in which this plugin works the only issues with yo
 Install the plugin to read the full FAQ.
 
 == Changelog ==
+
+= 0.7 =
+* WordPress MU support bug fixes
+* Minor CDN uploader fixes
+* Added support for URIs starting with /
+* Minor error message improvements
 
 = 0.6 =
 * Improved error message notifications

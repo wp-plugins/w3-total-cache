@@ -1,7 +1,9 @@
 <?php
 
+$w3_blog_id = w3_get_blog_id();
+
 if (! defined('W3_PLUGIN_VERSION')) {
-    define('W3_PLUGIN_VERSION', '0.6');
+    define('W3_PLUGIN_VERSION', '0.7');
 }
 
 if (! defined('W3_PLUGIN_POWERED_BY')) {
@@ -24,8 +26,12 @@ if (! defined('W3_PLUGIN_FILE')) {
     define('W3_PLUGIN_FILE', 'w3-total-cache/w3-total-cache.php');
 }
 
+if (! defined('W3_CONFIG_NAME')) {
+    define('W3_CONFIG_NAME', 'w3-total-cache-config');
+}
+
 if (! defined('W3_CONFIG_PATH')) {
-    define('W3_CONFIG_PATH', WP_CONTENT_DIR . '/w3-total-cache-config.php');
+    define('W3_CONFIG_PATH', WP_CONTENT_DIR . '/' . W3_CONFIG_NAME . ($w3_blog_id != '' ? '-' . $w3_blog_id : '') . '.php');
 }
 
 if (! defined('W3_CONFIG_DEFAULT_PATH')) {
@@ -169,4 +175,114 @@ function w3_mkdir($path, $mask = 0777)
 function w3_is_xml($content)
 {
     return (stristr($content, '<?xml') !== false || stristr($content, '<html') !== false);
+}
+
+/**
+ * Returns blog ID
+ *
+ * @return string
+ */
+function w3_get_blog_id()
+{
+    static $id = null;
+    
+    if ($id === null) {
+        $wpmu = false;
+        
+        if (defined('VHOST')) {
+            $wpmu = true;
+        } else {
+            $wpmu = file_exists(ABSPATH . 'wpmu-settings.php');
+        }
+        
+        if ($wpmu) {
+            if (defined('VHOST') && VHOST === 'yes') {
+                $id = w3_get_domain($_SERVER['HTTP_HOST']);
+            } else {
+                if (defined('PATH_CURRENT_SITE')) {
+                    $base = PATH_CURRENT_SITE;
+                } elseif (isset($GLOBALS['base'])) {
+                    $base = $GLOBALS['base'];
+                } else {
+                    $base = '/';
+                }
+                
+                if (empty($base)) {
+                    $base = '/';
+                }
+                
+                $id = strtolower($_SERVER['REQUEST_URI']);
+                
+                if (strpos($id, $base) === 0) {
+                    $id = substr_replace($id, '', 0, strlen($base));
+                }
+                
+                if (($pos = strpos($id, '/'))) {
+                    $id = substr($id, 0, $pos);
+                }
+                
+                if (($pos = strpos($id, '?'))) {
+                    $id = substr($id, 0, $pos);
+                }
+                
+                if ($id != '') {
+                    $id = trim($id, '/');
+                    
+                    if (in_array($id, array(
+                        'page', 
+                        'comments', 
+                        'blog', 
+                        'wp-admin', 
+                        'wp-includes', 
+                        'wp-content', 
+                        'files', 
+                        'feed'
+                    )) || is_file($id)) {
+                        $id = '';
+                    } else {
+                        $id = $id . '.' . w3_get_domain($_SERVER['HTTP_HOST']);
+                    }
+                }
+            }
+        }
+    }
+    
+    return $id;
+}
+
+/**
+ * Returns domain from host
+ *
+ * @param string $host
+ * @return string
+ */
+function w3_get_domain($host)
+{
+    $host = strtolower($host);
+    
+    if (strpos($host, 'www.') === 0) {
+        $host = str_replace('www.', '', $host);
+    }
+    
+    if (($pos = strpos($host, ':'))) {
+        $host = substr($host, 0, $pos);
+    }
+    
+    return $host;
+}
+
+/**
+ * Returns site url [fast]
+ *
+ * @return string
+ */
+function w3_get_site_url()
+{
+    static $site_url = null;
+    
+    if (! $site_url) {
+        $site_url = get_option('siteurl');
+    }
+    
+    return $site_url;
 }

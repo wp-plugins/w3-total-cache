@@ -142,20 +142,12 @@ class W3_Plugin_TotalCache extends W3_Plugin
      */
     function activate()
     {
-        $uploadsDir = WP_CONTENT_DIR . '/uploads';
-        
-        if (! is_dir($uploadsDir)) {
-            if (@mkdir($uploadsDir, 0777)) {
-                @chmod($uploadsDir, 0777);
+        if (! file_exists(W3_CONFIG_PATH)) {
+            if (@copy(W3_CONFIG_DEFAULT_PATH, W3_CONFIG_PATH)) {
+                @chmod(W3_CONFIG_PATH, 0666);
             } else {
-                w3_writable_error($uploadsDir);
+                w3_writable_error(W3_CONFIG_PATH);
             }
-        }
-        
-        if (@copy(W3_CONFIG_DEFAULT_PATH, W3_CONFIG_PATH)) {
-            @chmod(W3_CONFIG_PATH, 0666);
-        } else {
-            w3_writable_error(W3_CONFIG_PATH);
         }
     }
     
@@ -194,7 +186,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
      */
     function plugin_action_links($links)
     {
-        $links[] = '<a class="edit" href="options-general.php?page=' . W3_PLUGIN_FILE . '"><strong>Settings</strong></a>';
+        $links[] = '<a class="edit" href="options-general.php?page=' . W3_PLUGIN_FILE . '">Settings</a>';
         
         return $links;
     }
@@ -425,6 +417,10 @@ class W3_Plugin_TotalCache extends W3_Plugin
                 $config->set('cdn.debug', $debug);
             }
             
+            if ($tab == 'cdn' && ! $config->get('common.defaults') && $config->get('cdn.domain') == '') {
+                $errors[] = 'The "Replace domain in URL with" field must be populated. Enter the hostname of your <acronym title="Content Delivery Network">CDN</acronym> provider. <em>This is the hostname you would enter into your address bar in order to view objects in your browser.</em>';
+            }
+            
             $config->set('common.defaults', false);
             
             if ($config->save()) {
@@ -584,7 +580,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
         $total = null;
         $results = array();
         
-        $w3_plugin_cdn->export_library($limit, $offset, $count, $total, $results);
+        @$w3_plugin_cdn->export_library($limit, $offset, $count, $total, $results);
         
         echo sprintf("{limit: %d, offset: %d, count: %d, total: %s, results: [\r\n", $limit, $offset, $count, $total);
         
@@ -638,7 +634,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
         $total = null;
         $results = array();
         
-        $w3_plugin_cdn->import_library($limit, $offset, $count, $total, $results);
+        @$w3_plugin_cdn->import_library($limit, $offset, $count, $total, $results);
         
         echo sprintf("{limit: %d, offset: %d, count: %d, total: %s, results: [\r\n", $limit, $offset, $count, $total);
         
@@ -707,9 +703,14 @@ class W3_Plugin_TotalCache extends W3_Plugin
         $w3_plugin_cdn = & W3_Plugin_Cdn::instance();
         
         $files = W3_Request::get_array('files');
+        $upload = array();
         $results = array();
         
-        $w3_plugin_cdn->upload($files, false, $results);
+        foreach ($files as $file) {
+            $upload[$file] = $file;
+        }
+        
+        @$w3_plugin_cdn->upload($upload, false, $results);
         
         echo "{results: [\r\n";
         

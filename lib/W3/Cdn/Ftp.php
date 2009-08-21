@@ -199,7 +199,7 @@ class W3_Cdn_Ftp extends W3_Cdn_Base
         $rand = md5(time());
         $tmp_dir = 'test_dir_' . $rand;
         $tmp_file = 'test_file_' . $rand;
-        $tmp_path = WP_CONTENT_DIR . '/uploads/' . $tmp_file;
+        $tmp_path = WP_CONTENT_DIR . '/' . $tmp_file;
         
         if (! @ftp_mkdir($this->_ftp, $tmp_dir)) {
             $this->_disconnect();

@@ -72,28 +72,30 @@ class W3_Plugin_Minify extends W3_Plugin
      */
     function activate()
     {
-        if (! is_dir(W3_PLUGIN_MINIFY_MIN_DIR)) {
-            if (@mkdir(W3_PLUGIN_MINIFY_MIN_DIR, 0777)) {
-                @chmod(W3_PLUGIN_MINIFY_MIN_DIR, 0777);
-            } else {
-                w3_writable_error(W3_PLUGIN_MINIFY_MIN_DIR);
+        if (! $this->locked()) {
+            if (! is_dir(W3_PLUGIN_MINIFY_MIN_DIR)) {
+                if (@mkdir(W3_PLUGIN_MINIFY_MIN_DIR, 0777)) {
+                    @chmod(W3_PLUGIN_MINIFY_MIN_DIR, 0777);
+                } else {
+                    w3_writable_error(W3_PLUGIN_MINIFY_MIN_DIR);
+                }
             }
-        }
-        
-        $file_htaccess = W3_PLUGIN_MINIFY_MIN_DIR . '/.htaccess';
-        
-        if (@copy(W3_PLUGIN_MINIFY_MIN_CONTENT_DIR . '/.htaccess', $file_htaccess)) {
-            @chmod($file_htaccess, 0666);
-        } else {
-            w3_writable_error($file_htaccess);
-        }
-        
-        $file_index = W3_PLUGIN_MINIFY_MIN_DIR . '/index.php';
-        
-        if (@copy(W3_PLUGIN_MINIFY_MIN_CONTENT_DIR . '/index.php', $file_index)) {
-            @chmod($file_index, 0666);
-        } else {
-            w3_writable_error($file_index);
+            
+            $file_htaccess = W3_PLUGIN_MINIFY_MIN_DIR . '/.htaccess';
+            
+            if (@copy(W3_PLUGIN_MINIFY_MIN_CONTENT_DIR . '/.htaccess', $file_htaccess)) {
+                @chmod($file_htaccess, 0666);
+            } else {
+                w3_writable_error($file_htaccess);
+            }
+            
+            $file_index = W3_PLUGIN_MINIFY_MIN_DIR . '/index.php';
+            
+            if (@copy(W3_PLUGIN_MINIFY_MIN_CONTENT_DIR . '/index.php', $file_index)) {
+                @chmod($file_index, 0666);
+            } else {
+                w3_writable_error($file_index);
+            }
         }
     }
     
@@ -102,18 +104,20 @@ class W3_Plugin_Minify extends W3_Plugin
      */
     function deactivate()
     {
-        @unlink(W3_PLUGIN_MINIFY_MIN_DIR . '/.htaccess');
-        @unlink(W3_PLUGIN_MINIFY_MIN_DIR . '/index.php');
-        
-        @unlink(W3_PLUGIN_MINIFY_MIN_DIR . '/include.css');
-        
-        @unlink(W3_PLUGIN_MINIFY_MIN_DIR . '/include.js');
-        @unlink(W3_PLUGIN_MINIFY_MIN_DIR . '/include-nb.js');
-        
-        @unlink(W3_PLUGIN_MINIFY_MIN_DIR . '/include-footer.js');
-        @unlink(W3_PLUGIN_MINIFY_MIN_DIR . '/include-footer-nb.js');
-        
-        @rmdir(W3_PLUGIN_MINIFY_MIN_DIR);
+        if (! $this->locked()) {
+            @unlink(W3_PLUGIN_MINIFY_MIN_DIR . '/.htaccess');
+            @unlink(W3_PLUGIN_MINIFY_MIN_DIR . '/index.php');
+            
+            @unlink(W3_PLUGIN_MINIFY_MIN_DIR . '/include.css');
+            
+            @unlink(W3_PLUGIN_MINIFY_MIN_DIR . '/include.js');
+            @unlink(W3_PLUGIN_MINIFY_MIN_DIR . '/include-nb.js');
+            
+            @unlink(W3_PLUGIN_MINIFY_MIN_DIR . '/include-footer.js');
+            @unlink(W3_PLUGIN_MINIFY_MIN_DIR . '/include-footer-nb.js');
+            
+            @rmdir(W3_PLUGIN_MINIFY_MIN_DIR);
+        }
     }
     
     /**
@@ -191,6 +195,7 @@ class W3_Plugin_Minify extends W3_Plugin
         $urls = array();
         
         $groups = $this->_config->get_array('minify.css.groups');
+        $siteurl = w3_get_site_url();
         
         foreach ($groups as $config) {
             if (isset($config['files'])) {
@@ -198,7 +203,7 @@ class W3_Plugin_Minify extends W3_Plugin
                     if (w3_is_url($file)) {
                         $urls[] = $file;
                     } else {
-                        $urls[] = get_option('siteurl') . '/' . $file;
+                        $urls[] = $siteurl . '/' . $file;
                     }
                 }
             }
@@ -223,6 +228,7 @@ class W3_Plugin_Minify extends W3_Plugin
         $urls = array();
         
         $groups = $this->_config->get_array('minify.js.groups');
+        $siteurl = w3_get_site_url();
         
         foreach ($groups as $config) {
             if (isset($config['files'])) {
@@ -230,7 +236,7 @@ class W3_Plugin_Minify extends W3_Plugin
                     if (w3_is_url($file)) {
                         $urls[] = $file;
                     } else {
-                        $urls[] = get_option('siteurl') . '/' . $file;
+                        $urls[] = $siteurl . '/' . $file;
                     }
                 }
             }
@@ -376,11 +382,13 @@ class W3_Plugin_Minify extends W3_Plugin
      */
     function format_group_url($type, $group)
     {
+        $siteurl = w3_get_site_url();
+        
         if ($this->_config->get_boolean('minify.rewrite', false)) {
-            return sprintf('%s/%s/%s.%s', get_option('siteurl'), W3_PLUGIN_MINIFY_MIN_DIRNAME, $group, $type);
+            return sprintf('%s/%s/%s.%s', $siteurl, W3_PLUGIN_MINIFY_MIN_DIRNAME, $group, $type);
         }
         
-        return sprintf('%s/%s/?t=%s&g=%s', get_option('siteurl'), W3_PLUGIN_MINIFY_MIN_DIRNAME, $type, $group);
+        return sprintf('%s/%s/?t=%s&g=%s', $siteurl, W3_PLUGIN_MINIFY_MIN_DIRNAME, $type, $group);
     }
     
     /**
@@ -409,7 +417,8 @@ class W3_Plugin_Minify extends W3_Plugin
             }
         }
         
-        $url = sprintf('%s/%s/?f=%s', get_option('siteurl'), W3_PLUGIN_MINIFY_MIN_DIRNAME, implode(',', $files));
+        $siteurl = w3_get_site_url();
+        $url = sprintf('%s/%s/?f=%s', $siteurl, W3_PLUGIN_MINIFY_MIN_DIRNAME, implode(',', $files));
         
         if ($base) {
             $url .= sprintf('&b=%s', $base);

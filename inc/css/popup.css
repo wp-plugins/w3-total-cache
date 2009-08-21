@@ -114,6 +114,9 @@ a:hover {
 .table th {
 	background: #eee;
 }
+.queue td {
+	font-size: 10px;
+}
 .updated,.error {
 	-moz-border-radius-bottomleft: 3px;
 	-moz-border-radius-bottomright: 3px;

@@ -655,7 +655,13 @@ class W3_PgCache
      */
     function _get_page_key($compression = false)
     {
-        $key = sprintf('w3tc_%s_page_%s', md5($_SERVER['HTTP_HOST']), md5($_SERVER['REQUEST_URI']));
+        $blog_id = w3_get_blog_id();
+        
+        if (empty($blog_id)) {
+            $blog_id = $_SERVER['HTTP_HOST'];
+        }
+        
+        $key = sprintf('w3tc_%s_page_%s', md5($blog_id), md5($_SERVER['REQUEST_URI']));
         
         if ($this->_config->get_boolean('pgcache.mobile.check') && ($mobile_type = $this->_get_mobile_type()) != '') {
             $key .= '_' . $mobile_type;

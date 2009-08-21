@@ -5,16 +5,18 @@
 
 <div id="cdn_queue_upload" class="tab-content"<?php if ($cdn_queue_tab != 'upload'): ?> style="display: none;"<?php endif; ?>>
 <?php if (! empty($queue[W3_PLUGIN_CDN_COMMAND_UPLOAD])): ?>
-	<table class="table">
+	<table class="table queue">
 		<tr>
-			<th>File</th>
+			<th>Local Path</th>
+			<th>Remote Path</th>
 			<th>Last Error</th>
-			<th width="25%">Date</th>
-			<th width="10%">Delete</th>
+			<th>Date</th>
+			<th>Delete</th>
 		</tr>
 		<?php foreach ((array) $queue[W3_PLUGIN_CDN_COMMAND_UPLOAD] as $result): ?>
 		<tr>
-			<td><?php echo htmlspecialchars($result->file); ?></td>
+			<td><?php echo htmlspecialchars($result->local_path); ?></td>
+			<td><?php echo htmlspecialchars($result->remote_path); ?></td>
 			<td><?php echo htmlspecialchars($result->last_error); ?></td>
 			<td align="center"><?php echo htmlspecialchars($result->date); ?></td>
 			<td align="center">
@@ -33,16 +35,18 @@
 
 <div id="cdn_queue_delete" class="tab-content"<?php if ($cdn_queue_tab != 'delete'): ?> style="display: none;"<?php endif; ?>>
 <?php if (! empty($queue[W3_PLUGIN_CDN_COMMAND_DELETE])): ?>
-	<table class="table">
+	<table class="table queue">
 		<tr>
-			<th>File</th>
+			<th>Local Path</th>
+			<th>Remote Path</th>
 			<th>Last Error</th>
 			<th width="25%">Date</th>
 			<th width="10%">Delete</th>
 		</tr>
 		<?php foreach ((array) $queue[W3_PLUGIN_CDN_COMMAND_DELETE] as $result): ?>
 		<tr>
-			<td><?php echo htmlspecialchars($result->file); ?></td>
+			<td><?php echo htmlspecialchars($result->local_path); ?></td>
+			<td><?php echo htmlspecialchars($result->remote_path); ?></td>
 			<td><?php echo htmlspecialchars($result->last_error); ?></td>
 			<td align="center"><?php echo htmlspecialchars($result->date); ?></td>
 			<td align="center">

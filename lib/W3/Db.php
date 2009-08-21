@@ -430,7 +430,13 @@ class W3_Db extends wpdb
      */
     function _get_cache_key($sql)
     {
-        return sprintf('w3tc_%s_sql_%s', md5($_SERVER['HTTP_HOST']), md5($sql));
+        $blog_id = w3_get_blog_id();
+        
+        if (empty($blog_id)) {
+            $blog_id = $_SERVER['HTTP_HOST'];
+        }
+        
+        return sprintf('w3tc_%s_sql_%s', md5($blog_id), md5($sql));
     }
     
     /**
