@@ -115,7 +115,7 @@ Install the plugin to read the full FAQ.
 = 0.7 =
 * WordPress MU support bug fixes
 * Minor CDN uploader fixes
-* Added support for URIs starting with /
+* Added minify support for URIs starting with /
 * Minor error message improvements
 
 = 0.6 =
