@@ -57,8 +57,7 @@
         # gunzip -c memcached-1.4.0.tar.gz | tar xf -<br />
         # cd memcached-1.4.0</li>
         <li>Let's compile:<br />
-        # ./configure<br />
-        # make &amp;&amp; make install</li>
+        # ./configure &amp;&amp; make &amp;&amp; make install</li>
         <li>We can optionally create memcached.conf in /etc/:<br />
         # cp -p /var/www/vhosts/domain.com/httpdocs/wp-content/plugins/w3-total-cache/ini/memcached.conf /etc/</li>
         <li>Make sure memcached is starts automatically on server boot:<br />
@@ -86,9 +85,7 @@
         # gunzip -c memcache-2.2.5.tgz | tar xf -<br />
         # cd memcache-2.2.5</li>
         <li>Now we start to compile:<br />
-        # phpize<br />
-        # ./configure<br />
-        # make &amp;&amp; make install<br />
+        # phpize &amp;&amp; ./configure &amp;&amp; make &amp;&amp; make install<br />
 		# cp -p /usr/local/src/memcache-2.2.5/modules/memcache.so /usr/lib/php/modules/</li>
         <li>Make sure the module is loaded:<br />
         # echo "extension=memcache.so" &gt; /etc/php.d/memcache.ini<br />
@@ -97,8 +94,8 @@
         # cp -p /var/www/vhosts/domain.com/httpdocs/wp-content/plugins/w3-total-cache/ini/memcache.ini /etc/php.d/</li>
         <li>Finally restart apache:<br />
         # /etc/init.d/httpd restart</li>
-        <li>You're done! Memcache should now be available. You can verify by creating a .<acronym title="Hypertext Preprocessor">php</acronym> script containing the following code and searching for "memcache" after opening the page in your browser:<br />
-        &lt;?php phpinfo(); ?&gt;</li>
+        <li>You're done! Memcache should now be available. If the following command retuns anything, you're all set:<br />
+		# php -r 'phpinfo();' | grep 'memcache'</li>
     </ol> 
         <hr />
         <p id="APC"><strong><acronym title="Alternative PHP Cache">APC</acronym> Installation via Yum or <acronym title="PHP Extension Community Library">PECL</acronym>: </strong><br />
@@ -116,8 +113,8 @@
         # cp -p /var/www/vhosts/domain.com/httpdocs/wp-content/plugins/w3-total-cache/ini/apc.ini /etc/php.d/</li>
         <li>When ready, restart apache:<br />
         # /etc/init.d/httpd restart</li>
-        <li>You're done! <acronym title="Alternative PHP Cache">APC</acronym> should now be available. You can verify by creating a .<acronym title="Hypertext Preprocessor">php</acronym> script containing the following code and opening the page in your browser:<br />
-        &lt;?php phpinfo(); ?&gt;</li>
+        <li>You're done! <acronym title="Alternative PHP Cache">APC</acronym> should now be available. If the following command retuns anything, you're all set:<br />
+		# php -r 'phpinfo();' | grep 'apc'</li>
     </ol>
     <p>For windows users we recommend checking the following sites for more installation tips:</p> 
     <ul> 
@@ -137,17 +134,15 @@
     	# whereis phpize<br />
     	# whereis php-config</li>
       <li>Use the output from #2 to modify the --with-apxs and --with-php-config flags in the following compile command:<br />
-    	# phpize<br />
-    	# ./configure --enable-apc --enable-apc-mmap --with-apxs=/usr/bin/phpize --with-php-config=/usr/bin/php-config<br />
-    	# make &amp;&amp; make install<br />
+    	# phpize &amp;&amp; ./configure --enable-apc --enable-apc-mmap --with-apxs=/usr/bin/phpize --with-php-config=/usr/bin/php-config &amp;&amp; make &amp;&amp; make install<br />
       <br />The result should be similar to:<br />
     	Installing shared extensions: /usr/lib/php/modules/</li>
       <li>Use our customed <acronym title="Alternative PHP Cache">APC</acronym> settings by overwriting apc.ini in /etc/php.d/:<br />
     	# cp -p /var/www/vhosts/domain.com/httpdocs/wp-content/plugins/w3-total-cache/ini/apc.ini /etc/php.d/</li>
       <li>Restart apache when ready:<br />
     	# /etc/init.d/httpd restart</li>
-      <li>You're done! <acronym title="Alternative PHP Cache">APC</acronym> should now be available. You can verify by creating a .<acronym title="Hypertext Preprocessor">php</acronym> script containing the following code and searching for "<acronym title="Alternative PHP Cache">APC</acronym>" after opening the page in your browser:<br />
-    	&lt;?php phpinfo(); ?&gt;</li>
+        <li>You're done! <acronym title="Alternative PHP Cache">APC</acronym> should now be available. If the following command retuns anything, you're all set:<br />
+		# php -r 'phpinfo();' | grep 'apc'</li>
     </ol>
     <hr />
     <p><strong>Note(s):</strong></p>
