@@ -88,15 +88,13 @@
         <li>Now we start to compile:<br />
         # phpize<br />
         # ./configure<br />
-        # make &amp;&amp; make install</li>
-        <li>If the output is like this:<br />
-        Installing shared extensions: /usr/lib/php/modules/<br />
-        <br />
-        Then:<br />
+        # make &amp;&amp; make install<br />
+		# cp -p /usr/local/src/memcache-2.2.5/modules/memcache.so /usr/lib/php/modules/</li>
+        <li>Make sure the module is loaded:<br />
         # echo "extension=memcache.so" &gt; /etc/php.d/memcache.ini<br />
         <br />
         or you can also use the memcache.ini file we prepared for you:<br />
-        # cp -p /var/www/vhosts/domain.com/httpdocs/wp-content/plugins/w3-total-cache/ini/apc.ini /etc/php.d/</li>
+        # cp -p /var/www/vhosts/domain.com/httpdocs/wp-content/plugins/w3-total-cache/ini/memcache.ini /etc/php.d/</li>
         <li>Finally restart apache:<br />
         # /etc/init.d/httpd restart</li>
         <li>You're done! Memcache should now be available. You can verify by creating a .<acronym title="Hypertext Preprocessor">php</acronym> script containing the following code and searching for "memcache" after opening the page in your browser:<br />
