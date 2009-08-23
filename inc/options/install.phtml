@@ -21,18 +21,18 @@
         <li><a href="http://www.google.com/search?q=installing%20yum&amp;output=search&amp;tbs=qdr:y&amp;tbo=1" target="_blank">Install yum</a> for your operating system if you don't already have it. If you like, you can update all of your installed software, but do so only if you have the experience and time to double check configurations afterwards:<br />
         # yum -y update</li>
         <li>Install <acronym title="PHP Extension Community Library">PECL</acronym>:<br />
-        # yum install php-pear</li>
+        # yum -y install php-pear</li>
         <li>Install the <acronym title="Hypertext Preprocessor">PHP</acronym> Development package:<br />
-        # yum install php-devel</li>
+        # yum -y install php-devel</li>
         <li>Install apxs with the following command:<br />
-        # yum install httpd-devel</li>
+        # yum -y install httpd-devel</li>
     </ol>
         <hr />
         <p id="memcached"><strong>Memcached (Daemon) Installation:</strong><br />
           <em>Time required: 3 minutes</em></p>
     <ol> 
         <li>Try to install with yum:<br />
-        # yum install libevent<br />
+        # yum -y install libevent<br />
         <br />
         If this succeeds skip to #5. If this fails, then let's compile. Download and extract the <a href="http://www.monkey.org/~provos/libevent/" target="_blank">latest stable version</a>:<br />
         # cd /usr/local/src<br />
@@ -60,7 +60,7 @@
         <li>Make sure memcached is starts automatically on server boot:<br />
         # touch /etc/init.d/memcached<br />
         # echo '#!/bin/sh -e' >> /etc/init.d/memcached<br />
-        # echo '/usr/local/bin/memcached -d -m 128 -p 11211 -u nobody' >> /etc/init.d/memcached<br />
+        # echo '/usr/local/bin/memcached -d -m 128 -p 11211 -u nobody -l localhost' >> /etc/init.d/memcached<br />
         # chmod u+x /etc/init.d/memcached</li>
         <li>And finally, let's start memcached:<br />
         # /etc/init.d/memcached</li>
@@ -102,7 +102,7 @@
         # pecl install apc<br />
         <br />
         or using yum:<br />
-        # yum install php-pecl-apc</li>
+        # yum -y install php-pecl-apc</li>
         <li>Make sure the module is loaded:<br />
         # echo "extension=apc.so" &gt; /etc/php.d/apc.ini<br />
         <br />
