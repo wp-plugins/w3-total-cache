@@ -4,14 +4,6 @@
  * W3 Minify object
  */
 
-if (! defined('MINIFY_DIR')) {
-    define('MINIFY_DIR', dirname(__FILE__) . '/../Minify/min');
-}
-
-if (! defined('MINIFY_LIB_DIR')) {
-    define('MINIFY_LIB_DIR', MINIFY_DIR . '/lib');
-}
-
 /**
  * Class W3_Minify
  */
@@ -29,10 +21,9 @@ class W3_Minify
      */
     function __construct()
     {
-        require_once dirname(__FILE__) . '/Config.php';
+        require_once W3TC_LIB_W3_DIR . '/Config.php';
         $this->_config = W3_Config::instance();
-        
-        set_include_path(get_include_path() . PATH_SEPARATOR . MINIFY_LIB_DIR);
+        set_include_path(get_include_path() . PATH_SEPARATOR . W3TC_LIB_MINIFY_DIR);
     }
     
     /**
@@ -49,10 +40,8 @@ class W3_Minify
      */
     function process()
     {
-        set_include_path(MINIFY_LIB_DIR . PATH_SEPARATOR . get_include_path());
-        
-        require_once MINIFY_LIB_DIR . '/Minify.php';
-        require_once MINIFY_LIB_DIR . '/HTTP/Encoder.php';
+        require_once W3TC_LIB_MINIFY_DIR . '/Minify.php';
+        require_once W3TC_LIB_MINIFY_DIR . '/HTTP/Encoder.php';
         
         HTTP_Encoder::$encodeToIe6 = $this->_config->get_boolean('minify.comprss.ie6', true);
         
@@ -84,9 +73,9 @@ class W3_Minify
         }
         
         if (($logger = $this->_config->get('minify.logger'))) {
-            require_once MINIFY_LIB_DIR . '/Minify/Logger.php';
+            require_once W3TC_LIB_MINIFY_DIR . '/Minify/Logger.php';
             if (true === $logger) {
-                require_once MINIFY_LIB_DIR . '/FirePHP.php';
+                require_once W3TC_LIB_MINIFY_DIR . '/FirePHP.php';
                 Minify_Logger::setLogger(FirePHP::getInstance(true));
             } else {
                 Minify_Logger::setLogger($logger);
@@ -99,20 +88,16 @@ class W3_Minify
         }
         
         if (isset($_GET['g']) && isset($_GET['t'])) {
-            // well need groups config
+            // will need groups config
             $serve_options['minApp']['groups'] = $this->_get_groups($_GET['t']);
         }
         
         if (isset($_GET['f']) || isset($_GET['g'])) {
             // serve!   
-            @header('X-Powered-By: ' . W3_PLUGIN_POWERED_BY);
+            @header('X-Powered-By: ' . W3TC_POWERED_BY);
             Minify::serve('MinApp', $serve_options);
-        } elseif ($this->_config->get_boolean('minify.builder')) {
-            header('Location: /wp-content/plugins/w3-total-cache/lib/Minify/min/builder/');
-            exit();
         } else {
-            header("Location: /");
-            exit();
+            die('This file cannot be accessed directly');
         }
     }
     
@@ -167,7 +152,7 @@ class W3_Minify
                 $cache_path = $this->_config->get_string('minify.cache.path');
                 
                 if (! $cache_path) {
-                    require_once MINIFY_LIB_DIR . '/Solar/Dir.php';
+                    require_once W3TC_LIB_MINIFY_DIR . '/Solar/Dir.php';
                     $cache_path = Solar_Dir::tmp();
                 }
             }
@@ -195,7 +180,7 @@ class W3_Minify
     {
         static $instance = null;
         
-        if (! $instance) {
+        if ($instance === null) {
             $class = __CLASS__;
             $instance = & new $class();
         }
@@ -305,11 +290,11 @@ class W3_Minify
     {
         static $cache_path = null;
         
-        if (! $cache_path) {
+        if ($cache_path === null) {
             $cache_path = $this->_config->get_string('minify.cache.path');
             
             if (! $cache_path) {
-                require_once MINIFY_LIB_DIR . '/Solar/Dir.php';
+                require_once W3TC_LIB_MINIFY_DIR . '/Solar/Dir.php';
                 $cache_path = Solar_Dir::tmp();
             }
         }
@@ -340,12 +325,11 @@ class W3_Minify
     {
         static $cache = null;
         
-        if (! $cache) {
+        if ($cache === null) {
             switch ($this->_config->get_string('minify.engine', 'memcached')) {
                 case 'memcached':
-                    require_once dirname(__FILE__) . '/Cache/Memcached.php';
-                    require_once MINIFY_LIB_DIR . '/Minify/Cache/Memcache.php';
-                    
+                    require_once W3TC_LIB_W3_DIR . '/Cache/Memcached.php';
+                    require_once W3TC_LIB_MINIFY_DIR . '/Minify/Cache/Memcache.php';
                     $memcached = & W3_Cache_Memcached::instance($this->_config->get_string('minify.memcached.engine', 'auto'), array(
                         'servers' => $this->_config->get_array('minify.memcached.servers')
                     ));
@@ -353,14 +337,12 @@ class W3_Minify
                     break;
                 
                 case 'apc':
-                    require_once MINIFY_LIB_DIR . '/Minify/Cache/APC.php';
-                    
+                    require_once W3TC_LIB_MINIFY_DIR . '/Minify/Cache/APC.php';
                     $cache = & new Minify_Cache_APC();
                     break;
                 
                 default:
-                    require_once MINIFY_LIB_DIR . '/Minify/Cache/File.php';
-                    
+                    require_once W3TC_LIB_MINIFY_DIR . '/Minify/Cache/File.php';
                     $cache = & new Minify_Cache_File($this->_config->get_string('minify.cache.path'), $this->_config->get_boolean('minify.cache.locking'));
                     break;
             }

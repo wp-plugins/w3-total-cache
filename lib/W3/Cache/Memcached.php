@@ -33,25 +33,25 @@ class W3_Cache_Memcached
     {
         static $instance = null;
         
-        if (! $instance) {
+        if ($instance === null) {
             if ($engine == W3_CACHE_MEMCACHED_AUTO) {
                 $engine = (class_exists('Memcache') ? W3_CACHE_MEMCACHED_NATIVE : W3_CACHE_MEMCACHED_CLIENT);
             }
             
             switch ($engine) {
                 case W3_CACHE_MEMCACHED_NATIVE:
-                    require_once dirname(__FILE__) . '/Memcached/Native.php';
+                    require_once W3TC_LIB_W3_DIR . '/Cache/Memcached/Native.php';
                     $instance = & new W3_Cache_Memcached_Native($config);
                     break;
                 
                 case W3_CACHE_MEMCACHED_CLIENT:
-                    require_once dirname(__FILE__) . '/Memcached/Client.php';
+                    require_once W3TC_LIB_W3_DIR . '/Cache/Memcached/Client.php';
                     $instance = & new W3_Cache_Memcached_Client($config);
                     break;
                 
                 default:
                     trigger_error('Incorrect memcached engine', E_USER_WARNING);
-                    require_once dirname(__FILE__) . '/Memcached/Base.php';
+                    require_once W3TC_LIB_W3_DIR . '/Cache/Memcached/Base.php';
                     $instance = & new W3_Cache_Memcached_Base();
                     break;
             }

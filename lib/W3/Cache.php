@@ -34,18 +34,18 @@ class W3_Cache
         if (! isset($instances[$engine])) {
             switch ($engine) {
                 case W3_CACHE_MEMCACHED:
-                    require_once dirname(__FILE__) . '/Cache/Memcached.php';
+                    require_once W3TC_LIB_W3_DIR . '/Cache/Memcached.php';
                     $instances[$engine] = W3_Cache_Memcached::instance($config['engine'], $config);
                     break;
                 
                 case W3_CACHE_APC:
-                    require_once dirname(__FILE__) . '/Cache/Apc.php';
+                    require_once W3TC_LIB_W3_DIR . '/Cache/Apc.php';
                     $instances[$engine] = & new W3_Cache_Apc();
                     break;
                 
                 default:
                     trigger_error('Incorrect cache engine', E_USER_WARNING);
-                    require_once dirname(__FILE__) . '/Cache/Base.php';
+                    require_once W3TC_LIB_W3_DIR . '/Cache/Base.php';
                     $instances[$engine] = & new W3_Cache_Base();
                     break;
             }

@@ -3,7 +3,7 @@
 /**
  * APC class
  */
-require_once dirname(__FILE__) . '/Base.php';
+require_once W3TC_LIB_W3_DIR . '/Cache/Base.php';
 
 /**
  * Class W3_Cache_Apc

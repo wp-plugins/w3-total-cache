@@ -117,12 +117,18 @@ class W3_Config
      */
     function read($file)
     {
-        if (file_exists($file)) {
+        if (file_exists($file) && is_readable($file)) {
             $config = include $file;
+            
+            if (! is_array($config)) {
+                return false;
+            }
             
             foreach ($config as $key => $value) {
                 $this->set($key, $value);
             }
+            
+            return true;
         }
         
         return false;
@@ -134,7 +140,7 @@ class W3_Config
      */
     function read_request($keys)
     {
-        require_once dirname(__FILE__) . '/Request.php';
+        require_once W3TC_LIB_W3_DIR . '/Request.php';
         
         foreach ($keys as $key => $type) {
             $request_key = str_replace('.', '_', $key);
@@ -234,11 +240,11 @@ class W3_Config
             case 'boolean':
                 $data = ($value ? 'true' : 'false');
                 break;
-                
+            
             case 'NULL':
                 $data = 'null';
                 break;
-
+            
             default:
             case 'string':
                 $data = "'" . addslashes((string) $value) . "'";
@@ -255,7 +261,7 @@ class W3_Config
      */
     function load()
     {
-        return $this->read(W3_CONFIG_PATH);
+        return $this->read(W3TC_CONFIG_PATH);
     }
     
     /**
@@ -265,7 +271,7 @@ class W3_Config
      */
     function load_default()
     {
-        return $this->read(W3_CONFIG_DEFAULT_PATH);
+        return $this->read(W3TC_CONFIG_DEFAULT_PATH);
     }
     
     /**
@@ -275,23 +281,30 @@ class W3_Config
      */
     function save()
     {
-        return $this->write(W3_CONFIG_PATH);
+        return $this->write(W3TC_CONFIG_PATH);
     }
     
     /**
      * Returns config instance
      *
+     * @param boolean $check_config
      * @return W3_Config
      */
-    function &instance()
+    function &instance($check_config = true)
     {
-        static $instance;
+        static $instance = null;
         
-        if (! $instance) {
+        if ($instance === null) {
             $class = __CLASS__;
             $instance = & new $class();
-            $instance->load_default();
-            $instance->load();
+            
+            if (! $instance->load_default()) {
+                die(sprintf('<strong>W3 Total Cache Error:</strong> Unable to read default config file <strong>%s</strong> or it is broken. Please re-install plugin.', W3TC_CONFIG_DEFAULT_PATH));
+            }
+            
+            if (! $instance->load() && $check_config) {
+                die(sprintf('<strong>W3 Total Cache Error:</strong> Unable to read config file or it is broken. Please create <strong>%s</strong> from <strong>%s</strong>.', W3TC_CONFIG_PATH, W3TC_CONFIG_DEFAULT_PATH));
+            }
         }
         
         return $instance;

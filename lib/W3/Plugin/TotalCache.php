@@ -3,15 +3,7 @@
 /**
  * W3 Total Cache plugin
  */
-require_once dirname(__FILE__) . '/../Plugin.php';
-
-if (! defined('W3_PLUGIN_TOTALCACHE_LINK_URL')) {
-    define('W3_PLUGIN_TOTALCACHE_LINK_URL', 'http://www.w3-edge.com/wordpress-plugins/');
-}
-
-if (! defined('W3_PLUGIN_TOTALCACHE_LINK_NAME')) {
-    define('W3_PLUGIN_TOTALCACHE_LINK_NAME', 'WordPress Plugins');
-}
+require_once W3TC_LIB_W3_DIR . '/Plugin.php';
 
 /**
  * Class W3_Plugin_TotalCache
@@ -30,12 +22,12 @@ class W3_Plugin_TotalCache extends W3_Plugin
      */
     function run()
     {
-        register_activation_hook(W3_PLUGIN_FILE, array(
+        register_activation_hook(W3TC_FILE, array(
             &$this, 
             'activate'
         ));
         
-        register_deactivation_hook(W3_PLUGIN_FILE, array(
+        register_deactivation_hook(W3TC_FILE, array(
             &$this, 
             'deactivate'
         ));
@@ -45,7 +37,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
             'admin_menu'
         ));
         
-        add_filter('plugin_action_links_' . W3_PLUGIN_FILE, array(
+        add_filter('plugin_action_links_' . W3TC_FILE, array(
             &$this, 
             'plugin_action_links'
         ));
@@ -62,7 +54,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
             ));
         }
         
-        @header('X-Powered-By: ' . W3_PLUGIN_POWERED_BY);
+        @header('X-Powered-By: ' . W3TC_POWERED_BY);
         
         if (is_admin()) {
             add_action('init', array(
@@ -79,35 +71,83 @@ class W3_Plugin_TotalCache extends W3_Plugin
         /**
          * Run DbCache plugin
          */
-        require_once W3_PLUGIN_DIR . '/lib/W3/Plugin/DbCache.php';
+        require_once W3TC_DIR . '/lib/W3/Plugin/DbCache.php';
         $w3_plugin_dbcache = W3_Plugin_DbCache::instance();
         $w3_plugin_dbcache->run();
         
         /**
          * Run PgCache plugin
          */
-        require_once W3_PLUGIN_DIR . '/lib/W3/Plugin/PgCache.php';
+        require_once W3TC_DIR . '/lib/W3/Plugin/PgCache.php';
         $w3_plugin_pgcache = W3_Plugin_PgCache::instance();
         $w3_plugin_pgcache->run();
         
         /**
          * Run CDN plugin
          */
-        require_once W3_PLUGIN_DIR . '/lib/W3/Plugin/Cdn.php';
+        require_once W3TC_DIR . '/lib/W3/Plugin/Cdn.php';
         $w3_plugin_cdn = W3_Plugin_Cdn::instance();
         $w3_plugin_cdn->run();
         
         /**
          * Run Minify plugin
          */
-        require_once W3_PLUGIN_DIR . '/lib/W3/Plugin/Minify.php';
+        require_once W3TC_DIR . '/lib/W3/Plugin/Minify.php';
         $w3_plugin_minify = W3_Plugin_Minify::instance();
         $w3_plugin_minify->run();
+    }
+    
+    /**
+     * Returns plugin instance
+     *
+     * @return W3_Plugin_TotalCache
+     */
+    function &instance()
+    {
+        static $instance = null;
+        
+        if ($instance === null) {
+            $class = __CLASS__;
+            $instance = & new $class();
+        }
+        
+        return $instance;
+    }
+    
+    /**
+     * Activate plugin action
+     */
+    function activate()
+    {
+        if (! file_exists(W3TC_CONFIG_PATH)) {
+            if (@copy(W3TC_CONFIG_DEFAULT_PATH, W3TC_CONFIG_PATH)) {
+                @chmod(W3TC_CONFIG_PATH, 0666);
+            } else {
+                w3_writable_error(W3TC_CONFIG_PATH);
+            }
+        }
+    }
+    
+    /**
+     * Deactivate plugin action
+     */
+    function deactivate()
+    {
+        @unlink(W3TC_CONFIG_PATH);
+    }
+    
+    /**
+     * Init Action
+     */
+    function init()
+    {
+        wp_enqueue_style('w3tc-options', WP_PLUGIN_URL . '/w3-total-cache/inc/css/options.css');
+        wp_enqueue_script('w3tc-options', WP_PLUGIN_URL . '/w3-total-cache/inc/js/options.js');
         
         /**
          * Run plugin action
          */
-        if (isset($_REQUEST['w3tc_action'])) {
+        if (isset($_REQUEST['w3tc_action']) && is_admin() && current_user_can('manage_options')) {
             $action = trim($_REQUEST['w3tc_action']);
             
             if (method_exists($this, $action)) {
@@ -121,59 +161,11 @@ class W3_Plugin_TotalCache extends W3_Plugin
     }
     
     /**
-     * Returns plugin instance
-     *
-     * @return W3_Plugin_TotalCache
-     */
-    function &instance()
-    {
-        static $instance = null;
-        
-        if (! $instance) {
-            $class = __CLASS__;
-            $instance = & new $class();
-        }
-        
-        return $instance;
-    }
-    
-    /**
-     * Activate plugin action
-     */
-    function activate()
-    {
-        if (! file_exists(W3_CONFIG_PATH)) {
-            if (@copy(W3_CONFIG_DEFAULT_PATH, W3_CONFIG_PATH)) {
-                @chmod(W3_CONFIG_PATH, 0666);
-            } else {
-                w3_writable_error(W3_CONFIG_PATH);
-            }
-        }
-    }
-    
-    /**
-     * Deactivate plugin action
-     */
-    function deactivate()
-    {
-        @unlink(W3_CONFIG_PATH);
-    }
-    
-    /**
-     * Init Action
-     */
-    function init()
-    {
-        wp_enqueue_style('w3tc-options', WP_PLUGIN_URL . '/w3-total-cache/inc/css/options.css');
-        wp_enqueue_script('w3tc-options', WP_PLUGIN_URL . '/w3-total-cache/inc/js/options.js');
-    }
-    
-    /**
      * Admin menu
      */
     function admin_menu()
     {
-        add_options_page('W3 Total Cache', 'W3 Total Cache', 'manage_options', W3_PLUGIN_FILE, array(
+        add_options_page('W3 Total Cache', 'W3 Total Cache', 'manage_options', W3TC_FILE, array(
             &$this, 
             'options'
         ));
@@ -186,7 +178,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
      */
     function plugin_action_links($links)
     {
-        $links[] = '<a class="edit" href="options-general.php?page=' . W3_PLUGIN_FILE . '">Settings</a>';
+        $links[] = '<a class="edit" href="options-general.php?page=' . W3TC_FILE . '">Settings</a>';
         
         return $links;
     }
@@ -196,7 +188,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
      */
     function favorite_actions($actions)
     {
-        $actions['options-general.php?page=' . W3_PLUGIN_FILE . '&amp;flush_all'] = array(
+        $actions['options-general.php?page=' . W3TC_FILE . '&amp;flush_all'] = array(
             'Empty Caches', 
             'manage_options'
         );
@@ -217,7 +209,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
      */
     function options()
     {
-        require_once dirname(__FILE__) . '/../Request.php';
+        require_once W3TC_LIB_W3_DIR . '/Request.php';
         
         $config = & $this->_config;
         $errors = array();
@@ -289,7 +281,6 @@ class W3_Plugin_TotalCache extends W3_Plugin
                 'minify.memcached.servers' => 'array', 
                 'minify.rewrite' => 'boolean', 
                 'minify.logger' => 'boolean', 
-                'minify.builder' => 'boolean', 
                 'minify.cache.path' => 'string', 
                 'minify.cache.locking' => 'string', 
                 'minify.docroot' => 'string', 
@@ -300,7 +291,6 @@ class W3_Plugin_TotalCache extends W3_Plugin
                 'minify.symlinks' => 'array', 
                 'minify.lifetime' => 'integer', 
                 'minify.html.enable' => 'boolean', 
-                'minify.html.strip.comments' => 'boolean', 
                 'minify.html.strip.crlf' => 'boolean', 
                 'minify.html.reject.admin' => 'boolean', 
                 'minify.css.enable' => 'boolean', 
@@ -417,16 +407,12 @@ class W3_Plugin_TotalCache extends W3_Plugin
                 $config->set('cdn.debug', $debug);
             }
             
-            if ($tab == 'cdn' && ! $config->get('common.defaults') && $config->get('cdn.domain') == '') {
-                $errors[] = 'The "Replace domain in URL with" field must be populated. Enter the hostname of your <acronym title="Content Delivery Network">CDN</acronym> provider. <em>This is the hostname you would enter into your address bar in order to view objects in your browser.</em>';
-            }
-            
             $config->set('common.defaults', false);
             
             if ($config->save()) {
                 $notes[] = 'Plugin configuration updated successfully.';
             } else {
-                $errors[] = 'Unable to save plugin configuration.';
+                $errors[] = 'Unable to save plugin configuration: config file is not writeable.';
             }
             
             if ($config->get_boolean('common.support', true) && $config->get_string('common.support.type', 'footer') == 'blogroll') {
@@ -485,14 +471,16 @@ class W3_Plugin_TotalCache extends W3_Plugin
             if ($tab == 'cdn') {
                 $notes[] = '<strong>It appears this is the first time you are using this feature. Unless you wish to first import attachments in your posts that are not already in the media library, please start a "manual export to <acronym title="Content Delivery Network">CDN</acronym>" and only enable this module after pending attachments have been successfully uploaded.</strong>';
             }
+        } elseif ($tab == 'cdn' && $config->get('cdn.enabled') && $config->get('cdn.domain') == '') {
+            $errors[] = 'The "Replace domain in URL with" field must be populated. Enter the hostname of your <acronym title="Content Delivery Network">CDN</acronym> provider. <em>This is the hostname you would enter into your address bar in order to view objects in your browser.</em>';
         }
         
         /**
          * Show page
          */
-        include W3_PLUGIN_DIR . '/inc/options/common/header.phtml';
-        include W3_PLUGIN_DIR . '/inc/options/' . $tab . '.phtml';
-        include W3_PLUGIN_DIR . '/inc/options/common/footer.phtml';
+        include W3TC_DIR . '/inc/options/common/header.phtml';
+        include W3TC_DIR . '/inc/options/' . $tab . '.phtml';
+        include W3TC_DIR . '/inc/options/common/footer.phtml';
     }
     
     /**
@@ -500,8 +488,8 @@ class W3_Plugin_TotalCache extends W3_Plugin
      */
     function cdn_queue()
     {
-        require_once dirname(__FILE__) . '/../Request.php';
-        require_once dirname(__FILE__) . '/Cdn.php';
+        require_once W3TC_LIB_W3_DIR . '/Request.php';
+        require_once W3TC_LIB_W3_DIR . '/Plugin/Cdn.php';
         
         $w3_plugin_cdn = & W3_Plugin_Cdn::instance();
         $cdn_queue_action = W3_Request::get_string('cdn_queue_action');
@@ -539,9 +527,9 @@ class W3_Plugin_TotalCache extends W3_Plugin
         $queue = $w3_plugin_cdn->queue_get();
         $title = 'Unsuccessfull transfers queue';
         
-        include W3_PLUGIN_DIR . '/inc/popup/common/header.phtml';
-        include W3_PLUGIN_DIR . '/inc/popup/cdn_queue.phtml';
-        include W3_PLUGIN_DIR . '/inc/popup/common/footer.phtml';
+        include W3TC_DIR . '/inc/popup/common/header.phtml';
+        include W3TC_DIR . '/inc/popup/cdn_queue.phtml';
+        include W3TC_DIR . '/inc/popup/common/footer.phtml';
     }
     
     /**
@@ -549,16 +537,16 @@ class W3_Plugin_TotalCache extends W3_Plugin
      */
     function cdn_export_library()
     {
-        require_once dirname(__FILE__) . '/Cdn.php';
+        require_once W3TC_LIB_W3_DIR . '/Plugin/Cdn.php';
         
         $w3_plugin_cdn = & W3_Plugin_Cdn::instance();
         
         $total = $w3_plugin_cdn->get_attachments_count();
         $title = 'Media library export';
         
-        include W3_PLUGIN_DIR . '/inc/popup/common/header.phtml';
-        include W3_PLUGIN_DIR . '/inc/popup/cdn_export_library.phtml';
-        include W3_PLUGIN_DIR . '/inc/popup/common/footer.phtml';
+        include W3TC_DIR . '/inc/popup/common/header.phtml';
+        include W3TC_DIR . '/inc/popup/cdn_export_library.phtml';
+        include W3TC_DIR . '/inc/popup/common/footer.phtml';
     }
     
     /**
@@ -568,8 +556,8 @@ class W3_Plugin_TotalCache extends W3_Plugin
     {
         set_time_limit(1000);
         
-        require_once dirname(__FILE__) . '/../Request.php';
-        require_once dirname(__FILE__) . '/Cdn.php';
+        require_once W3TC_LIB_W3_DIR . '/Request.php';
+        require_once W3TC_LIB_W3_DIR . '/Plugin/Cdn.php';
         
         $w3_plugin_cdn = & W3_Plugin_Cdn::instance();
         
@@ -601,7 +589,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
      */
     function cdn_import_library()
     {
-        require_once dirname(__FILE__) . '/Cdn.php';
+        require_once W3TC_LIB_W3_DIR . '/Plugin/Cdn.php';
         
         $w3_plugin_cdn = & W3_Plugin_Cdn::instance();
         
@@ -610,9 +598,9 @@ class W3_Plugin_TotalCache extends W3_Plugin
         
         $title = 'Media library import';
         
-        include W3_PLUGIN_DIR . '/inc/popup/common/header.phtml';
-        include W3_PLUGIN_DIR . '/inc/popup/cdn_import_library.phtml';
-        include W3_PLUGIN_DIR . '/inc/popup/common/footer.phtml';
+        include W3TC_DIR . '/inc/popup/common/header.phtml';
+        include W3TC_DIR . '/inc/popup/cdn_import_library.phtml';
+        include W3TC_DIR . '/inc/popup/common/footer.phtml';
     }
     
     /**
@@ -622,8 +610,8 @@ class W3_Plugin_TotalCache extends W3_Plugin
     {
         set_time_limit(1000);
         
-        require_once dirname(__FILE__) . '/../Request.php';
-        require_once dirname(__FILE__) . '/Cdn.php';
+        require_once W3TC_LIB_W3_DIR . '/Request.php';
+        require_once W3TC_LIB_W3_DIR . '/Plugin/Cdn.php';
         
         $w3_plugin_cdn = & W3_Plugin_Cdn::instance();
         
@@ -655,8 +643,8 @@ class W3_Plugin_TotalCache extends W3_Plugin
      */
     function cdn_export()
     {
-        require_once dirname(__FILE__) . '/../Request.php';
-        require_once dirname(__FILE__) . '/Cdn.php';
+        require_once W3TC_LIB_W3_DIR . '/Request.php';
+        require_once W3TC_LIB_W3_DIR . '/Plugin/Cdn.php';
         
         $w3_plugin_cdn = & W3_Plugin_Cdn::instance();
         
@@ -685,9 +673,9 @@ class W3_Plugin_TotalCache extends W3_Plugin
                 break;
         }
         
-        include W3_PLUGIN_DIR . '/inc/popup/common/header.phtml';
-        include W3_PLUGIN_DIR . '/inc/popup/cdn_export_file.phtml';
-        include W3_PLUGIN_DIR . '/inc/popup/common/footer.phtml';
+        include W3TC_DIR . '/inc/popup/common/header.phtml';
+        include W3TC_DIR . '/inc/popup/cdn_export_file.phtml';
+        include W3TC_DIR . '/inc/popup/common/footer.phtml';
     }
     
     /**
@@ -697,8 +685,8 @@ class W3_Plugin_TotalCache extends W3_Plugin
     {
         set_time_limit(1000);
         
-        require_once dirname(__FILE__) . '/../Request.php';
-        require_once dirname(__FILE__) . '/Cdn.php';
+        require_once W3TC_LIB_W3_DIR . '/Request.php';
+        require_once W3TC_LIB_W3_DIR . '/Plugin/Cdn.php';
         
         $w3_plugin_cdn = & W3_Plugin_Cdn::instance();
         
@@ -731,8 +719,8 @@ class W3_Plugin_TotalCache extends W3_Plugin
      */
     function cdn_test_ftp()
     {
-        require_once dirname(__FILE__) . '/../Request.php';
-        require_once dirname(__FILE__) . '/../Cdn.php';
+        require_once W3TC_LIB_W3_DIR . '/Request.php';
+        require_once W3TC_LIB_W3_DIR . '/Cdn.php';
         
         $host = W3_Request::get_string('host');
         $user = W3_Request::get_string('user');
@@ -769,7 +757,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
         $bookmarks = get_bookmarks();
         $exists = false;
         foreach ($bookmarks as $bookmark) {
-            if ($bookmark->link_url == W3_PLUGIN_TOTALCACHE_LINK_URL) {
+            if ($bookmark->link_url == W3TC_LINK_URL) {
                 $exists = true;
                 break;
             }
@@ -778,8 +766,8 @@ class W3_Plugin_TotalCache extends W3_Plugin
         if (! $exists) {
             require_once ABSPATH . 'wp-admin/includes/bookmark.php';
             wp_insert_link(array(
-                'link_url' => W3_PLUGIN_TOTALCACHE_LINK_URL, 
-                'link_name' => W3_PLUGIN_TOTALCACHE_LINK_NAME
+                'link_url' => W3TC_LINK_URL, 
+                'link_name' => W3TC_LINK_NAME
             ));
         }
     }
@@ -792,7 +780,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
         $bookmarks = get_bookmarks();
         $link_id = 0;
         foreach ($bookmarks as $bookmark) {
-            if ($bookmark->link_url == W3_PLUGIN_TOTALCACHE_LINK_URL) {
+            if ($bookmark->link_url == W3TC_LINK_URL) {
                 $link_id = $bookmark->link_id;
                 break;
             }
@@ -812,19 +800,19 @@ class W3_Plugin_TotalCache extends W3_Plugin
     function flush($type)
     {
         if ($this->_config->get_string('dbcache.engine') == $type) {
-            require_once W3_PLUGIN_DIR . '/lib/W3/Db.php';
+            require_once W3TC_DIR . '/lib/W3/Db.php';
             $w3_db = W3_Db::instance();
             $w3_db->flush();
         }
         
         if ($this->_config->get_string('pgcache.engine') == $type) {
-            require_once W3_PLUGIN_DIR . '/lib/W3/PgCache.php';
+            require_once W3TC_DIR . '/lib/W3/PgCache.php';
             $w3_pgcache = W3_PgCache::instance();
             $w3_pgcache->flush();
         }
         
         if ($this->_config->get_string('minify.engine') == $type) {
-            require_once W3_PLUGIN_DIR . '/lib/W3/Minify.php';
+            require_once W3TC_DIR . '/lib/W3/Minify.php';
             $w3_minify = W3_Minify::instance();
             $w3_minify->flush();
         }
@@ -931,31 +919,7 @@ This site's performance optimized by W3 Total Cache:
 
 W3 Total Cache improves the user experience of your blog by caching
 frequent operations, reducing the weight of various files and providing
-transparent content delivery network integration. The goal is to improve the
-user experience for the readers of your blog without having to change
-WordPress, your theme, your plugins or how you produce your content. When fully
-utilized, your blog will be able to sustain extremely high traffic spikes
-without requiring hardware upgrades or removing features or functionality from
-your theme.
-	
-Features and benefits include:
-
-	- Improved progressive render (non-blocking CSS and JS embedding)
-	- Reduced HTTP Transactions, DNS lookups, reduced document load time
-	- Transparent content delivery network (CDN) support with automated media
-		library import
-	- Bandwidth savings via Minify and HTTP compression (gzip / deflate) for HTML, CSS
-		and JS
-	- Minification (concatenation, white space removal) of inline, external or 3rd
-		party JS and CSS with scheduled updates
-	- Optional embedding of JS just above </body>
-	- Support for caching pages, posts, feeds, database objects, CSS, JS in memory
-		with APC or memcached or both
-	- Caching of RSS/Atom Feeds (comments, page and site), URIs with query string
-		variables (like search result pages), Database queries, Pages, Posts, CSS and JS
-	- Complete header management including Etags
-	- Increased web server concurrency and reduced resource consumption, increased scale
-
+transparent content delivery network integration.
 
 Learn more about our WordPress Plugins: http://www.w3-edge.com/wordpress-plugins/
 DATA;
@@ -986,8 +950,7 @@ DATA;
         }
         
         if ($this->_config->get_boolean('minify.enabled', true) && $this->_config->get_boolean('minify.debug')) {
-            require_once dirname(__FILE__) . '/../Minify.php';
-            
+            require_once W3TC_LIB_W3_DIR . '/Minify.php';
             $w3_minify = W3_Minify::instance();
             
             $buffer .= "\r\n\r\n" . $w3_minify->get_debug_info();

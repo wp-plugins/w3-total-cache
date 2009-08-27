@@ -19,7 +19,13 @@ class W3_Request
     function get($key, $default = null)
     {
         if (isset($_REQUEST[$key])) {
-            return $_REQUEST[$key];
+            $value = $_REQUEST[$key];
+            
+            if (is_string($value) && get_magic_quotes_gpc()) {
+                $value = stripslashes($value);
+            }
+            
+            return $value;
         }
         
         return $default;

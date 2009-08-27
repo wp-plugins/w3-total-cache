@@ -21,8 +21,8 @@ class W3_Plugin
      */
     function __construct()
     {
-        require_once dirname(__FILE__) . '/Config.php';
-        $this->_config = W3_Config::instance();
+        require_once W3TC_LIB_W3_DIR . '/Config.php';
+        $this->_config = W3_Config::instance(false);
     }
     
     /**
@@ -51,7 +51,7 @@ class W3_Plugin
     {
         static $instance = null;
         
-        if (! $instance) {
+        if ($instance === null) {
             $class = __CLASS__;
             $instance = & new $class();
         }
@@ -69,13 +69,13 @@ class W3_Plugin
         static $locked = null;
         
         if ($locked === null) {
-            $dir = @dir(dirname(W3_CONFIG_PATH));
-            $config = basename(W3_CONFIG_PATH);
+            $dir = @dir(dirname(W3TC_CONFIG_PATH));
+            $config = basename(W3TC_CONFIG_PATH);
             
             $locked = false;
             
             while (($entry = @$dir->read())) {
-                if (strpos($entry, W3_CONFIG_NAME) === 0 && $entry !== $config) {
+                if (strpos($entry, W3TC_CONFIG_NAME) === 0 && $entry !== $config) {
                     $locked = true;
                     break;
                 }

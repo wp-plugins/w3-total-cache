@@ -49,7 +49,7 @@ class W3_PgCache
      */
     function __construct()
     {
-        require_once dirname(__FILE__) . '/Config.php';
+        require_once W3TC_LIB_W3_DIR . '/Config.php';
         $this->_config = W3_Config::instance();
     }
     
@@ -81,7 +81,7 @@ class W3_PgCache
             $cache = $this->_get_cache();
             
             if (is_array(($data = $cache->get($this->_page_key)))) {
-                @header('X-Powered-By: ' . W3_PLUGIN_POWERED_BY);
+                @header('X-Powered-By: ' . W3TC_POWERED_BY);
                 
                 /**
                  * Handle 404 error
@@ -136,53 +136,63 @@ class W3_PgCache
      */
     function ob_callback($buffer)
     {
-        if (empty($buffer) || ! $this->_can_cache2() || ! w3_is_xml($buffer)) {
-            return $buffer;
+        if (empty($buffer) || ! $this->_can_cache2()) {
+            if (w3_is_xml($buffer)) {
+                $this->_send_compression_headers($this->_compression);
+                
+                switch ($this->_compression) {
+                    case 'gzip':
+                        return gzencode($buffer);
+                    
+                    case 'deflate':
+                        return gzdeflate($buffer);
+                }
+            } else {
+                return $buffer;
+            }
         }
+        
+        /**
+         * Send compression headers first
+         */
+        $this->_send_compression_headers($this->_compression);
         
         /**
          * Create data object
          */
+        $data_array = array();
+        $page_keys = array();
+        
+        $cache = $this->_get_cache();
+        $lifetime = $this->_config->get_integer('dbcache.lifetime', 3600);
+        $time = time();
+        $is_404 = is_404();
+        
         $compressions = array(
             false, 
             'gzip', 
             'deflate'
         );
         
-        $data_array = array();
-        $page_keys = array();
-        
-        if ($this->_compression !== false) {
-            header('Content-Encoding: ' . $this->_compression);
-            header('Vary: Accept-Encoding, Cookie');
-        }
-        
-        $cache = $this->_get_cache();
-        
         foreach ($compressions as $compression) {
             $data = array(
-                'time' => time(), 
-                '404' => is_404()
+                'time' => $time, 
+                '404' => $is_404
             );
             
             /**
              * Set headers to cache
              */
             $data['headers'] = $this->_get_data_headers($compression);
-            
-            if ($compression !== false) {
-                /**
-                 * If compression is supported, cache compressed page
-                 */
-                if ($compression == 'gzip') {
-                    $data['content'] = gzencode($buffer);
-                } else {
-                    $data['content'] = gzdeflate($buffer);
-                }
+
+            /**
+             * Set content to cache
+             */
+            if ($compression == 'gzip') {
+                $data['content'] = gzencode($buffer);
+            } elseif ($compression == 'deflate') {
+                $data['content'] = gzdeflate($buffer);
             } else {
-                /**
-                 * Otherwise cache plain
-                 */
                 $data['content'] = $buffer;
             }
             
@@ -191,7 +201,7 @@ class W3_PgCache
              */
             $page_key = $this->_get_page_key($compression);
             
-            $cache->set($page_key, $data, $this->_config->get_integer('dbcache.lifetime', 3600));
+            $cache->set($page_key, $data, $lifetime);
             
             $data_array[$compression] = $data;
             $page_keys[] = $page_key;
@@ -327,7 +337,7 @@ class W3_PgCache
     {
         static $instance = null;
         
-        if (! $instance) {
+        if ($instance === null) {
             $class = __CLASS__;
             $instance = & new $class();
         }
@@ -448,7 +458,7 @@ class W3_PgCache
     {
         static $cache = null;
         
-        if (! $cache) {
+        if ($cache === null) {
             $engine = $this->_config->get_string('pgcache.engine', 'memcached');
             if ($engine == 'memcached') {
                 $engineConfig = array(
@@ -459,7 +469,7 @@ class W3_PgCache
                 $engineConfig = array();
             }
             
-            require_once dirname(__FILE__) . '/Cache.php';
+            require_once W3TC_LIB_W3_DIR . '/Cache.php';
             $cache = & W3_Cache::instance($engine, $engineConfig);
         }
         
@@ -764,6 +774,19 @@ class W3_PgCache
                 $data['content'] .= $content;
                 $data['content'] = gzdeflate($data['content']);
                 break;
+        }
+    }
+    
+    /**
+     * Sends compression headers
+     *
+     * @param string $compression
+     */
+    function _send_compression_headers($compression)
+    {
+        if ($compression !== false) {
+            header('Content-Encoding: ' . $compression);
+            header('Vary: Accept-Encoding, Cookie');
         }
     }
 }

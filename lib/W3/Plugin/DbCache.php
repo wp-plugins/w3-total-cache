@@ -3,7 +3,7 @@
 /**
  * W3 DbCache plugin
  */
-require_once dirname(__FILE__) . '/../Plugin.php';
+require_once W3TC_LIB_W3_DIR . '/Plugin.php';
 
 /**
  * Class W3_Plugin_DbCache
@@ -15,12 +15,12 @@ class W3_Plugin_DbCache extends W3_Plugin
      */
     function run()
     {
-        register_activation_hook(W3_PLUGIN_FILE, array(
+        register_activation_hook(W3TC_FILE, array(
             &$this, 
             'activate'
         ));
         
-        register_deactivation_hook(W3_PLUGIN_FILE, array(
+        register_deactivation_hook(W3TC_FILE, array(
             &$this, 
             'deactivate'
         ));
@@ -35,7 +35,7 @@ class W3_Plugin_DbCache extends W3_Plugin
     {
         static $instance = null;
         
-        if (! $instance) {
+        if ($instance === null) {
             $class = __CLASS__;
             $instance = & new $class();
         }
@@ -51,7 +51,7 @@ class W3_Plugin_DbCache extends W3_Plugin
         if (! $this->locked()) {
             $file_db = WP_CONTENT_DIR . '/db.php';
             
-            if (@copy(W3_PLUGIN_CONTENT_DIR . '/db.php', $file_db)) {
+            if (@copy(W3TC_CONTENT_DIR . '/db.php', $file_db)) {
                 @chmod($file_db, 0666);
             } else {
                 w3_writable_error($file_db);

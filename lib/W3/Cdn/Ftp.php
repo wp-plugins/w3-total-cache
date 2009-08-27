@@ -3,7 +3,7 @@
 /**
  * W3 CDN FTP Class
  */
-require_once dirname(__FILE__) . '/Base.php';
+require_once W3TC_LIB_W3_DIR . '/Cdn/Base.php';
 
 if (! defined('W3_CDN_FTP_CONNECT_TIMEOUT')) {
     define('W3_CDN_FTP_CONNECT_TIMEOUT', 30);

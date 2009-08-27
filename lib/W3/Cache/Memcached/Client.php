@@ -3,8 +3,8 @@
 /**
  * PHP memcached client
  */
-require_once dirname(__FILE__) . '/Base.php';
-require_once dirname(__FILE__) . '/memcached-client.php';
+require_once W3TC_LIB_W3_DIR . '/Cache/Memcached/Base.php';
+require_once W3TC_LIB_W3_DIR . '/Cache/Memcached/memcached-client.php';
 
 /**
  * Class W3_Cache_Memcached_Client
@@ -30,7 +30,8 @@ class W3_Cache_Memcached_Client extends W3_Cache_Memcached_Base
         }
         
         $this->_memcached = & new memcached_client(array(
-            'servers' => $this->config['servers'], 
+            'servers' => $this->config['servers'],
+            'persistant' => true, 
             'debug' => false, 
             'compress_threshold' => (! empty($this->config['compress_threshold']) ? (integer) $this->config['compress_threshold'] : 0)
         ));

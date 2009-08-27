@@ -71,7 +71,7 @@ class W3_Db extends wpdb
      */
     function __construct($dbuser, $dbpassword, $dbname, $dbhost)
     {
-        require_once dirname(__FILE__) . '/Config.php';
+        require_once W3TC_LIB_W3_DIR . '/Config.php';
         $this->_config = W3_Config::instance();
         
         parent::__construct($dbuser, $dbpassword, $dbname, $dbhost);
@@ -293,7 +293,7 @@ class W3_Db extends wpdb
     {
         static $instance = null;
         
-        if (! $instance) {
+        if ($instance === null) {
             $class = __CLASS__;
             $instance = & new $class(DB_USER, DB_PASSWORD, DB_NAME, DB_HOST);
         }
@@ -336,7 +336,7 @@ class W3_Db extends wpdb
     {
         static $cache = null;
         
-        if (! $cache) {
+        if ($cache === null) {
             $engine = $this->_config->get_string('dbcache.engine', 'memcached');
             if ($engine == 'memcached') {
                 $engineConfig = array(
@@ -347,7 +347,7 @@ class W3_Db extends wpdb
                 $engineConfig = array();
             }
             
-            require_once dirname(__FILE__) . '/Cache.php';
+            require_once W3TC_LIB_W3_DIR . '/Cache.php';
             $cache = & W3_Cache::instance($engine, $engineConfig);
         }
         

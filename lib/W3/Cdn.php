@@ -35,23 +35,23 @@ class W3_Cdn
         if (! isset($instances[$engine])) {
             switch ($engine) {
                 case W3_CDN_FTP:
-                    require_once dirname(__FILE__) . '/Cdn/Ftp.php';
+                    require_once W3TC_LIB_W3_DIR . '/Cdn/Ftp.php';
                     $instances[$engine] = & new W3_Cdn_Ftp($config);
                     break;
                 
                 case W3_CDN_CF:
-                    require_once dirname(__FILE__) . '/Cdn/Cf.php';
+                    require_once W3TC_LIB_W3_DIR . '/Cdn/Cf.php';
                     $instances[$engine] = & new W3_Cdn_Cf($config);
                     break;
                 
                 case W3_CDN_S3:
-                    require_once dirname(__FILE__) . '/Cdn/S3.php';
+                    require_once W3TC_LIB_W3_DIR . '/Cdn/S3.php';
                     $instances[$engine] = & new W3_Cdn_S3($config);
                     break;
                 
                 default:
                     trigger_error('Incorrect CDN engine', E_USER_WARNING);
-                    require_once dirname(__FILE__) . '/Cdn/Base.php';
+                    require_once W3TC_LIB_W3_DIR . '/Cdn/Base.php';
                     $instances[$engine] = & new W3_Cdn_Base();
                     break;
             }

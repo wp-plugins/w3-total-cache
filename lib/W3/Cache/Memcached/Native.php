@@ -3,7 +3,7 @@
 /**
  * PECL Memcached class
  */
-require_once dirname(__FILE__) . '/Base.php';
+require_once W3TC_LIB_W3_DIR . '/Cache/Memcached/Base.php';
 
 /**
  * Class W3_Cache_Memcached_Native
@@ -47,7 +47,7 @@ class W3_Cache_Memcached_Native extends W3_Cache_Memcached_Base
         if (! empty($this->config['servers'])) {
             foreach ((array) $this->config['servers'] as $server) {
                 list ($ip, $port) = explode(':', $server);
-                $this->_memcache->addServer($ip, $port);
+                $this->_memcache->addServer($ip, $port, true);
             }
         } else {
             return false;
