@@ -2,45 +2,54 @@
 
 $enabled = ($config->get_boolean('dbcache.enabled') || $config->get_boolean('pgcache.enabled') || $config->get_boolean('minify.enabled') || $config->get_boolean('cdn.enabled'));
 $debug = ($config->get_boolean('dbcache.debug') || $config->get_boolean('pgcache.debug') || $config->get_boolean('minify.debug') || $config->get_boolean('cdn.debug'));
-$supportType = $config->get_string('common.support.type', 'footer');
+$support_type = $config->get_string('common.support.type', 'footer');
 
-$canEmptyMemcache = ($config->get_string('dbcache.engine') == 'memcached' || $config->get_string('pgcache.engine') == 'memcached' || $config->get_string('minify.engine') == 'memcached'); 
-$canEmptyApc = ($config->get_string('dbcache.engine') == 'apc' || $config->get_string('pgcache.engine') == 'apc' || $config->get_string('minify.engine') == 'apc'); 
-$canEmptyDisk = ($config->get_string('minify.engine') == 'file'); 
+$can_empty_memcache = ($config->get_string('dbcache.engine') == 'memcached' || $config->get_string('pgcache.engine') == 'memcached' || $config->get_string('minify.engine') == 'memcached'); 
+$can_empty_apc = ($config->get_string('dbcache.engine') == 'apc' || $config->get_string('pgcache.engine') == 'apc' || $config->get_string('minify.engine') == 'apc'); 
+$can_empty_disk = ($config->get_string('minify.engine') == 'file'); 
+
+$memcache_engine = class_exists('Memcache') ? '(Memcache)' : '';
+
+$support_types = array('footer' => 'Page footer');
+$link_categories = get_terms('link_category', array('hide_empty' => 0));
+
+foreach ($link_categories as $link_category) {
+    $support_types['link_category_' . $link_category->term_id] = $link_category->name;    
+}
 
 ?>
 <h3>General Settings</h3>
 
 <p>The plugin is currently <span class="w3tc-<?php if ($enabled): ?>enabled">enabled<?php else: ?>disabled">disabled<?php endif; ?></span>. Changing any of the following settings will clear all caches. If an option is disabled it means that either your current installation is not compatible or installation is required.</p> 
 
-<p><label><input id="enabled" type="checkbox" name="enabled" value="1"<?php checked($enabled); ?> /> Deselect this option to disable all caching functionality.</label></p>
+<p><label><input id="enabled" type="checkbox" name="enabled" value="1"<?php checked($enabled, true); ?> /> Deselect this option to disable all caching functionality.</label></p>
 
 <form action="options-general.php">
     <p>You can 
-    	<input type="hidden" name="page" value="<?php echo W3_PLUGIN_FILE; ?>" />
+    	<input type="hidden" name="page" value="<?php echo W3TC_FILE; ?>" />
     	<input class="button" type="submit" name="flush_all" value="empty all caches" /> at once or 
-    	<input class="button" type="submit" name="flush_memcached" value="empty only the memcached cache"<?php if (! $canEmptyMemcache): ?> disabled="disabled"<?php endif; ?> /> or
-    	<input class="button" type="submit" name="flush_apc" value="empty only the APC cache"<?php if (! $canEmptyApc): ?> disabled="disabled"<?php endif; ?> /> or 
-    	<input class="button" type="submit" name="flush_file" value="empty only the minify disk cache"<?php if (! $canEmptyDisk): ?> disabled="disabled"<?php endif; ?> />.
+    	<input class="button" type="submit" name="flush_memcached" value="empty only the memcached cache"<?php if (! $can_empty_memcache): ?> disabled="disabled"<?php endif; ?> /> or
+    	<input class="button" type="submit" name="flush_apc" value="empty only the APC cache"<?php if (! $can_empty_apc): ?> disabled="disabled"<?php endif; ?> /> or 
+    	<input class="button" type="submit" name="flush_file" value="empty only the minify disk cache"<?php if (! $can_empty_disk): ?> disabled="disabled"<?php endif; ?> />.
     </p>
 </form>
 
 <p>Enable page caching to decrease the response time of your blog.</p>
 
-<form action="options-general.php?page=<?php echo urldecode(W3_PLUGIN_FILE); ?>&amp;tab=<?php echo $tab; ?>" method="post">
+<form action="options-general.php?page=<?php echo urldecode(W3TC_FILE); ?>&amp;tab=<?php echo $tab; ?>" method="post">
     <table class="form-table">
         <tr>
         	<th valign="top">Page Caching:</th>
         	<td>
         		<input type="hidden" name="pgcache.enabled" value="0" />
-        		<label><input class="enabled" type="checkbox" name="pgcache.enabled" value="1"<?php checked($config->get_boolean('pgcache.enabled')); ?> />&nbsp;<strong>Enable</strong></label><br />
+        		<label><input class="enabled" type="checkbox" name="pgcache.enabled" value="1"<?php checked($config->get_boolean('pgcache.enabled'), true); ?> />&nbsp;<strong>Enable</strong></label><br />
     			<span class="description">Caching pages will reduce the response time of and increase the concurrency potential of your web server.</span>
     		</td>
     	</tr>
     	<tr>
     		<th valign="top">Page Caching Method:</th>
     		<td>
-    			<label><input type="radio" name="pgcache.engine" value="memcached"<?php checked($config->get_string('pgcache.engine'), 'memcached'); ?> /> Memcached</label><br />
+    			<label><input type="radio" name="pgcache.engine" value="memcached"<?php checked($config->get_string('pgcache.engine'), 'memcached'); ?> /> Memcached <?php echo $memcache_engine; ?></label><br />
 				<label><input type="radio" name="pgcache.engine" value="apc"<?php checked($config->get_string('pgcache.engine'), 'apc'); ?><?php if (! $check_apc): ?> disabled="disabled"<?php endif; ?> /> <acronym title="Alternative PHP Cache">APC</acronym></label><br />
     		</td>
         </tr>
@@ -53,7 +62,7 @@ $canEmptyDisk = ($config->get_string('minify.engine') == 'file');
         	<th valign="top">Minify:</th>
         	<td>
         		<input type="hidden" name="minify.enabled" value="0" />
-        		<label><input class="enabled" type="checkbox" name="minify.enabled" value="1"<?php checked($config->get_boolean('minify.enabled')); ?> />&nbsp;<strong>Enable</strong></label><br />
+        		<label><input class="enabled" type="checkbox" name="minify.enabled" value="1"<?php checked($config->get_boolean('minify.enabled'), true); ?> />&nbsp;<strong>Enable</strong></label><br />
         		<span class="description">Minification can decrease file size of <acronym title="Hypertext Markup Language">HTML</acronym>, <acronym title="Cascading Style Sheets">CSS</acronym> and <acronym title="JavaScript">JS</acronym> respectively by ~10% on average.</span>    	
         	</td>
         </tr>
@@ -61,7 +70,7 @@ $canEmptyDisk = ($config->get_string('minify.engine') == 'file');
         	<th valign="top">Minify Caching Method:</th>
         	<td>
         		<label><input type="radio" name="minify.engine" value="file"<?php checked($config->get_string('minify.engine'), 'file'); ?> /> Disk</label><br />
-        		<label><input type="radio" name="minify.engine" value="memcached"<?php checked($config->get_string('minify.engine'), 'memcached'); ?> /> Memcached</label><br />
+        		<label><input type="radio" name="minify.engine" value="memcached"<?php checked($config->get_string('minify.engine'), 'memcached'); ?> /> Memcached <?php echo $memcache_engine; ?></label><br />
 				<label><input type="radio" name="minify.engine" value="apc"<?php checked($config->get_string('minify.engine'), 'apc'); ?><?php if (! $check_apc): ?> disabled="disabled"<?php endif; ?> /> <acronym title="Alternative PHP Cache">APC</acronym></label><br />
         	</td>
         </tr>
@@ -74,14 +83,14 @@ $canEmptyDisk = ($config->get_string('minify.engine') == 'file');
      		<th valign="top">Database Caching:</th>
      		<td>
      			<input type="hidden" name="dbcache.enabled" value="0" />
-    			<label><input class="enabled" type="checkbox" name="dbcache.enabled" value="1"<?php checked($config->get_boolean('dbcache.enabled')); ?> />&nbsp;<strong>Enable</strong></label><br />
+    			<label><input class="enabled" type="checkbox" name="dbcache.enabled" value="1"<?php checked($config->get_boolean('dbcache.enabled'), true); ?> />&nbsp;<strong>Enable</strong></label><br />
 				<span class="description">Caching database objects will increase the response time of your blog by at least an order of magnitude in most cases.</span>
     		</td>
     	</tr>
     	<tr>
     		<th valign="top">Database Caching Method:</th>
     		<td>
-    			<label><input type="radio" name="dbcache.engine" value="memcached"<?php checked($config->get_string('dbcache.engine', 'memcached')); ?> /> Memcached</label><br />
+    			<label><input type="radio" name="dbcache.engine" value="memcached"<?php checked($config->get_string('dbcache.engine'), 'memcached'); ?> /> Memcached <?php echo $memcache_engine; ?></label><br />
 				<label><input type="radio" name="dbcache.engine" value="apc"<?php checked($config->get_string('dbcache.engine'), 'apc'); ?><?php if (! $check_apc): ?> disabled="disabled"<?php endif; ?> /> <acronym title="Alternative PHP Cache">APC</acronym></label><br />
     		</td>
     	</tr>
@@ -94,7 +103,7 @@ $canEmptyDisk = ($config->get_string('minify.engine') == 'file');
 			<th><acronym title="Content Delivery Network">CDN</acronym>:</th>
         	<td>
         		<input type="hidden" name="cdn.enabled" value="0" />
-				<label><input class="enabled" type="checkbox" name="cdn.enabled" value="1"<?php checked($config->get_boolean('cdn.enabled')); ?> />&nbsp;<strong>Enable</strong></label><br />
+				<label><input class="enabled" type="checkbox" name="cdn.enabled" value="1"<?php checked($config->get_boolean('cdn.enabled'), true); ?> />&nbsp;<strong>Enable</strong></label><br />
         	</td>
         </tr>
         <tr>
@@ -115,7 +124,7 @@ $canEmptyDisk = ($config->get_string('minify.engine') == 'file');
      		<th valign="top">Debug Mode:</th>
      		<td>
      			<input type="hidden" name="debug" value="0" />
-    			<label><input type="checkbox" name="debug" value="1"<?php checked($debug); ?> />&nbsp;<strong>Enable</strong></label>
+    			<label><input type="checkbox" name="debug" value="1"<?php checked($debug, true); ?> />&nbsp;<strong>Enable</strong></label>
     		</td>
     	</tr>
     </table>    
@@ -123,7 +132,13 @@ $canEmptyDisk = ($config->get_string('minify.engine') == 'file');
     <h3>Support Us</h3>
      
 	<p>If this plugin has saved you money, made your server more stable and/or improved user experience for the readers of your blog, support us with a link!</p>
-    <p><input type="hidden" name="common.support" value="0" /><label><input type="checkbox" name="common.support"<?php checked($config->get_boolean('common.support')); ?> /> Yes, I'd love to support you guys, please add the link to my site's</label> <select name="common.support.type"><option value="blogroll"<?php if ($supportType == 'blogroll'): ?> selected="selected"<?php endif; ?>>blogroll</option><option value="footer"<?php if ($supportType == 'footer'): ?> selected="selected"<?php endif; ?>>footer</option></select>.</p>
+    <p><input type="hidden" name="common.support.enabled" value="0" /><label><input type="checkbox" name="common.support.enabled"<?php checked($config->get_boolean('common.support.enabled'), true); ?> /> Yes, I'd love to support you guys, please add the link to my site's</label>
+    	<select name="common.support.type">
+    		<?php foreach ($support_types as $support_type_id => $support_type_name): ?>
+    		<option value="<?php echo $support_type_id; ?>"<?php selected($support_type, $support_type_id); ?>><?php echo htmlspecialchars($support_type_name); ?></option>
+    		<?php endforeach; ?>
+		</select>.
+	</p>
     <p>If you want to place the link manually here is the code:</p>
     <p><textarea cols="100" rows="3">Performance Optimization &lt;a href=&quot;http://www.w3-edge.com/wordpress-plugins/&quot; rel=&quot;external&quot;&gt;WordPress Plugins&lt;/a&gt; by W3 EDGE</textarea></p> 
     

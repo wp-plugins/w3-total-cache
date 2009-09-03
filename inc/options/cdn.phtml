@@ -9,7 +9,7 @@
 	<input id="cdn_queue" class="button" type="button" value="view unsuccessfull transfers" /> now.
 </p>
 
-<form action="options-general.php?page=<?php echo urldecode(W3_PLUGIN_FILE); ?>&amp;tab=<?php echo $tab; ?>" method="post">
+<form action="options-general.php?page=<?php echo urldecode(W3TC_FILE); ?>&amp;tab=<?php echo $tab; ?>" method="post">
 
 	<!-- <p>
 		<a href="#cdn_ftp" class="w3tc-tab" rel="#cdn_ftp"><acronym title="File Transfer Protocol">FTP</acronym> settings</a> |
@@ -46,12 +46,12 @@
         	<tr>
         		<th colspan="2">
         			<input type="hidden" name="cdn.ftp.pasv" value="0" />
-        			<label><input type="checkbox" name="cdn.ftp.pasv" value="1"<?php checked($config->get_boolean('cdn.ftp.pasv')); ?> /> Use Passive <acronym title="File Transfer Protocol">FTP</acronym> Mode</label>
+        			<label><input type="checkbox" name="cdn.ftp.pasv" value="1"<?php checked($config->get_boolean('cdn.ftp.pasv'), true); ?> /> Use Passive <acronym title="File Transfer Protocol">FTP</acronym> Mode</label>
         		</th>
         	</tr>
         </table>
         <p>
-        	<input id="test_ftp" class="button" type="button" value="Test FTP server" /> <span id="test_ftp_status" class="w3tc-cdn-status w3tc-process"></span>
+        	<input id="test_ftp" class="button" type="button" value="Test FTP server" /> <span id="test_ftp_status" class="w3tc-status w3tc-process"></span>
         </p>
     </div>
     <div id="cdn_cf" class="w3tc-tab-content" style="display: none;">
@@ -84,7 +84,7 @@
     	<tr>
     		<th>
     			<input type="hidden" name="cdn.includes.enable" value="0" />
-    			<label><input type="checkbox" name="cdn.includes.enable" value="1"<?php checked($config->get_boolean('cdn.includes.enable')); ?> /> Host wp-includes/ files</label>
+    			<label><input type="checkbox" name="cdn.includes.enable" value="1"<?php checked($config->get_boolean('cdn.includes.enable'), true); ?> /> Host wp-includes/ files</label>
     		</th>
     		<td>
     			<input class="button cdn_export" type="button" name="includes" value="Upload includes files" />
@@ -93,7 +93,7 @@
     	<tr>
     		<th>
     			<input type="hidden" name="cdn.theme.enable" value="0" />
-    			<label><input type="checkbox" name="cdn.theme.enable" value="1"<?php checked($config->get_boolean('cdn.theme.enable')); ?> /> Host active theme files</label>
+    			<label><input type="checkbox" name="cdn.theme.enable" value="1"<?php checked($config->get_boolean('cdn.theme.enable'), true); ?> /> Host active theme files</label>
     		</th>
     		<td>
 				<input class="button cdn_export" type="button" name="theme" value="Upload theme files" />
@@ -102,7 +102,7 @@
     	<tr>
     		<th>
     			<input type="hidden" name="cdn.minify.enable" value="0" />
-    			<label><input type="checkbox" name="cdn.minify.enable" value="1"<?php checked($config->get_boolean('cdn.minify.enable')); ?> /> Host minified <acronym title="Cascading Style Sheets">CSS</acronym> and <acronym title="JavaScript">JS</acronym> files</label>
+    			<label><input type="checkbox" name="cdn.minify.enable" value="1"<?php checked($config->get_boolean('cdn.minify.enable'), true); ?> /> Host minified <acronym title="Cascading Style Sheets">CSS</acronym> and <acronym title="JavaScript">JS</acronym> files</label>
     		</th>
     		<td>
 				<input class="button cdn_export" type="button" name="minify" value="Upload minify files" />
@@ -111,7 +111,7 @@
     	<tr>
     		<th>
     			<input type="hidden" name="cdn.custom.enable" value="0" />
-    			<label><input type="checkbox" name="cdn.custom.enable" value="1"<?php checked($config->get_boolean('cdn.custom.enable')); ?> /> Host custom files</label>
+    			<label><input type="checkbox" name="cdn.custom.enable" value="1"<?php checked($config->get_boolean('cdn.custom.enable'), true); ?> /> Host custom files</label>
     		</th>
     		<td>
 				<input class="button cdn_export" type="button" name="custom" value="Upload custom files" />
@@ -138,7 +138,7 @@
     	<tr>
     		<th colspan="2">
     			<input type="hidden" name="cdn.import.external" value="0" />
-    			<label><input type="checkbox" name="cdn.import.external" value="1"<?php checked($config->get_boolean('cdn.import.external')); ?> /> Import external files</label>
+    			<label><input type="checkbox" name="cdn.import.external" value="1"<?php checked($config->get_boolean('cdn.import.external'), true); ?> /> Import external media library attachments</label>
     		</th>
     	</tr>
     	<tr>

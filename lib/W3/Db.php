@@ -62,6 +62,13 @@ class W3_Db extends wpdb
     var $_config = null;
     
     /**
+     * Lifetime
+     *
+     * @var integer
+     */
+    var $_lifetime = null;
+    
+    /**
      * PHP5 constructor
      *
      * @param string $dbuser
@@ -73,6 +80,7 @@ class W3_Db extends wpdb
     {
         require_once W3TC_LIB_W3_DIR . '/Config.php';
         $this->_config = W3_Config::instance();
+        $this->_lifetime = $this->_config->get_integer('dbcache.lifetime', 180);
         
         parent::__construct($dbuser, $dbpassword, $dbname, $dbhost);
     }
@@ -102,7 +110,7 @@ class W3_Db extends wpdb
             return false;
         }
         
-        ++ $this->query_total;
+        ++$this->query_total;
         
         // filter the query, if filters are available
         // NOTE: some queries are made before the plugins have been loaded, and thus cannot be filtered with this method
@@ -120,7 +128,8 @@ class W3_Db extends wpdb
         // Keep track of the last query for debug..
         $this->last_query = $query;
         
-        $caching = $this->can_cache($query);
+        $reason = '';
+        $caching = $this->can_cache($query, $reason);
         $cached = false;
         $data = false;
         $time_total = 0;
@@ -138,7 +147,7 @@ class W3_Db extends wpdb
          * Check if query was cached
          */
         if (is_array($data)) {
-            ++ $this->query_hits;
+            ++$this->query_hits;
             $cached = true;
             
             /**
@@ -150,8 +159,8 @@ class W3_Db extends wpdb
             $this->col_info = $data['col_info'];
             $this->num_rows = $data['num_rows'];
         } else {
-            ++ $this->num_queries;
-            ++ $this->query_misses;
+            ++$this->num_queries;
+            ++$this->query_misses;
             
             // Perform the query via std mysql_query function..
             $this->timer_start();
@@ -184,13 +193,13 @@ class W3_Db extends wpdb
                 $i = 0;
                 while ($i < @mysql_num_fields($this->result)) {
                     $this->col_info[$i] = @mysql_fetch_field($this->result);
-                    $i ++;
+                    $i++;
                 }
                 
                 $num_rows = 0;
                 while (($row = @mysql_fetch_object($this->result))) {
                     $this->last_result[$num_rows] = $row;
-                    $num_rows ++;
+                    $num_rows++;
                 }
                 
                 @mysql_free_result($this->result);
@@ -214,7 +223,7 @@ class W3_Db extends wpdb
                     );
                     
                     $cache = $this->_get_cache();
-                    $cache->set($cache_key, $data, $this->_get_lifetime($query));
+                    $cache->set($cache_key, $data, $this->_lifetime);
                 }
             }
         }
@@ -223,6 +232,7 @@ class W3_Db extends wpdb
             $this->query_stats[] = array(
                 'query' => $query, 
                 'caching' => $caching, 
+                'reason' => $reason, 
                 'cached' => $cached, 
                 'time_total' => $time_total
             );
@@ -239,12 +249,21 @@ class W3_Db extends wpdb
      * @param string $sql
      * @return boolean
      */
-    function can_cache($sql)
+    function can_cache($sql, &$cache_reject_reason)
     {
         /**
          * Skip if disabled
          */
         if (! $this->_config->get_boolean('dbcache.enabled')) {
+            $cache_reject_reason = 'Caching is disabled';
+            return false;
+        }
+        
+        /**
+         * Skip if doint AJAX
+         */
+        if (defined('DOING_AJAX')) {
+            $cache_reject_reason = 'Doing AJAX';
             return false;
         }
         
@@ -252,13 +271,31 @@ class W3_Db extends wpdb
          * Skip if doing cron
          */
         if (defined('DOING_CRON')) {
+            $cache_reject_reason = 'Doing cron';
             return false;
         }
         
         /**
-         * Skip if request URI is rejected
+         * Skip if APP request
          */
-        if (! $this->_check_request_uri()) {
+        if (defined('APP_REQUEST')) {
+            $cache_reject_reason = 'APP request';
+            return false;
+        }
+        
+        /**
+         * Skip if XMLRPC request
+         */
+        if (defined('XMLRPC_REQUEST')) {
+            $cache_reject_reason = 'XMLRPC request';
+            return false;
+        }
+        
+        /**
+         * Skip if admin
+         */
+        if (defined('WP_ADMIN')) {
+            $cache_reject_reason = 'Admin';
             return false;
         }
         
@@ -266,6 +303,31 @@ class W3_Db extends wpdb
          * Skip if SQL is rejected
          */
         if (! $this->_check_sql($sql)) {
+            $cache_reject_reason = 'SQL rejected';
+            return false;
+        }
+        
+        /**
+         * Skip if request URI is rejected
+         */
+        if (! $this->_check_request_uri()) {
+            $cache_reject_reason = 'URI rejected';
+            return false;
+        }
+        
+        /**
+         * Skip if cookie is rejected
+         */
+        if (! $this->_check_cookies()) {
+            $cache_reject_reason = 'Cookie rejected';
+            return false;
+        }
+        
+        /**
+         * Skip if user is logged in
+         */
+        if (! $this->_check_logged_in()) {
+            $cache_reject_reason = 'User is logged in';
             return false;
         }
         
@@ -316,9 +378,9 @@ class W3_Db extends wpdb
         
         if (count($this->query_stats)) {
             $debug_info .= "SQL info:\r\n";
-            $debug_info .= sprintf("%s | %s | %s | % s | %s\r\n", str_pad('#', 5, ' ', STR_PAD_LEFT), str_pad('Time (s)', 8, ' ', STR_PAD_LEFT), str_pad('Caching', 10, ' ', STR_PAD_BOTH), str_pad('Status', 10, ' ', STR_PAD_BOTH), 'Query');
+            $debug_info .= sprintf("%s | %s | %s | % s | %s\r\n", str_pad('#', 5, ' ', STR_PAD_LEFT), str_pad('Time (s)', 8, ' ', STR_PAD_LEFT), str_pad('Caching (Reject reason)', 30, ' ', STR_PAD_BOTH), str_pad('Status', 10, ' ', STR_PAD_BOTH), 'Query');
             foreach ($this->query_stats as $index => $query) {
-                $debug_info .= sprintf("%s | %s | %s | %s | %s\r\n", str_pad($index + 1, 5, ' ', STR_PAD_LEFT), str_pad(round($query['time_total'], 3), 8, ' ', STR_PAD_LEFT), str_pad(($query['caching'] ? 'enabled' : 'disabled'), 10, ' ', STR_PAD_BOTH), str_pad(($query['cached'] ? 'Cached' : 'Not cached'), 10, ' ', STR_PAD_BOTH), str_replace('-->', '-- >', trim($query['query'])));
+                $debug_info .= sprintf("%s | %s | %s | %s | %s\r\n", str_pad($index + 1, 5, ' ', STR_PAD_LEFT), str_pad(round($query['time_total'], 3), 8, ' ', STR_PAD_LEFT), str_pad(($query['caching'] ? 'enabled' : sprintf('disabled (%s)', $query['reason'])), 30, ' ', STR_PAD_BOTH), str_pad(($query['cached'] ? 'Cached' : 'Not cached'), 10, ' ', STR_PAD_BOTH), str_replace('-->', '-- >', trim($query['query'])));
             }
         }
         
@@ -341,7 +403,8 @@ class W3_Db extends wpdb
             if ($engine == 'memcached') {
                 $engineConfig = array(
                     'engine' => $this->_config->get_string('dbcache.memcached.engine', 'auto'), 
-                    'servers' => $this->_config->get_array('dbcache.memcached.servers')
+                    'servers' => $this->_config->get_array('dbcache.memcached.servers'), 
+                    'persistant' => true
                 );
             } else {
                 $engineConfig = array();
@@ -371,7 +434,8 @@ class W3_Db extends wpdb
             'set names', 
             'found_rows', 
             $this->prefix . 'posts', 
-            $this->prefix . 'postsmeta'
+            $this->prefix . 'postmeta', 
+            $this->prefix . 'comments'
         );
         
         if (preg_match('@(' . implode('|', $auto_reject_strings) . ')@i', $sql)) {
@@ -398,7 +462,6 @@ class W3_Db extends wpdb
     function _check_request_uri()
     {
         $auto_reject_uri = array(
-            'wp-admin', 
             'wp-login', 
             'wp-register', 
             'wp-signup'
@@ -423,6 +486,52 @@ class W3_Db extends wpdb
     }
     
     /**
+     * Checks WordPress cookies
+     *
+     * @return boolean
+     */
+    function _check_cookies()
+    {
+        foreach (array_keys($_COOKIE) as $cookie_name) {
+            if ($cookie_name == 'wordpress_test_cookie') {
+                continue;
+            }
+            if (preg_match('/^wp-postpass|^comment_author/', $cookie_name)) {
+                return false;
+            }
+        }
+        
+        foreach ($this->_config->get_array('dbcache.reject.cookie') as $reject_cookie) {
+            foreach (array_keys($_COOKIE) as $cookie_name) {
+                if (strstr($cookie_name, $reject_cookie) !== false) {
+                    return false;
+                }
+            }
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Check if user is logged in
+     * 
+     * @return boolean
+     */
+    function _check_logged_in()
+    {
+        foreach (array_keys($_COOKIE) as $cookie_name) {
+            if ($cookie_name == 'wordpress_test_cookie') {
+                continue;
+            }
+            if (strpos($cookie_name, 'wordpress') === 0) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    /**
      * Returns cache key
      *
      * @param string $sql
@@ -437,34 +546,5 @@ class W3_Db extends wpdb
         }
         
         return sprintf('w3tc_%s_sql_%s', md5($blog_id), md5($sql));
-    }
-    
-    /**
-     * Returns lifetime for SQL
-     *
-     * @param string $sql
-     * @return integer
-     */
-    function _get_lifetime($sql)
-    {
-        $config = array(
-            '__default' => $this->_config->get_integer('dbcache.lifetime.default', 180), 
-            '_options' => $this->_config->get_integer('dbcache.lifetime.options', 180), 
-            '_links' => $this->_config->get_integer('dbcache.lifetime.links', 10800), 
-            '_terms' => $this->_config->get_integer('dbcache.lifetime.terms', 10800), 
-            '_user' => $this->_config->get_integer('dbcache.lifetime.user', 1800), 
-            '_post' => $this->_config->get_integer('dbcache.lifetime.post', 3600)
-        );
-        
-        $lifetime = $config['__default'];
-        
-        foreach ($config as $string => $ttl) {
-            if (strstr($sql, $string) !== false) {
-                $lifetime = $ttl;
-                break;
-            }
-        }
-        
-        return $lifetime;
     }
 }

@@ -24,6 +24,102 @@ class W3_Config
     var $_config = array();
     
     /**
+     * Config keys
+     */
+    var $_keys = array(
+        'dbcache.enabled' => 'boolean', 
+        'dbcache.debug' => 'boolean', 
+        'dbcache.engine' => 'string', 
+        'dbcache.memcached.engine' => 'string', 
+        'dbcache.memcached.servers' => 'array', 
+        'dbcache.reject.admin' => 'boolean', 
+        'dbcache.reject.uri' => 'array', 
+        'dbcache.reject.cookie' => 'array', 
+        'dbcache.reject.sql' => 'array', 
+        'dbcache.lifetime' => 'integer', 
+        
+        'pgcache.enabled' => 'boolean', 
+        'pgcache.debug' => 'boolean', 
+        'pgcache.engine' => 'string', 
+        'pgcache.memcached.engine' => 'string', 
+        'pgcache.memcached.servers' => 'array', 
+        'pgcache.lifetime' => 'integer', 
+        'pgcache.compress' => 'boolean', 
+        'pgcache.cache.logged' => 'boolean', 
+        'pgcache.cache.query' => 'boolean', 
+        'pgcache.cache.home' => 'boolean', 
+        'pgcache.cache.feed' => 'boolean', 
+        'pgcache.cache.404' => 'boolean', 
+        'pgcache.cache.flush' => 'boolean', 
+        'pgcache.cache.headers' => 'array', 
+        'pgcache.accept.files' => 'array', 
+        'pgcache.reject.uri' => 'array', 
+        'pgcache.reject.ua' => 'array', 
+        'pgcache.reject.cookie' => 'array', 
+        'pgcache.mobile.check' => 'boolean', 
+        'pgcache.mobile.whitelist' => 'array', 
+        'pgcache.mobile.browsers' => 'array', 
+        
+        'minify.enabled' => 'boolean', 
+        'minify.debug' => 'boolean', 
+        'minify.engine' => 'string', 
+        'minify.memcached.engine' => 'string', 
+        'minify.memcached.servers' => 'array', 
+        'minify.rewrite' => 'boolean', 
+        'minify.logger' => 'boolean', 
+        'minify.cache.path' => 'string', 
+        'minify.cache.locking' => 'string', 
+        'minify.docroot' => 'string', 
+        'minify.fixtime' => 'integer', 
+        'minify.compress' => 'boolean', 
+        'minify.compress.ie6' => 'boolean', 
+        'minify.options' => 'array', 
+        'minify.symlinks' => 'array', 
+        'minify.lifetime' => 'integer', 
+        'minify.html.enable' => 'boolean', 
+        'minify.html.strip.crlf' => 'boolean', 
+        'minify.html.reject.admin' => 'boolean', 
+        'minify.css.enable' => 'boolean', 
+        'minify.css.strip.comments' => 'boolean', 
+        'minify.css.strip.crlf' => 'boolean', 
+        'minify.css.groups' => 'array', 
+        'minify.js.enable' => 'boolean', 
+        'minify.js.combine.header' => 'boolean', 
+        'minify.js.combine.footer' => 'boolean', 
+        'minify.js.strip.comments' => 'boolean', 
+        'minify.js.strip.crlf' => 'boolean', 
+        'minify.js.groups' => 'array', 
+        
+        'cdn.enabled' => 'boolean', 
+        'cdn.debug' => 'boolean', 
+        'cdn.engine' => 'string', 
+        'cdn.domain' => 'string', 
+        'cdn.includes.enable' => 'boolean', 
+        'cdn.includes.files' => 'string', 
+        'cdn.theme.enable' => 'boolean', 
+        'cdn.theme.files' => 'string', 
+        'cdn.minify.enable' => 'boolean', 
+        'cdn.custom.enable' => 'boolean', 
+        'cdn.custom.files' => 'array', 
+        'cdn.import.external' => 'boolean', 
+        'cdn.import.files' => 'string', 
+        'cdn.limit.queue' => 'integer', 
+        'cdn.ftp.host' => 'string', 
+        'cdn.ftp.user' => 'string', 
+        'cdn.ftp.pass' => 'string', 
+        'cdn.ftp.path' => 'string', 
+        'cdn.ftp.pasv' => 'boolean', 
+        
+        'common.support.enabled' => 'boolean', 
+        'common.support.type' => 'string', 
+        
+        'notes.defaults' => 'boolean', 
+    	'notes.wp_content_perms' => 'boolean',
+    	'notes.cdn_first_time' => 'boolean', 
+        'notes.no_memcached_nor_apc' => 'boolean', 
+    );
+    
+    /**
      * Returns config value
      *
      * @param string $key
@@ -32,7 +128,7 @@ class W3_Config
      */
     function get($key, $default = null)
     {
-        if (array_key_exists($key, $this->_config)) {
+        if (isset($this->_keys[$key]) && array_key_exists($key, $this->_config)) {
             return $this->_config[$key];
         }
         
@@ -98,7 +194,13 @@ class W3_Config
      */
     function set($key, $value)
     {
-        $this->_config[$key] = $value;
+        if (isset($this->_keys[$key])) {
+            $type = $this->_keys[$key];
+            settype($value, $type);
+            $this->_config[$key] = $value;
+        }
+        
+        return false;
     }
     
     /**
@@ -136,13 +238,12 @@ class W3_Config
     
     /**
      * Reads config from request
-     * @param array $keys
      */
-    function read_request($keys)
+    function read_request()
     {
         require_once W3TC_LIB_W3_DIR . '/Request.php';
         
-        foreach ($keys as $key => $type) {
+        foreach ($this->_keys as $key => $type) {
             $request_key = str_replace('.', '_', $key);
             
             if (! isset($_REQUEST[$request_key])) {

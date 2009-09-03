@@ -91,11 +91,16 @@ class W3_Plugin_Cdn extends W3_Plugin
     {
         global $wpdb;
         
-        $upload_info = wp_upload_dir();
+        $upload_info = w3_upload_info();
         
-        if (! empty($upload_info['error'])) {
-            echo sprintf('<strong>Upload directory error:</strong> %s', $upload_info['error']);
-            die();
+        if (! $upload_info) {
+            $upload_path = get_option('upload_path');
+            $upload_path = trim($upload_path);
+            if (empty($upload_path)) {
+                $upload_path = WP_CONTENT_DIR . '/uploads';
+            }
+            
+            w3_writable_error($upload_path);
         }
         
         $sql = sprintf('DROP TABLE IF EXISTS `%s%s`', $wpdb->prefix, W3TC_CDN_TABLE_QUEUE);
@@ -183,7 +188,7 @@ class W3_Plugin_Cdn extends W3_Plugin
         $upload_url = $this->get_upload_url();
         
         if ($upload_url) {
-            $regexp = '~(["\'])((' . preg_quote($siteurl) . ')?/(' . preg_quote($upload_url) . '[^"\'>]+))~';
+            $regexp = '~(["\'])((' . preg_quote($siteurl) . ')?/?(' . preg_quote($upload_url) . '[^"\'>]+))~';
             
             $content = preg_replace_callback($regexp, array(
                 &$this, 
@@ -205,7 +210,7 @@ class W3_Plugin_Cdn extends W3_Plugin
             'every_15_min' => array(
                 'interval' => 900, 
                 'display' => 'Every 15 minutes'
-            ), 
+            )
         );
     }
     
@@ -224,7 +229,7 @@ class W3_Plugin_Cdn extends W3_Plugin
         } else {
             $file = get_post_meta($attachment_id, '_wp_attached_file', true);
             $files = array(
-                $file
+                $this->normalize_attachment_file($file)
             );
         }
         
@@ -249,7 +254,7 @@ class W3_Plugin_Cdn extends W3_Plugin
         if ($this->_config->get_boolean('cdn.includes.enable', true)) {
             $mask = $this->_config->get_string('cdn.includes.files');
             if (! empty($mask)) {
-                $regexps[] = '~(["\'])((' . preg_quote($siteurl) . ')?/(wp-includes/(' . $this->get_regexp_by_mask($mask) . ')))~';
+                $regexps[] = '~(["\'])((' . preg_quote($siteurl) . ')?/?(wp-includes/(' . $this->get_regexp_by_mask($mask) . ')))~';
             }
         }
         
@@ -257,12 +262,12 @@ class W3_Plugin_Cdn extends W3_Plugin
             $stylesheet = get_stylesheet();
             $mask = $this->_config->get_string('cdn.theme.files');
             if (! empty($mask)) {
-                $regexps[] = '~(["\'])((' . preg_quote($siteurl) . ')?/(wp-content/themes/' . preg_quote($stylesheet) . '/(' . $this->get_regexp_by_mask($mask) . ')))~';
+                $regexps[] = '~(["\'])((' . preg_quote($siteurl) . ')?/?(wp-content/themes/' . preg_quote($stylesheet) . '/(' . $this->get_regexp_by_mask($mask) . ')))~';
             }
         }
         
         if ($this->_config->get_boolean('cdn.minify.enable', true)) {
-            $regexps[] = '~(["\'])((' . preg_quote($siteurl) . ')?/(' . preg_quote(W3TC_MINIFY_DIR_NAME) . '/include(-footer)?(-nb)?\.(css|js)))~';
+            $regexps[] = '~(["\'])((' . preg_quote($siteurl) . ')?/?(' . preg_quote(W3TC_MINIFY_DIR_NAME) . '/include(-footer)?(-nb)?\.(css|js)))~';
         }
         
         if ($this->_config->get_boolean('cdn.custom.enable', true)) {
@@ -272,7 +277,7 @@ class W3_Plugin_Cdn extends W3_Plugin
                 foreach ($files as $file) {
                     $files_quoted[] = preg_quote($file);
                 }
-                $regexps[] = '~(["\'])((' . preg_quote($siteurl) . ')?/(' . implode('|', $files_quoted) . '))~';
+                $regexps[] = '~(["\'])((' . preg_quote($siteurl) . ')?/?(' . implode('|', $files_quoted) . '))~';
             }
         }
         
@@ -305,11 +310,12 @@ class W3_Plugin_Cdn extends W3_Plugin
         
         if ($upload_dir && $upload_url) {
             if (isset($metadata['file'])) {
-                $local_file = $upload_dir . '/' . $metadata['file'];
-                $remote_file = $upload_url . '/' . $metadata['file'];
+                $file = $this->normalize_attachment_file($metadata['file']);
+                $local_file = $upload_dir . '/' . $file;
+                $remote_file = $upload_url . '/' . $file;
                 $files[$local_file] = $remote_file;
                 if (isset($metadata['sizes'])) {
-                    $file_dir = dirname($metadata['file']);
+                    $file_dir = dirname($file);
                     foreach ((array) $metadata['sizes'] as $size) {
                         if (isset($size['file'])) {
                             $local_file = $upload_dir . '/' . $file_dir . '/' . $size['file'];
@@ -587,13 +593,16 @@ class W3_Plugin_Cdn extends W3_Plugin
                 foreach ($posts as $post) {
                     if (! empty($post->metadata)) {
                         $metadata = @unserialize($post->metadata);
-                        if (isset($metadata['file'])) {
-                            $files = array_merge($files, $this->get_metadata_files($metadata));
-                        } elseif (! empty($post->file)) {
-                            $local_file = $upload_dir . '/' . $post->file;
-                            $remote_file = $upload_url . '/' . $post->file;
-                            $files[$local_file] = $remote_file;
-                        }
+                    } else {
+                        $metadata = array();
+                    }
+                    if (isset($metadata['file'])) {
+                        $files = array_merge($files, $this->get_metadata_files($metadata));
+                    } elseif (! empty($post->file)) {
+                        $file = $this->normalize_attachment_file($post->file);
+                        $local_file = $upload_dir . '/' . $file;
+                        $remote_file = $upload_url . '/' . $file;
+                        $files[$local_file] = $remote_file;
                     }
                 }
                 
@@ -657,21 +666,23 @@ class W3_Plugin_Cdn extends W3_Plugin
                 
                 foreach ($posts as $post) {
                     $matches = null;
+                    $post_content = $post->post_content;
                     
-                    if (preg_match_all('~(href|src)=[\'"]?([^\'"<>\s]+)[\'"]?~', $post->post_content, $matches, PREG_SET_ORDER)) {
+                    if (preg_match_all('~(href|src)=[\'"]?([^\'"<>\s]+)[\'"]?~', $post_content, $matches, PREG_SET_ORDER)) {
                         foreach ($matches as $match) {
                             $src = $match[2];
-                            $file = ltrim(str_replace($siteurl, '', $src), '/');
-                            $file_dir = date('Y/m');
-                            $file_base = basename($file);
-                            $dst = sprintf('%s/%s/%s', $upload_dir, $file_dir, $file_base);
-                            $dst_path = ABSPATH . $dst;
-                            $dst_url = sprintf('%s/%s/%s/%s', $siteurl, $upload_url, $file_dir, $file_base);
-                            $result = false;
-                            $error = '';
-                            $download_result = null;
                             
                             if (preg_match('~(' . $regexp . ')$~', $src)) {
+                                $file = ltrim(str_replace($siteurl, '', $src), '\\/');
+                                $file_dir = date('Y/m');
+                                $file_base = basename($file);
+                                $dst = sprintf('%s/%s/%s', $upload_dir, $file_dir, $file_base);
+                                $dst_path = ABSPATH . $dst;
+                                $dst_url = sprintf('%s/%s/%s/%s', $siteurl, $upload_url, $file_dir, $file_base);
+                                $result = false;
+                                $error = '';
+                                $download_result = null;
+                                
                                 if (! file_exists($dst_path)) {
                                     if (w3_is_url($file)) {
                                         if ($import_external) {
@@ -704,17 +715,13 @@ class W3_Plugin_Cdn extends W3_Plugin
                                             if (! is_wp_error($id)) {
                                                 require_once ABSPATH . 'wp-admin/includes/image.php';
                                                 wp_update_attachment_metadata($id, wp_generate_attachment_metadata($id, $dst_path));
-                                                wp_update_post(array(
-                                                    'ID' => $post->ID, 
-                                                    'post_content' => str_replace($src, $dst_url, $post->post_content)
-                                                ));
                                                 
+                                                $post_content = str_replace($src, $dst_url, $post_content);
                                                 $result = true;
                                                 $error = 'OK';
                                             } else {
                                                 $error = 'Unable to insert attachment';
                                             }
-                                        
                                         } else {
                                             $error = 'Unable to download file';
                                         }
@@ -722,17 +729,22 @@ class W3_Plugin_Cdn extends W3_Plugin
                                 } else {
                                     $error = 'Destination file already exists';
                                 }
-                            } else {
-                                $error = 'File type is not supported';
+                                
+                                $results[] = array(
+                                    'src' => $src, 
+                                    'dst' => $dst, 
+                                    'result' => $result, 
+                                    'error' => $error
+                                );
                             }
-                            
-                            $results[] = array(
-                                'src' => $src, 
-                                'dst' => $dst, 
-                                'result' => $result, 
-                                'error' => $error
-                            );
                         }
+                    }
+                    
+                    if ($post_content != $post->post_content) {
+                        wp_update_post(array(
+                            'ID' => $post->ID, 
+                            'post_content' => $post_content
+                        ));
                     }
                 }
             }
@@ -919,7 +931,7 @@ class W3_Plugin_Cdn extends W3_Plugin
     {
         global $wpdb;
         static $queue = null, $domain = null;
-
+        
         if (in_array($matches[2], $this->replaced_urls)) {
             return $matches[0];
         }
@@ -1094,9 +1106,9 @@ class W3_Plugin_Cdn extends W3_Plugin
         static $upload_dir = null;
         
         if ($upload_dir === null) {
-            $upload_info = wp_upload_dir();
-            if (empty($upload_info['error'])) {
-                $upload_dir = trim(str_replace(ABSPATH, '', $upload_info['basedir']), '/');
+            $upload_info = w3_upload_info();
+            if ($upload_info) {
+                $upload_dir = ltrim(str_replace(ABSPATH, '', $upload_info['basedir']), '\\/');
             } else {
                 $upload_dir = false;
             }
@@ -1115,16 +1127,32 @@ class W3_Plugin_Cdn extends W3_Plugin
         static $upload_dir = null;
         
         if ($upload_dir === null) {
-            $upload_info = wp_upload_dir();
-            if (empty($upload_info['error'])) {
+            $upload_info = w3_upload_info();
+            if ($upload_info) {
                 $siteurl = w3_get_site_url();
-                $upload_dir = trim(str_replace($siteurl, '', $upload_info['baseurl']), '/');
+                $upload_dir = ltrim(str_replace($siteurl, '', $upload_info['baseurl']), '\\/');
             } else {
                 $upload_dir = false;
             }
         }
         
         return $upload_dir;
+    }
+    
+    /**
+     * Normalizes attachment file
+     *
+     * @param string $file
+     * @return string
+     */
+    function normalize_attachment_file($file)
+    {
+        $upload_info = w3_upload_info();
+        if ($upload_info) {
+            $file = ltrim(str_replace($upload_info['basedir'], '', $file), '\\/');
+        }
+        
+        return $file;
     }
     
     /**

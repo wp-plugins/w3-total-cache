@@ -30,8 +30,8 @@ class W3_Cache_Memcached_Client extends W3_Cache_Memcached_Base
         }
         
         $this->_memcached = & new memcached_client(array(
-            'servers' => $this->config['servers'],
-            'persistant' => true, 
+            'servers' => $this->config['servers'], 
+            'persistant' => isset($this->config['persistant']) ? (boolean) $this->config['persistant'] : false, 
             'debug' => false, 
             'compress_threshold' => (! empty($this->config['compress_threshold']) ? (integer) $this->config['compress_threshold'] : 0)
         ));

@@ -62,8 +62,8 @@ class W3_Plugin_Minify extends W3_Plugin
     {
         if (! $this->locked()) {
             if (! is_dir(W3TC_MINIFY_DIR)) {
-                if (@mkdir(W3TC_MINIFY_DIR, 0777)) {
-                    @chmod(W3TC_MINIFY_DIR, 0777);
+                if (@mkdir(W3TC_MINIFY_DIR, 0755)) {
+                    @chmod(W3TC_MINIFY_DIR, 0755);
                 } else {
                     w3_writable_error(W3TC_MINIFY_DIR);
                 }
@@ -72,7 +72,7 @@ class W3_Plugin_Minify extends W3_Plugin
             $file_htaccess = W3TC_MINIFY_DIR . '/.htaccess';
             
             if (@copy(W3TC_MINIFY_CONTENT_DIR . '/_htaccess', $file_htaccess)) {
-                @chmod($file_htaccess, 0666);
+                @chmod($file_htaccess, 0644);
             } else {
                 w3_writable_error($file_htaccess);
             }
@@ -80,7 +80,7 @@ class W3_Plugin_Minify extends W3_Plugin
             $file_index = W3TC_MINIFY_DIR . '/index.php';
             
             if (@copy(W3TC_MINIFY_CONTENT_DIR . '/index.php', $file_index)) {
-                @chmod($file_index, 0666);
+                @chmod($file_index, 0644);
             } else {
                 w3_writable_error($file_index);
             }
@@ -131,7 +131,7 @@ class W3_Plugin_Minify extends W3_Plugin
         }
         
         if (! empty($head_prepend)) {
-            $buffer = preg_replace('~<head[^>]+>~Ui', '\\0' . $head_prepend, $buffer);
+            $buffer = preg_replace('~<head[^>]*>~Ui', '\\0' . $head_prepend, $buffer);
         }
         
         $buffer = $this->clean($buffer);
@@ -157,17 +157,19 @@ class W3_Plugin_Minify extends W3_Plugin
      */
     function clean($content)
     {
-        if ($this->_config->get_boolean('minify.css.enable', true) && $this->_config->get_boolean('minify.css.clean', true)) {
+        if ($this->_config->get_boolean('minify.css.enable', true)) {
             $content = $this->clean_styles($content);
         }
         
-        if ($this->_config->get_boolean('minify.js.enable', true) && $this->_config->get_boolean('minify.js.clean', true)) {
+        if ($this->_config->get_boolean('minify.js.enable', true)) {
             $content = $this->clean_scripts($content);
         }
         
         if ($this->_config->get_boolean('minify.html.enable', true) && ! ($this->_config->get_boolean('minify.html.reject.admin', true) && current_user_can('manage_options'))) {
             $content = $this->minify_html($content);
         }
+        
+        $content = preg_replace('~<style[^<>]*>\s*</style>~', '', $content);
         
         return $content;
     }
@@ -180,7 +182,7 @@ class W3_Plugin_Minify extends W3_Plugin
      */
     function clean_styles($content)
     {
-        $urls = array();
+        $regexps = array();
         
         $groups = $this->_config->get_array('minify.css.groups');
         $siteurl = w3_get_site_url();
@@ -189,17 +191,17 @@ class W3_Plugin_Minify extends W3_Plugin
             if (isset($config['files'])) {
                 foreach ((array) $config['files'] as $file) {
                     if (w3_is_url($file)) {
-                        $urls[] = $file;
+                        $regexps[] = preg_quote($file);
                     } else {
-                        $urls[] = $siteurl . '/' . $file;
+                        $regexps[] = '(' . preg_quote($siteurl) . ')?/?' . preg_quote($file);
                     }
                 }
             }
         }
         
-        foreach ($urls as $url) {
-            $content = preg_replace('~<link[^<>]*href=["\']?' . preg_quote($url) . '["\']?[^<>]*/?>~is', '', $content);
-            $content = preg_replace('~@import\s+(url\s*)?[\(]?["\']?\s*' . preg_quote($url) . '\s*["\']?[\)]?\s*;?~is', '', $content);
+        foreach ($regexps as $regexp) {
+            $content = preg_replace('~<link\s+[^<>]*href=["\']?' . $regexp . '["\']?[^<>]*/?>~is', '', $content);
+            $content = preg_replace('~@import\s+(url\s*)?\(?["\']?\s*' . $regexp . '\s*["\']?\)?[^;]*;?~is', '', $content);
         }
         
         return $content;
@@ -213,7 +215,7 @@ class W3_Plugin_Minify extends W3_Plugin
      */
     function clean_scripts($content)
     {
-        $urls = array();
+        $regexps = array();
         
         $groups = $this->_config->get_array('minify.js.groups');
         $siteurl = w3_get_site_url();
@@ -222,16 +224,16 @@ class W3_Plugin_Minify extends W3_Plugin
             if (isset($config['files'])) {
                 foreach ((array) $config['files'] as $file) {
                     if (w3_is_url($file)) {
-                        $urls[] = $file;
+                        $regexps[] = preg_quote($file);
                     } else {
-                        $urls[] = $siteurl . '/' . $file;
+                        $regexps[] = '(' . preg_quote($siteurl) . ')?/?' . preg_quote($file);
                     }
                 }
             }
         }
         
-        foreach ($urls as $url) {
-            $content = preg_replace('~<script[^<>]*src=["\']?' . preg_quote($url) . '["\']?[^<>]*></script>~is', '', $content);
+        foreach ($regexps as $regexp) {
+            $content = preg_replace('~<script\s+[^<>]*src=["\']?' . $regexp . '["\']?[^<>]*></script>~is', '', $content);
         }
         
         return $content;
@@ -252,21 +254,33 @@ class W3_Plugin_Minify extends W3_Plugin
         require_once 'JSMin.php';
         
         $options = array(
-            'xhtml' => true, 
-            'cssMinifier' => array(
-                'Minify_CSS', 
-                'minify'
-            ), 
-            'jsMinifier' => array(
-                'JSMin', 
-                'minify'
-            )
+            'xhtml' => true
         );
         
-        $content = Minify_HTML::minify($content, $options);
+        if ($this->_config->get_boolean('minify.css.enable', true)) {
+            $options['cssMinifier'] = array(
+                'Minify_CSS', 
+                'minify'
+            );
+        }
         
-        if ($this->_config->get_boolean('minify.html.strip.crlf', false)) {
+        if ($this->_config->get_boolean('minify.js.enable', true)) {
+            $options['jsMinifier'] = array(
+                'JSMin', 
+                'minify'
+            );
+        }
+        
+        try {
+            $content = Minify_HTML::minify($content, $options);
+        } catch (Exception $exception) {
+            return sprintf('<strong>W3 Total Cache Error:</strong> Minify error: %s', $exception->getMessage());
+        }
+        
+        if ($this->_config->get_boolean('minify.html.strip.crlf')) {
             $content = preg_replace("~[\r\n]+~", ' ', $content);
+        } else {
+            $content = preg_replace("~[\r\n]+~", "\n", $content);
         }
         
         return $content;

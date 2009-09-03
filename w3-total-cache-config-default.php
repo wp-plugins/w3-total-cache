@@ -16,13 +16,9 @@ return array(
     ), 
     'dbcache.reject.admin' => false, 
     'dbcache.reject.uri' => array(), 
+    'dbcache.reject.cookie' => array(), 
     'dbcache.reject.sql' => array(), 
-    'dbcache.lifetime.default' => 180, 
-    'dbcache.lifetime.options' => 180, 
-    'dbcache.lifetime.links' => 10800, 
-    'dbcache.lifetime.terms' => 10800, 
-    'dbcache.lifetime.user' => 1800, 
-    'dbcache.lifetime.post' => 3600, 
+    'dbcache.lifetime' => 180, 
     
     /**
      * PgCache configuration
@@ -41,7 +37,7 @@ return array(
     'pgcache.cache.home' => true, 
     'pgcache.cache.feed' => true, 
     'pgcache.cache.404' => true, 
-    'pgcache.cache.flush' => true, 
+    'pgcache.cache.flush' => false, 
     'pgcache.cache.headers' => array(
         'Last-Modified', 
         'Expires', 
@@ -104,7 +100,6 @@ return array(
     'minify.html.reject.admin' => true, 
     'minify.html.strip.crlf' => false, 
     'minify.css.enable' => true, 
-    'minify.css.clean' => true, 
     'minify.css.strip.comments' => false, 
     'minify.css.strip.crlf' => false, 
     'minify.css.groups' => array(
@@ -115,7 +110,8 @@ return array(
         )
     ), 
     'minify.js.enable' => true, 
-    'minify.js.clean' => true, 
+    'minify.js.combine.header' => false, 
+    'minify.js.combine.footer' => false, 
     'minify.js.strip.comments' => false, 
     'minify.js.strip.crlf' => false, 
     'minify.js.groups' => array(), 
@@ -123,7 +119,7 @@ return array(
     /**
      * CDN configuration
      */
-    'cdn.enabled' => false,
+    'cdn.enabled' => false, 
     'cdn.debug' => false, 
     'cdn.engine' => 'ftp', 
     'cdn.domain' => '', 
@@ -148,7 +144,14 @@ return array(
     /**
      * Common configuration
      */
-    'common.defaults' => true, 
-    'common.support' => true, 
-    'common.support.type' => 'footer'
+    'common.support.enabled' => true, 
+    'common.support.type' => 'footer', 
+    
+    /**
+     * Notes configuration
+     */
+    'notes.defaults' => true,
+    'notes.wp_content_perms' => true,
+    'notes.cdn_first_time' => true, 
+    'notes.no_memcached_nor_apc' => true, 
 );

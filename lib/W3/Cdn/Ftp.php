@@ -115,7 +115,7 @@ class W3_Cdn_Ftp extends W3_Cdn_Base
                         continue;
                     }
                     
-                    @ftp_chmod($this->_ftp, 0777, $dir);
+                    @ftp_chmod($this->_ftp, 0755, $dir);
                     
                     if (! @ftp_chdir($this->_ftp, $dir)) {
                         @ftp_close($this->_ftp);
@@ -137,7 +137,7 @@ class W3_Cdn_Ftp extends W3_Cdn_Base
             
             if ($result) {
                 $count ++;
-                @ftp_chmod($this->_ftp, 0777, $remote_file);
+                @ftp_chmod($this->_ftp, 0644, $remote_file);
             }
         }
         
@@ -192,32 +192,36 @@ class W3_Cdn_Ftp extends W3_Cdn_Base
      */
     function test(&$error = null)
     {
+        $rand = md5(time());
+        $upload_info = w3_upload_info();
+        $tmp_dir = 'test_dir_' . $rand;
+        $tmp_file = 'test_file_' . $rand;
+        $tmp_path = $upload_info['path'] . '/' . $tmp_file;
+        
+        if (($fp = @fopen($tmp_path, 'w'))) {
+            @fputs($fp, $rand);
+            @fclose($fp);
+        } else {
+            $error = sprintf('Unable to create file: %s', $tmp_path);
+            return false;
+        }
+
         if (! $this->_connect($error)) {
             return false;
         }
-        
-        $rand = md5(time());
-        $tmp_dir = 'test_dir_' . $rand;
-        $tmp_file = 'test_file_' . $rand;
-        $tmp_path = WP_CONTENT_DIR . '/' . $tmp_file;
         
         if (! @ftp_mkdir($this->_ftp, $tmp_dir)) {
             $this->_disconnect();
             $error = sprintf('Unable to make directory: %s', $tmp_dir);
             return false;
+        } else {
+            @ftp_chmod($this->_ftp, 0755, $tmp_dir);
         }
         
         if (! @ftp_chdir($this->_ftp, $tmp_dir)) {
             $this->_disconnect();
             $error = sprintf('Unable to change directory to: %d', $tmp_dir);
             return false;
-        }
-        
-        @ftp_chmod($this->_ftp, 0777);
-        
-        if (($fp = @fopen($tmp_path, 'w'))) {
-            @fputs($fp, $rand);
-            @fclose($fp);
         }
         
         if (! @ftp_put($this->_ftp, $tmp_file, $tmp_path, FTP_BINARY)) {
@@ -233,7 +237,6 @@ class W3_Cdn_Ftp extends W3_Cdn_Base
         @ftp_cdup($this->_ftp);
         @ftp_rmdir($this->_ftp, $tmp_dir);
         @unlink($tmp_path);
-        
         $this->_disconnect();
         
         return true;

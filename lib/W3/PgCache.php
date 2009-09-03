@@ -45,6 +45,13 @@ class W3_PgCache
     var $_time_start = 0;
     
     /**
+     * Cache reject reason
+     *
+     * @var string
+     */
+    var $_cache_reject_reason = '';
+    
+    /**
      * PHP5 Constructor
      */
     function __construct()
@@ -100,7 +107,7 @@ class W3_PgCache
                  */
                 if ($this->_config->get_boolean('pgcache.debug')) {
                     $time_total = w3_microtime() - $this->_time_start;
-                    $debug_info = $this->_get_debug_info(true, true, $time_total, $data['headers']);
+                    $debug_info = $this->_get_debug_info(true, '', true, $time_total, $data['headers']);
                     $this->_append_content($data, "\r\n\r\n" . $debug_info);
                 }
                 
@@ -136,9 +143,15 @@ class W3_PgCache
      */
     function ob_callback($buffer)
     {
-        if (empty($buffer) || ! $this->_can_cache2()) {
-            if (w3_is_xml($buffer)) {
+        if (! $this->_can_cache2($buffer)) {
+            if (w3_is_xml($buffer) && ! is_admin()) {
                 $this->_send_compression_headers($this->_compression);
+                
+                if ($this->_config->get_boolean('pgcache.debug')) {
+                    $time_total = w3_microtime() - $this->_time_start;
+                    $debug_info = $this->_get_debug_info(false, $this->_cache_reject_reason, false, $time_total, $this->_get_data_headers($this->_compression));
+                    $buffer .= "\r\n\r\n" . $debug_info;
+                }
                 
                 switch ($this->_compression) {
                     case 'gzip':
@@ -164,7 +177,7 @@ class W3_PgCache
         $page_keys = array();
         
         $cache = $this->_get_cache();
-        $lifetime = $this->_config->get_integer('dbcache.lifetime', 3600);
+        $lifetime = $this->_config->get_integer('pgcache.lifetime', 3600);
         $time = time();
         $is_404 = is_404();
         
@@ -184,7 +197,7 @@ class W3_PgCache
              * Set headers to cache
              */
             $data['headers'] = $this->_get_data_headers($compression);
-
+            
             /**
              * Set content to cache
              */
@@ -235,7 +248,7 @@ class W3_PgCache
          */
         if ($this->_config->get_boolean('pgcache.debug')) {
             $time_total = w3_microtime() - $this->_time_start;
-            $debug_info = $this->_get_debug_info(true, false, $time_total, $data_array[$this->_compression]['headers']);
+            $debug_info = $this->_get_debug_info(true, '', false, $time_total, $data_array[$this->_compression]['headers']);
             $this->_append_content($data_array[$this->_compression], "\r\n\r\n" . $debug_info);
         }
         
@@ -356,6 +369,47 @@ class W3_PgCache
          * Skip if disabled
          */
         if (! $this->_config->get_boolean('pgcache.enabled', true)) {
+            $this->_cache_reject_reason = 'Caching is disabled';
+            return false;
+        }
+        
+        /**
+         * Skip if doing AJAX
+         */
+        if (defined('DOING_AJAX')) {
+            $this->_cache_reject_reason = 'Doing AJAX';
+            return false;
+        }
+        
+        /**
+         * Skip if doing cron
+         */
+        if (defined('DOING_CRON')) {
+            $this->_cache_reject_reason = 'Doing cron';
+            return false;
+        }
+        
+        /**
+         * Skip if APP request
+         */
+        if (defined('APP_REQUEST')) {
+            $this->_cache_reject_reason = 'APP request';
+            return false;
+        }
+        
+        /**
+         * Skip if XMLRPC request
+         */
+        if (defined('XMLRPC_REQUEST')) {
+            $this->_cache_reject_reason = 'XMLRPC request';
+            return false;
+        }
+        
+        /**
+         * Skip if admin
+         */
+        if (defined('WP_ADMIN')) {
+            $this->_cache_reject_reason = 'Admin';
             return false;
         }
         
@@ -363,6 +417,7 @@ class W3_PgCache
          * Skip if posting
          */
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $this->_cache_reject_reason = 'Request method is POST';
             return false;
         }
         
@@ -370,6 +425,7 @@ class W3_PgCache
          * Skip if session defined
          */
         if (defined('SID') && SID != '') {
+            $this->_cache_reject_reason = 'Session is started';
             return false;
         }
         
@@ -377,6 +433,7 @@ class W3_PgCache
          * Skip if there is query in the request uri
          */
         if (! $this->_config->get_boolean('pgcache.cache.query', true) && strstr($_SERVER['REQUEST_URI'], '?') !== false) {
+            $this->_cache_reject_reason = 'Request URI contains query';
             return false;
         }
         
@@ -384,6 +441,7 @@ class W3_PgCache
          * Check request URI
          */
         if (! in_array($_SERVER['PHP_SELF'], $this->_config->get_array('pgcache.accept.files')) && ! $this->_check_request_uri()) {
+            $this->_cache_reject_reason = 'Request URI rejected';
             return false;
         }
         
@@ -391,6 +449,7 @@ class W3_PgCache
          * Check User Agent
          */
         if (! $this->_check_ua()) {
+            $this->_cache_reject_reason = 'User Agent rejected';
             return false;
         }
         
@@ -398,6 +457,16 @@ class W3_PgCache
          * Check WordPress cookies
          */
         if (! $this->_check_cookies()) {
+            $this->_cache_reject_reason = 'Cookie rejected';
+            return false;
+        }
+        
+        /**
+         * Skip if user is logged in
+         */
+        if (! $this->_config->get_boolean('pgcache.cache.logged', true) && ! $this->_check_logged_in()) {
+            $this->_cache_reject_reason = 'User is logged in';
+            
             return false;
         }
         
@@ -407,9 +476,10 @@ class W3_PgCache
     /**
      * Checks if can we do cache logic
      *
+     * @param string $buffer
      * @return boolean
      */
-    function _can_cache2()
+    function _can_cache2($buffer)
     {
         /**
          * Skip if caching is disabled
@@ -418,10 +488,18 @@ class W3_PgCache
             return false;
         }
         
+        if (empty($buffer)) {
+            $this->_cache_reject_reason = 'Page is empty';
+            
+            return false;
+        }
+        
         /**
          * Don't cache 404 pages
          */
         if (! $this->_config->get_boolean('pgcache.cache.404', true) && is_404()) {
+            $this->_cache_reject_reason = 'Page is 404';
+            
             return false;
         }
         
@@ -429,6 +507,8 @@ class W3_PgCache
          * Don't cache homepage
          */
         if (! $this->_config->get_boolean('pgcache.cache.home', true) && is_home()) {
+            $this->_cache_reject_reason = 'Page is home';
+            
             return false;
         }
         
@@ -436,13 +516,8 @@ class W3_PgCache
          * Don't cache feed
          */
         if (! $this->_config->get_boolean('pgcache.cache.feed', true) && is_feed()) {
-            return false;
-        }
-        
-        /**
-         * Skip if user is logged in
-         */
-        if (! $this->_config->get_boolean('pgcache.cache.logged', true) && is_user_logged_in()) {
+            $this->_cache_reject_reason = 'Page is feed';
+            
             return false;
         }
         
@@ -463,7 +538,8 @@ class W3_PgCache
             if ($engine == 'memcached') {
                 $engineConfig = array(
                     'engine' => $this->_config->get_string('pgcache.memcached.engine', 'auto'), 
-                    'servers' => $this->_config->get_array('pgcache.memcached.servers')
+                    'servers' => $this->_config->get_array('pgcache.memcached.servers'), 
+                    'persistant' => true
                 );
             } else {
                 $engineConfig = array();
@@ -484,11 +560,8 @@ class W3_PgCache
     function _check_request_uri()
     {
         $auto_reject_uri = array(
-            'wp-admin', 
             'wp-includes', 
             'wp-content', 
-            'xmlrpc.php', 
-            'wp-app.php', 
             'robots.txt'
         );
         
@@ -535,7 +608,7 @@ class W3_PgCache
             if ($cookie_name == 'wordpress_test_cookie') {
                 continue;
             }
-            if (preg_match('/^wp-postpass|^wordpress|^comment_author/', $cookie_name)) {
+            if (preg_match('/^wp-postpass|^comment_author/', $cookie_name)) {
                 return false;
             }
         }
@@ -545,6 +618,25 @@ class W3_PgCache
                 if (strstr($cookie_name, $reject_cookie) !== false) {
                     return false;
                 }
+            }
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Check if user is logged in
+     * 
+     * @return boolean
+     */
+    function _check_logged_in()
+    {
+        foreach (array_keys($_COOKIE) as $cookie_name) {
+            if ($cookie_name == 'wordpress_test_cookie') {
+                continue;
+            }
+            if (strpos($cookie_name, 'wordpress') === 0) {
+                return false;
             }
         }
         
@@ -723,19 +815,23 @@ class W3_PgCache
      * Returns debug info
      *
      * @param boolean $cache
+     * @param string $reason
      * @param boolean $status
      * @param double $time
      * @param array $headers
      * @return string
      */
-    function _get_debug_info($cache, $status, $time, $headers)
+    function _get_debug_info($cache, $reason, $status, $time, $headers)
     {
         $debug_info = "<!-- W3 Total Cache: Page cache debug info:\r\n";
         $debug_info .= sprintf("%s%s\r\n", str_pad('Engine: ', 20), $this->_config->get_string('pgcache.engine'));
         $debug_info .= sprintf("%s%s\r\n", str_pad('Key: ', 20), $this->_page_key);
         $debug_info .= sprintf("%s%s\r\n", str_pad('Caching: ', 20), ($cache ? 'enabled' : 'disabled'));
+        if (! $cache) {
+            $debug_info .= sprintf("%s%s\r\n", str_pad('Reject reason: ', 20), $reason);
+        }
         $debug_info .= sprintf("%s%s\r\n", str_pad('Status: ', 20), ($status ? 'cached' : 'not cached'));
-        $debug_info .= sprintf("%s%.3fs\r\n", str_pad('Time: ', 20), $time);
+        $debug_info .= sprintf("%s%.3fs\r\n", str_pad('Creation Time: ', 20), $time);
         
         if (count($headers)) {
             $debug_info .= "Headers info:\r\n";
@@ -764,7 +860,7 @@ class W3_PgCache
                 break;
             
             case 'gzip':
-                $data['content'] = gzdecode($data['content']);
+                $data['content'] = (function_exists('gzdecode') ? gzdecode($data['content']) : w3_gzdecode($data['content']));
                 $data['content'] .= $content;
                 $data['content'] = gzencode($data['content']);
                 break;

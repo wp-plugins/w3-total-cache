@@ -87,12 +87,25 @@ class W3_Minify
             $serve_options['maxAge'] = 31536000;
         }
         
-        if (isset($_GET['g']) && isset($_GET['t'])) {
-            // will need groups config
-            $serve_options['minApp']['groups'] = $this->_get_groups($_GET['t']);
-        }
-        
-        if (isset($_GET['f']) || isset($_GET['g'])) {
+        if (isset($_GET['f']) || (isset($_GET['g']) && isset($_GET['t']))) {
+            if (isset($_GET['g']) && isset($_GET['t'])) {
+                // will need groups config
+                $serve_options['minApp']['groups'] = $this->_get_groups($_GET['t']);
+                
+                if ($_GET['t'] == 'js' && ((in_array($_GET['g'], array(
+                    'include', 
+                    'include-nb'
+                )) && $this->_config->get_boolean('minify.js.combine.header')) || (in_array($_GET['g'], array(
+                    'include-footer', 
+                    'include-footer-nb'
+                )) && $this->_config->get_boolean('minify.js.combine.footer')))) {
+                    $serve_options['minifiers']['application/x-javascript'] = array(
+                        $this, 
+                        'minify_stub'
+                    );
+                }
+            }
+            
             // serve!   
             @header('X-Powered-By: ' . W3TC_POWERED_BY);
             Minify::serve('MinApp', $serve_options);
@@ -112,23 +125,27 @@ class W3_Minify
     {
         switch ($type) {
             case 'text/css':
-                if ($this->_config->get_boolean('minify.css.strip.comments', true)) {
+                if ($this->_config->get_boolean('minify.css.strip.comments')) {
                     $content = preg_replace('~/\*.*\*/~Us', '', $content);
                 }
                 
-                if ($this->_config->get_boolean('minify.css.strip.crlf', true)) {
+                if ($this->_config->get_boolean('minify.css.strip.crlf')) {
                     $content = preg_replace("~[\r\n]+~", ' ', $content);
+                } else {
+                    $content = preg_replace("~[\r\n]+~", "\n", $content);
                 }
                 break;
             
             case 'application/x-javascript':
-                if ($this->_config->get_boolean('minify.js.strip.comments', true)) {
+                if ($this->_config->get_boolean('minify.js.strip.comments')) {
                     $content = preg_replace('~^//.*$~m', '', $content);
                     $content = preg_replace('~/\*.*\*/~Us', '', $content);
                 }
                 
-                if ($this->_config->get_boolean('minify.js.strip.crlf', true)) {
+                if ($this->_config->get_boolean('minify.js.strip.crlf')) {
                     $content = preg_replace("~[\r\n]+~", '', $content);
+                } else {
+                    $content = preg_replace("~[\r\n]+~", "\n", $content);
                 }
                 break;
         }
@@ -207,7 +224,7 @@ class W3_Minify
                     if (w3_is_url($css_file)) {
                         $css_file_info = sprintf('%s (%s)', $css_file, $css_file_path);
                     } else {
-                        $css_file_path = $css_file_info = ABSPATH . ltrim($css_file, '/');
+                        $css_file_path = $css_file_info = ABSPATH . ltrim($css_file, '\\/');
                     }
                     
                     $debug_info .= sprintf("%s | %s | % s | %s\r\n", str_pad($css_group, 15, ' ', STR_PAD_BOTH), str_pad(date('Y-m-d H:i:s', filemtime($css_file_path)), 19, ' ', STR_PAD_BOTH), str_pad(filesize($css_file_path), 12, ' ', STR_PAD_LEFT), $css_file_info);
@@ -226,7 +243,7 @@ class W3_Minify
                     if (w3_is_url($js_file)) {
                         $js_file_info = sprintf('%s (%s)', $js_file, $js_file_path);
                     } else {
-                        $js_file_path = $js_file_info = ABSPATH . ltrim($js_file, '/');
+                        $js_file_path = $js_file_info = ABSPATH . ltrim($js_file, '\\/');
                     }
                     
                     $debug_info .= sprintf("%s | %s | % s | %s\r\n", str_pad($js_group, 15, ' ', STR_PAD_BOTH), str_pad(date('Y-m-d H:i:s', filemtime($js_file_path)), 19, ' ', STR_PAD_BOTH), str_pad(filesize($js_file_path), 12, ' ', STR_PAD_LEFT), $js_file_info);
@@ -237,6 +254,16 @@ class W3_Minify
         $debug_info .= '-->';
         
         return $debug_info;
+    }
+    
+    /**
+     * Minify stub function
+     *
+     * @param string $source
+     */
+    function minify_stub($source)
+    {
+        return $source;
     }
     
     /**
@@ -331,7 +358,8 @@ class W3_Minify
                     require_once W3TC_LIB_W3_DIR . '/Cache/Memcached.php';
                     require_once W3TC_LIB_MINIFY_DIR . '/Minify/Cache/Memcache.php';
                     $memcached = & W3_Cache_Memcached::instance($this->_config->get_string('minify.memcached.engine', 'auto'), array(
-                        'servers' => $this->_config->get_array('minify.memcached.servers')
+                        'servers' => $this->_config->get_array('minify.memcached.servers'), 
+                        'persistant' => true
                     ));
                     $cache = & new Minify_Cache_Memcache($memcached);
                     break;

@@ -45,9 +45,11 @@ class W3_Cache_Memcached_Native extends W3_Cache_Memcached_Base
     function connect()
     {
         if (! empty($this->config['servers'])) {
+            $persistant = isset($this->config['persistant']) ? (boolean) $this->config['persistant'] : false;
+            
             foreach ((array) $this->config['servers'] as $server) {
                 list ($ip, $port) = explode(':', $server);
-                $this->_memcache->addServer($ip, $port, true);
+                $this->_memcache->addServer($ip, $port, $persistant);
             }
         } else {
             return false;

@@ -67,7 +67,7 @@ class Minify_CSS_UriRewriter {
         self::$debugText .= "docRoot    : " . self::$_docRoot . "\n"
                           . "currentDir : " . self::$_currentDir . "\n";
         if (self::$_symlinks) {
-            self::$debugText .= "symlinks : " . var_export(self::$_symlinks, 1) . "\n";
+            self::$debugText .= "symlinks : " . implode(', ', self::$_symlinks) . "\n";
         }
         self::$debugText .= "\n";
         

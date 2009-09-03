@@ -1,42 +1,36 @@
 <?php
 
-$w3_blog_id = w3_get_blog_id();
+define('W3TC_VERSION', '0.7.5.1');
+define('W3TC_POWERED_BY', 'W3 Total Cache/' . W3TC_VERSION);
+define('W3TC_LINK_URL', 'http://www.w3-edge.com/wordpress-plugins/');
+define('W3TC_LINK_NAME', 'WordPress Plugins');
 
-if (! defined('W3_PLUGIN_VERSION')) {
-    define('W3_PLUGIN_VERSION', '0.7');
+if (! defined('W3TC_DIR')) {
+    define('W3TC_DIR', realpath(dirname(__FILE__) . '/..'));
 }
 
-if (! defined('W3_PLUGIN_POWERED_BY')) {
-    define('W3_PLUGIN_POWERED_BY', 'W3 Total Cache/' . W3_PLUGIN_VERSION);
-}
+define('W3TC_FILE', 'w3-total-cache/w3-total-cache.php');
+define('W3TC_CONTENT_DIR', W3TC_DIR . '/wp-content');
+define('W3TC_LIB_W3_DIR', W3TC_DIR . '/lib/W3');
+define('W3TC_LIB_MINIFY_DIR', W3TC_DIR . '/lib/Minify/');
 
 if (! defined('WP_CONTENT_DIR')) {
-    define('WP_CONTENT_DIR', dirname(__FILE__) . '/../../../');
+    define('WP_CONTENT_DIR', realpath(W3TC_DIR . '/../..'));
 }
 
-if (! defined('W3_PLUGIN_DIR')) {
-    define('W3_PLUGIN_DIR', WP_CONTENT_DIR . '/plugins/w3-total-cache');
-}
+define('W3TC_CONFIG_NAME', 'w3-total-cache-config');
+define('W3TC_CONFIG_PATH', WP_CONTENT_DIR . '/' . W3TC_CONFIG_NAME . (($w3_blog_id = w3_get_blog_id()) != '' ? '-' . $w3_blog_id : '') . '.php');
+define('W3TC_CONFIG_DEFAULT_PATH', W3TC_DIR . '/w3-total-cache-config-default.php');
 
-if (! defined('W3_PLUGIN_CONTENT_DIR')) {
-    define('W3_PLUGIN_CONTENT_DIR', W3_PLUGIN_DIR . '/wp-content');
-}
+define('W3TC_MINIFY_DIR_NAME', 'wp-content/w3tc-cache');
+define('W3TC_MINIFY_DIR', ABSPATH . W3TC_MINIFY_DIR_NAME);
+define('W3TC_MINIFY_CONTENT_DIR', W3TC_DIR . '/' . W3TC_MINIFY_DIR_NAME);
 
-if (! defined('W3_PLUGIN_FILE')) {
-    define('W3_PLUGIN_FILE', 'w3-total-cache/w3-total-cache.php');
-}
-
-if (! defined('W3_CONFIG_NAME')) {
-    define('W3_CONFIG_NAME', 'w3-total-cache-config');
-}
-
-if (! defined('W3_CONFIG_PATH')) {
-    define('W3_CONFIG_PATH', WP_CONTENT_DIR . '/' . W3_CONFIG_NAME . ($w3_blog_id != '' ? '-' . $w3_blog_id : '') . '.php');
-}
-
-if (! defined('W3_CONFIG_DEFAULT_PATH')) {
-    define('W3_CONFIG_DEFAULT_PATH', W3_PLUGIN_DIR . '/w3-total-cache-config-default.php');
-}
+define('W3TC_CDN_COMMAND_UPLOAD', 1);
+define('W3TC_CDN_COMMAND_DELETE', 2);
+define('W3TC_CDN_TABLE_QUEUE', 'w3tc_cdn_queue');
+define('W3TC_CDN_THEMES_DIR', ABSPATH . 'wp-content/themes/');
+define('W3TC_CDN_INCLUDES_DIR', ABSPATH . 'wp-includes/');
 
 /**
  * W3 writable error
@@ -78,64 +72,43 @@ function w3_is_url($url)
     return preg_match('~^https?://~', $url);
 }
 
-if (! function_exists('gzdecode')) {
-    /**
-     * Decodes gzip-encoded string
-     *
-     * @param string $data
-     * @return string
-     */
-    function gzdecode($data)
-    {
-        $flags = ord(substr($data, 3, 1));
-        $headerlen = 10;
-        $extralen = 0;
-        
-        if ($flags & 4) {
-            $extralen = unpack('v', substr($data, 10, 2));
-            $extralen = $extralen[1];
-            $headerlen += 2 + $extralen;
-        }
-        
-        if ($flags & 8) {
-            $headerlen = strpos($data, chr(0), $headerlen) + 1;
-        }
-        
-        if ($flags & 16) {
-            $headerlen = strpos($data, chr(0), $headerlen) + 1;
-        }
-        
-        if ($flags & 2) {
-            $headerlen += 2;
-        }
-        
-        $unpacked = gzinflate(substr($data, $headerlen));
-        
-        if ($unpacked === FALSE) {
-            $unpacked = $data;
-        }
-        
-        return $unpacked;
-    }
-}
-
 /**
- * Creates thumbnail
+ * Decodes gzip-encoded string
  *
- * @param string $file
- * @param integer $max_w
- * @param integer $max_h
- * @param boolean $crop
- * @param string $suffix
- * @param string $dest_path
- * @param integer $jpeg_quality
+ * @param string $data
  * @return string
  */
-function w3_create_thumbnail($file, $max_w, $max_h, $crop = false, $suffix = null, $dest_path = null, $jpeg_quality = 90)
+function w3_gzdecode($data)
 {
-    $thumbpath = image_resize($file, $max_w, $max_h, $crop, $suffix, $dest_path, $jpeg_quality);
+    $flags = ord(substr($data, 3, 1));
+    $headerlen = 10;
+    $extralen = 0;
     
-    return apply_filters('wp_create_thumbnail', $thumbpath);
+    if ($flags & 4) {
+        $extralen = unpack('v', substr($data, 10, 2));
+        $extralen = $extralen[1];
+        $headerlen += 2 + $extralen;
+    }
+    
+    if ($flags & 8) {
+        $headerlen = strpos($data, chr(0), $headerlen) + 1;
+    }
+    
+    if ($flags & 16) {
+        $headerlen = strpos($data, chr(0), $headerlen) + 1;
+    }
+    
+    if ($flags & 2) {
+        $headerlen += 2;
+    }
+    
+    $unpacked = gzinflate(substr($data, $headerlen));
+    
+    if ($unpacked === FALSE) {
+        $unpacked = $data;
+    }
+    
+    return $unpacked;
 }
 
 /**
@@ -145,7 +118,7 @@ function w3_create_thumbnail($file, $max_w, $max_h, $crop = false, $suffix = nul
  * @param integer $mask
  * @return boolean
  */
-function w3_mkdir($path, $mask = 0777)
+function w3_mkdir($path, $mask = 0755)
 {
     $dirs = preg_split('~[\\/]+~', $path);
     $curr_path = '';
@@ -280,9 +253,55 @@ function w3_get_site_url()
 {
     static $site_url = null;
     
-    if (! $site_url) {
+    if ($site_url === null) {
         $site_url = get_option('siteurl');
+        
+        if (empty($site_url)) {
+            $site_url = sprintf('http://%s', $_SERVER['HTTP_HOST']);
+        }
     }
     
     return $site_url;
+}
+
+/**
+ * Returns upload info
+ *
+ * @return array
+ */
+function w3_upload_info()
+{
+    static $upload_info = null;
+    
+    if ($upload_info === null) {
+        $upload_info = @wp_upload_dir();
+        
+        if (! empty($upload_info['error'])) {
+            $upload_info = false;
+        }
+    }
+    
+    return $upload_info;
+}
+
+/**
+ * Redirects to URL
+ * 
+ * @param string $url
+ * @param string $params
+ */
+function w3_redirect($url = '', $params = '')
+{
+    $url = (! empty($url) ? $url : $_SERVER['HTTP_REFERER']);
+    if (empty($url)) {
+        $url = $_SERVER['REQUEST_URI'];
+    }
+    
+    if (! empty($params)) {
+        $params = (strpos($url, '?') === false ? '?' : '&') . $params;
+        $url .= $params;
+    }
+    
+    header('Location: ' . $url);
+    exit();
 }

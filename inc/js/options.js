@@ -159,25 +159,49 @@ jQuery(function($) {
 	});
 	
 	$('#minify_form').submit(function() {
-		var invalid_js = [], invalid_css = [];
+		var js = [], css = [], invalid_js = [], invalid_css = [], duplicate = false;
+		
 		$('#js_files :text').each(function() {
 			var v = $(this).val();
-			if (v != '' && ! /\.js$/.test(v)) {
-				invalid_js.push(v);
+			if (v != '') {
+				for (var i = 0; i < js.length; i++) {
+					if (js[i] == v) {
+						duplicate = true;
+						break;
+					}
+				}
+				js[js.length] = v;
+				if (! /\.js$/.test(v)) {
+					invalid_js.push(v);
+				}
 			}
 		});
 		$('#css_files :text').each(function() {
 			var v = $(this).val();
-			if (v != '' && ! /\.css$/.test(v)) {
-				invalid_css.push(v);
+			if (v != '') {
+				for (var i = 0; i < css.length; i++) {
+					if (css[i] == v) {
+						duplicate = true;
+						break;
+					}
+				}
+				css[css.length] = v;
+				if (! /\.css$/.test(v)) {
+					invalid_css.push(v);
+				}
 			}
 		});
 		
-		if (invalid_js.length && ! confirm('These files have invalid JS file extension:\r\n\r\n' + invalid_js.join('\r\n') + '\r\n\r\nAre you confident this files contain valid JS code?')) {
+		if ($('#js_enabled:checked').size() && invalid_js.length && ! confirm('These files have invalid JS file extension:\r\n\r\n' + invalid_js.join('\r\n') + '\r\n\r\nAre you confident this files contain valid JS code?')) {
 			return false;
 		}
 		
-		if (invalid_css.length && ! confirm('These files have invalid CSS file extension:\r\n\r\n' + invalid_css.join('\r\n') + '\r\n\r\nAre you confident this files contain valid CSS code?')) {
+		if ($('#css_enabled:checked').size() && invalid_css.length && ! confirm('These files have invalid CSS file extension:\r\n\r\n' + invalid_css.join('\r\n') + '\r\n\r\nAre you confident this files contain valid CSS code?')) {
+			return false;
+		}
+		
+		if (duplicate) {
+			alert('Duplicate files have been found in your minify settings, please check your settings again.');
 			return false;
 		}
 		
@@ -218,6 +242,21 @@ jQuery(function($) {
 			user: $('#cdn_ftp_user').val(),
 			path: $('#cdn_ftp_path').val(),
 			pass: $('#cdn_ftp_pass').val()
+		}, function(data) {
+			status.addClass(data.result ? 'w3tc-success' : 'w3tc-error');
+			status.html(data.error);
+		}, 'json');
+	});
+	
+	$('#test_memcached').click(function() {
+		var status = $('#test_memcached_status');
+		status.removeClass('w3tc-error');
+		status.addClass('w3tc-process');
+		status.html('Testing...');
+		$.post('options-general.php', {
+			page: 'w3-total-cache/w3-total-cache.php',
+			w3tc_action: 'test_memcached',
+			servers: $('#memcached_servers').val()
 		}, function(data) {
 			status.addClass(data.result ? 'w3tc-success' : 'w3tc-error');
 			status.html(data.error);
