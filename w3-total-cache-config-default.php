@@ -79,7 +79,7 @@ return array(
         'localhost:11211'
     ), 
     'minify.rewrite' => true, 
-    'minify.logger' => false, 
+    'minify.logging' => true, 
     'minify.cache.path' => '', 
     'minify.cache.locking' => true, 
     'minify.docroot' => '', 
@@ -96,6 +96,7 @@ return array(
         )
     ), 
     'minify.lifetime' => 3600, 
+    'minify.upload' => true,
     'minify.html.enable' => true, 
     'minify.html.reject.admin' => true, 
     'minify.html.strip.crlf' => false, 

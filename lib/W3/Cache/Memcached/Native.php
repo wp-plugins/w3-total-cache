@@ -49,7 +49,7 @@ class W3_Cache_Memcached_Native extends W3_Cache_Memcached_Base
             
             foreach ((array) $this->config['servers'] as $server) {
                 list ($ip, $port) = explode(':', $server);
-                $this->_memcache->addServer($ip, $port, $persistant);
+                $this->_memcache->addServer(trim($ip), (integer) trim($port), $persistant);
             }
         } else {
             return false;
@@ -69,7 +69,7 @@ class W3_Cache_Memcached_Native extends W3_Cache_Memcached_Base
      */
     function disconnect()
     {
-        return $this->_memcache->close();
+        return @$this->_memcache->close();
     }
     
     /**
@@ -82,7 +82,7 @@ class W3_Cache_Memcached_Native extends W3_Cache_Memcached_Base
      */
     function add($key, $var, $expire = 0)
     {
-        return $this->_memcache->add($key, $var, false, $expire);
+        return @$this->_memcache->add($key, $var, false, $expire);
     }
     
     /**
@@ -95,7 +95,7 @@ class W3_Cache_Memcached_Native extends W3_Cache_Memcached_Base
      */
     function set($key, $var, $expire = 0)
     {
-        return $this->_memcache->set($key, $var, false, $expire);
+        return @$this->_memcache->set($key, $var, false, $expire);
     }
     
     /**
@@ -106,7 +106,7 @@ class W3_Cache_Memcached_Native extends W3_Cache_Memcached_Base
      */
     function get($key)
     {
-        return $this->_memcache->get($key);
+        return @$this->_memcache->get($key);
     }
     
     /**
@@ -119,7 +119,7 @@ class W3_Cache_Memcached_Native extends W3_Cache_Memcached_Base
      */
     function replace($key, $var, $expire = 0)
     {
-        return $this->_memcache->replace($key, $var, false, $expire);
+        return @$this->_memcache->replace($key, $var, false, $expire);
     }
     
     /**
@@ -130,7 +130,7 @@ class W3_Cache_Memcached_Native extends W3_Cache_Memcached_Base
      */
     function delete($key)
     {
-        return $this->_memcache->delete($key);
+        return @$this->_memcache->delete($key);
     }
     
     /**
@@ -140,6 +140,6 @@ class W3_Cache_Memcached_Native extends W3_Cache_Memcached_Base
      */
     function flush()
     {
-        return $this->_memcache->flush();
+        return @$this->_memcache->flush();
     }
 }

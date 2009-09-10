@@ -12,7 +12,10 @@ if (! is_dir(W3TC_DIR) || ! file_exists(W3TC_DIR . '/inc/define.php')) {
 }
 
 require_once W3TC_DIR . '/inc/define.php';
-require_once W3TC_DIR . '/lib/W3/PgCache.php';
 
-$w3_pgcache = W3_PgCache::instance();
-$w3_pgcache->process();
+if (file_exists(W3TC_CONFIG_PATH)) {
+    require_once W3TC_DIR . '/lib/W3/PgCache.php';
+    
+    $w3_pgcache = W3_PgCache::instance();
+    $w3_pgcache->process();
+}

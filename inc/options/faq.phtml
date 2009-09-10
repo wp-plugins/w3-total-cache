@@ -77,7 +77,7 @@
         <li><a href="#q63">How can I serve my favicon from the <acronym title="Content Delivery Network">CDN</acronym>?</a></li>
         <li><a href="#q64">Why do you set the value of the media attribute of &lt;link&gt; to all?</a></li>
         <li><a href="#q65">Why can't I specify other &lt;script&gt; types or encoding?</a></li>
-        <li><a href="#q66">My theme doesn't call wp_head() or wp_footer(), how do I set this plugin up?</a></li>
+        <li><a href="#q66">My theme doesn't call wp_footer(), how do I set this plugin up?</a></li>
         <li><a href="#q67">Is this plugin compatible with other popular caching plugins?</a></li>
         <li><a href="#q68">Some WordPress caching plugins fail when markup is not well-formed, is this plugin similar?</a></li>
         <li><a href="#q69">Won't various 3rd parties who's <acronym title="JavaScript">JS</acronym> I download and cache be concerned?</a></li>
@@ -371,13 +371,15 @@ No, you can drag and drop them into the desired order on the minify settings pag
   <p id="q65"><strong>Why can't I specify other &lt;script&gt; types or encoding?</strong><br />
     We have not found a use case where this appears to be of any consequence. If you're aware of one <a href="mailto:wordpressexperts@w3-edge.com">please let us know</a>.</p>
   <p align="right"><a href="#toc">back to top</a></p>
-  <p id="q66"><strong>My theme doesn't call wp_head() or wp_footer(), how do I set this plugin up?</strong><br />
+  <p id="q66"><strong>My theme doesn't call wp_footer(), how do I set this plugin up?</strong><br />
     The calls you'll want to make for the various cases are:</p>
   <ul>
-    <li>&lt;?php w3tc_scripts('include-footer'); ?&gt;<br />
+    <li>&lt;?php if (function_exists('w3tc_scripts')){w3tc_scripts('include-footer');} ?&gt;<br />
       Inserts the footer <acronym title="JavaScript">JS</acronym> group at the location you specify in your theme.</li>
-    <li>&lt;?php w3tc_scripts('include-footer_nb'); ?&gt;<br />
+    <li>&lt;?php if (function_exists('w3tc_scripts')){w3tc_scripts('include-footer_nb');} ?&gt;<br />
       Inserts the footer non-blocking <acronym title="JavaScript">JS</acronym> group at the location you specify in your theme.</li>
+    <li>&lt;?php if (function_exists('w3tc_scripts')){w3tc_scripts('include-footer');w3tc_scripts('include-footer-nb');} ?&gt;<br />
+      Inserts both of the above <acronym title="JavaScript">JS</acronym> groups at the location you specify in your theme.</li>
   </ul>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q67"><strong>Is this plugin compatible with other popular caching plugins?</strong><br />
@@ -405,14 +407,15 @@ No, you can drag and drop them into the desired order on the minify settings pag
     Yes, any <acronym title="Cascading Style Sheet">CSS</acronym> and <acronym title="JavaScript">JS</acronym> you manage with the plugin are minified before being uploaded to your <acronym title="Content Delivery Network">CDN</acronym>. You don't have to make any special changes to your theme. We encourage you to make sure that your provider supports <acronym title="Hypertext Transfer Protocol">HTTP</acronym> compression as the benefit of having your static assets available from more than one <acronym title="Point of Presence">POP</acronym> alone is not enough.</p>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q75"><strong>Who do you recommend as a <acronym title="Content Delivery Network">CDN</acronym> provider?</strong><br />
-    That depends on how you use your blog and where most of your readers read your blog (regionally). Here's a shortlist:</p>
+    That depends on how you use your blog and where most of your readers read your blog (regionally). Here's a short list:</p>
   <ul>
+    <li><a href="http://www.netdna.com/" target="_blank">NetDNA</a></li>
     <li><a href="http://www.simplecdn.com/" target="_blank">Simple<acronym title="Content Delivery Network">CDN</acronym></a></li>
-    <li><a href="http://www.edgecast.com/" target="_blank">EdgeCast</a></li>
-    <li><a href="http://www.limelightnetworks.com/" target="_blank">Limelight Networks</a></li>
     <li><a href="http://aws.amazon.com/s3/" target="_blank">Amazon S3</a> / <a href="http://aws.amazon.com/cloudfront/" target="_blank">Cloudfront</a></li>
-    <li><a href="http://www.akamai.com/" target="_blank">Akamai</a></li>
+    <li><a href="http://www.edgecast.com/" target="_blank">EdgeCast</a></li>
     <li><a href="http://www.voxel.net/products-services/voxcast-cdn" target="_blank">Voxel</a></li>
+    <li><a href="http://www.limelightnetworks.com/" target="_blank">Limelight Networks</a></li>
+    <li><a href="http://www.akamai.com/" target="_blank">Akamai</a></li>
   </ul>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q76"><strong>Hang on, don't I need to modify my <acronym title="Cascading Style Sheet">CSS</acronym> files so they'll work on the <acronym title="Content Delivery Network">CDN</acronym>?</strong><br />
@@ -422,7 +425,7 @@ No, you can drag and drop them into the desired order on the minify settings pag
     Yes! Please <a href="mailto:wordpressexperts@w3-edge.com">reach out to us</a> and we'll get you acclimated so you can "set it and forget it."</p>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q78"><strong>Which web servers do you support?</strong><br />
-    We are aware of no incompatibilities with <a href="http://httpd.apache.org/" target="_blank">apache</a> 1.3+ or <a href="http://www.iis.net/" target="_blank">IIS</a> 5+. We are still testing <a href="http://nginx.net/" target="_blank">nginx</a>, <a href="http://litespeedtech.com/products/webserver/overview/" target="_blank">litespeed</a> and <a href="http://www.lighttpd.net/" target="_blank">lighttpd</a>. If you have thoughts or an opinion, we're <a href="mailto:wordpressexperts@w3-edge.com">interested in hearing</a>.</p>
+    We are aware of no incompatibilities with <a href="http://httpd.apache.org/" target="_blank">apache</a> 1.3+, <a href="http://www.iis.net/" target="_blank">IIS</a> 5+ or <a href="http://litespeedtech.com/products/webserver/overview/" target="_blank">litespeed</a> 4.0.2+. If there's a web server you feel we should be actively testing (e.g. <a href="http://www.lighttpd.net/" target="_blank">lighttpd</a>), we're <a href="mailto:wordpressexperts@w3-edge.com">interested in hearing</a>.</p>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q79"><strong>Do I need to enable mod_gzip, mod_rewrite or install any <acronym title="Hypertext Transfer Protocol">HTTP</acronym> compression software on my server?</strong><br />
     No, but we do find that it does help some rich internet applications to compress their AJAX responses, so you might look at it just for that case.</p>

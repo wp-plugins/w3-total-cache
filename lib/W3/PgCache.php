@@ -160,9 +160,9 @@ class W3_PgCache
                     case 'deflate':
                         return gzdeflate($buffer);
                 }
-            } else {
-                return $buffer;
             }
+            
+            return $buffer;
         }
         
         /**
@@ -679,13 +679,6 @@ class W3_PgCache
             foreach (headers_list() as $header) {
                 list ($header_name, $header_value) = explode(': ', $header, 2);
                 $headers[$header_name] = $header_value;
-            }
-        } else {
-            foreach (array_keys($_SERVER) as $skey) {
-                if (substr($skey, 0, 5) == 'HTTP_') {
-                    $header_name = str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($skey, 5)))));
-                    $headers[$header_name] = $_SERVER[$skey];
-                }
             }
         }
         

@@ -104,6 +104,17 @@ class W3_Plugin_Minify extends W3_Plugin
             @unlink(W3TC_MINIFY_DIR . '/include-footer.js');
             @unlink(W3TC_MINIFY_DIR . '/include-footer-nb.js');
             
+            $dir = @dir(W3TC_MINIFY_DIR);
+            if ($dir) {
+                while (($entry = @$dir->read())) {
+                    if (strpos($entry, 'minify_') === 0) {
+                        @unlink(W3TC_MINIFY_DIR . DIRECTORY_SEPARATOR . $entry);
+                    }
+                }
+            }
+            
+            @unlink(W3TC_MINIFY_DIR . '/error.log');
+            
             @rmdir(W3TC_MINIFY_DIR);
         }
     }

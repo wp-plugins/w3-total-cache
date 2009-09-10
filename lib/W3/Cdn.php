@@ -32,31 +32,33 @@ class W3_Cdn
     {
         static $instances = array();
         
-        if (! isset($instances[$engine])) {
+        $instance_key = sprintf('%s_%s', $engine, md5(serialize($config)));
+        
+        if (! isset($instances[$instance_key])) {
             switch ($engine) {
                 case W3_CDN_FTP:
                     require_once W3TC_LIB_W3_DIR . '/Cdn/Ftp.php';
-                    $instances[$engine] = & new W3_Cdn_Ftp($config);
+                    $instances[$instance_key] = & new W3_Cdn_Ftp($config);
                     break;
                 
                 case W3_CDN_CF:
                     require_once W3TC_LIB_W3_DIR . '/Cdn/Cf.php';
-                    $instances[$engine] = & new W3_Cdn_Cf($config);
+                    $instances[$instance_key] = & new W3_Cdn_Cf($config);
                     break;
                 
                 case W3_CDN_S3:
                     require_once W3TC_LIB_W3_DIR . '/Cdn/S3.php';
-                    $instances[$engine] = & new W3_Cdn_S3($config);
+                    $instances[$instance_key] = & new W3_Cdn_S3($config);
                     break;
                 
                 default:
                     trigger_error('Incorrect CDN engine', E_USER_WARNING);
                     require_once W3TC_LIB_W3_DIR . '/Cdn/Base.php';
-                    $instances[$engine] = & new W3_Cdn_Base();
+                    $instances[$instance_key] = & new W3_Cdn_Base();
                     break;
             }
         }
         
-        return $instances[$engine];
+        return $instances[$instance_key];
     }
 }

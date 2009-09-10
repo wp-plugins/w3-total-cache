@@ -1,6 +1,6 @@
 <?php
 
-define('W3TC_VERSION', '0.7.5.1');
+define('W3TC_VERSION', '0.7.5.2');
 define('W3TC_POWERED_BY', 'W3 Total Cache/' . W3TC_VERSION);
 define('W3TC_LINK_URL', 'http://www.w3-edge.com/wordpress-plugins/');
 define('W3TC_LINK_NAME', 'WordPress Plugins');
@@ -292,15 +292,39 @@ function w3_upload_info()
  */
 function w3_redirect($url = '', $params = '')
 {
-    $url = (! empty($url) ? $url : $_SERVER['HTTP_REFERER']);
-    if (empty($url)) {
-        $url = $_SERVER['REQUEST_URI'];
+    $url = (! empty($url) ? $url : (! empty($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : $_SERVER['REQUEST_URI']));
+    
+    if (($parse_url = @parse_url($url))) {
+        $url = $parse_url['scheme'] . '://' . (! empty($parse_url['user']) ? $parse_url['user'] . (! empty($parse_url['pass']) ? ':' . $parse_url['pass'] : '') . '@' : '') . $parse_url['host'] . (! empty($parse_url['port']) ? ':' . $parse_url['port'] : '') . $parse_url['path'];
+    } else {
+        $parse_url = array();
     }
     
-    if (! empty($params)) {
-        $params = (strpos($url, '?') === false ? '?' : '&') . $params;
-        $url .= $params;
+    $old_params = array();
+    if (! empty($parse_url['query'])) {
+        parse_str($parse_url['query'], $old_params);
     }
+    
+    $new_params = array();
+    if (! empty($params)) {
+        parse_str($params, $new_params);
+    }
+    
+    $merged_params = array_merge($old_params, $new_params);
+    
+    if (! empty($merged_params)) {
+        $count = count($merged_params);
+        $query_string = '';
+        
+        foreach ($merged_params as $param => $value) {
+            $count --;
+            $query_string .= urlencode($param) . (! empty($value) ? '=' . urlencode($value) : '') . ($count ? '&' : '');
+        }
+        
+        $url .= (strpos($url, '?') === false ? '?' : '&') . $query_string;
+    }
+    
+    $url .= (! empty($parse_url['fragment']) ? '#' . $parse_url['fragment'] : '');
     
     header('Location: ' . $url);
     exit();

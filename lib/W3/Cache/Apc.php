@@ -86,6 +86,6 @@ class W3_Cache_Apc extends W3_Cache_Base
      */
     function flush()
     {
-        return apc_clear_cache();
+        return apc_clear_cache('user');
     }
 }

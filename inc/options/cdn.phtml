@@ -10,13 +10,6 @@
 </p>
 
 <form action="options-general.php?page=<?php echo urldecode(W3TC_FILE); ?>&amp;tab=<?php echo $tab; ?>" method="post">
-
-	<!-- <p>
-		<a href="#cdn_ftp" class="w3tc-tab" rel="#cdn_ftp"><acronym title="File Transfer Protocol">FTP</acronym> settings</a> |
-		<a href="#cdn_cf" class="w3tc-tab" rel="#cdn_cf">Amazon CloudFront settings</a> |
-		<a href="#cdn_s3" class="w3tc-tab" rel="#cdn_s3">Amazon S3 settings</a>
-	</p> -->
-	
 	<div id="cdn_ftp" class="w3tc-tab-content">
         <table class="form-table">
         	<tr>
@@ -54,19 +47,6 @@
         	<input id="test_ftp" class="button" type="button" value="Test FTP server" /> <span id="test_ftp_status" class="w3tc-status w3tc-process"></span>
         </p>
     </div>
-    <div id="cdn_cf" class="w3tc-tab-content" style="display: none;">
-    	to do...
-        <p>
-        	<input class="button" type="button" value="Test CloudFront server" />
-        </p>
-    </div>
-    <div id="cdn_s3" class="w3tc-tab-content" style="display: none;">
-    	to do...
-        <p>
-        	<input class="button" type="button" value="Test S3 server" />
-        </p>
-   	</div>
-    
     <table class="form-table">
     	<tr>
     		<th style="width: 300px;"><label for="cdn_domain">Replace domain in <acronym title="Uniform Resource Locator">URL</acronym> with:</label></th>

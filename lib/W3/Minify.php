@@ -17,6 +17,13 @@ class W3_Minify
     var $_config = null;
     
     /**
+     * Memcached object
+     *
+     * @var W3_Cache_Memcached
+     */
+    var $_memcached = null;
+    
+    /**
      * PHP5 constructor
      */
     function __construct()
@@ -72,24 +79,13 @@ class W3_Minify
             $serve_options['debug'] = true;
         }
         
-        if (($logger = $this->_config->get('minify.logger'))) {
+        if ($this->_config->get('minify.logging', true)) {
             require_once W3TC_LIB_MINIFY_DIR . '/Minify/Logger.php';
-            if (true === $logger) {
-                require_once W3TC_LIB_MINIFY_DIR . '/FirePHP.php';
-                Minify_Logger::setLogger(FirePHP::getInstance(true));
-            } else {
-                Minify_Logger::setLogger($logger);
-            }
-        }
-        
-        // check for URI versioning
-        if (preg_match('/&\\d/', $_SERVER['QUERY_STRING'])) {
-            $serve_options['maxAge'] = 31536000;
+            Minify_Logger::setLogger($this);
         }
         
         if (isset($_GET['f']) || (isset($_GET['g']) && isset($_GET['t']))) {
             if (isset($_GET['g']) && isset($_GET['t'])) {
-                // will need groups config
                 $serve_options['minApp']['groups'] = $this->_get_groups($_GET['t']);
                 
                 if ($_GET['t'] == 'js' && ((in_array($_GET['g'], array(
@@ -106,7 +102,6 @@ class W3_Minify
                 }
             }
             
-            // serve!   
             @header('X-Powered-By: ' . W3TC_POWERED_BY);
             Minify::serve('MinApp', $serve_options);
         } else {
@@ -162,8 +157,10 @@ class W3_Minify
         
         $cache = $this->_get_cache();
         
-        if (is_a($cache, 'Minify_Cache_Memcached') || is_a($cache, 'Minify_Cache_APC')) {
-            return $cache->flush();
+        if (is_a($cache, 'Minify_Cache_Memcache') && is_a($this->_memcached, 'W3_Cache_Memcached_Base')) {
+            return $this->_memcached->flush();
+        } elseif (is_a($cache, 'Minify_Cache_APC') && function_exists('apc_clear_cache')) {
+            return apc_clear_cache('user');
         } elseif (is_a($cache, 'Minify_Cache_File')) {
             if (! $cache_path) {
                 $cache_path = $this->_config->get_string('minify.cache.path');
@@ -267,6 +264,23 @@ class W3_Minify
     }
     
     /**
+     * Log
+     *
+     * @param mixed $object
+     * @param string $label
+     */
+    function log($object, $label = null)
+    {
+        $file = W3TC_MINIFY_DIR . '/error.log';
+        $data = sprintf("[%s] [%s] %s\n", date('r'), $_SERVER['REQUEST_URI'], $object);
+        
+        if (($fp = @fopen($file, 'a'))) {
+            @fputs($fp, $data);
+            @fclose($fp);
+        }
+    }
+    
+    /**
      * Returns minify groups
      *
      * @param string $type
@@ -326,18 +340,27 @@ class W3_Minify
             }
         }
         
+        $lifetime = $this->_config->get_integer('minify.lifetime', 3600);
         $file_path = sprintf('%s/minify_%s.%s', $cache_path, md5($file), $type);
         $file_exists = file_exists($file_path);
         
-        if ($file_exists && filemtime($file_path) >= (time() - $this->_config->get_integer('minify.lifetime', 3600))) {
+        if (file_exists($file_path) && @filemtime($file_path) >= (time() - $lifetime)) {
             return $file_path;
         }
         
-        if (($file_data = file_get_contents($file)) && ($fp = fopen($file_path, 'w'))) {
-            fputs($fp, $file_data);
-            fclose($fp);
-            
-            return $file_path;
+        if (is_dir($cache_path)) {
+            if (($file_data = @file_get_contents($file))) {
+                if (($fp = @fopen($file_path, 'w'))) {
+                    @fputs($fp, $file_data);
+                    @fclose($fp);
+                } else {
+                    $this->log(sprintf('Unable to open file %s for writing', $file_path));
+                }
+            } else {
+                $this->log(sprintf('Unable to download URL: %s', $file));
+            }
+        } else {
+            $this->log(sprintf('Cache directory %s is not exists', $cache_path));
         }
         
         return ($file_exists ? $file_path : false);
@@ -357,11 +380,11 @@ class W3_Minify
                 case 'memcached':
                     require_once W3TC_LIB_W3_DIR . '/Cache/Memcached.php';
                     require_once W3TC_LIB_MINIFY_DIR . '/Minify/Cache/Memcache.php';
-                    $memcached = & W3_Cache_Memcached::instance($this->_config->get_string('minify.memcached.engine', 'auto'), array(
+                    $this->_memcached = & W3_Cache_Memcached::instance($this->_config->get_string('minify.memcached.engine', 'auto'), array(
                         'servers' => $this->_config->get_array('minify.memcached.servers'), 
                         'persistant' => true
                     ));
-                    $cache = & new Minify_Cache_Memcache($memcached);
+                    $cache = & new Minify_Cache_Memcache($this->_memcached);
                     break;
                 
                 case 'apc':
@@ -371,7 +394,14 @@ class W3_Minify
                 
                 default:
                     require_once W3TC_LIB_MINIFY_DIR . '/Minify/Cache/File.php';
-                    $cache = & new Minify_Cache_File($this->_config->get_string('minify.cache.path'), $this->_config->get_boolean('minify.cache.locking'));
+                    $cache_path = $this->_config->get_string('minify.cache.path');
+                    if (empty($cache_path)) {
+                        $cache_path = W3TC_MINIFY_DIR;
+                    }
+                    if (! is_dir($cache_path)) {
+                        $this->log(sprintf('Cache directory %s is not exists', $cache_path));
+                    }
+                    $cache = & new Minify_Cache_File($cache_path, $this->_config->get_boolean('minify.cache.locking'));
                     break;
             }
         }

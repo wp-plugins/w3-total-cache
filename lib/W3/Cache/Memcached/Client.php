@@ -29,8 +29,15 @@ class W3_Cache_Memcached_Client extends W3_Cache_Memcached_Base
             return false;
         }
         
+        $servers = array();
+        
+        foreach ($this->config['servers'] as $server) {
+            list ($host, $port) = explode(':', $server);
+            $servers[] = sprintf('%s:%d', trim($host), trim($port));
+        }
+        
         $this->_memcached = & new memcached_client(array(
-            'servers' => $this->config['servers'], 
+            'servers' => $servers, 
             'persistant' => isset($this->config['persistant']) ? (boolean) $this->config['persistant'] : false, 
             'debug' => false, 
             'compress_threshold' => (! empty($this->config['compress_threshold']) ? (integer) $this->config['compress_threshold'] : 0)

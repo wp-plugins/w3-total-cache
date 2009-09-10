@@ -34,8 +34,11 @@ foreach ($js_check_groups as $js_check_group) {
     	<tr>
     		<th style="width: 250px;"><label for="memcached_servers">Memcached Hostname:Port / IP:Port:</label></th>
     		<td>
-    			<input id="memcached_servers" type="text" name="minify.memcached.servers" value="<?php echo htmlspecialchars(implode(',', $config->get_array('minify.memcached.servers'))); ?>" size="100"<?php if ($config->get_string('minify.engine', 'memcached') != 'memcached'): ?> disabled="disabled"<?php endif; ?> /> <input id="test_memcached" class="button" type="button" value="Test Memcached"<?php if ($config->get_string('minify.engine', 'memcached') != 'memcached'): ?> disabled="disabled"<?php endif; ?> /> <span id="test_memcached_status" class="w3tc-status w3tc-process"></span><br />
-    			<span class="description">Multiple servers may be used and seperated by a comma; e.g. 192.168.1.100:11211, domain.com:22122</span>
+    			<input id="memcached_servers" type="text" name="minify.memcached.servers" value="<?php echo htmlspecialchars(implode(',', $config->get_array('minify.memcached.servers'))); ?>" size="100"<?php if (! $minify_memcached): ?> disabled="disabled"<?php endif; ?> />
+    			<span id="test_memcached_status" class="w3tc-status w3tc-process"></span>
+    			<input id="test_memcached" class="button" type="button" value="Test"<?php if (! $minify_memcached): ?> disabled="disabled"<?php endif; ?> />
+    			<input id="flush_memcached_minify" class="button" type="button" value="Empty"<?php if (! $minify_memcached): ?> disabled="disabled"<?php endif; ?> />
+    			<br /><span class="description">Multiple servers may be used and seperated by a comma; e.g. 192.168.1.100:11211, domain.com:22122</span>
     		</td>
     	</tr>
     	<tr>
@@ -57,6 +60,12 @@ foreach ($js_check_groups as $js_check_group) {
     			<input type="hidden" name="minify.rewrite" value="0" />			
     			<label><input type="checkbox" name="minify.rewrite" value="1"<?php checked($config->get_boolean('minify.rewrite'), true); ?> /> Rewrite <acronym title="Uniform Resource Locator">URL</acronym> Structure</label><br />
 				<span class="description">If disabled, <acronym title="Cascading Style Sheets">CSS</acronym> and <acronym title="JavaScript">JS</acronym> embeddings will use of GET variables, enabling this option is recommended unless you really want to avoid the redirects.</span>
+    		</th>
+    	</tr>
+    	<tr>
+    		<th colspan="2">
+    			<input type="hidden" name="minify.upload" value="0" />			
+    			<label><input type="checkbox" name="minify.upload" value="1"<?php checked($config->get_boolean('minify.upload'), true); ?> /> Automatically upload modified files</label>
     		</th>
     	</tr>
     	<tr>

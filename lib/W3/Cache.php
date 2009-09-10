@@ -15,6 +15,10 @@ if (! defined('W3_CACHE_APC')) {
     define('W3_CACHE_APC', 'apc');
 }
 
+if (! defined('W3_CACHE_FILE')) {
+    define('W3_CACHE_FILE', 'file');
+}
+
 /**
  * Class W3_Cache
  */
@@ -31,26 +35,33 @@ class W3_Cache
     {
         static $instances = array();
         
-        if (! isset($instances[$engine])) {
+        $instance_key = sprintf('%s_%s', $engine, md5(serialize($config)));
+        
+        if (! isset($instances[$instance_key])) {
             switch ($engine) {
                 case W3_CACHE_MEMCACHED:
                     require_once W3TC_LIB_W3_DIR . '/Cache/Memcached.php';
-                    $instances[$engine] = W3_Cache_Memcached::instance($config['engine'], $config);
+                    $instances[$instance_key] = W3_Cache_Memcached::instance($config['engine'], $config);
                     break;
                 
                 case W3_CACHE_APC:
                     require_once W3TC_LIB_W3_DIR . '/Cache/Apc.php';
-                    $instances[$engine] = & new W3_Cache_Apc();
+                    $instances[$instance_key] = & new W3_Cache_Apc();
+                    break;
+                
+                case W3_CACHE_FILE:
+                    require_once W3TC_LIB_W3_DIR . '/Cache/File.php';
+                    $instances[$instance_key] = & new W3_Cache_File();
                     break;
                 
                 default:
                     trigger_error('Incorrect cache engine', E_USER_WARNING);
                     require_once W3TC_LIB_W3_DIR . '/Cache/Base.php';
-                    $instances[$engine] = & new W3_Cache_Base();
+                    $instances[$instance_key] = & new W3_Cache_Base();
                     break;
             }
         }
-        
-        return $instances[$engine];
+
+        return $instances[$instance_key];
     }
 }

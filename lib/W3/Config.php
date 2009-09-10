@@ -66,7 +66,7 @@ class W3_Config
         'minify.memcached.engine' => 'string', 
         'minify.memcached.servers' => 'array', 
         'minify.rewrite' => 'boolean', 
-        'minify.logger' => 'boolean', 
+        'minify.logging' => 'boolean', 
         'minify.cache.path' => 'string', 
         'minify.cache.locking' => 'string', 
         'minify.docroot' => 'string', 
@@ -76,6 +76,7 @@ class W3_Config
         'minify.options' => 'array', 
         'minify.symlinks' => 'array', 
         'minify.lifetime' => 'integer', 
+        'minify.upload' => 'boolean', 
         'minify.html.enable' => 'boolean', 
         'minify.html.strip.crlf' => 'boolean', 
         'minify.html.reject.admin' => 'boolean', 
@@ -114,9 +115,9 @@ class W3_Config
         'common.support.type' => 'string', 
         
         'notes.defaults' => 'boolean', 
-    	'notes.wp_content_perms' => 'boolean',
-    	'notes.cdn_first_time' => 'boolean', 
-        'notes.no_memcached_nor_apc' => 'boolean', 
+        'notes.wp_content_perms' => 'boolean', 
+        'notes.cdn_first_time' => 'boolean', 
+        'notes.no_memcached_nor_apc' => 'boolean'
     );
     
     /**
@@ -400,10 +401,13 @@ class W3_Config
             $instance = & new $class();
             
             if (! $instance->load_default()) {
+                debug_print_backtrace();
+                
                 die(sprintf('<strong>W3 Total Cache Error:</strong> Unable to read default config file <strong>%s</strong> or it is broken. Please re-install plugin.', W3TC_CONFIG_DEFAULT_PATH));
             }
             
             if (! $instance->load() && $check_config) {
+                debug_print_backtrace();
                 die(sprintf('<strong>W3 Total Cache Error:</strong> Unable to read config file or it is broken. Please create <strong>%s</strong> from <strong>%s</strong>.', W3TC_CONFIG_PATH, W3TC_CONFIG_DEFAULT_PATH));
             }
         }

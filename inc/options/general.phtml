@@ -1,12 +1,6 @@
 <?php 
 
-$enabled = ($config->get_boolean('dbcache.enabled') || $config->get_boolean('pgcache.enabled') || $config->get_boolean('minify.enabled') || $config->get_boolean('cdn.enabled'));
-$debug = ($config->get_boolean('dbcache.debug') || $config->get_boolean('pgcache.debug') || $config->get_boolean('minify.debug') || $config->get_boolean('cdn.debug'));
-$support_type = $config->get_string('common.support.type', 'footer');
-
-$can_empty_memcache = ($config->get_string('dbcache.engine') == 'memcached' || $config->get_string('pgcache.engine') == 'memcached' || $config->get_string('minify.engine') == 'memcached'); 
-$can_empty_apc = ($config->get_string('dbcache.engine') == 'apc' || $config->get_string('pgcache.engine') == 'apc' || $config->get_string('minify.engine') == 'apc'); 
-$can_empty_disk = ($config->get_string('minify.engine') == 'file'); 
+$support_type = $config->get_string('common.support.type');
 
 $memcache_engine = class_exists('Memcache') ? '(Memcache)' : '';
 
@@ -42,7 +36,7 @@ foreach ($link_categories as $link_category) {
         	<th valign="top">Page Caching:</th>
         	<td>
         		<input type="hidden" name="pgcache.enabled" value="0" />
-        		<label><input class="enabled" type="checkbox" name="pgcache.enabled" value="1"<?php checked($config->get_boolean('pgcache.enabled'), true); ?> />&nbsp;<strong>Enable</strong></label><br />
+        		<label><input class="enabled" type="checkbox" name="pgcache.enabled" value="1"<?php checked($pgcache_enabled, true); ?> />&nbsp;<strong>Enable</strong></label><br />
     			<span class="description">Caching pages will reduce the response time of and increase the concurrency potential of your web server.</span>
     		</td>
     	</tr>
@@ -62,7 +56,7 @@ foreach ($link_categories as $link_category) {
         	<th valign="top">Minify:</th>
         	<td>
         		<input type="hidden" name="minify.enabled" value="0" />
-        		<label><input class="enabled" type="checkbox" name="minify.enabled" value="1"<?php checked($config->get_boolean('minify.enabled'), true); ?> />&nbsp;<strong>Enable</strong></label><br />
+        		<label><input class="enabled" type="checkbox" name="minify.enabled" value="1"<?php checked($minify_enabled, true); ?> />&nbsp;<strong>Enable</strong></label><br />
         		<span class="description">Minification can decrease file size of <acronym title="Hypertext Markup Language">HTML</acronym>, <acronym title="Cascading Style Sheets">CSS</acronym> and <acronym title="JavaScript">JS</acronym> respectively by ~10% on average.</span>    	
         	</td>
         </tr>
@@ -83,7 +77,7 @@ foreach ($link_categories as $link_category) {
      		<th valign="top">Database Caching:</th>
      		<td>
      			<input type="hidden" name="dbcache.enabled" value="0" />
-    			<label><input class="enabled" type="checkbox" name="dbcache.enabled" value="1"<?php checked($config->get_boolean('dbcache.enabled'), true); ?> />&nbsp;<strong>Enable</strong></label><br />
+    			<label><input class="enabled" type="checkbox" name="dbcache.enabled" value="1"<?php checked($dbcache_enabled, true); ?> />&nbsp;<strong>Enable</strong></label><br />
 				<span class="description">Caching database objects will increase the response time of your blog by at least an order of magnitude in most cases.</span>
     		</td>
     	</tr>
@@ -103,15 +97,13 @@ foreach ($link_categories as $link_category) {
 			<th><acronym title="Content Delivery Network">CDN</acronym>:</th>
         	<td>
         		<input type="hidden" name="cdn.enabled" value="0" />
-				<label><input class="enabled" type="checkbox" name="cdn.enabled" value="1"<?php checked($config->get_boolean('cdn.enabled'), true); ?> />&nbsp;<strong>Enable</strong></label><br />
+				<label><input class="enabled" type="checkbox" name="cdn.enabled" value="1"<?php checked($cdn_enabled, true); ?> />&nbsp;<strong>Enable</strong></label><br />
         	</td>
         </tr>
         <tr>
 			<th><acronym title="Content Delivery Network">CDN</acronym> Type:</th>
         	<td>
 				<label><input type="radio" name="cdn.engine" value="ftp"<?php checked($config->get_string('cdn.engine'), 'ftp'); ?> /> <acronym title="File Transfer Protocol">FTP</acronym></label><br />
-				<!--<label><input type="radio" name="cdn.engine" value="cf"<?php checked($config->get_string('cdn.engine'), 'cf'); ?> /> Amazon CloudFront</label><br />
-				<label><input type="radio" name="cdn.engine" value="s3"<?php checked($config->get_string('cdn.engine'), 's3'); ?> /> Amazon S3</label><br />-->
 				<span class="description">Select the <acronym title="Content Delivery Network">CDN</acronym> type you wish to use.</span>
         	</td>
         </tr>

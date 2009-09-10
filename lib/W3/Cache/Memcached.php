@@ -31,9 +31,11 @@ class W3_Cache_Memcached
      */
     function &instance($engine = W3_CACHE_MEMCACHED_AUTO, $config = array())
     {
-        static $instance = null;
+        static $instances = array();
         
-        if ($instance === null) {
+        $instance_key = sprintf('%s_%s', $engine, md5(serialize($config)));
+        
+        if (! isset($instances[$instance_key])) {
             if ($engine == W3_CACHE_MEMCACHED_AUTO) {
                 $engine = (class_exists('Memcache') ? W3_CACHE_MEMCACHED_NATIVE : W3_CACHE_MEMCACHED_CLIENT);
             }
@@ -41,24 +43,24 @@ class W3_Cache_Memcached
             switch ($engine) {
                 case W3_CACHE_MEMCACHED_NATIVE:
                     require_once W3TC_LIB_W3_DIR . '/Cache/Memcached/Native.php';
-                    $instance = & new W3_Cache_Memcached_Native($config);
+                    $instances[$instance_key] = & new W3_Cache_Memcached_Native($config);
                     break;
                 
                 case W3_CACHE_MEMCACHED_CLIENT:
                     require_once W3TC_LIB_W3_DIR . '/Cache/Memcached/Client.php';
-                    $instance = & new W3_Cache_Memcached_Client($config);
+                    $instances[$instance_key] = & new W3_Cache_Memcached_Client($config);
                     break;
                 
                 default:
                     trigger_error('Incorrect memcached engine', E_USER_WARNING);
                     require_once W3TC_LIB_W3_DIR . '/Cache/Memcached/Base.php';
-                    $instance = & new W3_Cache_Memcached_Base();
+                    $instances[$instance_key] = & new W3_Cache_Memcached_Base();
                     break;
             }
             
-            $instance->connect();
+            $instances[$instance_key]->connect();
         }
         
-        return $instance;
+        return $instances[$instance_key];
     }
 }

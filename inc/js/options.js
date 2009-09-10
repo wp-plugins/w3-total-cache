@@ -159,7 +159,7 @@ jQuery(function($) {
 	});
 	
 	$('#minify_form').submit(function() {
-		var js = [], css = [], invalid_js = [], invalid_css = [], duplicate = false;
+		var js = [], css = [], invalid_js = [], invalid_css = [], duplicate = false, query_js = [], query_css = [];
 		
 		$('#js_files :text').each(function() {
 			var v = $(this).val();
@@ -170,7 +170,17 @@ jQuery(function($) {
 						break;
 					}
 				}
-				js[js.length] = v;
+				
+				js.push(v);
+				
+				var qindex = v.indexOf('?');
+				if (qindex != -1) {
+					if (! /^https?:\/\//.test(v)) {
+						query_js.push(v);
+					}
+					v = v.substr(0, qindex);
+				}
+				
 				if (! /\.js$/.test(v)) {
 					invalid_js.push(v);
 				}
@@ -185,19 +195,43 @@ jQuery(function($) {
 						break;
 					}
 				}
-				css[css.length] = v;
+				
+				css.push(v);
+				
+				var qindex = v.indexOf('?');
+				if (qindex != -1) {
+					if (! /^https?:\/\//.test(v)) {
+						query_css.push(v);
+					}
+					v = v.substr(0, qindex);
+				}
+				
 				if (! /\.css$/.test(v)) {
 					invalid_css.push(v);
 				}
 			}
 		});
 		
-		if ($('#js_enabled:checked').size() && invalid_js.length && ! confirm('These files have invalid JS file extension:\r\n\r\n' + invalid_js.join('\r\n') + '\r\n\r\nAre you confident this files contain valid JS code?')) {
-			return false;
+		if ($('#js_enabled:checked').size()) {
+			if (invalid_js.length && ! confirm('These files have invalid JS file extension:\r\n\r\n' + invalid_js.join('\r\n') + '\r\n\r\nAre you confident this files contain valid JS code?')) {
+				return false;
+			}
+			
+			if (query_js.length) {
+				alert('These JS files contain query string in the name:\r\n\r\n' + query_js.join('\r\n'));
+				return false;
+			}
 		}
 		
-		if ($('#css_enabled:checked').size() && invalid_css.length && ! confirm('These files have invalid CSS file extension:\r\n\r\n' + invalid_css.join('\r\n') + '\r\n\r\nAre you confident this files contain valid CSS code?')) {
-			return false;
+		if ($('#css_enabled:checked').size()) {
+			if (invalid_css.length && ! confirm('These files have invalid CSS file extension:\r\n\r\n' + invalid_css.join('\r\n') + '\r\n\r\nAre you confident this files contain valid CSS code?')) {
+				return false;
+			}
+			
+			if (query_css.length) {
+				alert('These CSS files contain query string in the name:\r\n\r\n' + query_css.join('\r\n'));
+				return false;
+			}
 		}
 		
 		if (duplicate) {
@@ -262,4 +296,13 @@ jQuery(function($) {
 			status.html(data.error);
 		}, 'json');
 	});
+	
+	var flush_types = ['flush_memcached_pgcache', 'flush_memcached_dbcache', 'flush_memcached_minify'];
+	for (var i = 0; i < flush_types.length; i++) {
+		$('#' + flush_types[i]).click(function(flush_type) {
+			return function() {
+				document.location.href = 'options-general.php?page=w3-total-cache/w3-total-cache.php&' + flush_type;
+			};
+		}(flush_types[i]));
+	}
 });

@@ -7,8 +7,11 @@
     	<tr>
     		<th style="width: 250px;"><label for="memcached_servers">Memcached Hostname:Port / IP:Port:</label></th>
     		<td>
-    			<input id="memcached_servers" type="text" name="dbcache.memcached.servers" value="<?php echo htmlspecialchars(implode(',', $config->get_array('dbcache.memcached.servers'))); ?>" size="100"<?php if ($config->get_string('dbcache.engine', 'memcached') != 'memcached'): ?> disabled="disabled"<?php endif; ?> /> <input id="test_memcached" class="button" type="button" value="Test Memcached"<?php if ($config->get_string('dbcache.engine', 'memcached') != 'memcached'): ?> disabled="disabled"<?php endif; ?> /> <span id="test_memcached_status" class="w3tc-status w3tc-process"></span><br />
-    			<span class="description">Multiple servers may be used and seperated by a comma; e.g. 192.168.1.100:11211, domain.com:22122</span>
+    			<input id="memcached_servers" type="text" name="dbcache.memcached.servers" value="<?php echo htmlspecialchars(implode(',', $config->get_array('dbcache.memcached.servers'))); ?>" size="100"<?php if (! $dbcache_memcached): ?> disabled="disabled"<?php endif; ?> />
+    			<span id="test_memcached_status" class="w3tc-status w3tc-process"></span>
+    			<input id="test_memcached" class="button" type="button" value="Test"<?php if (! $dbcache_memcached): ?> disabled="disabled"<?php endif; ?> />
+    			<input id="flush_memcached_dbcache" class="button" type="button" value="Empty"<?php if (! $dbcache_memcached): ?> disabled="disabled"<?php endif; ?> />
+    			<br /><span class="description">Multiple servers may be used and seperated by a comma; e.g. 192.168.1.100:11211, domain.com:22122</span>
     		</td>
     	</tr>
     	<tr>
