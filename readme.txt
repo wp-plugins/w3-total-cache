@@ -31,9 +31,7 @@ In essence, anything that can be automated to squeeze out every bit of server pe
 
 1. Disable and remove any other caching plugin you may be using &mdash; most plugins have uninstall procedures you can follow. Make sure wp-content/ has 777 permissions (e.g.: # chmod 777 /var/www/vhosts/domain.com/httpdocs/wp-content/) before proceeding.
 1. Unzip and upload the plugin to your plugins directory (wp-content/plugins/) when done wp-content/plugins/w3-total-cache/ should exist.
-1. Ensure that wp-config.php contains the statement below; if you previously used a caching plugin, this statement is likely to exist already:
-
-	`define('wP_CACHE', true);`
+1. Ensure that wp-config.php contains the statement below; if you previously used a caching plugin, this statement is likely to exist already: `define('wP_CACHE', true);`
 1. Locate and activate the plugin on the plugins page. Set the permisions of wp-content back to 755 (e.g.: # chmod 755 /var/www/vhosts/domain.com/httpdocs/wp-content/) and click through to the General Settings tab.
 1. Select your caching preferences for page, database and minify. If memcached is used this will require you to confirm or modify the default settings and add any additional memcached servers you wish to use. To utilize APC and memcached + memcache installation guides have been provided for those with virtual dedicated or dedicated servers. For those in shared hosting environments, contact your provider to see if either of these are supported.
 1. If you already have a content delivery network provider, proceed to the CDN Settings tab and populate the fields and set your preferences. If you're not running a version of WordPress with the Media Library feature, use the Media Library Import Tool to migrate your post images etc to appropriate locations. If you do not have a CDN provider, you can create and use a subdomain instead, e.g. subdomain.domain.com to improve server response, pipelining performance and progressive render.
@@ -130,7 +128,7 @@ Install the plugin to read the full FAQ.
 * Minified files now (optionally) upload automatically according to update interval (expiry time)
 * Provided memcache.ini directives updated to improve network throughput
 * Addressed WordPress MU site-wide activation/deactivation issues
-* Added "empty" (memcached) cache button to each tab
+* Added empty (memcached) cache button to each tab
 * Fixed bug with parsing memcached server strings
 * Added warning dialog to minify tab about removal of query strings locally hosted object URIs
 * Fixed bug with minify sometimes not creating files as it should
