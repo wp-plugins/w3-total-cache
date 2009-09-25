@@ -12,6 +12,7 @@ Dramatically improve the user experience of your blog. Add page caching, databas
 Trusted by many popular blogs like: mashable.com, pearsonified.com, webdesignerdepot.com, freelanceswitch.com, briansolis.com, css3.info, tutsplus.com, yoast.com, noupe.com and others &mdash; W3 Total Cache improves the user experience of your blog by caching every aspect of your site, reducing the download time of your theme and providing transparent content delivery network (CDN) integration.
 
 Benefits:
+
 * Increased visitor time on site
 * Optimized progressive render (pages appear to load instantly)
 * Reduced HTTP Transactions, DNS lookups and reduced document load time
@@ -19,6 +20,7 @@ Benefits:
 * Increased web server concurrency and increased scale (easily sustain high traffic spikes)
 
 Features:
+
 * Transparent content delivery network (CDN) integration with Media Library, theme files and WordPress core
 * Caching of pages / posts in memory or on disk
 * Caching of CSS and JavaScript in memory, on disk or on CDN
