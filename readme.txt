@@ -23,7 +23,7 @@ Features:
 
 * Transparent content delivery network (CDN) integration with Media Library, theme files and WordPress core
 * Caching of pages / posts in memory or on disk
-* Caching of CSS and JavaScript in memory, on disk or on CDN
+* Caching of (minified) CSS and JavaScript in memory, on disk or on CDN
 * Caching of database objects in memory
 * Caching of RSS (comments, page and site) feeds in memory or on disk
 * Caching of search results pages (i.e. URIs with query string variables) in memory or on disk
@@ -107,6 +107,7 @@ Technically no, a CDN is a high performance cache that stores static assets (you
 = Will this plugin speed up WP Admin? =
 
 Yes, indirectly - if you have a lot of bloggers working with you, you will find that it feels like you have a server dedicated only to WP Admin once this plugin is enabled; the result, increased productivity.
+
 
 = Which web servers do you support? =
 
