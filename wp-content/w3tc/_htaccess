@@ -1,0 +1,10 @@
+# BEGIN W3 Minify module rewrite rules
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteRule ^([a-z0-9-_]+)\.(include(-footer)?(-nb)?)\.(css|js)$ minify.php?gg=$1&g=$2&t=$5
+</IfModule>
+# END W3 Minify module rewrite rules
+
+# BEGIN Prevent directory listing
+Options -Indexes
+# END Prevent directory listing

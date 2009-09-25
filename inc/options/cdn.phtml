@@ -1,0 +1,162 @@
+<?php 
+$cdn_mirror = ($config->get_string('cdn.engine') == 'mirror');
+?>
+<h3><acronym title="Content Delivery Network">CDN</acronym> Settings</h3>
+
+<p><acronym title="Content Delivery Network">CDN</acronym> support is currently <span class="w3tc-<?php if ($config->get_boolean('cdn.enabled')): ?>enabled">enabled<?php else: ?>disabled">disabled<?php endif; ?></span>.</p>
+
+<?php if ($cdn_mirror): ?>
+<p>
+	You can use the <input id="cdn_rename_domain" class="button" type="button" value="domain rename tool" /> now.
+</p>
+<?php else: ?>
+<p>
+	You can <input id="cdn_export_library" class="button" type="button" value="export media library to CDN" />,
+	use the <input id="cdn_rename_domain" class="button" type="button" value="domain rename tool" />,
+	<input id="cdn_import_library" class="button" type="button" value="import post files to the Media Library & CDN" /> or
+	<input id="cdn_queue" class="button" type="button" value="view unsuccessful FTP transfers" /> now.
+</p>
+<?php endif; ?>
+
+<form action="options-general.php?page=<?php echo urldecode(W3TC_FILE); ?>&amp;tab=<?php echo $tab; ?>" method="post">
+	<?php if (! $cdn_mirror): ?>
+	<div id="cdn_ftp" class="w3tc-tab-content">
+        <table class="form-table">
+        	<tr>
+        		<th><label for="cdn_ftp_host"><acronym title="File Transfer Protocol">FTP</acronym> Hostname:</label></th>
+        		<td>
+        			<input id="cdn_ftp_host" type="text" name="cdn.ftp.host" value="<?php echo htmlspecialchars($config->get_string('cdn.ftp.host')); ?>" size="30" />
+        		</td>
+        	</tr>
+        	<tr>
+        		<th><label for="cdn_ftp_user"><acronym title="File Transfer Protocol">FTP</acronym> Username:</label></th>
+        		<td>
+        			<input id="cdn_ftp_user" type="text" name="cdn.ftp.user" value="<?php echo htmlspecialchars($config->get_string('cdn.ftp.user')); ?>" size="30" />
+        		</td>
+        	</tr>
+        	<tr>
+        		<th><label for="cdn_ftp_pass"><acronym title="File Transfer Protocol">FTP</acronym> Password:</label></th>
+        		<td>
+        			<input id="cdn_ftp_pass" type="text" name="cdn.ftp.pass" value="<?php echo htmlspecialchars($config->get_string('cdn.ftp.pass')); ?>" size="30" />
+        		</td>
+        	</tr>
+        	<tr>
+        		<th><label for="cdn_ftp_path"><acronym title="File Transfer Protocol">FTP</acronym> Path:</label></th>
+        		<td>
+        			<input id="cdn_ftp_path" type="text" name="cdn.ftp.path" value="<?php echo htmlspecialchars($config->get_string('cdn.ftp.path')); ?>" size="30" />
+        		</td>
+        	</tr>
+        	<tr>
+        		<th colspan="2">
+        			<input type="hidden" name="cdn.ftp.pasv" value="0" />
+        			<label><input type="checkbox" name="cdn.ftp.pasv" value="1"<?php checked($config->get_boolean('cdn.ftp.pasv'), true); ?> /> Use Passive <acronym title="File Transfer Protocol">FTP</acronym> Mode</label>
+        		</th>
+        	</tr>
+        </table>
+        <p>
+        	<input id="test_ftp" class="button" type="button" value="Test FTP server" /> <span id="test_ftp_status" class="w3tc-status w3tc-process"></span>
+        </p>
+    </div>
+    <?php endif; ?>
+    <table class="form-table">
+    	<tr>
+    		<th style="width: 300px;"><label for="cdn_domain">Replace domain in <acronym title="Uniform Resource Locator">URL</acronym> with:</label></th>
+    		<td>
+    			<input id="cdn_domain" type="text" name="cdn.domain" value="<?php echo htmlspecialchars($config->get_string('cdn.domain')); ?>" size="40" />
+    		</td>
+    	</tr>
+    	<?php if (! $cdn_mirror): ?>
+    	<tr>
+    		<th><label for="cdn_limit_queue">Re-transfer cycle limit:</label></th>
+    		<td>
+    			<input id="cdn_limit_queue" type="text" name="cdn.limit.queue" value="<?php echo htmlspecialchars($config->get_integer('cdn.limit.queue')); ?>" size="10" /><br />
+    			<span class="description">Number of files processed per cycle.</span>
+    		</td>
+    	</tr>
+    	<?php endif; ?>
+    	<tr>
+    		<th<?php if ($cdn_mirror): ?> colspan="2"<?php endif; ?>>
+    			<input type="hidden" name="cdn.includes.enable" value="0" />
+    			<label><input type="checkbox" name="cdn.includes.enable" value="1"<?php checked($config->get_boolean('cdn.includes.enable'), true); ?> /> Host wp-includes/ files</label>
+    		</th>
+    		<?php if (! $cdn_mirror): ?>
+    		<td>
+    			<input class="button cdn_export" type="button" name="includes" value="Upload includes files" />
+    		</td>
+    		<?php endif; ?>
+    	</tr>
+    	<tr>
+    		<th<?php if ($cdn_mirror): ?> colspan="2"<?php endif; ?>>
+    			<input type="hidden" name="cdn.theme.enable" value="0" />
+    			<label><input type="checkbox" name="cdn.theme.enable" value="1"<?php checked($config->get_boolean('cdn.theme.enable'), true); ?> /> Host active theme files</label>
+    		</th>
+    		<?php if (! $cdn_mirror): ?>
+    		<td>
+				<input class="button cdn_export" type="button" name="theme" value="Upload theme files" />
+    		</td>
+    		<?php endif; ?>
+    	</tr>
+    	<tr>
+    		<th<?php if ($cdn_mirror): ?> colspan="2"<?php endif; ?>>
+    			<input type="hidden" name="cdn.minify.enable" value="0" />
+    			<label><input type="checkbox" name="cdn.minify.enable" value="1"<?php checked($config->get_boolean('cdn.minify.enable'), true); ?> /> Host minified <acronym title="Cascading Style Sheets">CSS</acronym> and <acronym title="JavaScript">JS</acronym> files</label>
+    		</th>
+    		<?php if (! $cdn_mirror): ?>
+    		<td>
+				<input class="button cdn_export" type="button" name="minify" value="Upload minify files" />
+    		</td>
+    		<?php endif; ?>
+    	</tr>
+    	<tr>
+    		<th<?php if ($cdn_mirror): ?> colspan="2"<?php endif; ?>>
+    			<input type="hidden" name="cdn.custom.enable" value="0" />
+    			<label><input type="checkbox" name="cdn.custom.enable" value="1"<?php checked($config->get_boolean('cdn.custom.enable'), true); ?> /> Host custom files</label>
+    		</th>
+    		<?php if (! $cdn_mirror): ?>
+    		<td>
+				<input class="button cdn_export" type="button" name="custom" value="Upload custom files" />
+    		</td>
+    		<?php endif; ?>
+    	</tr>
+    	<tr>
+    		<th><label for="cdn_includes_files">Search wp-includes/ directory for files:</label></th>
+    		<td>
+    			<input id="cdn_includes_files" type="text" name="cdn.includes.files" value="<?php echo htmlspecialchars($config->get_string('cdn.includes.files')); ?>" size="40" />
+    		</td>
+    	</tr>
+    	<tr>
+    		<th><label for="cdn_theme_files">Search current theme directory for files:</label></th>
+    		<td>
+    			<input id="cdn_theme_files" type="text" name="cdn.theme.files" value="<?php echo htmlspecialchars($config->get_string('cdn.theme.files')); ?>" size="40" />
+    		</td>
+    	</tr>
+    	<tr>
+    		<th valign="top"><label for="cdn_custom_files">Custom file list:</label></th>
+    		<td>
+    			<textarea id="cdn_custom_files" name="cdn.custom.files" cols="30" rows="5"><?php echo htmlspecialchars(implode("\r\n", $config->get_array('cdn.custom.files'))); ?></textarea>
+    		</td>
+    	</tr>
+    	<tr>
+    		<th valign="top"><label for="cdn_reject_ua">Rejected User Agents:</label></th>
+    		<td><textarea id="cdn_reject_ua" name="cdn.reject.ua" cols="30" rows="5"><?php echo htmlspecialchars(implode("\r\n", $config->get_array('cdn.reject.ua'))); ?></textarea></td>
+    	</tr>
+    	<?php if (! $cdn_mirror): ?>
+    	<tr>
+    		<th colspan="2">
+    			<input type="hidden" name="cdn.import.external" value="0" />
+    			<label><input type="checkbox" name="cdn.import.external" value="1"<?php checked($config->get_boolean('cdn.import.external'), true); ?> /> Import external media library attachments</label>
+    		</th>
+    	</tr>
+    	<tr>
+    		<th><label for="cdn_import_files">Import files:</label></th>
+    		<td>
+    			<input id="cdn_import_files" type="text" name="cdn.import.files" value="<?php echo htmlspecialchars($config->get_string('cdn.import.files')); ?>" size="40" />
+    		</td>
+    	</tr>
+    	<?php endif; ?>
+    </table>
+    
+    <p class="submit">
+    	<input type="submit" name="Submit" class="button-primary" value="Save changes" />
+    </p>
+</form>
