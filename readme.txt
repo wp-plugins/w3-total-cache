@@ -12,7 +12,6 @@ Dramatically improve the user experience of your blog. Add page caching, databas
 Trusted by many popular blogs like: mashable.com, pearsonified.com, webdesignerdepot.com, freelanceswitch.com, briansolis.com, css3.info, tutsplus.com, yoast.com, noupe.com and others &mdash; W3 Total Cache improves the user experience of your blog by caching every aspect of your site, reducing the download time of your theme and providing transparent content delivery network (CDN) integration.
 
 Benefits:
-
 * Increased visitor time on site
 * Optimized progressive render (pages appear to load instantly)
 * Reduced HTTP Transactions, DNS lookups and reduced document load time
@@ -20,7 +19,6 @@ Benefits:
 * Increased web server concurrency and increased scale (easily sustain high traffic spikes)
 
 Features:
-
 * Transparent content delivery network (CDN) integration with Media Library, theme files and WordPress core
 * Caching of pages / posts in memory or on disk
 * Caching of CSS and JavaScript in memory, on disk or on CDN
@@ -35,26 +33,15 @@ Features:
 
 Easily improve the user experience for your readers without having to change WordPress, your theme, your plugins or how you produce your content.
 
-== Installation ==
-
-1. Disable and remove any other caching plugin you may be using &mdash; most plugins have uninstall procedures you can follow. Make sure wp-content/ has 777 permissions before proceeding, e.g.: `# chmod 777 /var/www/vhosts/domain.com/httpdocs/wp-content/`
-1. Unzip and upload the plugin to your plugins directory (wp-content/plugins/), when done wp-content/plugins/w3-total-cache/ should exist.
-1. Ensure that wp-config.php contains the statement below; if you previously used a caching plugin, this statement is likely to exist already: `define('WP_CACHE', true);`
-1. Locate and activate the plugin on the plugins page, then click the Settings link to proceed to the General Settings tab. Set the permissions of wp-content back to 755, e.g.: `# chmod 755 /var/www/vhosts/domain.com/httpdocs/wp-content/`
-1. Select your caching preferences for page, database and minify. If memcached is used this will require you to confirm or modify the default settings and add any additional memcached servers you wish to use. To utilize APC and memcached + memcache installation guides have been provided under the Installation tab. For those in shared hosting environments, contact your provider to see if either of these is supported.
-1. If you already have a content delivery network provider, proceed to the CDN Settings tab and populate the fields and set your preferences. If you're not running a version of WordPress with the Media Library feature, use the Media Library Import Tool to migrate your post images etc to appropriate locations. If you do not have a CDN provider, you can still improve your site's performance using this feature. Create and use a subdomain on your own server; e.g. static.domain.com and configure options on the CDN tab accordingly.
-1. On the Minify Settings tab all of the recommended settings are preset. Specify any CSS and JS files in the respective sections, view your site's HTML source and search for .css and .js files. In the case of JS files you can specify the type and location of the embedding using the drop down menu.
-1. You're done! Get back to blogging!
-
 == Frequently Asked Questions ==
 
 = Why does speed matter? =
 
-Speed is among the most significant success factors web sites face. In fact, your blog's speed directly affects your income (revenue) – it's a fact. Some high traffic sites conducted some research and uncovered the following:
+Speed is among the most significant success factors web sites face. In fact, your blog's speed directly affects your income (revenue) &mdash; it's a fact. Some high traffic sites conducted some research and uncovered the following:
 
-* Google.com: +500 ms (speed decrease) -> -20% traffic loss [1](http://home.blarg.net/~glinden/StanfordDataMining.2006-11-29.ppt)
-* Yahoo.com: +400 ms (speed decrease) -> -5-9% full-page traffic loss (visitor left before the page finished loading) [2](http://www.slideshare.net/stoyan/yslow-20-presentation)
-* Amazon.com: +100 ms (speed decrease) -> -1% sales loss [1](http://home.blarg.net/~glinden/StanfordDataMining.2006-11-29.ppt)
+* Google.com: +500 ms (speed decrease) -> -20% traffic loss [[1](http://home.blarg.net/~glinden/StanfordDataMining.2006-11-29.ppt)]
+* Yahoo.com: +400 ms (speed decrease) -> -5-9% full-page traffic loss (visitor left before the page finished loading) [[2](http://www.slideshare.net/stoyan/yslow-20-presentation)]
+* Amazon.com: +100 ms (speed decrease) -> -1% sales loss [[1](http://home.blarg.net/~glinden/StanfordDataMining.2006-11-29.ppt)]
 
 A millionth of a second is not a long time, yet the impact is quite significant. Even if you're not a large company (or just hope to become one), a loss is still a loss. However, there is a solution to this problem, take advantage.
 
@@ -134,6 +121,17 @@ No, however we do have an extensive FAQ in the plugin.
 In general, due to the manner in which this plugin works the only issues with you may encounter existed before you installed this plugin. In other words, the order or location of JavaScript or CSS files etc will need to be paid attention to as you configure your settings.
 
 Install the plugin to read the full FAQ.
+
+== Installation ==
+
+1. Disable and remove any other caching plugin you may be using &mdash; most plugins have uninstall procedures you can follow. Make sure wp-content/ has 777 permissions before proceeding, e.g.: `# chmod 777 /var/www/vhosts/domain.com/httpdocs/wp-content/`
+1. Unzip and upload the plugin to your plugins directory (wp-content/plugins/), when done wp-content/plugins/w3-total-cache/ should exist.
+1. Ensure that wp-config.php contains the statement below; if you previously used a caching plugin, this statement is likely to exist already: `define('WP_CACHE', true);`
+1. Locate and activate the plugin on the plugins page, then click the Settings link to proceed to the General Settings tab. Set the permissions of wp-content back to 755, e.g.: `# chmod 755 /var/www/vhosts/domain.com/httpdocs/wp-content/`
+1. Select your caching preferences for page, database and minify. If memcached is used this will require you to confirm or modify the default settings and add any additional memcached servers you wish to use. To utilize APC and memcached + memcache installation guides have been provided under the Installation tab. For those in shared hosting environments, contact your provider to see if either of these is supported.
+1. If you already have a content delivery network provider, proceed to the CDN Settings tab and populate the fields and set your preferences. If you're not running a version of WordPress with the Media Library feature, use the Media Library Import Tool to migrate your post images etc to appropriate locations. If you do not have a CDN provider, you can still improve your site's performance using this feature. Create and use a subdomain on your own server; e.g. static.domain.com and configure options on the CDN tab accordingly.
+1. On the Minify Settings tab all of the recommended settings are preset. Specify any CSS and JS files in the respective sections, view your site's HTML source and search for .css and .js files. In the case of JS files you can specify the type and location of the embedding using the drop down menu.
+1. You're done! Get back to blogging!
 
 == Changelog ==
 
