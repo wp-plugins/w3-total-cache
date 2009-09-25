@@ -69,16 +69,20 @@ class W3_Plugin
         static $locked = null;
         
         if ($locked === null) {
-            $dir = @dir(dirname(W3TC_CONFIG_PATH));
-            $config = basename(W3TC_CONFIG_PATH);
-            
             $locked = false;
+            $config = basename(W3TC_CONFIG_PATH);
+            $config_dir = dirname(W3TC_CONFIG_PATH);
             
-            while (($entry = @$dir->read())) {
-                if (strpos($entry, W3TC_CONFIG_NAME) === 0 && $entry !== $config) {
-                    $locked = true;
-                    break;
+            $dir = @opendir($config_dir);
+            
+            if ($dir) {
+                while (($entry = @readdir($dir))) {
+                    if (strpos($entry, W3TC_CONFIG_NAME) === 0 && $entry !== $config) {
+                        $locked = true;
+                        break;
+                    }
                 }
+                @closedir($dir);
             }
         }
         

@@ -25,7 +25,7 @@ class W3_Plugin_PgCache extends W3_Plugin
             'deactivate'
         ));
         
-        if ($this->_config->get_boolean('pgcache.enabled')) {
+        if ($this->_config->get_boolean('pgcache.enabled', true)) {
             add_action('publish_phone', array(
                 &$this, 
                 'on_post_edit'
@@ -115,7 +115,7 @@ class W3_Plugin_PgCache extends W3_Plugin
         }
         
         if (! $this->locked()) {
-            if (@copy(W3TC_CONTENT_DIR . '/advanced-cache.php', WP_CONTENT_DIR . '/advanced-cache.php')) {
+            if (@copy(W3TC_INSTALL_DIR . '/advanced-cache.php', WP_CONTENT_DIR . '/advanced-cache.php')) {
                 @chmod(WP_CONTENT_DIR . '/advanced-cache.php', 0644);
             } else {
                 w3_writable_error(WP_CONTENT_DIR . '/advanced-cache.php');
@@ -188,6 +188,8 @@ class W3_Plugin_PgCache extends W3_Plugin
         static $flushed_posts = array();
         
         if (! in_array($post_id, $flushed_posts)) {
+            require_once W3TC_LIB_W3_DIR . '/PgCache.php';
+            
             $w3_pgcache = W3_PgCache::instance();
             $w3_pgcache->flush_post($post_id);
             
@@ -220,7 +222,7 @@ class W3_Plugin_PgCache extends W3_Plugin
      */
     function on_comment_status($comment_id, $status)
     {
-        if (preg_match('@wp-admin@', $_SERVER['REQUEST_URI']) && ($status === 'approve' || $status === '1')) {
+        if ($status === 'approve' || $status === '1') {
             $this->on_comment_change($comment_id);
         }
     }
@@ -233,6 +235,8 @@ class W3_Plugin_PgCache extends W3_Plugin
         static $flushed = false;
         
         if (! $flushed) {
+            require_once W3TC_LIB_W3_DIR . '/PgCache.php';
+            
             $w3_pgcache = W3_PgCache::instance();
             $w3_pgcache->flush();
         }

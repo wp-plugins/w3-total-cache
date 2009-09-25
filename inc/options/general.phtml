@@ -21,10 +21,11 @@ foreach ($link_categories as $link_category) {
 <form action="options-general.php">
     <p>You can 
     	<input type="hidden" name="page" value="<?php echo W3TC_FILE; ?>" />
+    	<input type="hidden" name="tab" value="<?php echo $tab; ?>" />
     	<input class="button" type="submit" name="flush_all" value="empty all caches" /> at once or 
     	<input class="button" type="submit" name="flush_memcached" value="empty only the memcached cache"<?php if (! $can_empty_memcache): ?> disabled="disabled"<?php endif; ?> /> or
     	<input class="button" type="submit" name="flush_apc" value="empty only the APC cache"<?php if (! $can_empty_apc): ?> disabled="disabled"<?php endif; ?> /> or 
-    	<input class="button" type="submit" name="flush_file" value="empty only the minify disk cache"<?php if (! $can_empty_disk): ?> disabled="disabled"<?php endif; ?> />.
+    	<input class="button" type="submit" name="flush_file" value="empty only the disk cache"<?php if (! $can_empty_file): ?> disabled="disabled"<?php endif; ?> />.
     </p>
 </form>
 
@@ -37,12 +38,13 @@ foreach ($link_categories as $link_category) {
         	<td>
         		<input type="hidden" name="pgcache.enabled" value="0" />
         		<label><input class="enabled" type="checkbox" name="pgcache.enabled" value="1"<?php checked($pgcache_enabled, true); ?> />&nbsp;<strong>Enable</strong></label><br />
-    			<span class="description">Caching pages will reduce the response time of and increase the concurrency potential of your web server.</span>
+    			<span class="description">Caching pages will reduce the response time of and increase the concurrency potential (scale) of your web server.</span>
     		</td>
     	</tr>
     	<tr>
     		<th valign="top">Page Caching Method:</th>
     		<td>
+    			<label><input type="radio" name="pgcache.engine" value="file"<?php checked($config->get_string('pgcache.engine'), 'file'); ?> /> Disk</label><br />
     			<label><input type="radio" name="pgcache.engine" value="memcached"<?php checked($config->get_string('pgcache.engine'), 'memcached'); ?> /> Memcached <?php echo $memcache_engine; ?></label><br />
 				<label><input type="radio" name="pgcache.engine" value="apc"<?php checked($config->get_string('pgcache.engine'), 'apc'); ?><?php if (! $check_apc): ?> disabled="disabled"<?php endif; ?> /> <acronym title="Alternative PHP Cache">APC</acronym></label><br />
     		</td>
@@ -78,7 +80,7 @@ foreach ($link_categories as $link_category) {
      		<td>
      			<input type="hidden" name="dbcache.enabled" value="0" />
     			<label><input class="enabled" type="checkbox" name="dbcache.enabled" value="1"<?php checked($dbcache_enabled, true); ?> />&nbsp;<strong>Enable</strong></label><br />
-				<span class="description">Caching database objects will increase the response time of your blog by at least an order of magnitude in most cases.</span>
+				<span class="description">Caching database objects may decrease the response time of your blog by at least an order of magnitude.</span>
     		</td>
     	</tr>
     	<tr>
@@ -104,6 +106,7 @@ foreach ($link_categories as $link_category) {
 			<th><acronym title="Content Delivery Network">CDN</acronym> Type:</th>
         	<td>
 				<label><input type="radio" name="cdn.engine" value="ftp"<?php checked($config->get_string('cdn.engine'), 'ftp'); ?> /> <acronym title="File Transfer Protocol">FTP</acronym></label><br />
+				<label><input type="radio" name="cdn.engine" value="mirror"<?php checked($config->get_string('cdn.engine'), 'mirror'); ?> /> Mirror (Origin Pull)</label><br />
 				<span class="description">Select the <acronym title="Content Delivery Network">CDN</acronym> type you wish to use.</span>
         	</td>
         </tr>

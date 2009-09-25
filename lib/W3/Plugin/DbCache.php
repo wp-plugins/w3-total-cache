@@ -51,7 +51,7 @@ class W3_Plugin_DbCache extends W3_Plugin
         if (! $this->locked()) {
             $file_db = WP_CONTENT_DIR . '/db.php';
             
-            if (@copy(W3TC_CONTENT_DIR . '/db.php', $file_db)) {
+            if (@copy(W3TC_INSTALL_DIR . '/db.php', $file_db)) {
                 @chmod($file_db, 0644);
             } else {
                 w3_writable_error($file_db);

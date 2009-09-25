@@ -22,29 +22,22 @@ class W3_Cache_File extends W3_Cache_Base
     var $_cache_dir = '';
     
     /**
-     * Current time
-     *
-     * @var integer
-     */
-    var $_time = 0;
-    
-    /**
      * PHP5 constructor
      *
      * @param array $config
      */
-    function __construct($config)
+    function __construct($config = array())
     {
         $this->_cache_dir = isset($config['cache_dir']) ? trim($config['cache_dir']) : 'cache';
-        $this->_time = time();
     }
     
     /**
      * PHP4 constructor
      *
+     *@paran array $config
      * @return W3_Cache_File
      */
-    function W3_Cache_File()
+    function W3_Cache_File($config = array())
     {
         $this->__construct($config);
     }
@@ -77,11 +70,15 @@ class W3_Cache_File extends W3_Cache_Base
     function set($key, $var, $expire = 0)
     {
         $path = $this->_get_path($key);
-        if (($fp = @fopen($path, 'w'))) {
-            @fputs($fp, $expire);
-            @fputs($fp, @serialize($var));
-            @fclose($fp);
-            return true;
+        $dir = dirname(str_replace($this->_cache_dir, '', $path));
+        if ((is_dir($dir) || w3_mkdir($dir, 0755, $this->_cache_dir))) {
+            $fp = @fopen($path, 'wb');
+            if ($fp) {
+                @fputs($fp, pack('L', $expire));
+                @fputs($fp, @serialize($var));
+                @fclose($fp);
+                return true;
+            }
         }
         return false;
     }
@@ -94,21 +91,32 @@ class W3_Cache_File extends W3_Cache_Base
      */
     function get($key)
     {
+        $pwd = getcwd();
+        $var = false;
         $path = $this->_get_path($key);
-        if (is_readable($path) && ($ftime = @filectime($path)) && ($fp = @fopen($path, 'r')) && ($expirec = @fgetc($fp)) !== false) {
-            $expire = (integer) $expirec;
-            $expire = ($expire && $expire <= W3_CACHE_FILE_EXPIRE_MAX ? $expire : W3_CACHE_FILE_EXPIRE_MAX);
-            if (($ftime + $expire) <= $this->_time) {
-                $data = '';
-                while (! @feof($fp)) {
-                    $data .= @fgets($fp, 4096);
+        if (is_readable($path)) {
+            $ftime = @filemtime($path);
+            if ($ftime) {
+                $fp = @fopen($path, 'rb');
+                if ($fp) {
+                    $expires = @fread($fp, 4);
+                    if ($expires !== false) {
+                        list (, $expire) = @unpack('L', $expires);
+                        $expire = ($expire && $expire <= W3_CACHE_FILE_EXPIRE_MAX ? $expire : W3_CACHE_FILE_EXPIRE_MAX);
+                        if ($ftime > time() - $expire) {
+                            $data = '';
+                            while (! @feof($fp)) {
+                                $data .= @fread($fp, 4096);
+                            }
+                            $var = @unserialize($data);
+                        }
+                    }
+                    @fclose($fp);
                 }
-                @fclose($fp);
-                return @unserialize($data);
             }
-            @fclose($fp);
         }
-        return false;
+        
+        return $var;
     }
     
     /**
@@ -150,6 +158,7 @@ class W3_Cache_File extends W3_Cache_Base
      */
     function flush()
     {
+        return w3_emptydir($this->_cache_dir);
     }
     
     /**
@@ -161,11 +170,7 @@ class W3_Cache_File extends W3_Cache_Base
     function _get_path($key)
     {
         $hash = md5($key);
-        $path = sprintf('%s/%s/%s/%s', $this->_cache_dir, substr($hash, 0, 2), substr($hash, 2, 2), substr($hash, 4, 28));
-        $dir = dirname($path);
-        if (! is_dir($dir)) {
-            w3_mkdir($dir);
-        }
+        $path = sprintf('%s/%s/%s/%s', $this->_cache_dir, substr($hash, 0, 2), substr($hash, 2, 2), $hash);
         
         return $path;
     }

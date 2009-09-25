@@ -51,7 +51,7 @@ class W3_Cache
                 
                 case W3_CACHE_FILE:
                     require_once W3TC_LIB_W3_DIR . '/Cache/File.php';
-                    $instances[$instance_key] = & new W3_Cache_File();
+                    $instances[$instance_key] = & new W3_Cache_File($config);
                     break;
                 
                 default:
@@ -61,7 +61,7 @@ class W3_Cache
                     break;
             }
         }
-
+        
         return $instances[$instance_key];
     }
 }

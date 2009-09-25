@@ -55,12 +55,12 @@
         <li>Let's compile:<br />
         # ./configure &amp;&amp; make &amp;&amp; make install</li>
         <li>Make sure memcached is starts automatically on server boot:<br />
-        # touch /etc/init.d/memcached<br />
-        # echo '#!/bin/sh -e' >> /etc/init.d/memcached<br />
-        # echo '/usr/local/bin/memcached -d -m 128 -p 11211 -u nobody -l localhost' >> /etc/init.d/memcached<br />
-        # chmod u+x /etc/init.d/memcached</li>
+        # touch /etc/rc.d/init.d/memcached<br />
+        # echo '#!/bin/sh -e' >> /etc/rc.d/init.d/memcached<br />
+        # echo '/usr/local/bin/memcached -d -m 128 -p 11211 -u nobody -l localhost' >> /etc/rc.d/init.d/memcached<br />
+        # chmod u+x /etc/rc.d/init.d/memcached</li>
         <li>And finally, let's start memcached:<br />
-        # /etc/init.d/memcached</li>
+        # /etc/rc.d/init.d/memcached</li>
     </ol>
     <p>For windows users we recommend checking the following sites for more installation tips:</p> 
     <ul> 
@@ -142,7 +142,7 @@
     <p><strong>Note(s):</strong></p>
     <ul>
       <li>The provided instructions are for CentOS, however we can provide others based on <a href="mailto:wordpressexperts@w3-edge.com">your requests</a>.</li>
-      <li>In the case where the "Rewrite <acronym>URL</acronym> Structure" (in <a href="/wp-admin/options-general.php?page=w3-total-cache/w3-total-cache.php&amp;tab=minify">Minify Settings</a> tab) is desired, and apache is not used, the file located in wp-content/plugins/w3-total-cache/wp-content/w3tc-cache/.htaccess contains directives that must be created for the directory: wp-content/w3tc-cache/.</li>
+      <li>In the case where the "Rewrite <acronym>URL</acronym> Structure" (in <a href="/wp-admin/options-general.php?page=w3-total-cache/w3-total-cache.php&amp;tab=minify">Minify Settings</a> tab) is desired, and apache is not used, the file located in wp-content/plugins/w3-total-cache/wp-content/w3tc/.htaccess contains directives that must be created for the directory: wp-content/w3tc/.</li>
       <li>Restarting the web server will empty your <acronym title="Alternative PHP Cache">APC</acronym> cache, which means it will have to be rebuilt over time and your site's performance will suffer during this period. Still, <acronym title="Alternative PHP Cache">APC</acronym> should be installed in any case to maximize WordPress performance.</li>
       <li>Consider using memcached for objects that must persist across web server restarts or that you wish to share amongst your pool of servers (or cluster), e.g.: database objects or page cache.</li>
       <li>Some yum or mirrors may not have the necessary packages, in such cases you may have to do a manual installation.</li>

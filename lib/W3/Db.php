@@ -110,7 +110,7 @@ class W3_Db extends wpdb
             return false;
         }
         
-        ++$this->query_total;
+        ++ $this->query_total;
         
         // filter the query, if filters are available
         // NOTE: some queries are made before the plugins have been loaded, and thus cannot be filtered with this method
@@ -147,7 +147,7 @@ class W3_Db extends wpdb
          * Check if query was cached
          */
         if (is_array($data)) {
-            ++$this->query_hits;
+            ++ $this->query_hits;
             $cached = true;
             
             /**
@@ -159,8 +159,8 @@ class W3_Db extends wpdb
             $this->col_info = $data['col_info'];
             $this->num_rows = $data['num_rows'];
         } else {
-            ++$this->num_queries;
-            ++$this->query_misses;
+            ++ $this->num_queries;
+            ++ $this->query_misses;
             
             // Perform the query via std mysql_query function..
             $this->timer_start();
@@ -371,7 +371,7 @@ class W3_Db extends wpdb
     function get_debug_info()
     {
         $debug_info = "<!-- W3 Total Cache: Db cache debug info:\r\n";
-        $debug_info .= sprintf("%s%s\r\n", str_pad('Engine: ', 20), $this->_config->get_string('dbcache.engine'));
+        $debug_info .= sprintf("%s%s\r\n", str_pad('Engine: ', 20), w3_get_engine_name($this->_config->get_string('dbcache.engine')));
         $debug_info .= sprintf("%s%d\r\n", str_pad('Total queries: ', 20), $this->query_total);
         $debug_info .= sprintf("%s%d\r\n", str_pad('Cached queries: ', 20), $this->query_hits);
         $debug_info .= sprintf("%s%.3f\r\n", str_pad('Total query time: ', 20), $this->time_total);
@@ -400,14 +400,24 @@ class W3_Db extends wpdb
         
         if ($cache === null) {
             $engine = $this->_config->get_string('dbcache.engine', 'memcached');
-            if ($engine == 'memcached') {
-                $engineConfig = array(
-                    'engine' => $this->_config->get_string('dbcache.memcached.engine', 'auto'), 
-                    'servers' => $this->_config->get_array('dbcache.memcached.servers'), 
-                    'persistant' => true
-                );
-            } else {
-                $engineConfig = array();
+            
+            switch ($engine) {
+                case 'memcached':
+                    $engineConfig = array(
+                        'engine' => $this->_config->get_string('dbcache.memcached.engine', 'auto'), 
+                        'servers' => $this->_config->get_array('dbcache.memcached.servers'), 
+                        'persistant' => true
+                    );
+                    break;
+                
+                case 'file':
+                    $engineConfig = array(
+                        'cache_dir' => W3TC_CACHE_FILE_DIR
+                    );
+                    break;
+                
+                default:
+                    $engineConfig = array();
             }
             
             require_once W3TC_LIB_W3_DIR . '/Cache.php';
@@ -463,8 +473,7 @@ class W3_Db extends wpdb
     {
         $auto_reject_uri = array(
             'wp-login', 
-            'wp-register', 
-            'wp-signup'
+            'wp-register'
         );
         
         foreach ($auto_reject_uri as $uri) {

@@ -25,14 +25,13 @@ return array(
      */
     'pgcache.enabled' => true, 
     'pgcache.debug' => false, 
-    'pgcache.engine' => 'memcached', 
+    'pgcache.engine' => 'file', 
     'pgcache.memcached.engine' => 'auto', 
     'pgcache.memcached.servers' => array(
         'localhost:11211'
     ), 
     'pgcache.lifetime' => 3600, 
     'pgcache.compress' => true, 
-    'pgcache.cache.logged' => true, 
     'pgcache.cache.query' => true, 
     'pgcache.cache.home' => true, 
     'pgcache.cache.feed' => true, 
@@ -40,18 +39,15 @@ return array(
     'pgcache.cache.flush' => false, 
     'pgcache.cache.headers' => array(
         'Last-Modified', 
-        'Expires', 
         'Content-Type', 
-        'X-Pingback', 
-        'ETag', 
-        'Cache-Control', 
-        'Pragma'
+        'X-Pingback'
     ), 
     'pgcache.accept.files' => array(
         'wp-comments-popup.php', 
         'wp-links-opml.php', 
         'wp-locations.php'
     ), 
+    'pgcache.reject.logged' => true, 
     'pgcache.reject.uri' => array(
         'wp-.*\.php', 
         'index\.php'
@@ -79,10 +75,7 @@ return array(
         'localhost:11211'
     ), 
     'minify.rewrite' => true, 
-    'minify.logging' => true, 
-    'minify.cache.path' => '', 
-    'minify.cache.locking' => true, 
-    'minify.docroot' => '', 
+    'minify.locking' => true, 
     'minify.fixtime' => 0, 
     'minify.symlinks' => array(), 
     'minify.compress' => true, 
@@ -96,26 +89,24 @@ return array(
         )
     ), 
     'minify.lifetime' => 3600, 
-    'minify.upload' => true,
+    'minify.upload' => true, 
     'minify.html.enable' => true, 
     'minify.html.reject.admin' => true, 
+    'minify.html.inline.css' => false, 
+    'minify.html.inline.js' => false, 
     'minify.html.strip.crlf' => false, 
     'minify.css.enable' => true, 
     'minify.css.strip.comments' => false, 
     'minify.css.strip.crlf' => false, 
-    'minify.css.groups' => array(
-        'include' => array(
-            'files' => array(
-                'wp-content/themes/default/style.css'
-            )
-        )
-    ), 
+    'minify.css.groups' => array(), 
     'minify.js.enable' => true, 
     'minify.js.combine.header' => false, 
     'minify.js.combine.footer' => false, 
     'minify.js.strip.comments' => false, 
     'minify.js.strip.crlf' => false, 
     'minify.js.groups' => array(), 
+    'minify.reject.ua' => array(), 
+    'minify.reject.uri' => array(), 
     
     /**
      * CDN configuration
@@ -141,6 +132,14 @@ return array(
     'cdn.ftp.pass' => '', 
     'cdn.ftp.path' => '', 
     'cdn.ftp.pasv' => false, 
+    'cdn.reject.ua' => array(
+        'bot', 
+        'ia_archive', 
+        'slurp', 
+        'crawl', 
+        'spider'
+    ), 
+    'cdn.reject.uri' => array(), 
     
     /**
      * Common configuration
@@ -151,8 +150,8 @@ return array(
     /**
      * Notes configuration
      */
-    'notes.defaults' => true,
-    'notes.wp_content_perms' => true,
+    'notes.defaults' => true, 
+    'notes.wp_content_perms' => true, 
     'notes.cdn_first_time' => true, 
-    'notes.no_memcached_nor_apc' => true, 
+    'notes.no_memcached_nor_apc' => true
 );

@@ -45,6 +45,12 @@ class W3_PgCache
     var $_time_start = 0;
     
     /**
+     * Lifetime
+     * @var integer
+     */
+    var $_lifetime = 0;
+    
+    /**
      * Cache reject reason
      *
      * @var string
@@ -58,6 +64,8 @@ class W3_PgCache
     {
         require_once W3TC_LIB_W3_DIR . '/Config.php';
         $this->_config = W3_Config::instance();
+        $this->_lifetime = $this->_config->get_integer('pgcache.lifetime', 3600);
+        $this->_compression = ($this->_config->get_boolean('pgcache.compress', true) ? $this->_get_compression() : false);
     }
     
     /**
@@ -78,7 +86,6 @@ class W3_PgCache
         }
         
         $this->_caching = $this->_can_cache();
-        $this->_compression = ($this->_config->get_boolean('pgcache.compress', true) ? $this->_get_compression() : false);
         $this->_page_key = $this->_get_page_key($this->_compression);
         
         if ($this->_caching) {
@@ -88,18 +95,22 @@ class W3_PgCache
             $cache = $this->_get_cache();
             
             if (is_array(($data = $cache->get($this->_page_key)))) {
-                @header('X-Powered-By: ' . W3TC_POWERED_BY);
+                @header('Pragma: public');
                 
                 /**
                  * Handle 404 error
                  */
                 if ($data['404']) {
-                    header('HTTP/1.1 404 Not Found');
-                } elseif (! empty($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
-                    $if_modified_since = strtotime(preg_replace('/;.*$/', '', $_SERVER['HTTP_IF_MODIFIED_SINCE']));
-                    if ($if_modified_since >= $data['time']) {
-                        header("HTTP/1.1 304 Not Modified");
-                    }
+                    @header('HTTP/1.1 404 Not Found');
+                } else {
+                    @$this->_conditional_get($data['time'], md5($data['content']));
+                }
+                
+                /**
+                 * Send cached headers
+                 */
+                foreach ((array) $data['headers'] as $header_name => $header_value) {
+                    @header($header_name . ': ' . $header_value);
                 }
                 
                 /**
@@ -107,15 +118,8 @@ class W3_PgCache
                  */
                 if ($this->_config->get_boolean('pgcache.debug')) {
                     $time_total = w3_microtime() - $this->_time_start;
-                    $debug_info = $this->_get_debug_info(true, '', true, $time_total, $data['headers']);
+                    $debug_info = $this->_get_debug_info(true, '', true, $time_total);
                     $this->_append_content($data, "\r\n\r\n" . $debug_info);
-                }
-                
-                /**
-                 * Send cached headers
-                 */
-                foreach ((array) $data['headers'] as $header_name => $header_value) {
-                    header($header_name . ': ' . $header_value);
                 }
                 
                 /**
@@ -143,32 +147,29 @@ class W3_PgCache
      */
     function ob_callback($buffer)
     {
-        if (! $this->_can_cache2($buffer)) {
-            if (w3_is_xml($buffer) && ! is_admin()) {
-                $this->_send_compression_headers($this->_compression);
+        if (! w3_is_xml($buffer)) {
+            return $buffer;
+        }
+        
+        if (! $this->_can_cache2()) {
+            $this->_send_compression_headers($this->_compression);
+            
+            if ($this->_config->get_boolean('pgcache.debug')) {
+                $time_total = w3_microtime() - $this->_time_start;
+                $debug_info = $this->_get_debug_info(false, $this->_cache_reject_reason, false, $time_total);
+                $buffer .= "\r\n\r\n" . $debug_info;
+            }
+            
+            switch ($this->_compression) {
+                case 'gzip':
+                    return gzencode($buffer);
                 
-                if ($this->_config->get_boolean('pgcache.debug')) {
-                    $time_total = w3_microtime() - $this->_time_start;
-                    $debug_info = $this->_get_debug_info(false, $this->_cache_reject_reason, false, $time_total, $this->_get_data_headers($this->_compression));
-                    $buffer .= "\r\n\r\n" . $debug_info;
-                }
-                
-                switch ($this->_compression) {
-                    case 'gzip':
-                        return gzencode($buffer);
-                    
-                    case 'deflate':
-                        return gzdeflate($buffer);
-                }
+                case 'deflate':
+                    return gzdeflate($buffer);
             }
             
             return $buffer;
         }
-        
-        /**
-         * Send compression headers first
-         */
-        $this->_send_compression_headers($this->_compression);
         
         /**
          * Create data object
@@ -177,7 +178,6 @@ class W3_PgCache
         $page_keys = array();
         
         $cache = $this->_get_cache();
-        $lifetime = $this->_config->get_integer('pgcache.lifetime', 3600);
         $time = time();
         $is_404 = is_404();
         
@@ -194,11 +194,6 @@ class W3_PgCache
             );
             
             /**
-             * Set headers to cache
-             */
-            $data['headers'] = $this->_get_data_headers($compression);
-            
-            /**
              * Set content to cache
              */
             if ($compression == 'gzip') {
@@ -209,14 +204,28 @@ class W3_PgCache
                 $data['content'] = $buffer;
             }
             
+            $data_array[$compression] = $data;
+        }
+        
+        /**
+         * We must compression headers first before ::_get_data_headers() call
+         */
+        @$this->_conditional_get($time, md5($data_array[$this->_compression]['content']));
+        $this->_send_compression_headers($this->_compression);
+        @header('Pragma: public');
+        
+        foreach ($data_array as $compression => $data) {
             /**
-             * Store data
+             * Set headers to cache
+             */
+            $data['headers'] = $this->_get_data_headers($compression);
+            $data_array[$compression] = $data;
+            
+            /**
+             * Cache data
              */
             $page_key = $this->_get_page_key($compression);
-            
-            $cache->set($page_key, $data, $lifetime);
-            
-            $data_array[$compression] = $data;
+            $cache->set($page_key, $data, $this->_lifetime);
             $page_keys[] = $page_key;
         }
         
@@ -248,7 +257,7 @@ class W3_PgCache
          */
         if ($this->_config->get_boolean('pgcache.debug')) {
             $time_total = w3_microtime() - $this->_time_start;
-            $debug_info = $this->_get_debug_info(true, '', false, $time_total, $data_array[$this->_compression]['headers']);
+            $debug_info = $this->_get_debug_info(true, '', false, $time_total);
             $this->_append_content($data_array[$this->_compression], "\r\n\r\n" . $debug_info);
         }
         
@@ -285,7 +294,7 @@ class W3_PgCache
         $map_key = $this->_get_map_key($namespace);
         $cache = $this->_get_cache();
         
-        return $cache->set($map_key, $map, $this->_config->get_integer('pgcache.lifetime', 3600));
+        return $cache->set($map_key, $map, $this->_lifetime);
     }
     
     /**
@@ -464,7 +473,7 @@ class W3_PgCache
         /**
          * Skip if user is logged in
          */
-        if (! $this->_config->get_boolean('pgcache.cache.logged', true) && ! $this->_check_logged_in()) {
+        if ($this->_config->get_boolean('pgcache.reject.logged', true) && ! $this->_check_logged_in()) {
             $this->_cache_reject_reason = 'User is logged in';
             
             return false;
@@ -479,18 +488,12 @@ class W3_PgCache
      * @param string $buffer
      * @return boolean
      */
-    function _can_cache2($buffer)
+    function _can_cache2()
     {
         /**
          * Skip if caching is disabled
          */
         if (! $this->_caching) {
-            return false;
-        }
-        
-        if (empty($buffer)) {
-            $this->_cache_reject_reason = 'Page is empty';
-            
             return false;
         }
         
@@ -534,15 +537,25 @@ class W3_PgCache
         static $cache = null;
         
         if ($cache === null) {
-            $engine = $this->_config->get_string('pgcache.engine', 'memcached');
-            if ($engine == 'memcached') {
-                $engineConfig = array(
-                    'engine' => $this->_config->get_string('pgcache.memcached.engine', 'auto'), 
-                    'servers' => $this->_config->get_array('pgcache.memcached.servers'), 
-                    'persistant' => true
-                );
-            } else {
-                $engineConfig = array();
+            $engine = $this->_config->get_string('pgcache.engine', 'file');
+            
+            switch ($engine) {
+                case 'memcached':
+                    $engineConfig = array(
+                        'engine' => $this->_config->get_string('pgcache.memcached.engine', 'auto'), 
+                        'servers' => $this->_config->get_array('pgcache.memcached.servers'), 
+                        'persistant' => true
+                    );
+                    break;
+                
+                case 'file':
+                    $engineConfig = array(
+                        'cache_dir' => W3TC_CACHE_FILE_DIR
+                    );
+                    break;
+                
+                default:
+                    $engineConfig = array();
             }
             
             require_once W3TC_LIB_W3_DIR . '/Cache.php';
@@ -560,9 +573,8 @@ class W3_PgCache
     function _check_request_uri()
     {
         $auto_reject_uri = array(
-            'wp-includes', 
-            'wp-content', 
-            'robots.txt'
+            'wp-login', 
+            'wp-register'
         );
         
         foreach ($auto_reject_uri as $uri) {
@@ -672,15 +684,18 @@ class W3_PgCache
     {
         $headers = array();
         
-        if (function_exists('apache_response_headers')) {
-            flush();
-            $headers = apache_response_headers();
-        } elseif (function_exists('headers_list')) {
+        if (function_exists('headers_list')) {
             foreach (headers_list() as $header) {
                 list ($header_name, $header_value) = explode(': ', $header, 2);
                 $headers[$header_name] = $header_value;
             }
+        } elseif (function_exists('apache_response_headers')) {
+            flush();
+            $headers = apache_response_headers();
         }
+        
+        ksort($headers);
+        reset($headers);
         
         return $headers;
     }
@@ -777,7 +792,13 @@ class W3_PgCache
      */
     function _get_map_key($namespace)
     {
-        $key = sprintf('w3tc_%s_map_%s', md5($_SERVER['HTTP_HOST']), $namespace);
+        $blog_id = w3_get_blog_id();
+        
+        if (empty($blog_id)) {
+            $blog_id = $_SERVER['HTTP_HOST'];
+        }
+        
+        $key = sprintf('w3tc_%s_map_%s', md5($blog_id), $namespace);
         
         return $key;
     }
@@ -811,13 +832,12 @@ class W3_PgCache
      * @param string $reason
      * @param boolean $status
      * @param double $time
-     * @param array $headers
      * @return string
      */
-    function _get_debug_info($cache, $reason, $status, $time, $headers)
+    function _get_debug_info($cache, $reason, $status, $time)
     {
         $debug_info = "<!-- W3 Total Cache: Page cache debug info:\r\n";
-        $debug_info .= sprintf("%s%s\r\n", str_pad('Engine: ', 20), $this->_config->get_string('pgcache.engine'));
+        $debug_info .= sprintf("%s%s\r\n", str_pad('Engine: ', 20), w3_get_engine_name($this->_config->get_string('pgcache.engine')));
         $debug_info .= sprintf("%s%s\r\n", str_pad('Key: ', 20), $this->_page_key);
         $debug_info .= sprintf("%s%s\r\n", str_pad('Caching: ', 20), ($cache ? 'enabled' : 'disabled'));
         if (! $cache) {
@@ -825,6 +845,8 @@ class W3_PgCache
         }
         $debug_info .= sprintf("%s%s\r\n", str_pad('Status: ', 20), ($status ? 'cached' : 'not cached'));
         $debug_info .= sprintf("%s%.3fs\r\n", str_pad('Creation Time: ', 20), $time);
+        
+        $headers = $this->_get_response_headers();
         
         if (count($headers)) {
             $debug_info .= "Headers info:\r\n";
@@ -874,8 +896,30 @@ class W3_PgCache
     function _send_compression_headers($compression)
     {
         if ($compression !== false) {
-            header('Content-Encoding: ' . $compression);
-            header('Vary: Accept-Encoding, Cookie');
+            @header('Content-Encoding: ' . $compression);
+            @header('Vary: Accept-Encoding, Cookie');
         }
+    }
+    
+    /**
+     * Conditional get
+     * @param $time
+     * @param $etag
+     * @return void
+     */
+    function _conditional_get($time, $etag)
+    {
+        require_once W3TC_LIB_MINIFY_DIR . 'HTTP/ConditionalGet.php';
+        
+        $cg_options = array(
+            'maxAge' => $this->_lifetime, 
+            'contentHash' => $etag
+        );
+        
+        if ($this->_compression) {
+            $cg_options['encoding'] = $this->_compression;
+        }
+        
+        HTTP_ConditionalGet::check($time, true, $cg_options);
     }
 }

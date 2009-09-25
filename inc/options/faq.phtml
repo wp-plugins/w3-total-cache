@@ -74,7 +74,7 @@
         <li><a href="#q60">How can I tell if it's working? Aren't there any statistics at all?</a></li>
         <li><a href="#q61">I'm an advanced theme developer and I want to have different combinations of <acronym title="Cascading Style Sheet">CSS</acronym> or <acronym title="JavaScript">JS</acronym> files on different types of pages in my theme; how is this done?</a></li>
 		<li><a href="#q62">Which features can I use if I haven't yet installed <acronym title="Alternative PHP Cache">APC</acronym> or memcached?</a></li>
-        <li><a href="#q63">How can I serve my favicon from the <acronym title="Content Delivery Network">CDN</acronym>?</a></li>
+        <li><a href="#q63">How can I host my favicon with my <acronym title="Content Delivery Network">CDN</acronym>?</a></li>
         <li><a href="#q64">Why do you set the value of the media attribute of &lt;link&gt; to all?</a></li>
         <li><a href="#q65">Why can't I specify other &lt;script&gt; types or encoding?</a></li>
         <li><a href="#q66">My theme doesn't call wp_footer(), how do I set this plugin up?</a></li>
@@ -89,6 +89,7 @@
         <li><a href="#q75">Who do you recommend as a <acronym title="Content Delivery Network">CDN</acronym> provider?</a></li>
         <li><a href="#q76">Hang on, don't I need to modify my <acronym title="Cascading Style Sheet">CSS</acronym> files so they'll work on the <acronym title="Content Delivery Network">CDN</acronym>?</a></li>
         <li><a href="#q77">I don't have time to deal with this, but I know I need it. Will you help me?</a></li>
+        <li><a href="#q92">What about query string variables on <acronym title="Cascading Style Sheet">CSS</acronym> and <acronym title="JavaScript">JS</acronym>, do they matter?</a></li>
       </ul>
     </li>
     <li class="col">
@@ -141,7 +142,7 @@
     <li>Minification (concatenation, white space removal) of inline, external or 3rd party <acronym title="JavaScript">JS</acronym> and <acronym title="Cascading Style Sheet">CSS</acronym> with scheduled updates</li>
     <li>Optional embedding of <acronym title="JavaScript">JS</acronym> just above &lt;/body&gt;</li>
       <li>Support for caching pages, posts, feeds, database objects, <acronym title="Cascading Style Sheet">CSS</acronym>, <acronym title="JavaScript">JS</acronym> in memory with <acronym title="Alternative PHP Cache">APC</acronym> or memcached or both</li>
-    <li>Caching of RSS/Atom Feeds (Comments, Page and site), URIs with query string variables (like search result pages), Database queries, Pages, Posts, <acronym title="Cascading Style Sheet">CSS</acronym> and <acronym title="JavaScript">JS</acronym></li>
+    <li>Caching of RSS/Atom Feeds (Comments, Page and site), <acronym title="Uniform Resource Indicator">URL</acronym>s with query string variables (like search result pages), Database queries, Pages, Posts, <acronym title="Cascading Style Sheet">CSS</acronym> and <acronym title="JavaScript">JS</acronym></li>
     <li>Complete header management including Etags</li>
     <li>Increased web server concurrency and reduced resource consumption, increased scale</li>
   </ul>
@@ -317,13 +318,13 @@
     On the contrary, as with any other action a user can perform on a site, faster performance will encourage more of it. The cache is so quickly rebuilt in memory that it's no trouble to show visitors the most current version of a post that's experiencing Digg, Slashdot, Drudge Report, Yahoo Buzz or Twitter effect.</p>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q49"><strong>What if I accidentally specify an incorrect path to a <acronym title="Cascading Style Sheet">CSS</acronym> or <acronym title="JavaScript">JS</acronym> file?</strong><br />
-    Unfortunately a 400 bad request error may be generated. So use the "Check URI" button to make sure that you have entered the correct URI or path to the file.</p>
+    Unfortunately a 400 bad request error may be generated. So use the "Check <acronym title="Uniform Resource Indicator">URL</acronym>" button to make sure that you have entered the correct <acronym title="Uniform Resource Indicator">URL</acronym> or path to the file.</p>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q50"><strong>Does the plugin automatically remove duplicate <acronym title="JavaScript">JS</acronym>?</strong><br />
     No. If you include a script in the minfy settings twice or it already exists in your theme we do not automatically remove the extra code. That's tricky business and it's better for us to just let you make the decisions conscientiously.</p>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q51"><strong>I've been using the plugin for some time, I updated one of my other plugins and now it doesn't work anymore. What's up?</strong><br />
-    It's likely the plugin author modified the <acronym title="JavaScript">JS</acronym> or <acronym title="Cascading Style Sheet">CSS</acronym> in the new release and any old <acronym title="Cascading Style Sheet">CSS</acronym> or <acronym title="JavaScript">JS</acronym> you optimized with our plugin has introduced duplicate code as a result (creating a conflict). Simply check out the source code, identify any new <acronym title="Cascading Style Sheet">CSS</acronym> or <acronym title="JavaScript">JS</acronym> and update your <acronym title="Cascading Style Sheet">CSS</acronym> and <acronym title="JavaScript">JS</acronym> optimizations our plugin and you're good to go.</p>
+    It's likely the plugin author modified their <acronym title="JavaScript">JS</acronym> or <acronym title="Cascading Style Sheet">CSS</acronym> in the new release and any old <acronym title="Cascading Style Sheet">CSS</acronym> or <acronym title="JavaScript">JS</acronym> you optimized with our plugin has introduced duplicate code as a result (creating a conflict). Simply check out the source code, identify any new <acronym title="Cascading Style Sheet">CSS</acronym> or <acronym title="JavaScript">JS</acronym> and update your <acronym title="Cascading Style Sheet">CSS</acronym> and <acronym title="JavaScript">JS</acronym> optimizations our plugin and you're good to go.</p>
   <!--
     <p id="q52" align="right"><a href="#toc">back to top</a></p>
 <p><strong>I have some <acronym title="Cascading Style Sheet">CSS</acronym> classes with declarations being overwritten or <acronym title="JavaScript">JS</acronym> with dependencies, do I really have to copy and paste all my <acronym title="Cascading Style Sheet">CSS</acronym> and <acronym title="JavaScript">JS</acronym> file settings around?</strong><br />
@@ -360,9 +361,9 @@ No, you can drag and drop them into the desired order on the minify settings pag
     Great question, we understand the use case all too well. Right now you cannot create different groups of <acronym title="JavaScript">JS</acronym> and <acronym title="Cascading Style Sheet">CSS</acronym> files for your home, page, post, archive or 404 etc. This feature is coming soon; it did not make the first cut.</p>
   <p align="right"><a href="#toc">back to top</a></p>
     <p id="q62"><strong>Which features can I use if I haven't yet installed <acronym title="Alternative PHP Cache">APC</acronym> or memcached?</strong><br />
-		  Memory caching will not be possible. However you will be able to use minify as well <acronym title="Content Delivery Network">CDN</acronym> functionality without issue. Remember that W3 Total Cache is not compatible with other caching plugins, so you'll want to install <acronym title="Alternative PHP Cache">APC</acronym> and/or memcached as soon as possible.</p>
+		  Memory caching will not be possible. However you will be able to use both the page cache and minify in "disk" mode, as well <acronym title="Content Delivery Network">CDN</acronym> functionality without issue. Remember that W3 Total Cache is not compatible with other caching plugins, so you'll want to install <acronym title="Alternative PHP Cache">APC</acronym> and/or memcached as soon as possible.</p>
   <p align="right"><a href="#toc">back to top</a></p>
-  <p id="q63"><strong>How can I serve my favicon from the <acronym title="Content Delivery Network">CDN</acronym>?</strong><br />
+  <p id="q63"><strong>How can I host my favicon with my <acronym title="Content Delivery Network">CDN</acronym>?</strong><br />
     If the file exists in your document root (i.e. http://domain.com/favicon.ico), the plugin can take care of that for you using custom upload options. If the file is in your theme directory you can also have the plugin uploaded from there.</p>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q64"><strong>Why do you set the value of the media attribute of &lt;link&gt; to all?</strong><br />
@@ -372,11 +373,11 @@ No, you can drag and drop them into the desired order on the minify settings pag
     We have not found a use case where this appears to be of any consequence. If you're aware of one <a href="mailto:wordpressexperts@w3-edge.com">please let us know</a>.</p>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q66"><strong>My theme doesn't call wp_footer(), how do I set this plugin up?</strong><br />
-    The calls you'll want to make for the various cases are:</p>
+    If you need to embed JavaScript at the bottom of the page and your theme doesn't use wp_footer(), you'll need to manually update your theme. The calls you'll want to make for the various cases are:</p>
   <ul>
     <li>&lt;?php if (function_exists('w3tc_scripts')){w3tc_scripts('include-footer');} ?&gt;<br />
       Inserts the footer <acronym title="JavaScript">JS</acronym> group at the location you specify in your theme.</li>
-    <li>&lt;?php if (function_exists('w3tc_scripts')){w3tc_scripts('include-footer_nb');} ?&gt;<br />
+    <li>&lt;?php if (function_exists('w3tc_scripts')){w3tc_scripts('include-footer-nb');} ?&gt;<br />
       Inserts the footer non-blocking <acronym title="JavaScript">JS</acronym> group at the location you specify in your theme.</li>
     <li>&lt;?php if (function_exists('w3tc_scripts')){w3tc_scripts('include-footer');w3tc_scripts('include-footer-nb');} ?&gt;<br />
       Inserts both of the above <acronym title="JavaScript">JS</acronym> groups at the location you specify in your theme.</li>
@@ -424,6 +425,9 @@ No, you can drag and drop them into the desired order on the minify settings pag
   <p id="q77"><strong>I don't have time to deal with this, but I know I need it. Will you help me?</strong><br />
     Yes! Please <a href="mailto:wordpressexperts@w3-edge.com">reach out to us</a> and we'll get you acclimated so you can "set it and forget it."</p>
   <p align="right"><a href="#toc">back to top</a></p>
+  <p id="q92"><strong>What about query string variables on <acronym title="Cascading Style Sheet">CSS</acronym> and <acronym title="JavaScript">JS</acronym>, do they matter?</strong><br />
+    This is definitely a special case. Files like "http://domain.com/wp-content/themes/default/js/script.js?ver=20090102" etc need to be specified with the full <acronym title="Uniform Resource Locator">URL</acronym>. This is an exception to the general rule of specifying a local path to file like: "wp-content/themes/default/js/script.js", which should also work fine. Be sure to click the "Verify <acronym title="Uniform Resource Indicator">URL</acronym>" button to be sure that everything is ok before saving changes.</p>
+  <p align="right"><a href="#toc">back to top</a></p>
   <p id="q78"><strong>Which web servers do you support?</strong><br />
     We are aware of no incompatibilities with <a href="http://httpd.apache.org/" target="_blank">apache</a> 1.3+, <a href="http://www.iis.net/" target="_blank">IIS</a> 5+ or <a href="http://litespeedtech.com/products/webserver/overview/" target="_blank">litespeed</a> 4.0.2+. If there's a web server you feel we should be actively testing (e.g. <a href="http://www.lighttpd.net/" target="_blank">lighttpd</a>), we're <a href="mailto:wordpressexperts@w3-edge.com">interested in hearing</a>.</p>
   <p align="right"><a href="#toc">back to top</a></p>
@@ -432,7 +436,7 @@ No, you can drag and drop them into the desired order on the minify settings pag
   <p>If you're larger organization or a web hosting company, consider looking into solutions that exist like <a href="http://www.gear6.com/">Gear6</a> which could be useful now that you have a plugin that makes management memcached pain free.</p>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q80"><strong>Is this plugin compatible with varnish or squid?</strong><br />
-    We are still testing the performance of this plugin with <a href="http://varnish.projects.linpro.no/" target="_blank">varnish</a>. It currently appears that varnish is not "necessary" when this plugin fully utilized due to the concurrency achieved via memory access for all objects required to handle requests. We have not tested <a href="http://www.squid-cache.org/" target="_blank">squid</a> with our plugin.</p>
+    Yes, it is compatible with <a href="http://varnish.projects.linpro.no/" target="_blank">varnish</a> and <a href="http://www.squid-cache.org/" target="_blank">squid</a>, however (with regard to dynamic content) we have yet to find a practical case where either can provide more scale for an individual server than apache 2+ if properly configured.</p>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q81"><strong>My server is state of the art with 15,000 RPM RAID, why do I need to cache anything in memory?</strong><br />
     Even if your server was using an array of solid state disks (SSD), your server's <acronym title="Random Access Memory">RAM</acronym> is still going to be faster and introduce less overhead to access than even the fastest solid state drives on a PCIe bus. If you didn't invest in solid state disks for your server, then even worse off - at least an order of magnitude speed difference in read operations in <acronym title="Random Access Memory">RAM</acronym> versus HDD. For write operations delta the latency differences is even more pronounced. <acronym title="Random Access Memory">RAM</acronym> is the winner hands down. We won't even discuss the blocking and arbitration issues that happen with disk arrays under certain circumstances.</p>
@@ -463,7 +467,7 @@ No, you can drag and drop them into the desired order on the minify settings pag
     If your WordPress installation is works, you're all set.</p>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q87"><strong>And I need mod_rewrite (or equivalent for my web server) installed too, no?</strong><br />
-    That's correct; everything you need for WordPress (i.e. fancy URLs) will get you started with this plugin also.</p>
+    That's correct; everything you need for WordPress (i.e. fancy <acronym title="Uniform Resource Locator">URL</acronym>s) will get you started with this plugin also.</p>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q88"><strong>How much hardware do I have to throw at something like this before I see a benefit?</strong><br />
     This plugin was actually designed with virtual dedicated servers in mind. As long as your server has at least 256M of <acronym title="Random Access Memory">RAM</acronym>, you can get started.</p>

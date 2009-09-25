@@ -1,6 +1,6 @@
 <?php
 
-define('W3TC_VERSION', '0.7.5.2');
+define('W3TC_VERSION', '0.8');
 define('W3TC_POWERED_BY', 'W3 Total Cache/' . W3TC_VERSION);
 define('W3TC_LINK_URL', 'http://www.w3-edge.com/wordpress-plugins/');
 define('W3TC_LINK_NAME', 'WordPress Plugins');
@@ -10,27 +10,30 @@ if (! defined('W3TC_DIR')) {
 }
 
 define('W3TC_FILE', 'w3-total-cache/w3-total-cache.php');
-define('W3TC_CONTENT_DIR', W3TC_DIR . '/wp-content');
 define('W3TC_LIB_W3_DIR', W3TC_DIR . '/lib/W3');
 define('W3TC_LIB_MINIFY_DIR', W3TC_DIR . '/lib/Minify/');
+define('W3TC_INSTALL_DIR', W3TC_DIR . '/wp-content');
+define('W3TC_INSTALL_MINIFY_DIR', W3TC_INSTALL_DIR . '/w3tc');
 
 if (! defined('WP_CONTENT_DIR')) {
     define('WP_CONTENT_DIR', realpath(W3TC_DIR . '/../..'));
 }
 
+define('WP_CONTENT_DIR_NAME', basename(WP_CONTENT_DIR));
+
+define('W3TC_CONTENT_DIR_NAME', WP_CONTENT_DIR_NAME . '/w3tc');
+define('W3TC_CONTENT_DIR', ABSPATH . W3TC_CONTENT_DIR_NAME);
+define('W3TC_CACHE_FILE_DIR', W3TC_CONTENT_DIR . '/cache');
+define('W3TC_CACHE_MINIFY_DIR', W3TC_CONTENT_DIR . '/minify');
+define('W3TC_LOG_DIR', W3TC_CONTENT_DIR . '/log');
+
 define('W3TC_CONFIG_NAME', 'w3-total-cache-config');
 define('W3TC_CONFIG_PATH', WP_CONTENT_DIR . '/' . W3TC_CONFIG_NAME . (($w3_blog_id = w3_get_blog_id()) != '' ? '-' . $w3_blog_id : '') . '.php');
 define('W3TC_CONFIG_DEFAULT_PATH', W3TC_DIR . '/w3-total-cache-config-default.php');
 
-define('W3TC_MINIFY_DIR_NAME', 'wp-content/w3tc-cache');
-define('W3TC_MINIFY_DIR', ABSPATH . W3TC_MINIFY_DIR_NAME);
-define('W3TC_MINIFY_CONTENT_DIR', W3TC_DIR . '/' . W3TC_MINIFY_DIR_NAME);
-
 define('W3TC_CDN_COMMAND_UPLOAD', 1);
 define('W3TC_CDN_COMMAND_DELETE', 2);
 define('W3TC_CDN_TABLE_QUEUE', 'w3tc_cdn_queue');
-define('W3TC_CDN_THEMES_DIR', ABSPATH . 'wp-content/themes/');
-define('W3TC_CDN_INCLUDES_DIR', ABSPATH . 'wp-includes/');
 
 /**
  * W3 writable error
@@ -116,17 +119,19 @@ function w3_gzdecode($data)
  *
  * @param string $path
  * @param integer $mask
+ * @param string
  * @return boolean
  */
-function w3_mkdir($path, $mask = 0755)
+function w3_mkdir($path, $mask = 0755, $curr_path = '')
 {
-    $dirs = preg_split('~[\\/]+~', $path);
-    $curr_path = '';
+    $path = preg_replace('~[\\\/]+~', '/', $path);
+    $path = trim($path, '/');
+    $dirs = explode('/', $path);
     foreach ($dirs as $dir) {
         if (empty($dir)) {
             return false;
         }
-        $curr_path .= $dir;
+        $curr_path .= ($curr_path == '' ? '' : '/') . $dir;
         if (! is_dir($curr_path)) {
             if (@mkdir($curr_path, $mask)) {
                 @chmod($curr_path, $mask);
@@ -134,9 +139,49 @@ function w3_mkdir($path, $mask = 0755)
                 return false;
             }
         }
-        $curr_path .= DIRECTORY_SEPARATOR;
     }
     return true;
+}
+
+/**
+ * Recursive remove dir
+ * 
+ * @param $path
+ * @return boolean
+ */
+function w3_rmdir($path, $empty = false)
+{
+    $dir = @opendir($path);
+    if ($dir) {
+        while (($entry = readdir($dir))) {
+            if ($entry != '.' && $entry != '..') {
+                $full_path = $path . '/' . $entry;
+                if (is_dir($full_path)) {
+                    $result = @w3_rmdir($full_path);
+                } else {
+                    $result = @unlink($full_path);
+                }
+                if (! $result) {
+                    @closedir($dir);
+                    return false;
+                }
+            }
+        }
+        @closedir($dir);
+        return ($empty ? true : @rmdir($path));
+    }
+    return false;
+}
+
+/**
+ * Recursive empty dir
+ * 
+ * @param $path
+ * @return boolean
+ */
+function w3_emptydir($path)
+{
+    return w3_rmdir($path, true);
 }
 
 /**
@@ -255,13 +300,54 @@ function w3_get_site_url()
     
     if ($site_url === null) {
         $site_url = get_option('siteurl');
-        
-        if (empty($site_url)) {
-            $site_url = sprintf('http://%s', $_SERVER['HTTP_HOST']);
-        }
     }
     
     return $site_url;
+}
+
+/**
+ * Get domain URL
+ * @return string
+ */
+function w3_get_domain_url()
+{
+    $siteurl = w3_get_site_url();
+    $parse_url = @parse_url($siteurl);
+    
+    if ($parse_url && isset($parse_url['scheme'])) {
+        $scheme = $parse_url['scheme'];
+        if (isset($parse_url['host'])) {
+            $host = $parse_url['host'];
+            $port = (isset($parse_url['port']) ? ':' . $parse_url['port'] : '');
+            return sprintf('%s://%s%s', $scheme, $host, $port);
+        }
+    }
+    
+    return false;
+}
+
+/**
+ * Returns blog path
+ * @return string
+ */
+function w3_get_site_path()
+{
+    static $site_path = null;
+    
+    if ($site_path === null) {
+        
+        $site_url = w3_get_site_url();
+        $domain_url = w3_get_domain_url();
+        
+        $site_path = str_replace($domain_url, '', $site_url);
+        $site_path = trim($site_path, '/');
+        
+        if ($site_path != '') {
+            $site_path .= '/';
+        }
+    }
+    
+    return $site_path;
 }
 
 /**
@@ -317,7 +403,7 @@ function w3_redirect($url = '', $params = '')
         $query_string = '';
         
         foreach ($merged_params as $param => $value) {
-            $count --;
+            $count--;
             $query_string .= urlencode($param) . (! empty($value) ? '=' . urlencode($value) : '') . ($count ? '&' : '');
         }
         
@@ -326,6 +412,112 @@ function w3_redirect($url = '', $params = '')
     
     $url .= (! empty($parse_url['fragment']) ? '#' . $parse_url['fragment'] : '');
     
-    header('Location: ' . $url);
+    @header('Location: ' . $url);
     exit();
 }
+
+/**
+ * Returns caching engine name
+ * @param $engine
+ * @return string
+ */
+function w3_get_engine_name($engine)
+{
+    switch ($engine) {
+        case 'memcached':
+            $engine_name = 'memcached';
+            break;
+        
+        case 'apc':
+            $engine_name = 'apc';
+            break;
+        
+        case 'file':
+            $engine_name = 'disk';
+            break;
+        
+        default:
+            $engine_name = 'N/A';
+            break;
+    }
+    
+    return $engine_name;
+}
+
+/**
+ * Converts value to boolean
+ * @param mixed $value
+ * @return boolean
+ */
+function w3_to_boolean($value)
+{
+    if (is_string($value)) {
+        switch (strtolower($value)) {
+            case '+':
+            case '1':
+            case 'y':
+            case 'on':
+            case 'yes':
+            case 'true':
+            case 'enabled':
+                return true;
+            
+            case '-':
+            case '0':
+            case 'n':
+            case 'no':
+            case 'off':
+            case 'false':
+            case 'disabled':
+                return false;
+        }
+    }
+    
+    return (boolean) $value;
+}
+
+/**
+ * Download url via GET
+ * @param $url
+ * @return string
+ */
+function w3_url_get($url)
+{
+    if (w3_to_boolean(ini_get('allow_url_fopen'))) {
+        ini_set('user_agent', W3TC_POWERED_BY);
+        return @file_get_contents($url);
+    } elseif (function_exists('curl_init')) {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_USERAGENT, W3TC_POWERED_BY);
+        $contents = curl_exec($ch);
+        curl_close($ch);
+        return $contents;
+    } else {
+        $parse_url = @parse_url($url);
+        if (isset($parse_url['host'])) {
+            $host = $parse_url['host'];
+            $port = (isset($parse_url['port']) ? (int) $parse_url['path'] : 80);
+            $path = (isset($parse_url['path']) ? trim($parse_url['path']) : '/');
+            $query = (isset($parse_url['query']) ? trim($parse_url['query']) : '');
+            $request_uri = $path . ($query != '' ? '?' . $query : '');
+            $request = sprintf("GET %s HTTP/1.1\r\nHost: %s\r\nConnection: close\r\nUser-Agent: %s\r\n\r\n", $request_uri, $host, W3TC_POWERED_BY);
+            if (($fp = @fsockopen($host, $port))) {
+                $response = '';
+                @fputs($fp, $request);
+                while (! @feof($fp)) {
+                    $response .= @fgets($fp, 4096);
+                }
+                @fclose($fp);
+                list (, $contents) = explode("\r\n\r\n", $response, 2);
+                return $contents;
+            }
+        }
+    }
+}
+
+/**
+ * Send powered by header
+ */
+@header('X-Powered-By: ' . W3TC_POWERED_BY);

@@ -1,52 +1,66 @@
 === Plugin Name ===
 Contributors: fredericktownes
-Tags: user experience, cache, caching, page cache, css cache, js cache, db cache, database cache, http compression, gzip, deflate, minify, CDN, content delivery network, media library, wp cache, wp super cache, w3 total cache, performance, speed
+Tags: user experience, cache, caching, page cache, css cache, js cache, db cache, disk cache, disk caching, database cache, http compression, gzip, deflate, minify, CDN, content delivery network, media library, wp cache, wp super cache, w3 total cache, performance, speed
 Requires at least: 2.5
 Tested up to: 2.8.4
-Stable tag: 0.7.5.2
+Stable tag: 0.8
 
 Dramatically improve the user experience of your blog. Add page caching, database caching, minify and content delivery network functionality and more to WordPress.
 
 == Description ==
 
-W3 Total Cache improves the user experience of your blog by caching frequent operations, reducing the weight of various theme files and providing transparent content delivery network integration.
+Trusted by many popular blogs like: mashable.com, pearsonified.com, webdesignerdepot.com, freelanceswitch.com, briansolis.com, css3.info, tutsplus.com, yoast.com, noupe.com and others &mdash; W3 Total Cache improves the user experience of your blog by caching every aspect of your site, reducing the download time of your theme and providing transparent content delivery network (CDN) integration.
 
-The goal is to improve the user experience for the readers of your blog without having to change WordPress, your theme, your plugins or how you produce your content. When fully utilized, your blog will be able to sustain extremely high traffic spikes without requiring hardware upgrades or removing features or functionality from your theme.
+Benefits:
 
-Features and benefits include:
+* Increased visitor time on site
+* Optimized progressive render (pages appear to load instantly)
+* Reduced HTTP Transactions, DNS lookups and reduced document load time
+* Bandwidth savings via Minify and HTTP compression of HTML, CSS, JavaScript and RSS feeds
+* Increased web server concurrency and increased scale (easily sustain high traffic spikes)
 
-* Improved progressive render (non-blocking CSS and JS embedding)
-* Transparent content delivery network (CDN) support with automated media library import
-* Bandwidth savings via Minify and HTTP compression (gzip / deflate) for HTML, CSS and JS
-* Minification (concatenation, white space removal) of inline, external or 3rd party JS and CSS with scheduled updates
-* Caching of RSS/Atom feeds (comments, page and site), URIs with query string variables (like search result pages), database objects, pages, posts, CSS and JS in memory with APC or memcached or both
-* Increased web server concurrency and reduced resource consumption, increased scale
-* Reduced HTTP Transactions, DNS lookups, reduced document load time
+Features:
+
+* Transparent content delivery network (CDN) integration with Media Library, theme files and WordPress core
+* Caching of pages / posts in memory or on disk
+* Caching of CSS and JavaScript in memory, on disk or on CDN
+* Caching of database objects in memory
+* Caching of RSS (comments, page and site) feeds in memory or on disk
+* Caching of search results pages (i.e. URIs with query string variables) in memory or on disk
+* Minification of posts / pages and RSS feeds
+* Minification (concatenation and white space removal) of inline, external or 3rd party JavaScript / CSS with automated updates
 * Complete header management including Etags
-* Optional embedding of JS just above &lt;/body&gt;
+* JavaScript embedding group and location management
+* Import post attachments directly into the Media Library (and CDN)
 
-In essence, anything that can be automated to squeeze out every bit of server performance and minimize bandwidth utilization has been done, leaving your readers with an optimized user experience.
+Easily improve the user experience for your readers without having to change WordPress, your theme, your plugins or how you produce your content.
 
 == Installation ==
 
 1. Disable and remove any other caching plugin you may be using &mdash; most plugins have uninstall procedures you can follow. Make sure wp-content/ has 777 permissions before proceeding, e.g.: `# chmod 777 /var/www/vhosts/domain.com/httpdocs/wp-content/`
 1. Unzip and upload the plugin to your plugins directory (wp-content/plugins/), when done wp-content/plugins/w3-total-cache/ should exist.
 1. Ensure that wp-config.php contains the statement below; if you previously used a caching plugin, this statement is likely to exist already: `define('WP_CACHE', true);`
-1. Locate and activate the plugin on the plugins page, then click the Settings link to proceed to the General Settings tab. Set the permisions of wp-content back to 755, e.g.: `# chmod 755 /var/www/vhosts/domain.com/httpdocs/wp-content/`
-1. Select your caching preferences for page, database and minify. If memcached is used this will require you to confirm or modify the default settings and add any additional memcached servers you wish to use. To utilize APC and memcached + memcache installation guides have been provided under the Installation tab. For those in shared hosting environments, contact your provider to see if either of these are supported.
+1. Locate and activate the plugin on the plugins page, then click the Settings link to proceed to the General Settings tab. Set the permissions of wp-content back to 755, e.g.: `# chmod 755 /var/www/vhosts/domain.com/httpdocs/wp-content/`
+1. Select your caching preferences for page, database and minify. If memcached is used this will require you to confirm or modify the default settings and add any additional memcached servers you wish to use. To utilize APC and memcached + memcache installation guides have been provided under the Installation tab. For those in shared hosting environments, contact your provider to see if either of these is supported.
 1. If you already have a content delivery network provider, proceed to the CDN Settings tab and populate the fields and set your preferences. If you're not running a version of WordPress with the Media Library feature, use the Media Library Import Tool to migrate your post images etc to appropriate locations. If you do not have a CDN provider, you can still improve your site's performance using this feature. Create and use a subdomain on your own server; e.g. static.domain.com and configure options on the CDN tab accordingly.
 1. On the Minify Settings tab all of the recommended settings are preset. Specify any CSS and JS files in the respective sections, view your site's HTML source and search for .css and .js files. In the case of JS files you can specify the type and location of the embedding using the drop down menu.
 1. You're done! Get back to blogging!
 
 == Frequently Asked Questions ==
 
-= Who is this plugin for? =
+= Why does speed matter? =
 
-Anyone that wants to provide an optimal user experience to their readers.
+Speed is among the most significant success factors web sites face. In fact, your blog's speed directly affects your income (revenue) – it's a fact. Some high traffic sites conducted some research and uncovered the following:
+
+* Google.com: +500 ms (speed decrease) -> -20% traffic loss [1](http://home.blarg.net/~glinden/StanfordDataMining.2006-11-29.ppt)
+* Yahoo.com: +400 ms (speed decrease) -> -5-9% full-page traffic loss (visitor left before the page finished loading) [2](http://www.slideshare.net/stoyan/yslow-20-presentation)
+* Amazon.com: +100 ms (speed decrease) -> -1% sales loss [1](http://home.blarg.net/~glinden/StanfordDataMining.2006-11-29.ppt)
+
+A millionth of a second is not a long time, yet the impact is quite significant. Even if you're not a large company (or just hope to become one), a loss is still a loss. However, there is a solution to this problem, take advantage.
 
 = Why is W3 Total Cache better than other cache plugins? =
 
-Most of the popular cache plugins available do a great job and serve their purpose very well. Our plugin remedies numerous performance reducing aspects of any web site going far beyond merely reducing CPU usage and bandwidth consumption for HTML pages alone. The plugin requires no theme modifications or programming compromises to reap the benefits.
+Most of the popular cache plugins available do a great job and serve their purpose very well. Our plugin remedies numerous performance reducing aspects of any web site going far beyond merely reducing CPU usage (load) and bandwidth consumption for HTML pages alone. Equally important, the plugin requires no theme modifications, modifications to your .htaccess (mod_rewrite rules) or programming compromises to reap the benefits. Setup is easy.
 
 = I've never heard of any of this stuff; my blog is fine, no one complains about the speed. Why should I install this? =
 
@@ -123,57 +137,77 @@ Install the plugin to read the full FAQ.
 
 == Changelog ==
 
+= 0.8 =
+* Added disk as method for page caching
+* Added support for mirror (origin pull) content delivery networks
+* Added options to specify minify group policies per template
+* Added options for toggling inline CSS and JS minification to improve minify reliability
+* Added option to update Media Library attachment hostnames (when migrating domains etc)
+* Added "Empty Cache" buttons to respective tabs
+* Added additional file download fallback methods for minify
+* Improved cookie handling
+* Improved header handling
+* Improved reliability of Media Library import
+* "Don't cache pages for logged in users" is now the default page cache setting
+* Fixed minify bug with RSS feeds
+* Fixed minify bug with rewriting of url() URI in CSS
+* Addressed more page cache invalidity cases
+* Addressed rare occurrence of PHP fatal errors when saving post or comments
+* Addressed CSS bug on wp-login.php
+* Addressed rare MySQL error when uploading attachments to Media Library
+* Modified plugin file/directory structure
+* Confirmed compatibility with varnish and squid
+
 = 0.7.5.2 =
-* Minified files now (optionally) upload automatically according to update interval (expiry time)
-* Provided memcache.ini directives updated to improve network throughput
-* Addressed WordPress MU site-wide activation/deactivation issues
-* Added empty (memcached) cache button to each tab
-* Fixed bug with parsing memcached server strings
 * Added warning dialog to minify tab about removal of query strings locally hosted object URIs
-* Fixed bug with minify sometimes not creating files as it should
-* Changed directory of minify working files to wp-content/w3tc-cache/
+* Added empty (memcached) cache button to each tab
 * Improved reliability of memcache flush
+* Minified files now (optionally) upload automatically according to update interval (expiry time)
+* Changed directory of minify working files to wp-content/w3tc-cache/
+* Fixed bug with parsing memcached server strings
+* Fixed bug with minify sometimes not creating files as it should
+* Addressed WordPress MU site-wide activation/deactivation issues
+* Provided memcache.ini directives updated to improve network throughput
 
 = 0.7.5.1 =
-* Resolved a bug in the minify library preventing proper permission notification messages
-* Improved notification handling
-* Fixed bug with database cache that caused comment counts to become out of date
 * Added memcached test button for convenience
+* Added option to concatenate any script to header or footer with non-blocking options for scripts that cannot be minified (e.g. obfuscated scripts)
+* Added options to concatenate JS files only in header or footer (for use with obfuscated scripts)
+* Improved notification handling
+* Improved compatibility with suPHP
+* Improved reliability of Media Library Export
+* Fixed bug with database cache that caused comment counts to become out of date
 * Fixed minor issue with URI with CDN functionality enabled
 * Removed unnecessary minify options
-* Improved reliability of Media Library Export
 * Minification error dialogs now disabled when JS or CSS minify settings disabled
 * Normalized line endings with /n as per minify author's direction
-* Added option to concatenate any script to header or footer with non-blocking options for scripts that cannot be minified (e.g. obfuscated scripts)
-* Improved compatibility with suPHP
-* Added options to concatenate JS files only in header or footer (for use with obfuscated scripts)
+* Resolved a bug in the minify library preventing proper permission notification messages
 
 = 0.7.5 =
-* Fixed issue with auto-download/upgrade and additional error checking
-* Improved handling of inline comments and JavaScript in HTML documents
-* Conditional CSS embeds are now minified leaving the conditional untouched
-* Memcached engine logic modified to better support clustering and multiple memcached instances
 * Added handling for magic_quotes set to on
+* Fixed issue with auto-download/upgrade and additional error checking
+* Fixed a bug preventing minify working properly if either CSS or JS minification was disabled
+* Improved handling of inline comments and JavaScript in HTML documents
+* Improved handing of @import CSS embedding
 * Addressed privilege control issue
 * Resolved warnings thrown in various versions of WordPress
-* Fixed a bug preventing minify working properly if either CSS or JS minification was disabled
-* Improved handing of @import CSS embedding
+* Memcached engine logic modified to better support clustering and multiple memcached instances
 * Eliminated false negatives in a number of gzip/deflate compression analysis tools
 * Total plugin file size reduced
 
 = 0.7 =
+* Added minify support for URIs starting with /
 * WordPress MU support bug fixes
 * Minor CDN uploader fixes
-* Added minify support for URIs starting with /
 * Minor error message improvements
 
 = 0.6 =
-* Improved error message notifications
-* FAQ and installation instructions corrections/adjustments
 * Added "Debug Mode" listing all settings and queries with statistics
-* Resolved bug in minification of feeds
-* Support for multiple wordpress installations added
+* Improved error message notifications
 * Improved cache stability for large objects
+* FAQ and installation instructions corrections/adjustments
+* Support for multiple wordpress installations added
+* Resolved bug in minification of feeds
 
 = 0.5 =
 * Initial release

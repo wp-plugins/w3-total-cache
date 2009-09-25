@@ -79,31 +79,7 @@ class W3_Request
      */
     function get_boolean($key, $default = false)
     {
-        $value = W3_Request::get($key);
-        
-        if (is_string($value)) {
-            switch (strtolower($value)) {
-                case '+':
-                case '1':
-                case 'y':
-                case 'on':
-                case 'yes':
-                case 'true':
-                case 'enabled':
-                    
-                    return true;
-                case '-':
-                case '0':
-                case 'n':
-                case 'no':
-                case 'off':
-                case 'false':
-                case 'disabled':
-                    return false;
-            }
-        }
-        
-        return $default;
+        return w3_to_boolean(W3_Request::get($key, $default));
     }
     
     /**

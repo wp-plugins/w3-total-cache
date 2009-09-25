@@ -1,6 +1,13 @@
 <h3>Database Caching Settings</h3>
 
-<p>Database caching is currently <span class="w3tc-<?php if ($config->get_boolean('dbcache.enabled')): ?>enabled">enabled<?php else: ?>disabled">disabled<?php endif; ?></span>.</p>
+<form action="options-general.php">
+    <p>
+        Database caching is currently <span class="w3tc-<?php if ($dbcache_enabled): ?>enabled">enabled<?php else: ?>disabled">disabled<?php endif; ?></span>.
+        <input type="submit" name="flush_dbcache" value="Empty cache"<?php if (! $dbcache_enabled): ?> disabled="disabled"<?php endif; ?> class="button" />	
+        <input type="hidden" name="page" value="<?php echo W3TC_FILE; ?>" />
+        <input type="hidden" name="tab" value="<?php echo $tab; ?>" />
+    </p>
+</form>
  
 <form action="options-general.php?page=<?php echo urldecode(W3TC_FILE); ?>&amp;tab=<?php echo $tab; ?>" method="post">
     <table class="form-table">
@@ -8,9 +15,8 @@
     		<th style="width: 250px;"><label for="memcached_servers">Memcached Hostname:Port / IP:Port:</label></th>
     		<td>
     			<input id="memcached_servers" type="text" name="dbcache.memcached.servers" value="<?php echo htmlspecialchars(implode(',', $config->get_array('dbcache.memcached.servers'))); ?>" size="100"<?php if (! $dbcache_memcached): ?> disabled="disabled"<?php endif; ?> />
-    			<span id="test_memcached_status" class="w3tc-status w3tc-process"></span>
     			<input id="test_memcached" class="button" type="button" value="Test"<?php if (! $dbcache_memcached): ?> disabled="disabled"<?php endif; ?> />
-    			<input id="flush_memcached_dbcache" class="button" type="button" value="Empty"<?php if (! $dbcache_memcached): ?> disabled="disabled"<?php endif; ?> />
+    			<span id="test_memcached_status" class="w3tc-status w3tc-process"></span>
     			<br /><span class="description">Multiple servers may be used and seperated by a comma; e.g. 192.168.1.100:11211, domain.com:22122</span>
     		</td>
     	</tr>

@@ -1,33 +1,34 @@
 <?php
 
-$css_files = array();
-$css_groups = $config->get_array('minify.css.groups');
-$css_check_groups = array('include');
+$groups = array(
+    '404' => '404',
+	'archive' => 'Archive',
+	'attachment' => 'Attachment',
+	'author' => 'Author',
+    'category' => 'Category',
+    'date' => 'Date',
+	'default' => 'Default',
+    'home' => 'Home',
+    'page' => 'Page',
+    'search' => 'Search',
+	'single' => 'Single',
+	'tag' => 'Tag',
+);
 
-foreach ($css_check_groups as $css_check_group) {
-    if (isset($css_groups[$css_check_group]['files'])) {
-        foreach ((array) $css_groups[$css_check_group]['files'] as $file) {
-            $css_files[$file] = $css_check_group;
-        }
-    }
-}
-
-$js_files = array();
 $js_groups = $config->get_array('minify.js.groups');
-$js_check_groups = array('include', 'include-nb', 'include-footer', 'include-footer-nb');
-
-foreach ($js_check_groups as $js_check_group) {
-    if (isset($js_groups[$js_check_group]['files'])) {
-        foreach ((array) $js_groups[$js_check_group]['files'] as $file) {
-            $js_files[$file] = $js_check_group;
-        }
-    }
-}
+$css_groups = $config->get_array('minify.css.groups');
 
 ?>
 <h3>Minify Settings</h3>
 
-<p>Minify is currently <span class="w3tc-<?php if ($config->get_boolean('minify.enabled')): ?>enabled">enabled<?php else: ?>disabled">disabled<?php endif; ?></span>.</p> 
+<form action="options-general.php">
+    <p>
+        Minify is currently <span class="w3tc-<?php if ($minify_enabled): ?>enabled">enabled<?php else: ?>disabled">disabled<?php endif; ?></span>.
+        <input type="submit" name="flush_minify" value="Empty cache"<?php if (! $minify_enabled): ?> disabled="disabled"<?php endif; ?> class="button" />	
+        <input type="hidden" name="page" value="<?php echo W3TC_FILE; ?>" />
+        <input type="hidden" name="tab" value="<?php echo $tab; ?>" />
+    </p>
+</form>
 
 <form id="minify_form" action="options-general.php?page=<?php echo urldecode(W3TC_FILE); ?>&amp;tab=<?php echo $tab; ?>" method="post">
     <table class="form-table">
@@ -35,9 +36,8 @@ foreach ($js_check_groups as $js_check_group) {
     		<th style="width: 250px;"><label for="memcached_servers">Memcached Hostname:Port / IP:Port:</label></th>
     		<td>
     			<input id="memcached_servers" type="text" name="minify.memcached.servers" value="<?php echo htmlspecialchars(implode(',', $config->get_array('minify.memcached.servers'))); ?>" size="100"<?php if (! $minify_memcached): ?> disabled="disabled"<?php endif; ?> />
-    			<span id="test_memcached_status" class="w3tc-status w3tc-process"></span>
     			<input id="test_memcached" class="button" type="button" value="Test"<?php if (! $minify_memcached): ?> disabled="disabled"<?php endif; ?> />
-    			<input id="flush_memcached_minify" class="button" type="button" value="Empty"<?php if (! $minify_memcached): ?> disabled="disabled"<?php endif; ?> />
+    			<span id="test_memcached_status" class="w3tc-status w3tc-process"></span>
     			<br /><span class="description">Multiple servers may be used and seperated by a comma; e.g. 192.168.1.100:11211, domain.com:22122</span>
     		</td>
     	</tr>
@@ -78,9 +78,13 @@ foreach ($js_check_groups as $js_check_group) {
     		<td>
     			<input type="hidden" name="minify.html.enable" value="0" />
     			<input type="hidden" name="minify.html.reject.admin" value="0" />
+    			<input type="hidden" name="minify.html.inline.css" value="0" />
+    			<input type="hidden" name="minify.html.inline.js" value="0" />
     			<input type="hidden" name="minify.html.strip.crlf" value="0" />
     			<label><input id="html_enabled" type="checkbox" name="minify.html.enable" value="1"<?php checked($config->get_boolean('minify.html.enable'), true); ?> /> Minify</label><br />
     			<label><input class="html_enabled" type="checkbox" name="minify.html.reject.admin" value="1"<?php checked($config->get_boolean('minify.html.reject.admin'), true); ?> /> Don't Minify <acronym title="Hypertext Markup Language">HTML</acronym> for logged in administrators</label><br />
+    			<label><input class="html_enabled" type="checkbox" name="minify.html.inline.css" value="1"<?php checked($config->get_boolean('minify.html.inline.css'), true); ?> /> Inline CSS Minification</label><br />
+    			<label><input class="html_enabled" type="checkbox" name="minify.html.inline.js" value="1"<?php checked($config->get_boolean('minify.html.inline.js'), true); ?> /> Inline JS Minification</label><br />
     			<label><input class="html_enabled" type="checkbox" name="minify.html.strip.crlf" value="1"<?php checked($config->get_boolean('minify.html.strip.crlf'), true); ?> /> Line break removal</label><br />
     		</td>
     	</tr>
@@ -113,30 +117,56 @@ foreach ($js_check_groups as $js_check_group) {
     	<tr>
     		<th valign="top"><acronym title="JavaScript">JS</acronym> File Management:</th>
     		<td>
-                <?php if (count($js_files)): ?>
-                <ol id="js_files">
-                	<?php foreach($js_files as $js_file => $group): ?>
-                	<li><input class="js_enabled" type="text" name="js_files_<?php echo htmlspecialchars($group); ?>[]" value="<?php echo htmlspecialchars($js_file); ?>" size="100" />&nbsp;<select class="js_file_location js_enabled"><option value="include"<?php selected($group, 'include'); ?>>Header</option><option value="include-nb"<?php selected($group, 'include-nb'); ?>>Header (non-blocking)</option><option value="include-footer"<?php selected($group, 'include-footer'); ?>>Footer</option><option value="include-footer-nb"<?php selected($group, 'include-footer-nb'); ?>>Footer (non-blocking)</option></select>&nbsp;<input class="js_file_delete js_enabled button" type="button" value="Delete" />&nbsp;<input class="js_file_verify js_enabled button" type="button" value="Verify URI" /></li>
+    			<p>
+    				<label>
+            			<select id="js_groups" class="js_enabled">
+            			<?php foreach ($groups as $groupKey => $groupText): ?>
+            				<option value="<?php echo $groupKey; ?>"><?php echo $groupText; ?></option>
+            			<?php endforeach; ?>
+            			</select> 
+						Group:
+        			</label>
+    			</p>
+    			<ol id="js_files">
+                <?php foreach ($js_groups as $js_group => $js_locations): ?>
+                	<?php foreach ((array) $js_locations as $js_location => $js_config): ?>
+                		<?php if (! empty($js_config['files'])): foreach ((array) $js_config['files'] as $js_file): ?>
+    					<li>
+    						<input class="js_enabled" type="text" name="js_files[<?php echo htmlspecialchars($js_group); ?>][<?php echo htmlspecialchars($js_location); ?>][]" value="<?php echo htmlspecialchars($js_file); ?>" size="100" />&nbsp;<select class="js_file_location js_enabled"><option value="include"<?php if ($js_location == 'include'): ?> selected="selected"<?php endif; ?>>Embed in: Header</option><option value="include-nb"<?php if ($js_location == 'include-nb'): ?> selected="selected"<?php endif; ?>>Embed in: Header (non-blocking)</option><option value="include-footer"<?php if ($js_location == 'include-footer'): ?> selected="selected"<?php endif; ?>>Embed in: Footer</option><option value="include-footer-nb"<?php if ($js_location == 'include-footer-nb'): ?> selected="selected"<?php endif; ?>>Embed in: Footer (non-blocking)</option></select>&nbsp;<input class="js_file_delete js_enabled button" type="button" value="Delete" />&nbsp;<input class="js_file_verify js_enabled button" type="button" value="Verify URI" />
+    					</li>
+                		<?php endforeach; endif; ?>
                 	<?php endforeach; ?>
-                </ol> 
-                <?php else: ?>
-                <div id="js_files_empty" class="w3tc-empty">No <acronym title="JavaScript">JS</acronym> files added</div>
-                <?php endif; ?>
+                <?php endforeach; ?>
+    			</ol>
+                <div id="js_files_empty" class="w3tc-empty" style="display: none;">No <acronym title="JavaScript">JS</acronym> files added</div>
                 <input id="js_file_add" class="js_enabled button" type="button" value="Add a script" />
     		</td>
     	</tr>
     	<tr>
     		<th valign="top"><acronym title="Cascading Style Sheets">CSS</acronym> File Management:</th>
     		<td>
-                <?php if (count($css_files)): ?>
-                <ol id="css_files">
-                	<?php foreach($css_files as $css_file => $group): ?>
-                	<li><input class="css_enabled" type="text" name="css_files_<?php echo htmlspecialchars($group); ?>[]" value="<?php echo htmlspecialchars($css_file); ?>" size="100" />&nbsp;<input class="css_file_delete css_enabled button" type="button" value="Delete" />&nbsp;<input class="css_file_verify css_enabled button" type="button" value="Verify URI" /></li>
+    			<p>
+    				<label>
+            			<select id="css_groups" class="css_enabled">
+            			<?php foreach ($groups as $groupKey => $groupText): ?>
+            				<option value="<?php echo $groupKey; ?>"><?php echo $groupText; ?></option>
+            			<?php endforeach; ?>
+            			</select> 
+						Group:
+        			</label>
+    			</p>
+    			<ol id="css_files">
+                <?php foreach ($css_groups as $css_group => $css_locations): ?>
+                	<?php foreach ((array) $css_locations as $css_location => $css_config): ?>
+                		<?php if (! empty($css_config['files'])): foreach ((array) $css_config['files'] as $css_file): ?>
+    					<li>
+    						<input class="css_enabled" type="text" name="css_files[<?php echo htmlspecialchars($css_group); ?>][<?php echo htmlspecialchars($css_location); ?>][]" value="<?php echo htmlspecialchars($css_file); ?>" size="100" />&nbsp;<input class="css_file_delete css_enabled button" type="button" value="Delete" />&nbsp;<input class="css_file_verify css_enabled button" type="button" value="Verify URI" />
+    					</li>
+                		<?php endforeach; endif; ?>
                 	<?php endforeach; ?>
-                </ol> 
-                <?php else: ?>
-                <div id="css_files_empty" class="w3tc-empty">No <acronym title="Cascading Style Sheets">CSS</acronym> files added</div>
-                <?php endif; ?>
+                <?php endforeach; ?>
+    			</ol>
+                <div id="css_files_empty" class="w3tc-empty" style="display: none;">No <acronym title="Cascading Style Sheets">CSS</acronym> files added</div>
     			<input id="css_file_add" class="css_enabled button" type="button" value="Add a style sheet" /> 
     		</td>
     	</tr>
