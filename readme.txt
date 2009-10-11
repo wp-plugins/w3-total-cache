@@ -1,6 +1,6 @@
 === Plugin Name ===
 Contributors: fredericktownes
-Tags: user experience, cache, caching, page cache, css cache, js cache, db cache, disk cache, disk caching, database cache, http compression, gzip, deflate, minify, CDN, content delivery network, media library, wp cache, wp super cache, w3 total cache, performance, speed
+Tags: user experience, cache, caching, page cache, css cache, js cache, db cache, disk cache, disk caching, database cache, http compression, gzip, deflate, minify, CDN, content delivery network, media library, wp cache, wp super cache, w3 total cache, performance, speed, multiple hosts, CSS, merge, combine, unobtrusive javascript, compress, optimize, optimizer, JavaScript, JS, cascading style sheets, plugin
 Requires at least: 2.5
 Tested up to: 2.8.4
 Stable tag: 0.8
@@ -9,28 +9,32 @@ Dramatically improve the user experience of your blog. Add page caching, databas
 
 == Description ==
 
-Trusted by many popular blogs like: mashable.com, pearsonified.com, webdesignerdepot.com, freelanceswitch.com, briansolis.com, css3.info, tutsplus.com, yoast.com, noupe.com and others &mdash; W3 Total Cache improves the user experience of your blog by caching every aspect of your site, reducing the download time of your theme and providing transparent content delivery network (CDN) integration.
+Trusted by many popular blogs like: mashable.com, pearsonified.com, webdesignerdepot.com, freelanceswitch.com, briansolis.com, css3.info, tutsplus.com, yoast.com, noupe.com and others &mdash; W3 Total Cache improves the user experience of your blog by improving your server performance, caching every aspect of your site, reducing the download time of your theme and providing transparent content delivery network (CDN) integration.
 
 Benefits:
 
-* Increased visitor time on site
+* At least 10x improvement in site performance (Grade A in YSlow, when fully configured)
+* "Instant" second page views (browser caching after first page view)
+* Reduced page load time: increased visitor time on site (visitors view more pages)
 * Optimized progressive render (pages appear to load instantly)
-* Reduced HTTP Transactions, DNS lookups and reduced document load time
-* Bandwidth savings via Minify and HTTP compression of HTML, CSS, JavaScript and RSS feeds
-* Increased web server concurrency and increased scale (easily sustain high traffic spikes)
+* Improved web server performance (easily sustain high traffic spikes)
+* Up to 80% Bandwidth savings via Minify and HTTP compression of HTML, CSS, JavaScript and RSS feeds
 
 Features:
 
-* Transparent content delivery network (CDN) integration with Media Library, theme files and WordPress core
-* Caching of pages / posts in memory or on disk
-* Caching of (minified) CSS and JavaScript in memory, on disk or on CDN
-* Caching of database objects in memory
+* Compatible with shared hosting, virtual private servers and dedicated servers / clusters
+* Transparent content delivery network (CDN) integration with Media Library, theme files and WordPress itself
+* Caching of (minified and compressed) pages and posts in memory or on disk
+* Caching of (minified and compressed) CSS and JavaScript in memory, on disk or on CDN
 * Caching of RSS (comments, page and site) feeds in memory or on disk
 * Caching of search results pages (i.e. URIs with query string variables) in memory or on disk
-* Minification of posts / pages and RSS feeds
-* Minification (concatenation and white space removal) of inline, external or 3rd party JavaScript / CSS with automated updates
-* Complete header management including Etags
-* JavaScript embedding group and location management
+* Caching of database objects in memory
+* Minification of posts and pages and RSS feeds
+* Minification (combine and remove comments / white space) of inline, embedded or 3rd party JavaScript (with automated updates)
+* Minification (combine and remove comments / white space) of inline, embedded or 3rd party CSS (with automated updates)
+* Browser caching of CSS, JavaScript and HTML using future expire headers and entity tags (ETag)
+* JavaScript grouping by template (home page, post page etc) with embed location management
+* Non-blocking JavaScript embedding
 * Import post attachments directly into the Media Library (and CDN)
 
 Easily improve the user experience for your readers without having to change WordPress, your theme, your plugins or how you produce your content.
@@ -45,7 +49,7 @@ Speed is among the most significant success factors web sites face. In fact, you
 * Yahoo.com: +400 ms (speed decrease) -> -5-9% full-page traffic loss (visitor left before the page finished loading) [[2](http://www.slideshare.net/stoyan/yslow-20-presentation)]
 * Amazon.com: +100 ms (speed decrease) -> -1% sales loss [[1](http://home.blarg.net/~glinden/StanfordDataMining.2006-11-29.ppt)]
 
-A thousandth of a second is not a long time, yet the impact is quite significant. Even if you're not a large company (or just hope to become one), a loss is still a loss. However, there is a solution to this problem, take advantage.
+A millionth of a second is not a long time, yet the impact is quite significant. Even if you're not a large company (or just hope to become one), a loss is still a loss. However, there is a solution to this problem, take advantage.
 
 = Why is W3 Total Cache better than other cache plugins? =
 
@@ -88,6 +92,7 @@ On the contrary, as with any other action a user can perform on a site, faster p
 That depends on how you use your blog and where most of your readers read your blog (regionally). Here's a short list:</p>
 
 * [NetDNA](http://www.netdna.com/)
+* [VPS NET](https://vps.net/cdn-signup)
 * [SimpleCDN](http://www.simplecdn.com/)
 * [Amazon S3](http://aws.amazon.com/s3/)
 * [Amazon Cloudfront](http://aws.amazon.com/cloudfront/)
