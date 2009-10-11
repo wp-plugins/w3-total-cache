@@ -1,6 +1,6 @@
 === Plugin Name ===
 Contributors: fredericktownes
-Tags: user experience, cache, caching, page cache, css cache, js cache, db cache, disk cache, disk caching, database cache, http compression, gzip, deflate, minify, CDN, content delivery network, media library, wp cache, wp super cache, w3 total cache, performance, speed, multiple hosts, CSS, merge, combine, unobtrusive javascript, compress, optimize, optimizer, JavaScript, JS, cascading style sheet, plugin
+Tags: user experience, cache, caching, page cache, css cache, js cache, db cache, disk cache, disk caching, database cache, http compression, gzip, deflate, minify, CDN, content delivery network, media library, wp cache, wp super cache, w3 total cache, performance, speed, multiple hosts, CSS, merge, combine, unobtrusive javascript, compress, optimize, optimizer, JavaScript, JS, cascading style sheet, plugin, yslow
 Requires at least: 2.5
 Tested up to: 2.8.4
 Stable tag: 0.8
@@ -49,7 +49,7 @@ Speed is among the most significant success factors web sites face. In fact, you
 * Yahoo.com: +400 ms (speed decrease) -> -5-9% full-page traffic loss (visitor left before the page finished loading) [[2](http://www.slideshare.net/stoyan/yslow-20-presentation)]
 * Amazon.com: +100 ms (speed decrease) -> -1% sales loss [[1](http://home.blarg.net/~glinden/StanfordDataMining.2006-11-29.ppt)]
 
-A millionth of a second is not a long time, yet the impact is quite significant. Even if you're not a large company (or just hope to become one), a loss is still a loss. However, there is a solution to this problem, take advantage.
+A thousandth of a second is not a long time, yet the impact is quite significant. Even if you're not a large company (or just hope to become one), a loss is still a loss. However, there is a solution to this problem, take advantage.
 
 = Why is W3 Total Cache better than other cache plugins? =
 
