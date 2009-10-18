@@ -1,6 +1,6 @@
-# Append this .htaccess file to the one in your document root to
-# enable compression and browser caching of files that W3 Total Cache
-# does not handle.
+# Append the contents of this file to this .htaccess to the one in your document root or configuration file to enable http
+# compression and client-side (browser) caching of files that W3 Total Cache does not handle. This file can also be used
+# for the self-hosted subdomain used in your CDN settings.
 
 # BEGIN HTTP Compression
 <IfModule mod_deflate.c>
@@ -51,14 +51,17 @@ ExpiresByType image/gif						A31536000
 ExpiresByType image/x-icon					A31536000
 </IfModule>
 
-# Set header information for proxies
 <IfModule mod_headers.c>
-Header append Vary User-Agent
 <FilesMatch "\.(ico|xml|xsd|xsl|gif|jpe?g|png|swf|pdf|zip|tar|rar|mp3|mov|rm|ram|wav|wma|wmv|asf|avi|mpg|mpeg|tgz|qt|doc|xls|ppt)$">
+# Set header information for proxies
+Header append Vary User-Agent
+# Ensure client-side caching of objects
 Header set Cache-Control "max-age=31536000, public"
 </FilesMatch>
 </IfModule>
 
-# Enable ETag
+# Enable Entity Tag
+<FilesMatch "\.(ico|xml|xsd|xsl|gif|jpe?g|png|swf|pdf|zip|tar|rar|mp3|mov|rm|ram|wav|wma|wmv|asf|avi|mpg|mpeg|tgz|qt|doc|xls|ppt)$">
 FileETag MTime Size
+</FilesMatch>
 # END Headers
