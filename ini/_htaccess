@@ -20,13 +20,13 @@ SetEnvIfNoCase Request_URI \
 # Make sure proxies don't deliver the wrong content
 Header append Vary User-Agent env=!dont-vary
 # Fragment size to be compressed at one time by zlib
-DeflateBufferSize 4096
+#DeflateBufferSize 4096
 # Fragment size to be compressed at one time by zlib
-DeflateCompressionLevel 9
+#DeflateCompressionLevel 9
 # How much memory should be used by zlib for compression
-DeflateMemLevel 9
+#DeflateMemLevel 9
 # Zlib compression window size
-DeflateWindowSize 15
+#DeflateWindowSize 15
 # Enable HTTP Compression policy for all except .css, .js and .html documents
 SetOutputFilter DEFLATE
 AddOutputFilterByType DEFLATE text/plain text/xml application/xml text/xsd text/xsl application/wlwmanifest+xml image/x-icon
