@@ -21,7 +21,7 @@ SetEnvIfNoCase Request_URI \
 Header append Vary User-Agent env=!dont-vary
 # Fragment size to be compressed at one time by zlib
 #DeflateBufferSize 4096
-# Fragment size to be compressed at one time by zlib
+# Amount of compression applied to output
 #DeflateCompressionLevel 9
 # How much memory should be used by zlib for compression
 #DeflateMemLevel 9
