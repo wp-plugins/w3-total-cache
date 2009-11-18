@@ -16,7 +16,7 @@ BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
 BrowserMatch \bMSI[E] !no-gzip !gzip-only-text/html
 # Don't compress media or scripts
 SetEnvIfNoCase Request_URI \
-\.(?:php|gif|jpe?g|png|swf|pdf|zip|tar|rar|mp3|mov|rm|ram|wav|wma|wmv|asf|avi|mpg|mpeg|tgz|qt|doc|xls|ppt)$ no-gzip$
+\.(?:php|gif|jp?g|png|swf|pdf|zip|tar|rar|mp3|mov|rm|ram|wav|wma|wmv|asf|avi|mp?g|tgz|qt|doc?|xls?|ppt?)$ no-gzip dont-vary
 # Make sure proxies don't deliver the wrong content
 Header append Vary User-Agent env=!dont-vary
 # Fragment size to be compressed at one time by zlib
@@ -34,34 +34,33 @@ AddOutputFilterByType DEFLATE text/plain text/xml application/xml text/xsd text/
 # END HTTP Compression
 
 # BEGIN Headers
-# Browser caching policy for all except .css, .js and .html documents
+# Browser caching policy for all except .css, .js and .html documents for 3 days
 <IfModule mod_expires.c>
 ExpiresActive On
 ExpiresByType text/plain					A259200
 ExpiresByType text/xml						A259200
-ExpiresByType application/xml				A259200
 ExpiresByType text/xsd						A259200
 ExpiresByType text/xsl						A259200
+ExpiresByType application/x-shockwave-flash	A259200
+ExpiresByType application/xml				A259200
 ExpiresByType application/wlwmanifest+xml	A259200
-ExpiresByType image/png						A259200
+ExpiresByType image/gif						A259200
 ExpiresByType image/jpeg					A259200
 ExpiresByType image/jpg						A259200
-ExpiresByType image/pjpeg					A259200
-ExpiresByType image/gif						A259200
+ExpiresByType image/png						A259200
 ExpiresByType image/x-icon					A259200
 </IfModule>
 
 <IfModule mod_headers.c>
-<FilesMatch "\.(ico|xml|xsd|xsl|gif|jpe?g|png|swf|pdf|zip|tar|rar|mp3|mov|rm|ram|wav|wma|wmv|asf|avi|mpg|mpeg|tgz|qt|doc|xls|ppt)$">
-# Set header information for proxies
-Header append Vary User-Agent
+<FilesMatch "\.(txt|ico|xml|xsd|xsl|gif|jp?g|png|swf)$">
 # Ensure client-side caching of objects
+Header set Pragma "cache"
 Header set Cache-Control "max-age=259200, public"
 </FilesMatch>
 </IfModule>
 
 # Enable Entity Tag
-<FilesMatch "\.(ico|xml|xsd|xsl|gif|jpe?g|png|swf|pdf|zip|tar|rar|mp3|mov|rm|ram|wav|wma|wmv|asf|avi|mpg|mpeg|tgz|qt|doc|xls|ppt)$">
+<FilesMatch "\.(txt|ico|xml|xsd|xsl|gif|jp?g|png|swf)$">
 FileETag MTime Size
 </FilesMatch>
 # END Headers
