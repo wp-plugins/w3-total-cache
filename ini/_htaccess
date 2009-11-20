@@ -1,6 +1,6 @@
 # Append the contents of this file to this .htaccess to the one in your document root or configuration file to enable http
 # compression and client-side (browser) caching of files that W3 Total Cache does not handle. This file can also be used
-# for the self-hosted subdomain used in your CDN settings.
+# for the self-hosted subdomain used in your CDN settings. Remove the optional directives section if necessary.
 
 # BEGIN HTTP Compression
 <IfModule mod_deflate.c>
@@ -16,7 +16,7 @@ BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
 BrowserMatch \bMSI[E] !no-gzip !gzip-only-text/html
 # Don't compress media or scripts
 SetEnvIfNoCase Request_URI \
-\.(?:php|gif|jp?g|png|swf|pdf|zip|tar|rar|mp3|mov|rm|ram|wav|wma|wmv|asf|avi|mp?g|tgz|qt|doc?|xls?|ppt?)$ no-gzip dont-vary
+\.(?:php|gif|jpe?g|png|swf|pdf|zip|tar|rar|mp3|mov|rm|ram|wav|wma|wmv|asf|avi|mp?g|tgz|qt)$ no-gzip dont-vary
 # Make sure proxies don't deliver the wrong content
 Header append Vary User-Agent env=!dont-vary
 # Fragment size to be compressed at one time by zlib
@@ -52,7 +52,7 @@ ExpiresByType image/x-icon					A259200
 </IfModule>
 
 <IfModule mod_headers.c>
-<FilesMatch "\.(txt|ico|xml|xsd|xsl|gif|jp?g|png|swf)$">
+<FilesMatch "\.(txt|ico|xml|xsd|xsl|gif|jpe?g|png|swf)$">
 # Ensure client-side caching of objects
 Header set Pragma "cache"
 Header set Cache-Control "max-age=259200, public"
@@ -60,7 +60,30 @@ Header set Cache-Control "max-age=259200, public"
 </IfModule>
 
 # Enable Entity Tag
-<FilesMatch "\.(txt|ico|xml|xsd|xsl|gif|jp?g|png|swf)$">
+<FilesMatch "\.(txt|ico|xml|xsd|xsl|gif|jpe?g|png|swf)$">
 FileETag MTime Size
 </FilesMatch>
 # END Headers
+
+# BEGIN Optional Directives (if using a non-default permalink setting)
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /
+
+# BEGIN Do not process 404 errors for images
+RewriteCond %{REQUEST_FILENAME} !^.*\.png [NC]
+RewriteCond %{REQUEST_FILENAME} !^.*\.jpe?g [NC]
+RewriteCond %{REQUEST_FILENAME} !^.*\.js [NC]
+RewriteCond %{REQUEST_FILENAME} !^.*\.gif [NC]
+RewriteCond %{REQUEST_FILENAME} !^.*\.css [NC]
+RewriteCond %{REQUEST_FILENAME} !^.*\.js [NC]
+RewriteCond %{REQUEST_FILENAME} !^.*\.xml [NC]
+RewriteCond %{REQUEST_FILENAME} !^.*\.html [NC]
+# END Do not process 404 errors for images
+
+# Default WordPress Directives
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.php [L]
+</IfModule>
+# END Optional Directives
