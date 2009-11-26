@@ -38,25 +38,27 @@ class W3_Plugin_Cdn extends W3_Plugin
         ));
         
         if ($this->_config->get_boolean('cdn.enabled')) {
-            add_action('delete_attachment', array(
-                &$this, 
-                'delete_attachment'
-            ));
-            
-            add_filter('wp_generate_attachment_metadata', array(
-                &$this, 
-                'generate_attachment_metadata'
-            ));
-            
-            add_filter('the_content', array(
-                &$this, 
-                'the_content'
-            ));
-            
-            add_action('w3_cdn_cron_queue_process', array(
-                &$this, 
-                'cron_queue_process'
-            ));
+            if ($this->_config->get_string('cdn.engine') != 'mirror') {
+                add_action('delete_attachment', array(
+                    &$this, 
+                    'delete_attachment'
+                ));
+                
+                add_filter('wp_generate_attachment_metadata', array(
+                    &$this, 
+                    'generate_attachment_metadata'
+                ));
+                
+                add_filter('the_content', array(
+                    &$this, 
+                    'the_content'
+                ));
+                
+                add_action('w3_cdn_cron_queue_process', array(
+                    &$this, 
+                    'cron_queue_process'
+                ));
+            }
             
             if ($this->can_cdn()) {
                 ob_start(array(
