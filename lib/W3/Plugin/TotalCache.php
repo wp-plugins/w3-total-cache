@@ -1129,7 +1129,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
             $css_groups = array();
             
             foreach ($js_files as $group => $locations) {
-                if (! in_array($group, $groups)) {
+                if (! array_key_exists($group, $groups)) {
                     continue;
                 }
                 
@@ -1157,7 +1157,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
             }
             
             foreach ($css_files as $group => $locations) {
-                if (! in_array($group, $groups)) {
+                if (! array_key_exists($group, $groups)) {
                     continue;
                 }
                 
