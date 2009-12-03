@@ -229,7 +229,7 @@ class W3_Plugin_PgCache extends W3_Plugin
     
     /**
      * Does disk cache cleanup
-	 *
+     *
      * @return void
      */
     function cleanup()
@@ -358,7 +358,7 @@ class W3_Plugin_PgCache extends W3_Plugin
     
     /**
      * Generates rules for WP dir
-	 *
+     *
      * @return string
      */
     function generate_rules_core()
@@ -430,29 +430,25 @@ class W3_Plugin_PgCache extends W3_Plugin
         
         if ($mobile_redirect != '') {
             $mobile_agents = $this->_config->get_array('pgcache.mobile.agents');
-            $mobile_agents_regexp = strtr(implode('|', array_map('preg_quote', $mobile_agents)), array(
-                '/' => '\/', 
-                ' ' => '\ '
-            ));
             
-            $rules .= "    RewriteCond %{HTTP_USER_AGENT} " . $mobile_agents_regexp . " [NC]\n";
+            $rules .= "    RewriteCond %{HTTP_USER_AGENT} " . implode('|', array_map('w3_preg_quote', $mobile_agents)) . " [NC]\n";
             $rules .= "    RewriteRule .* " . $mobile_redirect . " [R,L]\n";
         }
         
         $rules .= "    RewriteCond %{REQUEST_URI} !" . implode('|', $reject_uris);
         
         if (count($accept_files)) {
-            $rules .= " [OR]\n    RewriteCond %{REQUEST_URI} " . implode('|', array_map('preg_quote', $accept_files)) . " [NC]\n";
+            $rules .= " [OR]\n    RewriteCond %{REQUEST_URI} " . implode('|', array_map('w3_preg_quote', $accept_files)) . " [NC]\n";
         } else {
             $rules .= "\n";
         }
         
         $rules .= "    RewriteCond %{REQUEST_METHOD} !=POST\n";
         $rules .= "    RewriteCond %{QUERY_STRING} =\"\"\n";
-        $rules .= "    RewriteCond %{HTTP_COOKIE} !" . implode('|', $reject_cookies) . " [NC]\n";
+        $rules .= "    RewriteCond %{HTTP_COOKIE} !" . implode('|', array_map('w3_preg_quote', $reject_cookies)) . " [NC]\n";
         
         if (count($reject_user_agents)) {
-            $rules .= "    RewriteCond %{HTTP_USER_AGENT} !" . implode('|', $reject_user_agents) . " [NC]\n";
+            $rules .= "    RewriteCond %{HTTP_USER_AGENT} !" . implode('|', array_map('w3_preg_quote', $reject_user_agents)) . " [NC]\n";
         }
         
         $rules .= "    RewriteCond " . str_replace('\\', '/', W3TC_CACHE_FILE_PGCACHE_DIR) . "/%{HTTP_HOST}/$1/index.html%{ENV:APPEND_EXT} -f\n";
@@ -477,7 +473,7 @@ class W3_Plugin_PgCache extends W3_Plugin
     
     /**
      * Generates directives for file cache dir
-	 *
+     *
      * @return string
      */
     function generate_rules_cache()
@@ -518,7 +514,7 @@ class W3_Plugin_PgCache extends W3_Plugin
     
     /**
      * Writes directives to WP .htaccess
-	 *
+     *
      * @return boolean
      */
     function write_rules_core()
@@ -550,7 +546,7 @@ class W3_Plugin_PgCache extends W3_Plugin
     
     /**
      * Writes directives to file cache .htaccess
-	 *
+     *
      * @return boolean
      */
     function write_rules_cache()
@@ -581,7 +577,7 @@ class W3_Plugin_PgCache extends W3_Plugin
     
     /**
      * Erases W3TC directives from config
-	 *
+     *
      * @param string $data
      * @return string
      */
@@ -595,7 +591,7 @@ class W3_Plugin_PgCache extends W3_Plugin
     
     /**
      * Erases WP Super Cache rules directives config
-	 *
+     *
      * @param string $data
      * @return string
      */
@@ -609,7 +605,7 @@ class W3_Plugin_PgCache extends W3_Plugin
     
     /**
      * Removes W3TC directives from WP .htaccess
-	 *
+     *
      * @return boolean
      */
     function remove_rules_core()
@@ -636,7 +632,7 @@ class W3_Plugin_PgCache extends W3_Plugin
     
     /**
      * Removes W3TC directives from file cache dir
-	 *
+     *
      * @return boolean
      */
     function remove_rules_cache()
@@ -648,7 +644,7 @@ class W3_Plugin_PgCache extends W3_Plugin
     
     /**
      * Checks core directives
-	 *
+     *
      * @return boolean
      */
     function check_rules_core()
@@ -661,7 +657,7 @@ class W3_Plugin_PgCache extends W3_Plugin
     
     /**
      * Checks cache directives
-	 *
+     *
      * @return boolean
      */
     function check_rules_cache()
@@ -674,7 +670,7 @@ class W3_Plugin_PgCache extends W3_Plugin
     
     /**
      * Checks WP directives
-	 *
+     *
      * @return boolean
      */
     function check_rules_wp()
@@ -683,5 +679,4 @@ class W3_Plugin_PgCache extends W3_Plugin
         
         return (($data = @file_get_contents($path)) && preg_match('~# BEGIN WordPress.*# END WordPress~s', $data));
     }
-
 }
