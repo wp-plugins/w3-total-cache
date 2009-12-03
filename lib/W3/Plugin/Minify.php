@@ -261,11 +261,11 @@ class W3_Plugin_Minify extends W3_Plugin
                     foreach ((array) $config['files'] as $file) {
                         if (w3_is_url($file) && ! preg_match('~' . $domain_url_regexp . '~i', $file)) {
                             // external CSS files
-                            $regexps[] = preg_quote($file);
+                            $regexps[] = w3_preg_quote($file);
                         } else {
                             // local CSS files
                             $file = ltrim(preg_replace('~' . $domain_url_regexp . '~i', '', $file), '/\\');
-                            $regexps[] = '(' . $domain_url_regexp . ')?/?' . preg_quote($file);
+                            $regexps[] = '(' . $domain_url_regexp . ')?/?' . w3_preg_quote($file);
                         }
                     }
                 }
@@ -299,11 +299,11 @@ class W3_Plugin_Minify extends W3_Plugin
                     foreach ((array) $config['files'] as $file) {
                         if (w3_is_url($file) && ! preg_match('~' . $domain_url_regexp . '~i', $file)) {
                             // external JS files
-                            $regexps[] = preg_quote($file);
+                            $regexps[] = w3_preg_quote($file);
                         } else {
                             // local JS files
                             $file = ltrim(preg_replace('~' . $domain_url_regexp . '~i', '', $file), '/\\');
-                            $regexps[] = '(' . $domain_url_regexp . ')?/?' . preg_quote($file);
+                            $regexps[] = '(' . $domain_url_regexp . ')?/?' . w3_preg_quote($file);
                         }
                     }
                 }
@@ -806,7 +806,7 @@ class W3_Plugin_Minify extends W3_Plugin
             $rules .= "    Header set Pragma public\n";
             $rules .= "    Header set X-Powered-By \"" . W3TC_POWERED_BY . "\"\n";
             $rules .= "    Header set Vary \"Accept-Encoding\"\n";
-            $rules .= "    Header merge Cache-Control \"public, must-revalidate\"\n";
+            $rules .= "    Header append Cache-Control \"public, must-revalidate\"\n";
             $rules .= "</IfModule>\n";
         }
         

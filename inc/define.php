@@ -358,7 +358,7 @@ function w3_get_site_url_regexp()
 {
     $site_url = w3_get_site_url();
     $domain = preg_replace('~https?://~i', '', $site_url);
-    $regexp = 'https?://' . preg_quote($domain);
+    $regexp = 'https?://' . w3_preg_quote($domain);
     return $regexp;
 }
 
@@ -394,7 +394,7 @@ function w3_get_domain_url_regexp()
 {
     $domain_url = w3_get_domain_url();
     $domain = preg_replace('~https?://~i', '', $domain_url);
-    $regexp = 'https?://' . preg_quote($domain);
+    $regexp = 'https?://' . w3_preg_quote($domain);
     return $regexp;
 }
 
@@ -938,6 +938,22 @@ function w3_twitter_status_update($username, $password, $status, &$error)
     }
     
     return false;
+}
+
+/**
+ * Quotes regular expression string
+ * 
+ * @param string $regexp
+ * @return string
+ */
+function w3_preg_quote($string, $delimiter = null)
+{
+    $string = preg_quote($string, $delimiter);
+    $string = strtr($string, array(
+        ' ' => '\ '
+    ));
+    
+    return $string;
 }
 
 /**

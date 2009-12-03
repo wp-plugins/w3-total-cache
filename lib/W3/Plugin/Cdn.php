@@ -261,13 +261,13 @@ class W3_Plugin_Cdn extends W3_Plugin
         $regexps = array();
         
         if ($upload_info) {
-            $regexps[] = '~(["\'])((' . $site_url_regexp . ')?/?(' . preg_quote($upload_info['upload_url']) . '[^"\'>]+))~';
+            $regexps[] = '~(["\'])((' . $site_url_regexp . ')?/?(' . w3_preg_quote($upload_info['upload_url']) . '[^"\'>]+))~';
         }
         
         if ($this->_config->get_boolean('cdn.includes.enable')) {
             $mask = $this->_config->get_string('cdn.includes.files');
             if (! empty($mask)) {
-                $regexps[] = '~(["\'])((' . $site_url_regexp . ')?/?(' . preg_quote(WPINC) . '/(' . $this->get_regexp_by_mask($mask) . ')))~';
+                $regexps[] = '~(["\'])((' . $site_url_regexp . ')?/?(' . w3_preg_quote(WPINC) . '/(' . $this->get_regexp_by_mask($mask) . ')))~';
             }
         }
         
@@ -275,12 +275,12 @@ class W3_Plugin_Cdn extends W3_Plugin
             $theme_dir = preg_replace('~' . $site_url_regexp . '~i', '', get_stylesheet_directory_uri());
             $mask = $this->_config->get_string('cdn.theme.files');
             if (! empty($mask)) {
-                $regexps[] = '~(["\'])((' . $site_url_regexp . ')?/?(' . preg_quote($theme_dir) . '/(' . $this->get_regexp_by_mask($mask) . ')))~';
+                $regexps[] = '~(["\'])((' . $site_url_regexp . ')?/?(' . w3_preg_quote($theme_dir) . '/(' . $this->get_regexp_by_mask($mask) . ')))~';
             }
         }
         
         if ($this->_config->get_boolean('cdn.minify.enable')) {
-            $regexps[] = '~(["\'])((' . $site_url_regexp . ')?/?(' . preg_quote(W3TC_CONTENT_MINIFY_DIR_NAME) . '/[a-z0-9-_]+\.include(-footer)?(-nb)?\.(css|js)))~';
+            $regexps[] = '~(["\'])((' . $site_url_regexp . ')?/?(' . w3_preg_quote(W3TC_CONTENT_MINIFY_DIR_NAME) . '/[a-z0-9-_]+\.include(-footer)?(-nb)?\.(css|js)))~';
         }
         
         if ($this->_config->get_boolean('cdn.custom.enable')) {
@@ -822,12 +822,12 @@ class W3_Plugin_Cdn extends W3_Plugin
             if ($posts) {
                 $count = count($posts);
                 $total = $this->get_rename_posts_count();
-                $names_quoted = array_map('preg_quote', $names);
+                $names_quoted = array_map('w3_preg_quote', $names);
                 
                 foreach ($posts as $post) {
                     $matches = null;
                     $post_content = $post->post_content;
-                    $regexp = '~(href|src)=[\'"]?(https?://(www\.)?(' . implode('|', $names_quoted) . ')/' . preg_quote($upload_info['upload_url']) . '([^\'"<>\s]+))[\'"]~';
+                    $regexp = '~(href|src)=[\'"]?(https?://(www\.)?(' . implode('|', $names_quoted) . ')/' . w3_preg_quote($upload_info['upload_url']) . '([^\'"<>\s]+))[\'"]~';
                     
                     if (preg_match_all($regexp, $post_content, $matches, PREG_SET_ORDER)) {
                         foreach ($matches as $match) {
@@ -1115,7 +1115,7 @@ class W3_Plugin_Cdn extends W3_Plugin
             '[', 
             ']', 
             '|'
-        ), preg_quote($mask));
+        ), w3_preg_quote($mask));
         
         return $regexp;
     }
