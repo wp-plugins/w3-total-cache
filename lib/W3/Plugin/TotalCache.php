@@ -2033,7 +2033,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
     {
         require_once W3TC_LIB_W3_DIR . '/Request.php';
         
-        $servers = W3_Request::get_string('servers');
+        $servers = W3_Request::get_array('servers');
         
         if ($this->is_memcache_available($servers)) {
             $result = true;

@@ -413,8 +413,7 @@ jQuery(function($) {
         status.removeClass('w3tc-success');
         status.addClass('w3tc-process');
         status.html('Testing...');
-        $.post('options-general.php', {
-            page: 'w3-total-cache/w3-total-cache.php',
+        $.post('options-general.php?page=w3-total-cache/w3-total-cache.php', {
             w3tc_action: 'test_memcached',
             servers: $('#memcached_servers').val()
         }, function(data) {
