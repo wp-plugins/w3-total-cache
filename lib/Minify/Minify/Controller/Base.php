@@ -100,7 +100,7 @@ abstract class Minify_Controller_Base {
             && is_string($minifierCallback[0])
             && !class_exists($minifierCallback[0], false)) {
             
-            require str_replace('_', '/', $minifierCallback[0]) . '.php';
+            require W3TC_LIB_MINIFY_DIR . '/' . str_replace('_', '/', $minifierCallback[0]) . '.php';
         }
     }
     
@@ -196,7 +196,7 @@ abstract class Minify_Controller_Base {
      * @return null
      */
     protected function log($msg) {
-        require_once 'Minify/Logger.php';
+        require_once W3TC_LIB_MINIFY_DIR . '/Minify/Logger.php';
         Minify_Logger::log($msg);
     }
 }

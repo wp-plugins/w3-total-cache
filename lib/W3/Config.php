@@ -30,9 +30,10 @@ class W3_Config
         'dbcache.enabled' => 'boolean', 
         'dbcache.debug' => 'boolean', 
         'dbcache.engine' => 'string', 
+        'dbcache.file.gc' => 'integer', 
         'dbcache.memcached.engine' => 'string', 
         'dbcache.memcached.servers' => 'array', 
-        'dbcache.reject.admin' => 'boolean', 
+        'dbcache.reject.logged' => 'boolean', 
         'dbcache.reject.uri' => 'array', 
         'dbcache.reject.cookie' => 'array', 
         'dbcache.reject.sql' => 'array', 
@@ -41,6 +42,7 @@ class W3_Config
         'pgcache.enabled' => 'boolean', 
         'pgcache.debug' => 'boolean', 
         'pgcache.engine' => 'string', 
+        'pgcache.file.gc' => 'integer', 
         'pgcache.memcached.engine' => 'string', 
         'pgcache.memcached.servers' => 'array', 
         'pgcache.lifetime' => 'integer', 
@@ -56,22 +58,23 @@ class W3_Config
         'pgcache.reject.uri' => 'array', 
         'pgcache.reject.ua' => 'array', 
         'pgcache.reject.cookie' => 'array', 
-        'pgcache.mobile.check' => 'boolean', 
-        'pgcache.mobile.whitelist' => 'array', 
-        'pgcache.mobile.browsers' => 'array', 
+        'pgcache.mobile.redirect' => 'string', 
+        'pgcache.mobile.agents' => 'array', 
         
         'minify.enabled' => 'boolean', 
         'minify.debug' => 'boolean', 
         'minify.engine' => 'string', 
+        'minify.file.locking' => 'boolean', 
+        'minify.file.gc' => 'integer', 
         'minify.memcached.engine' => 'string', 
         'minify.memcached.servers' => 'array', 
         'minify.rewrite' => 'boolean', 
-        'minify.locking' => 'string', 
         'minify.fixtime' => 'integer', 
         'minify.compress' => 'boolean', 
         'minify.compress.ie6' => 'boolean', 
         'minify.options' => 'array', 
         'minify.symlinks' => 'array', 
+        'minify.maxage' => 'integer', 
         'minify.lifetime' => 'integer', 
         'minify.upload' => 'boolean', 
         'minify.html.enable' => 'boolean', 
@@ -95,7 +98,6 @@ class W3_Config
         'cdn.enabled' => 'boolean', 
         'cdn.debug' => 'boolean', 
         'cdn.engine' => 'string', 
-        'cdn.domain' => 'string', 
         'cdn.includes.enable' => 'boolean', 
         'cdn.includes.files' => 'string', 
         'cdn.theme.enable' => 'boolean', 
@@ -106,22 +108,314 @@ class W3_Config
         'cdn.import.external' => 'boolean', 
         'cdn.import.files' => 'string', 
         'cdn.limit.queue' => 'integer', 
+        'cdn.mirror.domain' => 'string', 
         'cdn.ftp.host' => 'string', 
         'cdn.ftp.user' => 'string', 
         'cdn.ftp.pass' => 'string', 
         'cdn.ftp.path' => 'string', 
         'cdn.ftp.pasv' => 'boolean', 
+        'cdn.ftp.domain' => 'string', 
+        'cdn.s3.key' => 'string', 
+        'cdn.s3.secret' => 'string', 
+        'cdn.s3.bucket' => 'string', 
+        'cdn.cf.key' => 'string', 
+        'cdn.cf.secret' => 'string', 
+        'cdn.cf.bucket' => 'string', 
+        'cdn.cf.id' => 'string', 
+        'cdn.cf.cname' => 'string', 
         'cdn.reject.ua' => 'array', 
         'cdn.reject.uri' => 'array', 
         
-        'common.support.enabled' => 'boolean', 
-        'common.support.type' => 'string', 
+        'common.support' => 'string', 
+        'common.widget.latest' => 'boolean', 
         
         'notes.defaults' => 'boolean', 
         'notes.wp_content_perms' => 'boolean', 
         'notes.cdn_first_time' => 'boolean', 
-        'notes.no_memcached_nor_apc' => 'boolean'
+        'notes.no_memcached_nor_apc' => 'boolean', 
+        'notes.php_is_old' => 'boolean', 
+        'notes.theme_changed' => 'boolean', 
+        'notes.wp_upgraded' => 'boolean', 
+        'notes.plugins_updated' => 'boolean', 
+        'notes.cdn_upload' => 'boolean', 
+        'notes.need_empty_pgcache' => 'boolean', 
+        'notes.need_empty_minify' => 'boolean', 
+        'notes.pgcache_rules_core' => 'boolean', 
+        'notes.pgcache_rules_cache' => 'boolean', 
+        'notes.minify_rules' => 'boolean',
+        'notes.support_us' => 'boolean'
     );
+    
+    var $_defaults = array(
+        'dbcache.enabled' => true, 
+        'dbcache.debug' => false, 
+        'dbcache.engine' => 'file', 
+        'dbcache.file.gc' => 3600, 
+        'dbcache.memcached.engine' => 'auto', 
+        'dbcache.memcached.servers' => array(
+            'localhost:11211'
+        ), 
+        'dbcache.reject.logged' => true, 
+        'dbcache.reject.uri' => array(), 
+        'dbcache.reject.cookie' => array(), 
+        'dbcache.reject.sql' => array(), 
+        'dbcache.lifetime' => 180, 
+        
+        'pgcache.enabled' => true, 
+        'pgcache.debug' => false, 
+        'pgcache.engine' => 'file', 
+        'pgcache.file.gc' => 3600, 
+        'pgcache.memcached.engine' => 'auto', 
+        'pgcache.memcached.servers' => array(
+            'localhost:11211'
+        ), 
+        'pgcache.lifetime' => 3600, 
+        'pgcache.compress' => true, 
+        'pgcache.cache.query' => true, 
+        'pgcache.cache.home' => true, 
+        'pgcache.cache.feed' => true, 
+        'pgcache.cache.404' => false, 
+        'pgcache.cache.flush' => false, 
+        'pgcache.cache.headers' => array(
+            'Last-Modified', 
+            'Content-Type', 
+            'X-Pingback'
+        ), 
+        'pgcache.accept.files' => array(
+            'wp-comments-popup.php', 
+            'wp-links-opml.php', 
+            'wp-locations.php'
+        ), 
+        'pgcache.reject.logged' => true, 
+        'pgcache.reject.uri' => array(
+            'wp-.*\.php', 
+            'index\.php'
+        ), 
+        'pgcache.reject.ua' => array(
+            'bot', 
+            'ia_archive', 
+            'slurp', 
+            'crawl', 
+            'spider'
+        ), 
+        'pgcache.reject.cookie' => array(), 
+        'pgcache.mobile.redirect' => '', 
+        'pgcache.mobile.agents' => array(
+            'Android', 
+            '2.0 MMP', 
+            '240x320', 
+            'AvantGo', 
+            'BlackBerry', 
+            'Blazer', 
+            'Cellphone', 
+            'Danger', 
+            'DoCoMo', 
+            'Elaine/3.0', 
+            'EudoraWeb', 
+            'hiptop', 
+            'IEMobile', 
+            'iPhone', 
+            'iPod', 
+            'KYOCERA/WX310K', 
+            'LG/U990', 
+            'MIDP-2.0', 
+            'MMEF20', 
+            'MOT-V', 
+            'NetFront', 
+            'Newt', 
+            'Nintendo Wii', 
+            'Nitro', 
+            'Nokia', 
+            'Opera Mini', 
+            'Palm', 
+            'Playstation Portable', 
+            'portalmmm', 
+            'Proxinet', 
+            'ProxiNet', 
+            'SHARP-TQ-GX10', 
+            'Small', 
+            'SonyEricsson', 
+            'Symbian OS', 
+            'SymbianOS', 
+            'TS21i-10', 
+            'UP.Browser', 
+            'UP.Link', 
+            'Windows CE', 
+            'WinWAP', 
+            'Ericsson', 
+            'htc', 
+            'Huawei', 
+            'MobilePhone', 
+            'Motorola', 
+            'nokia', 
+            'Novarra', 
+            'O2', 
+            'Samsung', 
+            'Sanyo', 
+            'Smartphone', 
+            'Symbian', 
+            'Toshiba', 
+            'Treo', 
+            'vodafone', 
+            'Xda', 
+            'Alcatel', 
+            'Amoi', 
+            'ASUS', 
+            'Audiovox', 
+            'AU-MIC', 
+            'BenQ', 
+            'Bird', 
+            'CDM', 
+            'dopod', 
+            'Fly', 
+            'Haier', 
+            'HP.iPAQ', 
+            'i-mobile', 
+            'KDDI', 
+            'KONKA', 
+            'KWC', 
+            'Lenovo', 
+            'LG', 
+            'NEWGEN', 
+            'Panasonic', 
+            'PANTECH', 
+            'PG', 
+            'Philips', 
+            'PPC', 
+            'PT', 
+            'Qtek', 
+            'Sagem', 
+            'SCH', 
+            'SEC', 
+            'Sendo', 
+            'SGH', 
+            'Sharp', 
+            'SIE', 
+            'SoftBank', 
+            'SPH', 
+            'UTS', 
+            'Vertu', 
+            'Opera.Mobi', 
+            'Windows.CE', 
+            'ZTE'
+        ), 
+        
+        'minify.enabled' => true, 
+        'minify.debug' => false, 
+        'minify.engine' => 'file', 
+        'minify.file.locking' => true, 
+        'minify.file.gc' => 86400, 
+        'minify.memcached.engine' => 'auto', 
+        'minify.memcached.servers' => array(
+            'localhost:11211'
+        ), 
+        'minify.rewrite' => true, 
+        'minify.fixtime' => 0, 
+        'minify.compress' => true, 
+        'minify.compress.ie6' => true, 
+        'minify.options' => array(
+            'bubbleCssImports' => false, 
+            'minApp' => array(
+                'groupsOnly' => false, 
+                'maxFiles' => 20
+            )
+        ), 
+        'minify.symlinks' => array(), 
+        'minify.maxage' => 86400, 
+        'minify.lifetime' => 86400, 
+        'minify.upload' => true, 
+        'minify.html.enable' => true, 
+        'minify.html.reject.admin' => true, 
+        'minify.html.inline.css' => false, 
+        'minify.html.inline.js' => false, 
+        'minify.html.strip.crlf' => false, 
+        'minify.css.enable' => true, 
+        'minify.css.strip.comments' => false, 
+        'minify.css.strip.crlf' => false, 
+        'minify.css.groups' => array(), 
+        'minify.js.enable' => true, 
+        'minify.js.combine.header' => false, 
+        'minify.js.combine.footer' => false, 
+        'minify.js.strip.comments' => false, 
+        'minify.js.strip.crlf' => false, 
+        'minify.js.groups' => array(), 
+        'minify.reject.ua' => array(), 
+        'minify.reject.uri' => array(), 
+        
+        'cdn.enabled' => false, 
+        'cdn.debug' => false, 
+        'cdn.engine' => 'ftp', 
+        'cdn.includes.enable' => true, 
+        'cdn.includes.files' => '*.css;*.js;*.gif;*.png;*.jpg', 
+        'cdn.theme.enable' => true, 
+        'cdn.theme.files' => '*.css;*.js;*.gif;*.png;*.jpg;*.ico', 
+        'cdn.minify.enable' => true, 
+        'cdn.custom.enable' => true, 
+        'cdn.custom.files' => array(
+            'favicon.ico'
+        ), 
+        'cdn.import.external' => false, 
+        'cdn.import.files' => '*.jpg;*.png;*.gif;*.avi;*.wmv;*.mpg;*.wav;*.mp3;*.txt;*.rtf;*.doc;*.xls;*.rar;*.zip;*.tar;*.gz;*.exe', 
+        'cdn.limit.queue' => 25, 
+        'cdn.mirror.domain' => '', 
+        'cdn.ftp.host' => '', 
+        'cdn.ftp.user' => '', 
+        'cdn.ftp.pass' => '', 
+        'cdn.ftp.path' => '', 
+        'cdn.ftp.pasv' => false, 
+        'cdn.ftp.domain' => '', 
+        'cdn.s3.key' => '', 
+        'cdn.s3.secret' => '', 
+        'cdn.s3.bucket' => '', 
+        'cdn.cf.key' => '', 
+        'cdn.cf.secret' => '', 
+        'cdn.cf.bucket' => '', 
+        'cdn.cf.id' => '', 
+        'cdn.cf.cname' => '', 
+        'cdn.reject.ua' => array(), 
+        'cdn.reject.uri' => array(), 
+        
+        'common.support' => '', 
+        'common.widget.latest' => true, 
+        
+        'notes.defaults' => true, 
+        'notes.wp_content_perms' => true, 
+        'notes.cdn_first_time' => true, 
+        'notes.no_memcached_nor_apc' => true, 
+        'notes.php_is_old' => true, 
+        'notes.theme_changed' => false, 
+        'notes.wp_upgraded' => false, 
+        'notes.plugins_updated' => false, 
+        'notes.cdn_upload' => false, 
+        'notes.need_empty_pgcache' => false, 
+        'notes.need_empty_minify' => false, 
+        'notes.pgcache_rules_core' => true, 
+        'notes.pgcache_rules_cache' => true, 
+        'notes.minify_rules' => true, 
+        'notes.support_us' => true
+    );
+    
+    /**
+     * PHP5 Constructor
+     * @param boolean $check_config
+     */
+    function __construct($check_config = true)
+    {
+        $this->load_defaults();
+        
+        if (! $this->load() && $check_config) {
+            die(sprintf('<strong>W3 Total Cache Error:</strong> Unable to read config file or it is broken. Please create <strong>%s</strong> from <strong>%s</strong>.', W3TC_CONFIG_PATH, W3TC_CONFIG_EXAMPLE_PATH));
+        }
+    }
+    
+    /**
+     * PHP4 Constructor
+     * @param booleab $check_config
+     */
+    function W3_Config($check_config = true)
+    {
+        $this->__construct($check_config);
+    }
     
     /**
      * Returns config value
@@ -132,11 +426,50 @@ class W3_Config
      */
     function get($key, $default = null)
     {
-        if (isset($this->_keys[$key]) && array_key_exists($key, $this->_config)) {
-            return $this->_config[$key];
+        if (array_key_exists($key, $this->_keys) && array_key_exists($key, $this->_config)) {
+            $value = $this->_config[$key];
+        } else {
+            if ($default === null && array_key_exists($key, $this->_defaults)) {
+                $value = $this->_defaults[$key];
+            } else {
+                $value = $default;
+            }
         }
         
-        return $default;
+        switch ($key) {
+            /**
+             * Disabled minify when PHP5 is not supported
+             */
+            case 'minify.enabled':
+            case 'cdn.minify.enable':
+                if (! W3TC_PHP5) {
+                    return false;
+                }
+                break;
+            
+            case 'cdn.engine':
+                if (! W3TC_PHP5 && ($value == 's3' || $value == 'cf')) {
+                    return 'mirror';
+                }
+                break;
+            
+            /**
+             * Disabled some PgCache options when enchanced mode enabled
+             */
+            case 'pgcache.cache.query':
+                if ($this->get_boolean('pgcache.enabled') && $this->get_string('pgcache.engine') == 'file_pgcache') {
+                    return false;
+                }
+                break;
+            
+            case 'pgcache.cache.headers':
+                if ($this->get_boolean('pgcache.enabled') && $this->get_string('pgcache.engine') == 'file_pgcache') {
+                    return array();
+                }
+                break;
+        }
+        
+        return $value;
     }
     
     /**
@@ -198,7 +531,7 @@ class W3_Config
      */
     function set($key, $value)
     {
-        if (isset($this->_keys[$key])) {
+        if (array_key_exists($key, $this->_keys)) {
             $type = $this->_keys[$key];
             settype($value, $type);
             $this->_config[$key] = $value;
@@ -224,7 +557,7 @@ class W3_Config
     function read($file)
     {
         if (file_exists($file) && is_readable($file)) {
-            $config = include $file;
+            $config = @include $file;
             
             if (! is_array($config)) {
                 return false;
@@ -290,6 +623,7 @@ class W3_Config
     function write($file)
     {
         @$fp = fopen($file, 'w');
+        
         if (! $fp) {
             return false;
         }
@@ -297,6 +631,7 @@ class W3_Config
         @fputs($fp, "<?php\r\n\r\nreturn array(\r\n");
         
         $this->_tabs = 1;
+        
         foreach ($this->_config as $key => $value) {
             $this->_write($fp, $key, $value);
         }
@@ -361,7 +696,7 @@ class W3_Config
     
     /**
      * Loads config
-     * 
+     *
      * @return boolean
      */
     function load()
@@ -370,18 +705,18 @@ class W3_Config
     }
     
     /**
-     * Loads default config
-     * 
-     * @return boolean
+     * Loads config dfefaults
      */
-    function load_default()
+    function load_defaults()
     {
-        return $this->read(W3TC_CONFIG_DEFAULT_PATH);
+        foreach ($this->_defaults as $key => $value) {
+            $this->set($key, $value);
+        }
     }
     
     /**
      * Saves config
-     * 
+     *
      * @return boolean
      */
     function save()
@@ -397,24 +732,13 @@ class W3_Config
      */
     function &instance($check_config = true)
     {
-        static $instance = null;
+        static $instances = array();
         
-        if ($instance === null) {
+        if (! isset($instances[0])) {
             $class = __CLASS__;
-            $instance = & new $class();
-            
-            if (! $instance->load_default()) {
-                debug_print_backtrace();
-                
-                die(sprintf('<strong>W3 Total Cache Error:</strong> Unable to read default config file <strong>%s</strong> or it is broken. Please re-install plugin.', W3TC_CONFIG_DEFAULT_PATH));
-            }
-            
-            if (! $instance->load() && $check_config) {
-                debug_print_backtrace();
-                die(sprintf('<strong>W3 Total Cache Error:</strong> Unable to read config file or it is broken. Please create <strong>%s</strong> from <strong>%s</strong>.', W3TC_CONFIG_PATH, W3TC_CONFIG_DEFAULT_PATH));
-            }
+            $instances[0] = & new $class($check_config);
         }
         
-        return $instance;
+        return $instances[0];
     }
 }

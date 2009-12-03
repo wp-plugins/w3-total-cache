@@ -4,7 +4,7 @@
  * PHP memcached client
  */
 require_once W3TC_LIB_W3_DIR . '/Cache/Memcached/Base.php';
-require_once W3TC_LIB_W3_DIR . '/Cache/Memcached/memcached-client.php';
+require_once W3TC_LIB_DIR . '/memcached-client.php';
 
 /**
  * Class W3_Cache_Memcached_Client
@@ -48,7 +48,7 @@ class W3_Cache_Memcached_Client extends W3_Cache_Memcached_Base
     
     /**
      * Disconnects from servers
-     * 
+     *
      * @return boolean
      */
     function disconnect()
@@ -145,7 +145,7 @@ class W3_Cache_Memcached_Client extends W3_Cache_Memcached_Base
     /**
      * Fluhes all data
      *
-     * @todo 
+     * @todo
      * @return boolean
      */
     function flush()

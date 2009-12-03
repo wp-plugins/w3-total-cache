@@ -2,6 +2,29 @@
 # compression and client-side (browser) caching of files that W3 Total Cache does not handle. This file can also be used
 # for the self-hosted subdomain used in your CDN settings. Remove the optional directives section if necessary.
 
+# BEGIN Define Mime Types (in case /etc/mime.types is poorly configured or incorrect)
+<IfModule mod_mime.c>
+AddType application/x-javascript		.js
+AddType application/x-shockwave-flash	.swf
+AddType image/bmp						.bmp
+AddType image/gif						.gif
+AddType image/jpeg						.jpeg
+AddType image/jpg						.jpg
+AddType image/png						.png
+AddType image/svg+xml					.svg
+AddType image/tif						.tif
+AddType image/tiff						.tiff
+AddType image/x-icon					.ico
+AddType text/css						.css
+AddType text/htm						.htm
+AddType text/html						.html
+AddType text/plain						.txt
+AddType text/xml						.xml
+AddType text/xsd						.xsd
+AddType text/xsl						.xsl
+</IfModule>
+# END Define Mime Types
+
 # BEGIN HTTP Compression
 <IfModule mod_deflate.c>
 # Netscape 4.x has some problems...
@@ -15,8 +38,7 @@ BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
 # workaround to get the desired effect:
 BrowserMatch \bMSI[E] !no-gzip !gzip-only-text/html
 # Don't compress media or scripts
-SetEnvIfNoCase Request_URI \
-\.(?:php|gif|jpe?g|png|swf|pdf|zip|tar|rar|mp3|mov|rm|ram|wav|wma|wmv|asf|avi|mp?g|tgz|qt)$ no-gzip dont-vary
+SetEnvIfNoCase Request_URI (?:bmp|gif|jpe?g|php|png|swf|tiff?)$ no-gzip dont-vary
 # Make sure proxies don't deliver the wrong content
 Header append Vary User-Agent env=!dont-vary
 # Fragment size to be compressed at one time by zlib
@@ -29,57 +51,72 @@ Header append Vary User-Agent env=!dont-vary
 #DeflateWindowSize 15
 # Enable HTTP Compression policy for all except .css, .js and .html documents
 SetOutputFilter DEFLATE
-AddOutputFilterByType DEFLATE text/plain text/xml application/xml text/xsd text/xsl application/wlwmanifest+xml image/x-icon
+AddOutputFilterByType DEFLATE text/css text/plain text/html text/xml text/xsd text/xsl application/x-javascript \
+\. application/wlwmanifest+xml image/svg+xml image/x-icon
 </IfModule>
 # END HTTP Compression
 
-# BEGIN Headers
-# Browser caching policy for all except .css, .js and .html documents for 3 days
+# BEGIN Headers: Ensure browser caching of objects for 3 days
+# Set Expires header
 <IfModule mod_expires.c>
 ExpiresActive On
-ExpiresByType text/plain					A259200
-ExpiresByType text/xml						A259200
-ExpiresByType text/xsd						A259200
-ExpiresByType text/xsl						A259200
+ExpiresByType application/x-javascript		A259200
 ExpiresByType application/x-shockwave-flash	A259200
-ExpiresByType application/xml				A259200
 ExpiresByType application/wlwmanifest+xml	A259200
+ExpiresByType image/bmp						A259200
 ExpiresByType image/gif						A259200
 ExpiresByType image/jpeg					A259200
 ExpiresByType image/jpg						A259200
 ExpiresByType image/png						A259200
+ExpiresByType image/svg+xml					A259200
+ExpiresByType image/tif						A259200
+ExpiresByType image/tiff					A259200
 ExpiresByType image/x-icon					A259200
+ExpiresByType text/css						A259200
+ExpiresByType text/htm						A259200
+ExpiresByType text/html						A259200
+ExpiresByType text/plain					A259200
+ExpiresByType text/xml						A259200
+ExpiresByType text/xsd						A259200
+ExpiresByType text/xsl						A259200
 </IfModule>
 
+<FilesMatch "\.(bmp|ico|html?|tiff?|gif|jpe?g|png|svgz?|swf|txt|xsd|xsl|xml)$">
 <IfModule mod_headers.c>
-<FilesMatch "\.(txt|ico|xml|xsd|xsl|gif|jpe?g|png|swf)$">
-# Ensure client-side caching of objects
-Header set Pragma "cache"
+# Set Pragma header
+Header set Pragma "public"
+# Set Cache-Control header
 Header set Cache-Control "max-age=259200, public"
-</FilesMatch>
+# For optimal performance remove cookies
+#Header unset Set-Cookie
 </IfModule>
 
-# Enable Entity Tag
-<FilesMatch "\.(txt|ico|xml|xsd|xsl|gif|jpe?g|png|swf)$">
+# Set Entity Tag header
 FileETag MTime Size
 </FilesMatch>
-# END Headers
+# END Headers: Ensure client-side caching of objects
 
 # BEGIN Optional Directives (if using a non-default permalink setting)
 <IfModule mod_rewrite.c>
 RewriteEngine On
 RewriteBase /
 
-# BEGIN Do not process 404 errors for images
-RewriteCond %{REQUEST_FILENAME} !^.*\.png [NC]
-RewriteCond %{REQUEST_FILENAME} !^.*\.jpe?g [NC]
-RewriteCond %{REQUEST_FILENAME} !^.*\.js [NC]
-RewriteCond %{REQUEST_FILENAME} !^.*\.gif [NC]
+# BEGIN Do not allow WordPress to process static objects
+RewriteCond %{REQUEST_FILENAME} !^.*\.bmp [NC]
 RewriteCond %{REQUEST_FILENAME} !^.*\.css [NC]
+RewriteCond %{REQUEST_FILENAME} !^.*\.gif [NC]
+RewriteCond %{REQUEST_FILENAME} !^.*\.html? [NC]
 RewriteCond %{REQUEST_FILENAME} !^.*\.js [NC]
+RewriteCond %{REQUEST_FILENAME} !^.*\.jpe?g [NC]
+RewriteCond %{REQUEST_FILENAME} !^.*\.png [NC]
+RewriteCond %{REQUEST_FILENAME} !^.*\.svgz? [NC]
+RewriteCond %{REQUEST_FILENAME} !^.*\.swf [NC]
+RewriteCond %{REQUEST_FILENAME} !^.*\.tiff? [NC]
+RewriteCond %{REQUEST_FILENAME} !^.*\.txt [NC]
+RewriteCond %{REQUEST_FILENAME} !^.*\.xsd [NC]
+RewriteCond %{REQUEST_FILENAME} !^.*\.xsl [NC]
 RewriteCond %{REQUEST_FILENAME} !^.*\.xml [NC]
-RewriteCond %{REQUEST_FILENAME} !^.*\.html [NC]
-# END Do not process 404 errors for images
+# END Do not allow WordPress to process static objects
 
 # Default WordPress Directives
 RewriteCond %{REQUEST_FILENAME} !-f

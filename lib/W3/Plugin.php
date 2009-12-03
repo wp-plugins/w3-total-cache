@@ -22,7 +22,7 @@ class W3_Plugin
     function __construct()
     {
         require_once W3TC_LIB_W3_DIR . '/Config.php';
-        $this->_config = W3_Config::instance(false);
+        $this->_config = & W3_Config::instance(false);
     }
     
     /**
@@ -49,14 +49,14 @@ class W3_Plugin
      */
     function &instance()
     {
-        static $instance = null;
+        static $instances = array();
         
-        if ($instance === null) {
+        if (! isset($instances[0])) {
             $class = __CLASS__;
-            $instance = & new $class();
+            $instances[0] = & new $class();
         }
         
-        return $instance;
+        return $instances[0];
     }
     
     /**
@@ -66,23 +66,26 @@ class W3_Plugin
      */
     function locked()
     {
+        global $blog_id;
         static $locked = null;
         
         if ($locked === null) {
             $locked = false;
-            $config = basename(W3TC_CONFIG_PATH);
-            $config_dir = dirname(W3TC_CONFIG_PATH);
             
-            $dir = @opendir($config_dir);
-            
-            if ($dir) {
-                while (($entry = @readdir($dir))) {
-                    if (strpos($entry, W3TC_CONFIG_NAME) === 0 && $entry !== $config) {
-                        $locked = true;
-                        break;
+            // check only for WP MU
+            if ($blog_id && function_exists('get_blog_option')) {
+                $blogs = get_blog_list();
+                
+                foreach ($blogs as $blog) {
+                    if ($blog['blog_id'] != $blog_id) {
+                        $active_plugins = get_blog_option($blog['blog_id'], 'active_plugins');
+                        
+                        if (in_array(W3TC_FILE, $active_plugins)) {
+                            $locked = true;
+                            break;
+                        }
                     }
                 }
-                @closedir($dir);
             }
         }
         

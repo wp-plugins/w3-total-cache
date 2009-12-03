@@ -36,6 +36,7 @@
 // $TCAnet$
 //
 
+
 /**
  * This is the PHP client for memcached - a distributed memory cache daemon.
  * More information is available at http://www.danga.com/memcached/
@@ -64,24 +65,27 @@
 // {{{ requirements
 // }}}
 
+
 // {{{ constants
 // {{{ flags
+
 
 /**
  * Flag: indicates data is serialized
  */
 if (! defined("MEMCACHE_SERIALIZED")) {
-    define("MEMCACHE_SERIALIZED", 1<<0);
+    define("MEMCACHE_SERIALIZED", 1 << 0);
 }
 
 /**
  * Flag: indicates data is compressed
  */
 if (! defined("MEMCACHE_COMPRESSED")) {
-    define("MEMCACHE_COMPRESSED", 1<<1);
+    define("MEMCACHE_COMPRESSED", 1 << 1);
 }
 
 // }}}
+
 
 /**
  * Minimum savings to store data compressed
@@ -91,6 +95,7 @@ if (! defined("COMPRESSION_SAVINGS")) {
 }
 
 // }}}
+
 
 // {{{ class memcached
 /**
@@ -103,6 +108,7 @@ class memcached_client
 {
    // {{{ properties
    // {{{ public
+    
 
    /**
     * Command statistics
@@ -114,6 +120,7 @@ class memcached_client
    
    // }}}
    // {{{ private
+    
 
    /**
     * Cached Sockets that are connected
@@ -216,6 +223,7 @@ class memcached_client
    // {{{ methods
    // {{{ public functions
    // {{{ memcached()
+    
 
    /**
     * Memcache initializer
@@ -257,6 +265,7 @@ class memcached_client
    {
       return $this->_set('add', $key, $val, $exp);
    }
+    
 
    // }}}
    // {{{ decr()
@@ -274,6 +283,7 @@ class memcached_client
    {
       return $this->_incrdecr('decr', $key, $amt);
    }
+    
 
    // }}}
    // {{{ delete()
@@ -345,6 +355,7 @@ class memcached_client
    {
       $this->_compress_enable = $enable;
    }
+    
 
    // }}}
    // {{{ forget_dead_hosts()
@@ -361,6 +372,7 @@ class memcached_client
 
    // }}}
    // {{{ get()
+    
 
    /**
     * Retrieves the value associated with the key from the memcache server
@@ -401,6 +413,7 @@ class memcached_client
 
    // }}}
    // {{{ get_multi()
+    
 
    /**
     * Get multiple keys from the server(s)
@@ -497,6 +510,7 @@ class memcached_client
    {
       return $this->_set('replace', $key, $value, $exp);
    }
+    
 
    // }}}
    // {{{ run_command()
@@ -539,6 +553,7 @@ class memcached_client
 
    // }}}
    // {{{ set()
+    
 
    /**
     * Unconditionally sets a key to a given value in the memcache.  Returns true
@@ -558,6 +573,7 @@ class memcached_client
 
    // }}}
    // {{{ set_compress_threshold()
+    
 
    /**
     * Sets the compression threshold
@@ -573,6 +589,7 @@ class memcached_client
 
    // }}}
    // {{{ set_debug()
+    
 
    /**
     * Sets the debug flag
@@ -590,6 +607,7 @@ class memcached_client
 
    // }}}
    // {{{ set_servers()
+    
 
    /**
     * Sets the server list to distribute key gets and puts between
@@ -630,6 +648,7 @@ class memcached_client
       fclose($this->_cache_sock[$host]);
       unset($this->_cache_sock[$host]);
    }
+    
 
    // }}}
    // {{{ _connect_sock()
@@ -659,6 +678,7 @@ class memcached_client
          return false;
       return true;
    }
+    
 
    // }}}
    // {{{ _dead_sock()
@@ -681,6 +701,7 @@ class memcached_client
 
    // }}}
    // {{{ get_sock()
+    
 
    /**
     * get_sock
@@ -751,6 +772,7 @@ class memcached_client
       
       return $hash;
    }
+    
 
    // }}}
    // {{{ _incrdecr()
@@ -788,6 +810,7 @@ class memcached_client
 
    // }}}
    // {{{ _load_items()
+    
 
    /**
     * Load items into $ret from $sock
@@ -921,6 +944,7 @@ class memcached_client
 
    // }}}
    // {{{ sock_to_host()
+    
 
    /**
     * Returns the socket for the host
@@ -971,6 +995,11 @@ class memcached_client
    // }}}
    // }}}
    // }}}
+}
+
+// }}}
+// }}}
+// }}}
 }
 
 // }}}

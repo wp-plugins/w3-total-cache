@@ -1,5 +1,4 @@
-function seconds_to_string(seconds)
-{
+function seconds_to_string(seconds) {
     var string = '', days = 0, hours = 0, minutes = 0;
     days = Math.floor(seconds / 86400);
     if (days) {
@@ -24,8 +23,7 @@ function seconds_to_string(seconds)
     return string;
 }
 
-var Cdn_Export_File =
-{
+var Cdn_Export_File = {
     paused: 0,
     limit: 25,
     offset: 0,
@@ -35,50 +33,41 @@ var Cdn_Export_File =
     seconds_elapsed: 0,
     timer: null,
 
-    set_progress: function(percent)
-    {
+    set_progress: function(percent) {
         jQuery('#cdn_export_file_progress .progress-bar').width(percent + '%');
         jQuery('#cdn_export_file_progress .progress-value').html(percent + '%');
     },
 
-    set_status: function(status)
-    {
+    set_status: function(status) {
         jQuery('#cdn_export_file_status').html(status);
     },
 
-    set_processed: function(processed)
-    {
+    set_processed: function(processed) {
         jQuery('#cdn_export_file_processed').html(processed);
     },
 
-    set_button_text: function(text)
-    {
+    set_button_text: function(text) {
         jQuery('#cdn_export_file_start').val(text);
     },
 
-    set_last_response: function()
-    {
+    set_last_response: function() {
         var date = new Date();
         jQuery('#cdn_export_file_last_response').html(date.toLocaleTimeString() + ' ' + date.toLocaleDateString());
     },
 
-    set_elapsed: function(text)
-    {
+    set_elapsed: function(text) {
         jQuery('#cdn_export_file_elapsed').html(text);
     },
 
-    add_log: function(path, result, error)
-    {
+    add_log: function(path, result, error) {
         jQuery('#cdn_export_file_log').prepend('<div class="log-' + (result == 1 ? 'success' : 'error') + '">' + path + ' <strong>' + error + '</strong></div>');
     },
 
-    clear_log: function()
-    {
+    clear_log: function() {
         jQuery('#cdn_export_library_log').val('');
     },
 
-    process: function()
-    {
+    process: function() {
         if (this.paused) {
             return;
         }
@@ -91,24 +80,19 @@ var Cdn_Export_File =
 
         var me = this;
         if (this.upload_files.length) {
-            jQuery.ajax(
-            {
+            jQuery.ajax( {
                 type: 'POST',
-                url: 'options-general.php',
-                data:
-                {
-                    page: 'w3-total-cache/w3-total-cache.php',
+                url: 'options-general.php?page=w3-total-cache/w3-total-cache.php',
+                data: {
                     w3tc_action: 'cdn_export_process',
                     'files[]': this.upload_files
                 },
                 dataType: 'json',
-                success: function(data)
-                {
+                success: function(data) {
                     me.set_last_response();
                     me.process_callback(data);
                 },
-                error: function()
-                {
+                error: function() {
                     me.set_last_response();
                     me.retry(me.retry_seconds);
                 }
@@ -116,16 +100,14 @@ var Cdn_Export_File =
         }
     },
 
-    retry: function(seconds)
-    {
+    retry: function(seconds) {
         if (this.paused) {
             return;
         }
         this.set_status('request failed (retry in ' + seconds + 's)');
         if (seconds) {
             var me = this;
-            setTimeout(function()
-            {
+            setTimeout(function() {
                 me.retry(--seconds);
             }, 1000);
         } else {
@@ -134,8 +116,7 @@ var Cdn_Export_File =
         }
     },
 
-    process_callback: function(data)
-    {
+    process_callback: function(data) {
         var failed = false;
         for ( var i = 0; i < data.results.length; i++) {
             this.add_log(data.results[i].remote_path, data.results[i].result, data.results[i].error);
@@ -166,14 +147,12 @@ var Cdn_Export_File =
         }
     },
 
-    timer_callback: function()
-    {
+    timer_callback: function() {
         this.seconds_elapsed++;
         this.set_elapsed(seconds_to_string(this.seconds_elapsed));
     },
 
-    init: function(files, cdn_url)
-    {
+    init: function(files, cdn_url) {
         if (files === undefined) {
             files = [];
         }
@@ -181,8 +160,7 @@ var Cdn_Export_File =
         this.files = files;
 
         var me = this;
-        jQuery('#cdn_export_file_start').click(function()
-        {
+        jQuery('#cdn_export_file_start').click(function() {
             if (this.value == 'Pause') {
                 me.paused = 1;
                 me.set_button_text('Resume');
@@ -198,8 +176,7 @@ var Cdn_Export_File =
                 me.paused = 0;
                 me.set_button_text('Pause');
                 me.set_status('processing');
-                me.timer = setInterval(function()
-                {
+                me.timer = setInterval(function() {
                     me.timer_callback();
                 }, 1000);
             }
@@ -209,8 +186,7 @@ var Cdn_Export_File =
     }
 };
 
-var Cdn_Export_Library =
-{
+var Cdn_Export_Library = {
     paused: 0,
     limit: 25,
     offset: 0,
@@ -218,95 +194,78 @@ var Cdn_Export_Library =
     seconds_elapsed: 0,
     timer: null,
 
-    set_progress: function(percent)
-    {
+    set_progress: function(percent) {
         jQuery('#cdn_export_library_progress .progress-bar').width(percent + '%');
         jQuery('#cdn_export_library_progress .progress-value').html(percent + '%');
     },
 
-    set_status: function(status)
-    {
+    set_status: function(status) {
         jQuery('#cdn_export_library_status').html(status);
     },
 
-    set_processed: function(processed)
-    {
+    set_processed: function(processed) {
         jQuery('#cdn_export_library_processed').html(processed);
     },
 
-    set_total: function(total)
-    {
+    set_total: function(total) {
         jQuery('#cdn_export_library_total').html(total);
     },
 
-    set_button_text: function(text)
-    {
+    set_button_text: function(text) {
         jQuery('#cdn_export_library_start').val(text);
     },
 
-    set_last_response: function()
-    {
+    set_last_response: function() {
         var date = new Date();
         jQuery('#cdn_export_library_last_response').html(date.toLocaleTimeString() + ' ' + date.toLocaleDateString());
     },
 
-    set_elapsed: function(text)
-    {
+    set_elapsed: function(text) {
         jQuery('#cdn_export_library_elapsed').html(text);
     },
 
-    add_log: function(path, result, error)
-    {
+    add_log: function(path, result, error) {
         jQuery('#cdn_export_library_log').prepend('<div class="log-' + (result == 1 ? 'success' : 'error') + '">' + path + ' <strong>' + error + '</strong></div>');
     },
 
-    clear_log: function()
-    {
+    clear_log: function() {
         jQuery('#cdn_export_library_log').html('');
     },
 
-    process: function()
-    {
+    process: function() {
         if (this.paused) {
             return;
         }
 
         var me = this;
-        jQuery.ajax(
-        {
+        jQuery.ajax( {
             type: 'POST',
-            url: 'options-general.php',
-            data:
-            {
-                page: 'w3-total-cache/w3-total-cache.php',
+            url: 'options-general.php?page=w3-total-cache/w3-total-cache.php',
+            data: {
                 w3tc_action: 'cdn_export_library_process',
                 limit: this.limit,
                 offset: this.offset
             },
             dataType: 'json',
-            success: function(data)
-            {
+            success: function(data) {
                 me.set_last_response();
                 me.process_callback(data);
             },
-            error: function()
-            {
+            error: function() {
                 me.set_last_response();
                 me.retry(me.retry_seconds);
             }
         });
     },
 
-    retry: function(seconds)
-    {
+    retry: function(seconds) {
         if (this.paused) {
             return;
         }
         this.set_status('request failed (retry in ' + seconds + 's)');
         if (seconds) {
             var me = this;
-            setTimeout(function()
-            {
+            setTimeout(function() {
                 me.retry(--seconds);
             }, 1000);
         } else {
@@ -315,8 +274,7 @@ var Cdn_Export_Library =
         }
     },
 
-    process_callback: function(data, status)
-    {
+    process_callback: function(data, status) {
         this.offset += data.count;
 
         this.set_total(data.total);
@@ -349,17 +307,14 @@ var Cdn_Export_Library =
         }
     },
 
-    timer_callback: function()
-    {
+    timer_callback: function() {
         this.seconds_elapsed++;
         this.set_elapsed(seconds_to_string(this.seconds_elapsed));
     },
 
-    init: function()
-    {
+    init: function() {
         var me = this;
-        jQuery('#cdn_export_library_start').click(function()
-        {
+        jQuery('#cdn_export_library_start').click(function() {
             if (this.value == 'Pause') {
                 me.paused = 1;
                 me.set_status('paused');
@@ -375,8 +330,7 @@ var Cdn_Export_Library =
                 me.paused = 0;
                 me.set_status('processing');
                 me.set_button_text('Pause');
-                me.timer = setInterval(function()
-                {
+                me.timer = setInterval(function() {
                     me.timer_callback();
                 }, 1000);
             }
@@ -386,8 +340,7 @@ var Cdn_Export_Library =
     }
 };
 
-var Cdn_Import_Library =
-{
+var Cdn_Import_Library = {
     paused: 0,
     limit: 5,
     offset: 0,
@@ -396,65 +349,53 @@ var Cdn_Import_Library =
     seconds_elapsed: 0,
     timer: null,
 
-    set_progress: function(percent)
-    {
+    set_progress: function(percent) {
         jQuery('#cdn_import_library_progress .progress-bar').width(percent + '%');
         jQuery('#cdn_import_library_progress .progress-value').html(percent + '%');
     },
 
-    set_status: function(status)
-    {
+    set_status: function(status) {
         jQuery('#cdn_import_library_status').html(status);
     },
 
-    set_processed: function(processed)
-    {
+    set_processed: function(processed) {
         jQuery('#cdn_import_library_processed').html(processed);
     },
 
-    set_total: function(total)
-    {
+    set_total: function(total) {
         jQuery('#cdn_import_library_total').html(total);
     },
 
-    set_button_text: function(text)
-    {
+    set_button_text: function(text) {
         jQuery('#cdn_import_library_start').val(text);
     },
 
-    set_last_response: function()
-    {
+    set_last_response: function() {
         var date = new Date();
         jQuery('#cdn_import_library_last_response').html(date.toLocaleTimeString() + ' ' + date.toLocaleDateString());
     },
 
-    set_elapsed: function(text)
-    {
+    set_elapsed: function(text) {
         jQuery('#cdn_import_library_elapsed').html(text);
     },
 
-    is_redirect_permanent: function()
-    {
+    is_redirect_permanent: function() {
         return (jQuery('#cdn_import_library_redirect_permanent:checked').size() > 0);
     },
 
-    is_redirect_cdn: function()
-    {
+    is_redirect_cdn: function() {
         return (jQuery('#cdn_import_library_redirect_cdn:checked').size() > 0);
     },
 
-    add_log: function(path, result, error)
-    {
+    add_log: function(path, result, error) {
         jQuery('#cdn_import_library_log').prepend('<div class="log-' + (result == 1 ? 'success' : 'error') + '">' + path + ' <strong>' + error + '</strong></div>');
     },
 
-    clear_log: function()
-    {
+    clear_log: function() {
         jQuery('#cdn_import_library_log').html('');
     },
 
-    add_rule: function(src, dst)
-    {
+    add_rule: function(src, dst) {
         if (/^https?:\/\//.test(src)) {
             return;
         }
@@ -473,53 +414,44 @@ var Cdn_Import_Library =
         rules.val(rules.val() + 'Redirect ' + (this.is_redirect_permanent() ? '302 ' : '') + src + ' ' + dst + '\r\n');
     },
 
-    clear_rules: function()
-    {
+    clear_rules: function() {
         jQuery('#cdn_import_library_rules').val('');
     },
 
-    process: function()
-    {
+    process: function() {
         if (this.paused) {
             return;
         }
 
         var me = this;
-        jQuery.ajax(
-        {
+        jQuery.ajax( {
             type: 'POST',
-            url: 'options-general.php',
-            data:
-            {
-                page: 'w3-total-cache/w3-total-cache.php',
+            url: 'options-general.php?page=w3-total-cache/w3-total-cache.php',
+            data: {
                 w3tc_action: 'cdn_import_library_process',
                 limit: this.limit,
                 offset: this.offset
             },
             dataType: 'json',
-            success: function(data)
-            {
+            success: function(data) {
                 me.set_last_response();
                 me.process_callback(data);
             },
-            error: function()
-            {
+            error: function() {
                 me.set_last_response();
                 me.retry(me.retry_seconds);
             }
         });
     },
 
-    retry: function(seconds)
-    {
+    retry: function(seconds) {
         if (this.paused) {
             return;
         }
         this.set_status('request failed (retry in ' + seconds + 's)');
         if (seconds) {
             var me = this;
-            setTimeout(function()
-            {
+            setTimeout(function() {
                 me.retry(--seconds);
             }, 1000);
         } else {
@@ -528,8 +460,7 @@ var Cdn_Import_Library =
         }
     },
 
-    process_callback: function(data)
-    {
+    process_callback: function(data) {
         this.offset += data.count;
 
         this.set_total(data.total);
@@ -564,18 +495,15 @@ var Cdn_Import_Library =
         }
     },
 
-    timer_callback: function()
-    {
+    timer_callback: function() {
         this.seconds_elapsed++;
         this.set_elapsed(seconds_to_string(this.seconds_elapsed));
     },
 
-    init: function(cdn_host)
-    {
+    init: function(cdn_host) {
         var me = this;
         this.cdn_host = cdn_host;
-        jQuery('#cdn_import_library_start').click(function()
-        {
+        jQuery('#cdn_import_library_start').click(function() {
             if (this.value == 'Pause') {
                 me.paused = 1;
                 me.set_button_text('Resume');
@@ -592,8 +520,7 @@ var Cdn_Import_Library =
                 me.paused = 0;
                 me.set_button_text('Pause');
                 me.set_status('processing');
-                me.timer = setInterval(function()
-                {
+                me.timer = setInterval(function() {
                     me.timer_callback();
                 }, 1000);
             }
@@ -603,8 +530,7 @@ var Cdn_Import_Library =
     }
 };
 
-var Cdn_Rename_Domain =
-{
+var Cdn_Rename_Domain = {
     paused: 0,
     limit: 25,
     offset: 0,
@@ -612,101 +538,83 @@ var Cdn_Rename_Domain =
     seconds_elapsed: 0,
     timer: null,
 
-    set_progress: function(percent)
-    {
+    set_progress: function(percent) {
         jQuery('#cdn_rename_domain_progress .progress-bar').width(percent + '%');
         jQuery('#cdn_rename_domain_progress .progress-value').html(percent + '%');
     },
 
-    set_status: function(status)
-    {
+    set_status: function(status) {
         jQuery('cdn_rename_domain_status').html(status);
     },
 
-    set_processed: function(processed)
-    {
+    set_processed: function(processed) {
         jQuery('#cdn_rename_domain_processed').html(processed);
     },
 
-    set_total: function(total)
-    {
+    set_total: function(total) {
         jQuery('#cdn_rename_domain_total').html(total);
     },
 
-    set_button_text: function(text)
-    {
+    set_button_text: function(text) {
         jQuery('#cdn_rename_domain_start').val(text);
     },
 
-    set_last_response: function()
-    {
+    set_last_response: function() {
         var date = new Date();
         jQuery('#cdn_rename_domain_last_response').html(date.toLocaleTimeString() + ' ' + date.toLocaleDateString());
     },
 
-    set_elapsed: function(text)
-    {
+    set_elapsed: function(text) {
         jQuery('#cdn_rename_domain_elapsed').html(text);
     },
 
-    add_log: function(path, result, error)
-    {
+    add_log: function(path, result, error) {
         jQuery('#cdn_rename_domain_log').prepend('<div class="log-' + (result == 1 ? 'success' : 'error') + '">' + path + ' <strong>' + error + '</strong></div>');
     },
 
-    clear_log: function()
-    {
+    clear_log: function() {
         jQuery('#cdn_rename_domain_log').html('');
     },
 
-    get_domain_names: function()
-    {
+    get_domain_names: function() {
         return jQuery('#cdn_rename_domain_names').val();
     },
 
-    process: function()
-    {
+    process: function() {
         if (this.paused) {
             return;
         }
 
         var me = this;
-        jQuery.ajax(
-        {
+        jQuery.ajax( {
             type: 'POST',
-            url: 'options-general.php',
-            data:
-            {
-                page: 'w3-total-cache/w3-total-cache.php',
+            url: 'options-general.php?page=w3-total-cache/w3-total-cache.php',
+            data: {
                 w3tc_action: 'cdn_rename_domain_process',
                 names: this.get_domain_names(),
                 limit: this.limit,
                 offset: this.offset
             },
             dataType: 'json',
-            success: function(data)
-            {
+            success: function(data) {
                 me.set_last_response();
                 me.process_callback(data);
             },
-            error: function()
-            {
+            error: function() {
                 me.set_last_response();
                 me.retry(me.retry_seconds);
             }
         });
     },
 
-    retry: function(seconds)
-    {
+    retry: function(seconds) {
         if (this.paused) {
             return;
         }
         this.set_status('request failed (retry in ' + seconds + 's)');
         if (seconds) {
             var me = this;
-            setTimeout(function()
-            {
+            setTimeout(function() {
                 me.retry(--seconds);
             }, 1000);
         } else {
@@ -715,8 +623,7 @@ var Cdn_Rename_Domain =
         }
     },
 
-    process_callback: function(data)
-    {
+    process_callback: function(data) {
         this.offset += data.count;
 
         this.set_total(data.total);
@@ -749,18 +656,15 @@ var Cdn_Rename_Domain =
         }
     },
 
-    timer_callback: function()
-    {
+    timer_callback: function() {
         this.seconds_elapsed++;
         this.set_elapsed(seconds_to_string(this.seconds_elapsed));
     },
 
-    init: function(cdn_host)
-    {
+    init: function(cdn_host) {
         var me = this;
         this.cdn_host = cdn_host;
-        jQuery('#cdn_rename_domain_start').click(function()
-        {
+        jQuery('#cdn_rename_domain_start').click(function() {
             if (this.value == 'Pause') {
                 me.paused = 1;
                 me.set_button_text('Resume');
@@ -780,8 +684,7 @@ var Cdn_Rename_Domain =
                 me.paused = 0;
                 me.set_button_text('Pause');
                 me.set_status('processing');
-                me.timer = setInterval(function()
-                {
+                me.timer = setInterval(function() {
                     me.timer_callback();
                 }, 1000);
             }
@@ -791,23 +694,19 @@ var Cdn_Rename_Domain =
     }
 };
 
-jQuery(function($)
-{
-    $('.tab').click(function()
-    {
+jQuery(function($) {
+    $('.tab').click(function() {
         $('.tab').removeClass('tab-selected');
         $('.tab-content').hide();
         $(this).addClass('tab-selected');
         $(this.rel).show();
     });
 
-    $('.cdn_queue_delete').click(function()
-    {
-        return confirm('Are you sure you want to delete this file from the queue?');
+    $('.cdn_queue_delete').click(function() {
+        return confirm('Are you sure you want to remove this file from the queue?');
     });
 
-    $('.cdn_queue_empty').click(function()
-    {
+    $('.cdn_queue_empty').click(function() {
         return confirm('Are you sure you want to empty the queue?');
     });
 });

@@ -4,7 +4,7 @@
  * @package Minify
  */
 
-require_once 'Minify/Source.php';
+require_once W3TC_LIB_MINIFY_DIR . '/Minify/Source.php';
 
 /**
  * Maintain a single last modification time for a group of Minify sources to

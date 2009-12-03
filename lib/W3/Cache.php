@@ -19,6 +19,10 @@ if (! defined('W3_CACHE_FILE')) {
     define('W3_CACHE_FILE', 'file');
 }
 
+if (! defined('W3_CACHE_FILE_PGCACHE')) {
+    define('W3_CACHE_FILE_PGCACHE', 'file_pgcache');
+}
+
 /**
  * Class W3_Cache
  */
@@ -41,7 +45,7 @@ class W3_Cache
             switch ($engine) {
                 case W3_CACHE_MEMCACHED:
                     require_once W3TC_LIB_W3_DIR . '/Cache/Memcached.php';
-                    $instances[$instance_key] = W3_Cache_Memcached::instance($config['engine'], $config);
+                    $instances[$instance_key] = & W3_Cache_Memcached::instance($config['engine'], $config);
                     break;
                 
                 case W3_CACHE_APC:
@@ -52,6 +56,11 @@ class W3_Cache
                 case W3_CACHE_FILE:
                     require_once W3TC_LIB_W3_DIR . '/Cache/File.php';
                     $instances[$instance_key] = & new W3_Cache_File($config);
+                    break;
+                
+                case W3_CACHE_FILE_PGCACHE:
+                    require_once W3TC_LIB_W3_DIR . '/Cache/File/PgCache.php';
+                    $instances[$instance_key] = & new W3_Cache_File_PgCache($config);
                     break;
                 
                 default:

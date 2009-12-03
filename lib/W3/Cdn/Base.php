@@ -30,6 +30,7 @@ class W3_Cdn_Base
     
     /**
      * PHP5 Constructor
+	 *
      * @param array $config
      */
     function __construct($config)
@@ -39,6 +40,7 @@ class W3_Cdn_Base
     
     /**
      * PHP4 Constructor
+	 *
      * @param array $config
      */
     function W3_Cdn_Base($config)
@@ -51,11 +53,11 @@ class W3_Cdn_Base
      *
      * @param array $files
      * @param array $results
-     * @return integer
+     * @return boolean
      */
     function upload($files, &$results)
     {
-        $results = $this->get_results($files, W3_CDN_RESULT_HALT, 'Not implemented');
+        $results = $this->get_results($files, W3_CDN_RESULT_HALT, 'Not implemented.');
         return false;
     }
     
@@ -64,22 +66,62 @@ class W3_Cdn_Base
      *
      * @param array $files
      * @param array $results
-     * @return integer
+     * @return boolean
      */
     function delete($files, &$results)
     {
-        $results = $this->get_results($files, W3_CDN_RESULT_HALT, 'Not implemented');
+        $results = $this->get_results($files, W3_CDN_RESULT_HALT, 'Not implemented.');
         return false;
     }
     
     /**
      * Test CDN server
      *
+     * @param string $error
      * @return boolean
      */
-    function test(&$error = null)
+    function test(&$error)
     {
-        $error = 'Not implemented';
+        $error = 'Not implemented.';
+        return false;
+    }
+    
+    /**
+     * Returns CDN domain
+	 *
+     * @return string
+     */
+    function get_domain()
+    {
+        return false;
+    }
+    
+    /**
+     * Returns via string
+	 *
+     * @return string
+     */
+    function get_via()
+    {
+        return $this->get_domain();
+    }
+    
+    /**
+     * Formats object URL
+	 *
+     * @param string $path
+     * @return string
+     */
+    function format_url($path)
+    {
+        $domain = $this->get_domain();
+        
+        if ($domain) {
+            $url = sprintf('%s://%s%s', (w3_is_https() ? 'https' : 'http'), $domain, $path);
+            
+            return $url;
+        }
+        
         return false;
     }
     

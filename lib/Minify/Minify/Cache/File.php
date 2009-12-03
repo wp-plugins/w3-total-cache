@@ -9,7 +9,7 @@ class Minify_Cache_File {
     public function __construct($path = '', $fileLocking = false)
     {
         if (! $path) {
-            require_once 'Solar/Dir.php';
+            require_once W3TC_LIB_MINIFY_DIR . '/Solar/Dir.php';
             $path = rtrim(Solar_Dir::tmp(), DIRECTORY_SEPARATOR);
         }
         $this->_locking = $fileLocking;

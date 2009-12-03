@@ -59,7 +59,7 @@ class Minify_Lines {
         
         // check for desired URI rewriting
         if (isset($options['currentDir'])) {
-            require_once 'Minify/CSS/UriRewriter.php';
+            require_once W3TC_LIB_MINIFY_DIR . '/Minify/CSS/UriRewriter.php';
             Minify_CSS_UriRewriter::$debugText = '';
             $content = Minify_CSS_UriRewriter::rewrite(
                  $content
@@ -68,8 +68,15 @@ class Minify_Lines {
                 ,isset($options['symlinks']) ? $options['symlinks'] : array()
             );
             $content = "/* Minify_CSS_UriRewriter::\$debugText\n\n" 
-                     . Minify_CSS_UriRewriter::$debugText . "*/\n"
-                     . $content;
+                 . Minify_CSS_UriRewriter::$debugText . "*/\n"
+                 . $content;
+        } elseif (isset($options['prependRelativePath'])) {
+            require_once W3TC_LIB_MINIFY_DIR . '/Minify/CSS/UriRewriter.php';
+            Minify_CSS_UriRewriter::$debugText = '';
+            $content = Minify_CSS_UriRewriter::prepend(
+                $content
+                ,$options['prependRelativePath']
+            );
         }
         
         return $content;

@@ -1,11 +1,11 @@
 <?php
 
 if (! defined('W3_CACHE_FILE_EXPIRE_MAX')) {
-    define('W3_CACHE_FILE_EXPIRE_MAX', 864000);
+    define('W3_CACHE_FILE_EXPIRE_MAX', 2592000);
 }
 
 /**
- * APC class
+ * File class
  */
 require_once W3TC_LIB_W3_DIR . '/Cache/Base.php';
 
@@ -69,9 +69,13 @@ class W3_Cache_File extends W3_Cache_Base
      */
     function set($key, $var, $expire = 0)
     {
-        $path = $this->_get_path($key);
-        $dir = dirname(str_replace($this->_cache_dir, '', $path));
-        if ((is_dir($dir) || w3_mkdir($dir, 0755, $this->_cache_dir))) {
+        $sub_path = $this->_get_path($key);
+        $path = $this->_cache_dir . '/' . $sub_path;
+        
+        $sub_dir = dirname($sub_path);
+        $dir = dirname($path);
+        
+        if ((is_dir($dir) || w3_mkdir($sub_dir, 0755, $this->_cache_dir))) {
             $fp = @fopen($path, 'wb');
             if ($fp) {
                 @fputs($fp, pack('L', $expire));
@@ -80,6 +84,7 @@ class W3_Cache_File extends W3_Cache_Base
                 return true;
             }
         }
+        
         return false;
     }
     
@@ -91,9 +96,9 @@ class W3_Cache_File extends W3_Cache_Base
      */
     function get($key)
     {
-        $pwd = getcwd();
         $var = false;
-        $path = $this->_get_path($key);
+        $path = $this->_cache_dir . '/' . $this->_get_path($key);
+        
         if (is_readable($path)) {
             $ftime = @filemtime($path);
             if ($ftime) {
@@ -144,10 +149,12 @@ class W3_Cache_File extends W3_Cache_Base
      */
     function delete($key)
     {
-        $path = $this->_get_path($key);
+        $path = $this->_cache_dir . '/' . $this->_get_path($key);
+        
         if (file_exists($path)) {
             return @unlink($path);
         }
+        
         return false;
     }
     
@@ -158,7 +165,25 @@ class W3_Cache_File extends W3_Cache_Base
      */
     function flush()
     {
-        return w3_emptydir($this->_cache_dir);
+        w3_emptydir($this->_cache_dir);
+        
+        return true;
+    }
+    
+    /**
+     * Returns modification time of cache file
+	 *
+     * @param integer $key
+     */
+    function mtime($key)
+    {
+        $path = $this->_cache_dir . '/' . $this->_get_path($key);
+        
+        if (file_exists($path)) {
+            return @filemtime($path);
+        }
+        
+        return false;
     }
     
     /**
@@ -170,7 +195,7 @@ class W3_Cache_File extends W3_Cache_Base
     function _get_path($key)
     {
         $hash = md5($key);
-        $path = sprintf('%s/%s/%s/%s', $this->_cache_dir, substr($hash, 0, 2), substr($hash, 2, 2), $hash);
+        $path = sprintf('%s/%s/%s', substr($hash, 0, 2), substr($hash, 2, 2), $hash);
         
         return $path;
     }

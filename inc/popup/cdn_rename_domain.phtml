@@ -1,3 +1,5 @@
+<?php include W3TC_DIR . '/inc/popup/common/header.phtml'; ?>
+
 <script type="text/javascript">
 /*<![CDATA[*/
 jQuery(function() {
@@ -29,7 +31,10 @@ jQuery(function() {
 	</tr>	
 	<tr>
 		<td>Domains to rename:</td>
-		<td><textarea cols="30" rows="3" id="cdn_rename_domain_names"></textarea></td>
+		<td>
+			<textarea cols="30" rows="3" id="cdn_rename_domain_names"></textarea><br />
+			e.g.: domain.com
+		</td>
 	</tr>	
 </table>
 
@@ -44,3 +49,5 @@ jQuery(function() {
 </div>
 
 <div id="cdn_rename_domain_log" class="log"></div>
+
+<?php include W3TC_DIR . '/inc/popup/common/footer.phtml'; ?>

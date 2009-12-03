@@ -7,7 +7,7 @@
 /**
  * Minify_Source
  */
-require_once 'Minify/Source.php';
+require_once W3TC_LIB_MINIFY_DIR . '/Minify/Source.php';
  
 /**
  * Minify - Combines, minifies, and caches JavaScript and CSS files on demand.
@@ -60,6 +60,12 @@ class Minify {
     public static $importWarning = "/* See http://code.google.com/p/minify/wiki/CommonProblems#@imports_can_appear_in_invalid_locations_in_combined_CSS_files */\n";
     
     /**
+     * Cache ID
+     * @var string
+     */
+    protected static $_cacheId = null;
+    
+    /**
      * Specify a cache object (with identical interface as Minify_Cache_File) or
      * a path to use with Minify_Cache_File.
      * 
@@ -77,7 +83,7 @@ class Minify {
     public static function setCache($cache = '', $fileLocking = true)
     {
         if (is_string($cache)) {
-            require_once 'Minify/Cache/File.php';
+            require_once W3TC_LIB_MINIFY_DIR . '/Minify/Cache/File.php';
             self::$_cache = new Minify_Cache_File($cache, $fileLocking);
         } else {
             self::$_cache = $cache;
@@ -163,7 +169,7 @@ class Minify {
             // make $controller into object
             $class = 'Minify_Controller_' . $controller;
             if (! class_exists($class, false)) {
-                require_once "Minify/Controller/" 
+                require_once W3TC_LIB_MINIFY_DIR . "/Minify/Controller/" 
                     . str_replace('_', '/', $controller) . ".php";    
             }
             $controller = new $class();
@@ -207,7 +213,7 @@ class Minify {
                 $contentEncoding = self::$_options['encodeMethod'];
             } else {
                 // sniff request header
-                require_once 'HTTP/Encoder.php';
+                require_once W3TC_LIB_MINIFY_DIR . '/HTTP/Encoder.php';
                 // depending on what the client accepts, $contentEncoding may be 
                 // 'x-gzip' while our internal encodeMethod is 'gzip'. Calling
                 // getAcceptedEncoding(false, false) leaves out compress and deflate as options.
@@ -218,7 +224,7 @@ class Minify {
         }
         
         // check client cache
-        require_once 'HTTP/ConditionalGet.php';
+        require_once W3TC_LIB_MINIFY_DIR . '/HTTP/ConditionalGet.php';
         $cgOptions = array(
             'lastModifiedTime' => self::$_options['lastModifiedTime']
             ,'isPublic' => self::$_options['isPublic']
@@ -266,7 +272,7 @@ class Minify {
             // the goal is to use only the cache methods to sniff the length and 
             // output the content, as they do not require ever loading the file into
             // memory.
-            $cacheId = 'minify_' . self::_getCacheId();
+            $cacheId = self::_getCacheId();
             $fullCacheId = (self::$_options['encodeMethod'])
                 ? $cacheId . '.gz'
                 : $cacheId;
@@ -376,7 +382,7 @@ class Minify {
             if ($unsetPathInfo) {
                 unset($_SERVER['PATH_INFO']);
             }
-            require_once 'Minify/Logger.php';
+            require_once W3TC_LIB_MINIFY_DIR . '/Minify/Logger.php';
             Minify_Logger::log("setDocRoot() set DOCUMENT_ROOT to \"{$_SERVER['DOCUMENT_ROOT']}\"");
         }
     }
@@ -408,8 +414,8 @@ class Minify {
         foreach ($sources as $source) {
             $source->minifier = array('Minify_Lines', 'minify');
             $id = $source->getId();
-            $source->minifyOptions = array(
-                'id' => (is_file($id) ? basename($id) : $id)
+            $source->minifyOptions = array_merge((array) $source->minifyOptions, array(
+            	'id' => (is_file($id) ? basename($id) : $id))
             );
         }
     }
@@ -487,6 +493,23 @@ class Minify {
     }
     
     /**
+     * Sets cache ID
+     * @param string $cacheId
+     */
+    public static function setCacheId($cacheId = null)
+    {
+        self::$_cacheId = $cacheId;
+    }
+    
+    /**
+     * Returns cache ID
+     */
+    public static function getCacheId()
+    {
+        return self::$_cacheId;
+    }
+    
+    /**
      * Make a unique cache id for for this request.
      * 
      * Any settings that could affect output are taken into consideration  
@@ -495,13 +518,13 @@ class Minify {
      */
     protected static function _getCacheId()
     {
-        return md5(serialize(array(
+        return (self::$_cacheId ? self::$_cacheId : md5(serialize(array(
             Minify_Source::getDigest(self::$_controller->sources)
             ,self::$_options['minifiers'] 
             ,self::$_options['minifierOptions']
             ,self::$_options['postprocessor']
             ,self::$_options['bubbleCssImports']
-        )));
+        ))));
     }
     
     /**

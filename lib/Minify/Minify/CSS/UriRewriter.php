@@ -158,15 +158,33 @@ class Minify_CSS_UriRewriter {
                 : substr($m[1], 1, strlen($m[1]) - 2);
         }
         // analyze URI
-        if ('/' !== $uri[0]                  // root-relative
-            && false === strpos($uri, '//')  // protocol (non-data)
-            && 0 !== strpos($uri, 'data:')   // data protocol
-        ) {
-            // URI is file-relative: rewrite depending on options
-            $uri = (self::$_prependPath !== null)
-                ? (self::$_prependPath . $uri)
-                : self::rewriteRelative($uri, self::$_currentDir, self::$_docRoot, self::$_symlinks);
+        if (false === strpos($uri, '//')  // protocol (non-data)
+            && 0 !== strpos($uri, 'data:'))   // data protocol
+        {
+            if (self::$_prependPath !== null) {
+                if (w3_is_url(self::$_prependPath)) {
+                    $parse_url = @parse_url(self::$_prependPath);
+                    
+                    if ($parse_url && isset($parse_url['host'])) {
+                        $scheme = $parse_url['scheme'];
+                        $host = $parse_url['host'];
+                        $port = (isset($parse_url['port']) && $parse_url['port'] != 80 ? ':' . $parse_url['port'] : '');
+                        $path = (! empty($parse_url['path']) ? trim($parse_url['path']) : '/');
+                        $dir_css = preg_replace('~[^/]+$~', '', $path);
+                        $dir_obj = preg_replace('~[^/]+$~', '', $uri);
+                        $dir = ltrim((strpos($dir_obj, '/') === 0 ?  w3_realpath($dir_obj) : w3_realpath($dir_css . $dir_obj)), '/');
+                        $file = basename($uri);
+                        
+                        $uri = sprintf('%s://%s%s/%s%s', $scheme, $host, $port, $dir, $file);
+                    }
+                }  else {
+                   $uri =  self::$_prependPath . $uri;
+                }             
+            } else {
+                $uri = self::rewriteRelative($uri, self::$_currentDir, self::$_docRoot, self::$_symlinks);
+            }
         }
+        
         return $isImport
             ? "@import {$quoteChar}{$uri}{$quoteChar}"
             : "url({$quoteChar}{$uri}{$quoteChar})";
@@ -212,6 +230,10 @@ class Minify_CSS_UriRewriter {
      */
     public static function rewriteRelative($uri, $realCurrentDir, $realDocRoot, $symlinks = array())
     {
+		if ('/' === $uri[0]) {                 // root-relative
+            return $uri; 
+		}
+        
         // prepend path with current dir separator (OS-independent)
         $path = strtr($realCurrentDir, '/', DIRECTORY_SEPARATOR)  
             . DIRECTORY_SEPARATOR . strtr($uri, '/', DIRECTORY_SEPARATOR);

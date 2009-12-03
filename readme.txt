@@ -1,19 +1,19 @@
 === Plugin Name ===
 Contributors: fredericktownes
-Tags: user experience, cache, caching, page cache, css cache, js cache, db cache, disk cache, disk caching, database cache, http compression, gzip, deflate, minify, CDN, content delivery network, media library, wp cache, wp super cache, w3 total cache, performance, speed, multiple hosts, CSS, merge, combine, unobtrusive javascript, compress, optimize, optimizer, JavaScript, JS, cascading style sheet, plugin, yslow
+Tags: user experience, cache, caching, page cache, css cache, js cache, db cache, disk cache, disk caching, database cache, http compression, gzip, deflate, minify, CDN, content delivery network, media library, performance, speed, multiple hosts, CSS, merge, combine, unobtrusive javascript, compress, optimize, optimizer, JavaScript, JS, cascading style sheet, plugin, yslow, YUI, google page speed, S3, CloudFront, AWS, Amazon Web Services, batcache, wp cache, wp super cache, w3 total cache
 Requires at least: 2.5
-Tested up to: 2.8.4
-Stable tag: 0.8
+Tested up to: 2.9
+Stable tag: 0.8.5
 
 Dramatically improve the user experience of your blog. Add page caching, database caching, minify and content delivery network functionality and more to WordPress.
 
 == Description ==
 
-Trusted by many popular blogs like: mashable.com, pearsonified.com, webdesignerdepot.com, freelanceswitch.com, briansolis.com, css3.info, tutsplus.com, yoast.com, noupe.com and others &mdash; W3 Total Cache improves the user experience of your blog by improving your server performance, caching every aspect of your site, reducing the download time of your theme and providing transparent content delivery network (CDN) integration.
+The fastest and most complete WordPress performance optimization plugin. Trusted by many popular blogs like: mashable.com, pearsonified.com, noupe.com, webdesignerdepot.com, freelanceswitch.com, briansolis.com, tutsplus.com, yoast.com, css3.info and others &mdash; W3 Total Cache improves the user experience of your blog by improving your server performance, caching every aspect of your site, reducing the download time of your theme and providing transparent content delivery network (CDN) integration.
 
 Benefits:
 
-* At least 10x improvement in site performance (Grade A in YSlow, when fully configured)
+* At least 10x improvement in site performance (when fully configured: Grade A in YSlow or great Google Page Speed Improvements)
 * "Instant" second page views (browser caching after first page view)
 * Reduced page load time: increased visitor time on site (visitors view more pages)
 * Optimized progressive render (pages appear to load instantly)
@@ -51,6 +51,8 @@ Speed is among the most significant success factors web sites face. In fact, you
 
 A thousandth of a second is not a long time, yet the impact is quite significant. Even if you're not a large company (or just hope to become one), a loss is still a loss. However, there is a solution to this problem, take advantage.
 
+In the near future search engines themselves will weigh the performance of web sites as factors in their ranking algorithms. Search engine's have the goal of providing users with the best user experience, so speed is definitely a factor.
+
 = Why is W3 Total Cache better than other cache plugins? =
 
 Most of the popular cache plugins available do a great job and serve their purpose very well. Our plugin remedies numerous performance reducing aspects of any web site going far beyond merely reducing CPU usage (load) and bandwidth consumption for HTML pages alone. Equally important, the plugin requires no theme modifications, modifications to your .htaccess (mod_rewrite rules) or programming compromises to reap the benefits. Setup is easy.
@@ -69,7 +71,7 @@ You're right, [Matt did say that](http://ma.tt/2008/03/wordpress-is-open-source/
 
 = Which WordPress versions are supported? =
 
-To use all features in the suite, a minimum of version 2.5 is required. Earlier versions will benefit from our Media Library Importer to get them back on the upgrade path and into a CDN of their choosing.
+To use all features in the suite, a minimum of version WordPress 2.5 with PHP 5 is required. Earlier versions will benefit from our Media Library Importer to get them back on the upgrade path and into a CDN of their choosing.
 
 = Will the plugin interfere with other plugins or widgets? =
 
@@ -89,17 +91,18 @@ On the contrary, as with any other action a user can perform on a site, faster p
 
 = Who do you recommend as a CDN (Content Delivery Network) provider? =
 
-That depends on how you use your blog and where most of your readers read your blog (regionally). Here's a short list:</p>
+That depends on how you use your blog and where most of your readers read your blog (regionally). Here's a short list:
 
-* [NetDNA](http://www.netdna.com/)
+* [MaxCDN](http://www.maxcdn.com/)
+* [Cotendo](http://www.cotendo.com/)
 * [VPS NET](https://vps.net/cdn-signup)
-* [SimpleCDN](http://www.simplecdn.com/)
-* [Amazon S3](http://aws.amazon.com/s3/)
-* [Amazon Cloudfront](http://aws.amazon.com/cloudfront/)
+* [Amazon S3](http://aws.amazon.com/s3/) &amp; [Amazon Cloudfront](http://aws.amazon.com/cloudfront/)
+* [NetDNA](http://www.netdna.com/)
 * [EdgeCast](http://www.edgecast.com/)
-* [Voxel](http://www.voxel.net/products-services/voxcast-cdn)
-* [Limelight Networks](http://www.limelightnetworks.com/)
 * [Akamai](http://www.akamai.com/)
+* [Limelight Networks](http://www.limelightnetworks.com/)
+* [SimpleCDN](http://www.simplecdn.com/)
+* [Voxel](http://www.voxel.net/products-services/voxcast-cdn)
 
 = Why would I want to cache my feeds? =
 
@@ -112,7 +115,6 @@ Technically no, a CDN is a high performance cache that stores static assets (you
 = Will this plugin speed up WP Admin? =
 
 Yes, indirectly - if you have a lot of bloggers working with you, you will find that it feels like you have a server dedicated only to WP Admin once this plugin is enabled; the result, increased productivity.
-
 
 = Which web servers do you support? =
 
@@ -136,12 +138,45 @@ Install the plugin to read the full FAQ.
 1. Unzip and upload the plugin to your plugins directory (wp-content/plugins/), when done wp-content/plugins/w3-total-cache/ should exist.
 1. Ensure that wp-config.php contains the statement below; if you previously used a caching plugin, this statement is likely to exist already: `define('WP_CACHE', true);`
 1. Locate and activate the plugin on the plugins page, then click the Settings link to proceed to the General Settings tab. Set the permissions of wp-content back to 755, e.g.: `# chmod 755 /var/www/vhosts/domain.com/httpdocs/wp-content/`
-1. Select your caching preferences for page, database and minify. If memcached is used this will require you to confirm or modify the default settings and add any additional memcached servers you wish to use. To utilize APC and memcached + memcache installation guides have been provided under the Installation tab. For those in shared hosting environments, contact your provider to see if either of these is supported.
+1. Select your caching preferences for page, database and minify. If memcached is used this will require you to confirm or modify the default settings and add any additional memcached servers you wish to use. To (optionally) utilize APC / memcached + memcache installation guides have been provided under the Installation tab. For those in shared hosting environments, contact your provider to see if either of these is supported.
 1. If you already have a content delivery network provider, proceed to the CDN Settings tab and populate the fields and set your preferences. If you're not running a version of WordPress with the Media Library feature, use the Media Library Import Tool to migrate your post images etc to appropriate locations. If you do not have a CDN provider, you can still improve your site's performance using this feature. Create and use a subdomain on your own server; e.g. static.domain.com and configure options on the CDN tab accordingly.
 1. On the Minify Settings tab all of the recommended settings are preset. Specify any CSS and JS files in the respective sections, view your site's HTML source and search for .css and .js files. In the case of JS files you can specify the type and location of the embedding using the drop down menu.
 1. You're done! Get back to blogging!
 
 == Changelog ==
+
+= 0.8.5 =
+* Added "enhanced" disk caching mode for page cache, a 160% performance improvement over basic mode
+* Added disk caching as an option for Database Cache
+* Added CDN support for Amazon S3 and CloudFront
+* Added mobile user agent rejection and redirect fields to page cache for handling mobile user agents
+* Added Submit Bug Report tab
+* Added support for detection of custom templates for minify groups
+* Added separate controls expiration time field for minify and page cache settings
+* Added PHP4 Support Notification to handle fatal errors on activation
+* Improved database caching by 45%
+* Improved handling of cache-control HTML headers
+* Improved handing of 3rd Party CSS file minification
+* Improved media library import reliability
+* Improved handling of `DOCUMENT_ROOT` on some servers
+* Improved garbage collection routine
+* Improved handling of `<pre>` and `<textarea>` minification
+* Improved handling of regular expressions in custom file list in CDN settings
+* Improved handling of media library attachments in RSS feeds
+* Improved handing of subdomains for CDN settings
+* Improved various notifications and error messages
+* Improved optional .htaccess directives (located in /ini/_htaccess)
+* Fixed bug with JS minifcation saving group settings
+* Fixed bug with false positives for duplicate CSS or JS in minify settings
+* Fixed bug causing settings to be lost on upgrade
+* Fixed bug with attachment URI when CDN mode enabled
+* Fixed small bug with FTP upload when CDN Method is Mirror (Origin Pull)
+* Fixed bug with the URI for wlwmanfiest.xml when CDN enabled 
+* Fixed bug with handling of HTTPS objects according to options
+* Fixed bug with emptying disk cache under various obscure permutations
+* Fixed bug with handling of obscure open_basedir restrictions
+* Fixed various bugs with emptying cache under various obscure permutations
+* Fixed bug with installations deeper than document root
 
 = 0.8 =
 * Added disk as method for page caching

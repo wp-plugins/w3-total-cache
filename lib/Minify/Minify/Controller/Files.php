@@ -4,7 +4,7 @@
  * @package Minify
  */
 
-require_once 'Minify/Controller/Base.php';
+require_once W3TC_LIB_MINIFY_DIR . '/Minify/Controller/Base.php';
 
 /**
  * Controller class for minifying a set of files

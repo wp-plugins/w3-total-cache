@@ -72,8 +72,13 @@ class Minify_HTML {
         if (isset($options['jsMinifier'])) {
             $this->_jsMinifier = $options['jsMinifier'];
         }
+        
+        $this->_stripCrlf = (isset($options['stripCrlf']) ? (boolean) $options['stripCrlf'] : false) ;            
+        $this->_cssStripCrlf = (isset($options['cssStripCrlf']) ? (boolean) $options['cssStripCrlf'] : false);            
+        $this->_cssStripComments = (isset($options['cssStripComments']) ? (boolean) $options['cssStripComments'] : false);            
+        $this->_jsStripCrlf = (isset($options['jsStripCrlf']) ? (boolean) $options['jsStripCrlf'] : false);            
+        $this->_jsStripComments = (isset($options['jsStripComments']) ? (boolean) $options['jsStripComments'] : false);            
     }
-    
     
     /**
      * Minify the markeup given in the constructor
@@ -138,6 +143,12 @@ class Minify_HTML {
         // use newlines before 1st attribute in open tags (to limit line lengths)
         $this->_html = preg_replace('/(<[a-z\\-]+)\\s+([^>]+>)/i', "$1\n$2", $this->_html);
         
+        if ($this->_stripCrlf) {
+            $this->_html = preg_replace("~[\r\n]+~", ' ', $this->_html);
+        } else {
+            $this->_html = preg_replace("~[\r\n]+~", "\n", $this->_html);
+        }
+                
         // fill placeholders
         $this->_html = str_replace(
             array_keys($this->_placeholders)
@@ -198,6 +209,16 @@ class Minify_HTML {
             : 'trim';
         $css = call_user_func($minifier, $css);
         
+        if ($this->_cssStripComments) {
+            $css = preg_replace('~/\*.*\*/~Us', ' ', $css);
+        }
+        
+        if ($this->_cssStripCrlf) {
+            $css = preg_replace("~[\r\n]+~", '', $css);
+        } else {
+            $css = preg_replace("~[\r\n]+~", "\n", $css);
+        }        
+        
         return $this->_reservePlace($this->_needsCdata($css)
             ? "{$openStyle}/*<![CDATA[*/{$css}/*]]>*/</style>"
             : "{$openStyle}{$css}</style>"
@@ -224,6 +245,17 @@ class Minify_HTML {
             ? $this->_jsMinifier
             : 'trim'; 
         $js = call_user_func($minifier, $js);
+        
+        if ($this->_jsStripComments) {
+            $js = preg_replace('~^//.*$~m', '', $js);
+            $js = preg_replace('~/\*.*\*/~Us', '', $js);
+        }
+        
+        if ($this->_jsStripCrlf) {
+            $js = preg_replace("~[\r\n]+~", '', $js);
+        } else {
+            $js = preg_replace("~[\r\n]+~", "\n", $js);
+        }
         
         return $this->_reservePlace($this->_needsCdata($js)
             ? "{$ws1}{$openScript}/*<![CDATA[*/{$js}/*]]>*/</script>{$ws2}"

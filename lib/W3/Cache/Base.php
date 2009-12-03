@@ -12,7 +12,7 @@ class W3_Cache_Base
     /**
      * Adds data
      *
-     * @abstract 
+     * @abstract
      * @param string $key
      * @param mixed $data
      * @param integer $expire
@@ -22,11 +22,11 @@ class W3_Cache_Base
     {
         return false;
     }
-
+    
     /**
      * Sets data
      *
-     * @abstract 
+     * @abstract
      * @param string $key
      * @param mixed $data
      * @param integer $expire
@@ -36,11 +36,11 @@ class W3_Cache_Base
     {
         return false;
     }
-
+    
     /**
      * Returns data
      *
-     * @abstract 
+     * @abstract
      * @param string $key
      * @return mixed
      */
@@ -59,11 +59,11 @@ class W3_Cache_Base
     {
         return $this->get($key);
     }
-
+    
     /**
      * Replaces data
      *
-     * @abstract 
+     * @abstract
      * @param string $key
      * @param mixed $data
      * @param integer $expire
@@ -73,11 +73,11 @@ class W3_Cache_Base
     {
         return false;
     }
-
+    
     /**
      * Deletes data
      *
-     * @abstract 
+     * @abstract
      * @param string $key
      * @return boolean
      */
@@ -85,11 +85,11 @@ class W3_Cache_Base
     {
         return false;
     }
-
+    
     /**
      * Flushes all data
      *
-     * @abstract 
+     * @abstract
      * @return boolean
      */
     function flush()

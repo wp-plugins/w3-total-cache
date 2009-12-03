@@ -3,15 +3,8 @@
 /**
  * W3 Database object
  */
-
-/**
- * @global w3db $wpdb
- */
 $wpdb = false;
 
-/**
- * Require default WordPress database object
- */
 require_once ABSPATH . 'wp-includes/wp-db.php';
 
 /**
@@ -79,8 +72,8 @@ class W3_Db extends wpdb
     function __construct($dbuser, $dbpassword, $dbname, $dbhost)
     {
         require_once W3TC_LIB_W3_DIR . '/Config.php';
-        $this->_config = W3_Config::instance();
-        $this->_lifetime = $this->_config->get_integer('dbcache.lifetime', 180);
+        $this->_config = & W3_Config::instance();
+        $this->_lifetime = $this->_config->get_integer('dbcache.lifetime');
         
         parent::__construct($dbuser, $dbpassword, $dbname, $dbhost);
     }
@@ -112,13 +105,13 @@ class W3_Db extends wpdb
         
         ++ $this->query_total;
         
-        // filter the query, if filters are available
-        // NOTE: some queries are made before the plugins have been loaded, and thus cannot be filtered with this method
+        // Filter the query, if filters are available
+        // NOTE: Some queries are made before the plugins have been loaded, and thus cannot be filtered with this method
         if (function_exists('apply_filters')) {
             $query = apply_filters('query', $query);
         }
         
-        // initialise return
+        // Initialise return
         $return_val = 0;
         $this->flush();
         
@@ -138,7 +131,7 @@ class W3_Db extends wpdb
             $cache_key = $this->_get_cache_key($query);
             
             $this->timer_start();
-            $cache = $this->_get_cache();
+            $cache = & $this->_get_cache();
             $data = $cache->get($cache_key);
             $time_total = $this->timer_stop();
         }
@@ -181,7 +174,7 @@ class W3_Db extends wpdb
                 return false;
             }
             
-            if (preg_match("/^\\s*(insert|delete|update|replace|alter) /i", $query)) {
+            if (preg_match("/^\\s*(insert|delete|update|replace|alter)\\s+/si", $query)) {
                 $this->rows_affected = mysql_affected_rows($this->dbh);
                 // Take note of the insert_id
                 if (preg_match("/^\\s*(insert|replace) /i", $query)) {
@@ -189,7 +182,7 @@ class W3_Db extends wpdb
                 }
                 // Return number of rows affected
                 $return_val = $this->rows_affected;
-            } else {
+            } elseif (is_resource($this->result)) {
                 $i = 0;
                 while ($i < @mysql_num_fields($this->result)) {
                     $this->col_info[$i] = @mysql_fetch_field($this->result);
@@ -222,7 +215,7 @@ class W3_Db extends wpdb
                         'num_rows' => $this->num_rows
                     );
                     
-                    $cache = $this->_get_cache();
+                    $cache = & $this->_get_cache();
                     $cache->set($cache_key, $data, $this->_lifetime);
                 }
             }
@@ -326,7 +319,7 @@ class W3_Db extends wpdb
         /**
          * Skip if user is logged in
          */
-        if (! $this->_check_logged_in()) {
+        if ($this->_config->get_boolean('dbcache.reject.logged') && ! $this->_check_logged_in()) {
             $cache_reject_reason = 'User is logged in';
             return false;
         }
@@ -341,7 +334,7 @@ class W3_Db extends wpdb
      */
     function flush_cache()
     {
-        $cache = $this->_get_cache();
+        $cache = & $this->_get_cache();
         
         return $cache->flush();
     }
@@ -353,19 +346,19 @@ class W3_Db extends wpdb
      */
     function &instance()
     {
-        static $instance = null;
+        static $instances = array();
         
-        if ($instance === null) {
+        if (! isset($instances[0])) {
             $class = __CLASS__;
-            $instance = & new $class(DB_USER, DB_PASSWORD, DB_NAME, DB_HOST);
+            $instances[0] = & new $class(DB_USER, DB_PASSWORD, DB_NAME, DB_HOST);
         }
         
-        return $instance;
+        return $instances[0];
     }
     
     /**
      * Returns debug info
-     * 
+     *
      * @return string
      */
     function get_debug_info()
@@ -396,15 +389,15 @@ class W3_Db extends wpdb
      */
     function &_get_cache()
     {
-        static $cache = null;
+        static $cache = array();
         
-        if ($cache === null) {
-            $engine = $this->_config->get_string('dbcache.engine', 'memcached');
+        if (! isset($cache[0])) {
+            $engine = $this->_config->get_string('dbcache.engine');
             
             switch ($engine) {
                 case 'memcached':
                     $engineConfig = array(
-                        'engine' => $this->_config->get_string('dbcache.memcached.engine', 'auto'), 
+                        'engine' => $this->_config->get_string('dbcache.memcached.engine'), 
                         'servers' => $this->_config->get_array('dbcache.memcached.servers'), 
                         'persistant' => true
                     );
@@ -412,7 +405,7 @@ class W3_Db extends wpdb
                 
                 case 'file':
                     $engineConfig = array(
-                        'cache_dir' => W3TC_CACHE_FILE_DIR
+                        'cache_dir' => W3TC_CACHE_FILE_DBCACHE_DIR
                     );
                     break;
                 
@@ -421,10 +414,10 @@ class W3_Db extends wpdb
             }
             
             require_once W3TC_LIB_W3_DIR . '/Cache.php';
-            $cache = & W3_Cache::instance($engine, $engineConfig);
+            $cache[0] = & W3_Cache::instance($engine, $engineConfig);
         }
         
-        return $cache;
+        return $cache[0];
     }
     
     /**
@@ -436,19 +429,18 @@ class W3_Db extends wpdb
     function _check_sql($sql)
     {
         $auto_reject_strings = array(
-            'insert', 
-            'delete', 
-            'update', 
-            'replace', 
-            'alter', 
-            'set names', 
-            'found_rows', 
-            $this->prefix . 'posts', 
-            $this->prefix . 'postmeta', 
-            $this->prefix . 'comments'
+            '^\s*insert', 
+            '^\s*delete', 
+            '^\s*update', 
+            '^\s*replace', 
+            '^\s*create', 
+            '^\s*alter', 
+            '^\s*show', 
+            '^\s*set', 
+            'found_rows\(\)'
         );
         
-        if (preg_match('@(' . implode('|', $auto_reject_strings) . ')@i', $sql)) {
+        if (preg_match('@' . implode('|', $auto_reject_strings) . '@is', $sql)) {
             return false;
         }
         
@@ -456,6 +448,7 @@ class W3_Db extends wpdb
         
         foreach ($reject_sql as $expr) {
             $expr = trim($expr);
+            $expr = str_replace('{prefix}', $this->prefix, $expr);
             if ($expr != '' && preg_match('@' . $expr . '@i', $sql)) {
                 return false;
             }
@@ -495,7 +488,7 @@ class W3_Db extends wpdb
     }
     
     /**
-     * Checks WordPress cookies
+     * Checks for WordPress cookies
      *
      * @return boolean
      */
@@ -523,7 +516,7 @@ class W3_Db extends wpdb
     
     /**
      * Check if user is logged in
-     * 
+     *
      * @return boolean
      */
     function _check_logged_in()

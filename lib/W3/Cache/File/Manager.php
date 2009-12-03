@@ -18,45 +18,47 @@ class W3_Cache_File_Manager
     
     function clean()
     {
-        return $this->_clean($this->_cache_dir, true);
+        $this->_clean($this->_cache_dir, false);
     }
     
-    function _clean($path, $empty = false)
+    function _clean($path, $remove = true)
     {
         $dir = @opendir($path);
+        
         if ($dir) {
             while (($entry = @readdir($dir))) {
                 if ($entry != '.' && $entry != '..') {
                     $full_path = $path . '/' . $entry;
+                    
                     if (is_dir($full_path)) {
-                        $result = $this->_clean($full_path);
+                        $this->_clean($full_path);
                     } elseif (! $this->is_valid($full_path)) {
-                        $result = @unlink($full_path);
-                    }
-                    if (! $result) {
-                        @closedir($dir);
-                        return false;
+                        @unlink($full_path);
                     }
                 }
             }
+            
             @closedir($dir);
-            if (! $empty) {
+            
+            if ($remove) {
                 @rmdir($path);
             }
-            return true;
         }
-        return false;
     }
     
     function is_valid($file)
     {
         $valid = false;
-        if (is_readable($file)) {
+        
+        if (file_exists($file)) {
             $ftime = @filemtime($file);
+            
             if ($ftime) {
                 $fp = @fopen($file, 'rb');
+                
                 if ($fp) {
                     $expires = @fread($fp, 4);
+                    
                     if ($expires !== false) {
                         list (, $expire) = @unpack('L', $expires);
                         $expire = ($expire && $expire <= W3_CACHE_FILE_EXPIRE_MAX ? $expire : W3_CACHE_FILE_EXPIRE_MAX);
@@ -64,10 +66,12 @@ class W3_Cache_File_Manager
                             $valid = true;
                         }
                     }
+                    
                     @fclose($fp);
                 }
             }
         }
+        
         return $valid;
     }
 }

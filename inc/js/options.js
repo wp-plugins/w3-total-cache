@@ -28,7 +28,7 @@ function input_enable(input, enabled) {
 
 function js_file_location_change() {
     jQuery('.js_file_location').change(function() {
-        jQuery(this).parent().find(':text').attr('name', 'js_files[' + jQuery('#js_groups').val() + '][' + jQuery(this).val() + ']');
+        jQuery(this).parent().find(':text').attr('name', 'js_files[' + jQuery('#js_groups').val() + '][' + jQuery(this).val() + '][]');
     });
 }
 
@@ -105,29 +105,29 @@ function file_validate() {
     });
 
     if (jQuery('#js_enabled:checked').size()) {
-        if (invalid_js.length && !confirm('These files have invalid JS file extension:\r\n\r\n' + invalid_js.join('\r\n') + '\r\n\r\nAre you confident this files contain valid JS code?')) {
+        if (invalid_js.length && !confirm('The following files have invalid JS file extension:\r\n\r\n' + invalid_js.join('\r\n') + '\r\n\r\nAre you confident these files contain valid JS code?')) {
             return false;
         }
 
         if (query_js.length) {
-            alert('These JS files contain query string in the name:\r\n\r\n' + query_js.join('\r\n'));
+            alert('We recommend using the entire URI for files with query string (GET) variables. You entered:\r\n\r\n' + query_js.join('\r\n'));
             return false;
         }
     }
 
     if (jQuery('#css_enabled:checked').size()) {
-        if (invalid_css.length && !confirm('These files have invalid CSS file extension:\r\n\r\n' + invalid_css.join('\r\n') + '\r\n\r\nAre you confident this files contain valid CSS code?')) {
+        if (invalid_css.length && !confirm('The following files have invalid CSS file extension:\r\n\r\n' + invalid_css.join('\r\n') + '\r\n\r\nAre you confident these files contain valid CSS code?')) {
             return false;
         }
 
         if (query_css.length) {
-            alert('These CSS files contain query string in the name:\r\n\r\n' + query_css.join('\r\n'));
+            alert('We recommend using the entire URI for files with query string (GET) variables. You entered:\r\n\r\n' + query_css.join('\r\n'));
             return false;
         }
     }
 
     if (duplicate) {
-        alert('Duplicate files have been found in your minify settings, please check your settings again.');
+        alert('Duplicate files have been found in your minify settings, please check your settings and re-save.');
         return false;
     }
 
@@ -320,10 +320,10 @@ jQuery(function($) {
     $('#test_ftp').click(function() {
         var status = $('#test_ftp_status');
         status.removeClass('w3tc-error');
+        status.removeClass('w3tc-success');
         status.addClass('w3tc-process');
         status.html('Testing...');
-        $.post('options-general.php', {
-            page: 'w3-total-cache/w3-total-cache.php',
+        $.post('options-general.php?page=w3-total-cache/w3-total-cache.php', {
             w3tc_action: 'cdn_test_ftp',
             host: $('#cdn_ftp_host').val(),
             user: $('#cdn_ftp_user').val(),
@@ -335,9 +335,82 @@ jQuery(function($) {
         }, 'json');
     });
 
+    $('#test_s3').click(function() {
+        var status = $('#test_s3_status');
+        status.removeClass('w3tc-error');
+        status.removeClass('w3tc-success');
+        status.addClass('w3tc-process');
+        status.html('Testing...');
+        $.post('options-general.php?page=w3-total-cache/w3-total-cache.php', {
+            w3tc_action: 'cdn_test_s3',
+            key: $('#cdn_s3_key').val(),
+            secret: $('#cdn_s3_secret').val(),
+            bucket: $('#cdn_s3_bucket').val()
+        }, function(data) {
+            status.addClass(data.result ? 'w3tc-success' : 'w3tc-error');
+            status.html(data.error);
+        }, 'json');
+    });
+
+    $('#test_cf').click(function() {
+        var status = $('#test_cf_status');
+        status.removeClass('w3tc-error');
+        status.removeClass('w3tc-success');
+        status.addClass('w3tc-process');
+        status.html('Testing...');
+        $.post('options-general.php?page=w3-total-cache/w3-total-cache.php', {
+            w3tc_action: 'cdn_test_cf',
+            key: $('#cdn_cf_key').val(),
+            secret: $('#cdn_cf_secret').val(),
+            bucket: $('#cdn_cf_bucket').val(),
+            id: $('#cdn_cf_id').val(),
+            cname: $('#cdn_cf_cname').val()
+        }, function(data) {
+            status.addClass(data.result ? 'w3tc-success' : 'w3tc-error');
+            status.html(data.error);
+        }, 'json');
+    });
+
+    $('#create_bucket_s3').click(function() {
+        var status = $('#create_bucket_s3_status');
+        status.removeClass('w3tc-error');
+        status.removeClass('w3tc-success');
+        status.addClass('w3tc-process');
+        status.html('Creating bucket...');
+        $.post('options-general.php?page=w3-total-cache/w3-total-cache.php', {
+            w3tc_action: 'cdn_create_bucket',
+            type: 's3',
+            key: $('#cdn_s3_key').val(),
+            secret: $('#cdn_s3_secret').val(),
+            bucket: $('#cdn_s3_bucket').val()
+        }, function(data) {
+            status.addClass(data.result ? 'w3tc-success' : 'w3tc-error');
+            status.html(data.error);
+        }, 'json');
+    });
+
+    $('#create_bucket_cf').click(function() {
+        var status = $('#create_bucket_cf_status');
+        status.removeClass('w3tc-error');
+        status.removeClass('w3tc-success');
+        status.addClass('w3tc-process');
+        status.html('Creating bucket...');
+        $.post('options-general.php?page=w3-total-cache/w3-total-cache.php', {
+            w3tc_action: 'cdn_create_bucket',
+            type: 'cf',
+            key: $('#cdn_cf_key').val(),
+            secret: $('#cdn_cf_secret').val(),
+            bucket: $('#cdn_cf_bucket').val()
+        }, function(data) {
+            status.addClass(data.result ? 'w3tc-success' : 'w3tc-error');
+            status.html(data.error);
+        }, 'json');
+    });
+
     $('#test_memcached').click(function() {
         var status = $('#test_memcached_status');
         status.removeClass('w3tc-error');
+        status.removeClass('w3tc-success');
         status.addClass('w3tc-process');
         status.html('Testing...');
         $.post('options-general.php', {
@@ -348,5 +421,81 @@ jQuery(function($) {
             status.addClass(data.result ? 'w3tc-success' : 'w3tc-error');
             status.html(data.error);
         }, 'json');
+    });
+
+    $('#support_more_files').click(function() {
+        $(this).before('<input type="file" name="files[]" /><br />');
+    });
+
+    $('#support_form').submit(function() {
+        var url = $('#support_url');
+        var email = $('#support_email');
+        var request_type = $('#support_request_type');
+        var description = $('#support_description');
+        var wp_login = $('#support_wp_login');
+        var wp_password = $('#support_wp_password');
+        var ftp_host = $('#support_ftp_host');
+        var ftp_login = $('#support_ftp_login');
+        var ftp_password = $('#support_ftp_password');
+
+        if (url.val() == '') {
+            alert('Please enter the address of your blog in the Blog URL field.');
+            url.focus();
+            return false;
+        }
+
+        if (!/^[a-z0-9_\-\.]+@[a-z0-9-\.]+\.[a-z]{2,5}$/.test(email.val().toLowerCase())) {
+            alert('Please enter valid email address in the E-Mail field.');
+            email.focus();
+            return false;
+        }
+
+        if (request_type.val() == '') {
+            alert('Please select request type.');
+            request_type.focus();
+            return false;
+        }
+
+        if (description.val() == '') {
+            alert('Please describe the issue in the issue description field.');
+            description.focus();
+            return false;
+        }
+
+        if (wp_login.val() != '' || wp_password.val() != '') {
+            if (wp_login.val() == '') {
+                alert('Please enter an administrator login. Remember you can create a temporary one just for this support case.');
+                wp_login.focus();
+                return false;
+            }
+
+            if (wp_password.val() == '') {
+                alert('Please enter WP Admin password, be sure it\'s spelled correctly.');
+                wp_password.focus();
+                return false;
+            }
+        }
+
+        if (ftp_host.val() != '' || ftp_login.val() != '' || ftp_password.val() != '') {
+            if (ftp_host.val() == '') {
+                alert('Please enter SSH or FTP host for your site.');
+                ftp_host.focus();
+                return false;
+            }
+
+            if (ftp_login.val() == '') {
+                alert('Please enter SSH or FTP login for your server. Remember you can create a temporary one just for this support case.');
+                ftp_login.focus();
+                return false;
+            }
+
+            if (ftp_password.val() == '') {
+                alert('Please enter SSH or FTP password for your FTP account.');
+                ftp_password.focus();
+                return false;
+            }
+        }
+
+        return true;
     });
 });

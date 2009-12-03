@@ -11,7 +11,7 @@ class W3_Minify
 {
     /**
      * Config
-     * 
+     *
      * @var W3_Config
      */
     var $_config = null;
@@ -29,8 +29,7 @@ class W3_Minify
     function __construct()
     {
         require_once W3TC_LIB_W3_DIR . '/Config.php';
-        $this->_config = W3_Config::instance();
-        set_include_path(get_include_path() . PATH_SEPARATOR . W3TC_LIB_MINIFY_DIR);
+        $this->_config = & W3_Config::instance();
     }
     
     /**
@@ -50,13 +49,14 @@ class W3_Minify
         require_once W3TC_LIB_MINIFY_DIR . '/Minify.php';
         require_once W3TC_LIB_MINIFY_DIR . '/HTTP/Encoder.php';
         
-        HTTP_Encoder::$encodeToIe6 = $this->_config->get_boolean('minify.comprss.ie6', true);
+        HTTP_Encoder::$encodeToIe6 = $this->_config->get_boolean('minify.comprss.ie6');
         
         Minify::$uploaderHoursBehind = $this->_config->get_integer('minify.fixtime');
         Minify::setCache($this->_get_cache());
         
         $serve_options = $this->_config->get_array('minify.options');
-        $serve_options['encodeOutput'] = $this->_config->get_boolean('minify.compress', true);
+        $serve_options['maxAge'] = $this->_config->get_integer('minify.maxage');
+        $serve_options['encodeOutput'] = $this->_config->get_boolean('minify.compress');
         $serve_options['postprocessor'] = array(
             &$this, 
             'postprocessor'
@@ -72,7 +72,7 @@ class W3_Minify
             $serve_options['minifierOptions']['text/css']['symlinks'][$link] = realpath($target);
         }
         
-        if ($this->_config->get_boolean('minify.debug') && isset($_REQUEST['debug'])) {
+        if ($this->_config->get_boolean('minify.debug')) {
             $serve_options['debug'] = true;
         }
         
@@ -97,9 +97,24 @@ class W3_Minify
                         'minify_stub'
                     );
                 }
+                
+                /**
+                 * Setup user-friendly cache ID for disk cache
+                 */
+                if ($this->_config->get_string('minify.engine') == 'file') {
+                    $cacheId = sprintf('%s.%s.%s', $_GET['gg'], $_GET['g'], $_GET['t']);
+                    
+                    Minify::setCacheId($cacheId);
+                }
             }
             
-            Minify::serve('MinApp', $serve_options);
+            @header('Pragma: public');
+            
+            try {
+                Minify::serve('MinApp', $serve_options);
+            } catch (Exception $exception) {
+                printf('<strong>W3 Total Cache Error:</strong> Minify error: %s', $exception->getMessage());
+            }
         } else {
             die('This file cannot be accessed directly');
         }
@@ -117,11 +132,11 @@ class W3_Minify
         switch ($type) {
             case 'text/css':
                 if ($this->_config->get_boolean('minify.css.strip.comments')) {
-                    $content = preg_replace('~/\*.*\*/~Us', '', $content);
+                    $content = preg_replace('~/\*.*\*/~Us', ' ', $content);
                 }
                 
                 if ($this->_config->get_boolean('minify.css.strip.crlf')) {
-                    $content = preg_replace("~[\r\n]+~", ' ', $content);
+                    $content = preg_replace("~[\r\n]+~", '', $content);
                 } else {
                     $content = preg_replace("~[\r\n]+~", "\n", $content);
                 }
@@ -141,7 +156,7 @@ class W3_Minify
                 break;
         }
         
-        return $content;
+        return trim($content);
     }
     
     /**
@@ -151,17 +166,21 @@ class W3_Minify
     {
         static $cache_path = null;
         
-        $cache = $this->_get_cache();
+        $cache = & $this->_get_cache();
         
         if (is_a($cache, 'Minify_Cache_Memcache') && is_a($this->_memcached, 'W3_Cache_Memcached_Base')) {
             return $this->_memcached->flush();
         } elseif (is_a($cache, 'Minify_Cache_APC') && function_exists('apc_clear_cache')) {
             return apc_clear_cache('user');
         } elseif (is_a($cache, 'Minify_Cache_File')) {
-            if (! is_dir(W3TC_CACHE_MINIFY_DIR)) {
-                $this->log(sprintf('Cache directory %s does not exists', W3TC_CACHE_MINIFY_DIR));
+            if (! is_dir(W3TC_CACHE_FILE_MINIFY_DIR)) {
+                $this->log(sprintf('Cache directory %s does not exists', W3TC_CACHE_FILE_MINIFY_DIR));
             }
-            return w3_emptydir(W3TC_CACHE_MINIFY_DIR);
+            
+            return w3_emptydir(W3TC_CACHE_FILE_MINIFY_DIR, array(
+                W3TC_CACHE_FILE_MINIFY_DIR . '/index.php', 
+                W3TC_CACHE_FILE_MINIFY_DIR . '/.htaccess'
+            ));
         }
         
         return false;
@@ -174,14 +193,14 @@ class W3_Minify
      */
     function &instance()
     {
-        static $instance = null;
+        static $instances = array();
         
-        if ($instance === null) {
+        if (! isset($instances[0])) {
             $class = __CLASS__;
-            $instance = & new $class();
+            $instances[0] = & new $class();
         }
         
-        return $instance;
+        return $instances[0];
     }
     
     /**
@@ -256,6 +275,10 @@ class W3_Minify
                             $result[$location][$file] = $precached_file;
                         }
                     } else {
+                        if (w3_get_blog_id()) {
+                            // for WPMU we have to remove blog path
+                            $file = str_replace(w3_get_site_path(), '', $file);
+                        }
                         $result[$location][$file] = '//' . $file;
                     }
                 }
@@ -274,22 +297,21 @@ class W3_Minify
      */
     function _precache_file($url, $type)
     {
-        $lifetime = $this->_config->get_integer('minify.lifetime', 3600);
-        $file_path = sprintf('%s/minify_%s.%s', W3TC_CACHE_MINIFY_DIR, md5($url), $type);
+        $lifetime = $this->_config->get_integer('minify.lifetime');
+        $file_path = sprintf('%s/minify_%s.%s', W3TC_CACHE_FILE_MINIFY_DIR, md5($url), $type);
         $file_exists = file_exists($file_path);
-        $base_url = $this->_get_base_url($url);
         
         if (file_exists($file_path) && @filemtime($file_path) >= (time() - $lifetime)) {
-            return $this->_get_minify_source($file_path, $base_url);
+            return $this->_get_minify_source($file_path, $url);
         }
         
-        if (is_dir(W3TC_CACHE_MINIFY_DIR)) {
+        if (is_dir(W3TC_CACHE_FILE_MINIFY_DIR)) {
             if (($file_data = w3_url_get($url))) {
                 if (($fp = @fopen($file_path, 'w'))) {
                     @fputs($fp, $file_data);
                     @fclose($fp);
                     
-                    return $this->_get_minify_source($file_path, $base_url);
+                    return $this->_get_minify_source($file_path, $url);
                 } else {
                     $this->log(sprintf('Unable to open file %s for writing', $file_path));
                 }
@@ -297,49 +319,28 @@ class W3_Minify
                 $this->log(sprintf('Unable to download URL: %s', $url));
             }
         } else {
-            $this->log(sprintf('Cache directory %s is not exists', W3TC_CACHE_MINIFY_DIR));
+            $this->log(sprintf('The cache directory %s does not exist', W3TC_CACHE_FILE_MINIFY_DIR));
         }
         
-        return ($file_exists ? $this->_get_minify_source($file_path, $base_url) : false);
+        return ($file_exists ? $this->_get_minify_source($file_path, $url) : false);
     }
     
     /**
      * Returns minify source
      * @param $file_path
-     * @param $base_url
+     * @param $url
      * @return Minify_Source
      */
-    function _get_minify_source($file_path, $base_url)
+    function _get_minify_source($file_path, $url)
     {
         require_once W3TC_LIB_MINIFY_DIR . '/Minify/Source.php';
         
         return new Minify_Source(array(
             'filepath' => $file_path, 
             'minifyOptions' => array(
-                'prependRelativePath' => $base_url
+                'prependRelativePath' => $url
             )
         ));
-    }
-    
-    /**
-     * Returns base URL
-     * @param $url
-     * @return string
-     */
-    function _get_base_url($url)
-    {
-        $parse_url = @parse_url($url);
-        if ($parse_url && isset($parse_url['scheme'])) {
-            $scheme = $parse_url['scheme'];
-            if (isset($parse_url['host'])) {
-                $host = $parse_url['host'];
-                $port = (isset($parse_url['port']) && $parse_url['port'] != 80 ? ':' . $parse_url['port'] : '');
-                $path = (isset($parse_url['path']) ? preg_replace('~[^/]+$~', '', $parse_url['path']) : '/');
-                
-                return sprintf('%s://%s%s%s', $scheme, $host, $port, $path);
-            }
-        }
-        return false;
     }
     
     /**
@@ -349,35 +350,35 @@ class W3_Minify
      */
     function &_get_cache()
     {
-        static $cache = null;
+        static $cache = array();
         
-        if ($cache === null) {
-            switch ($this->_config->get_string('minify.engine', 'memcached')) {
+        if (! isset($cache[0])) {
+            switch ($this->_config->get_string('minify.engine')) {
                 case 'memcached':
                     require_once W3TC_LIB_W3_DIR . '/Cache/Memcached.php';
                     require_once W3TC_LIB_MINIFY_DIR . '/Minify/Cache/Memcache.php';
-                    $this->_memcached = & W3_Cache_Memcached::instance($this->_config->get_string('minify.memcached.engine', 'auto'), array(
+                    $this->_memcached = & W3_Cache_Memcached::instance($this->_config->get_string('minify.memcached.engine'), array(
                         'servers' => $this->_config->get_array('minify.memcached.servers'), 
                         'persistant' => true
                     ));
-                    $cache = & new Minify_Cache_Memcache($this->_memcached);
+                    $cache[0] = & new Minify_Cache_Memcache($this->_memcached);
                     break;
                 
                 case 'apc':
                     require_once W3TC_LIB_MINIFY_DIR . '/Minify/Cache/APC.php';
-                    $cache = & new Minify_Cache_APC();
+                    $cache[0] = & new Minify_Cache_APC();
                     break;
                 
                 default:
                     require_once W3TC_LIB_MINIFY_DIR . '/Minify/Cache/File.php';
-                    if (! is_dir(W3TC_CACHE_MINIFY_DIR)) {
-                        $this->log(sprintf('Cache directory %s does not exists', W3TC_CACHE_MINIFY_DIR));
+                    if (! is_dir(W3TC_CACHE_FILE_MINIFY_DIR)) {
+                        $this->log(sprintf('Cache directory %s does not exist', W3TC_CACHE_FILE_MINIFY_DIR));
                     }
-                    $cache = & new Minify_Cache_File(W3TC_CACHE_MINIFY_DIR, $this->_config->get_boolean('minify.locking'));
+                    $cache[0] = & new Minify_Cache_File(W3TC_CACHE_FILE_MINIFY_DIR, $this->_config->get_boolean('minify.file.locking'));
                     break;
             }
         }
         
-        return $cache;
+        return $cache[0];
     }
 }

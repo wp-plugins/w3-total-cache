@@ -8,7 +8,7 @@ require_once W3TC_LIB_W3_DIR . '/Cache/Base.php';
 /**
  * Class W3_Cache_Memcached_Base
  */
-class W3_Cache_Memcached_Base extends W3_Cache_Base 
+class W3_Cache_Memcached_Base extends W3_Cache_Base
 {
     /**
      * Server config
@@ -37,22 +37,22 @@ class W3_Cache_Memcached_Base extends W3_Cache_Base
     {
         $this->__construct($config);
     }
-
+    
     /**
      * Inits the engine
      *
-     * @abstract 
+     * @abstract
      * @return boolean
      */
     function connect()
     {
         return false;
     }
-
+    
     /**
      * Disconnects from the memcached server
      *
-     * @abstract 
+     * @abstract
      * @return bool
      */
     function disconnect()

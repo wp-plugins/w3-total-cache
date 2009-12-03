@@ -39,7 +39,7 @@ class W3_Request
      * @param boolean $trim
      * @return string
      */
-    function get_string($key, $default = 0, $trim = true)
+    function get_string($key, $default = '', $trim = true)
     {
         $value = (string) W3_Request::get($key, $default);
         
