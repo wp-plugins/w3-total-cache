@@ -108,15 +108,15 @@ class W3_Plugin_Cdn extends W3_Plugin
         
         $sql = sprintf("CREATE TABLE `%s%s` (
             `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-            `local_path` varchar(255) NOT NULL DEFAULT '',
-            `remote_path` varchar(255) NOT NULL DEFAULT '',
+            `local_path` varchar(150) NOT NULL DEFAULT '',
+            `remote_path` varchar(150) NOT NULL DEFAULT '',
             `command` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '1 - Upload, 2 - Delete',
-            `last_error` varchar(255) NOT NULL DEFAULT '',
+            `last_error` varchar(150) NOT NULL DEFAULT '',
             `date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
             PRIMARY KEY (`id`),
             UNIQUE KEY `path` (`local_path`, `remote_path`),
             KEY `date` (`date`)
-        ) CHARACTER SET latin1", $wpdb->prefix, W3TC_CDN_TABLE_QUEUE);
+        ) /*!40100 CHARACTER SET latin1 */", $wpdb->prefix, W3TC_CDN_TABLE_QUEUE);
         
         $wpdb->query($sql);
         
