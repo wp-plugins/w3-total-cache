@@ -11,6 +11,13 @@ require_once W3TC_LIB_W3_DIR . '/Plugin.php';
 class W3_Plugin_Minify extends W3_Plugin
 {
     /**
+     * Minify reject reason
+     * 
+     * @var string
+     */
+    var $minify_reject_reason = '';
+    
+    /**
      * Runs plugin
      */
     function run()
@@ -193,7 +200,7 @@ class W3_Plugin_Minify extends W3_Plugin
         }
         
         if (! empty($head_prepend)) {
-            $buffer = preg_replace('~<head[^>]*>~Ui', '\\0' . $head_prepend, $buffer);
+            $buffer = preg_replace('~<head(\s+[^<>]+)*>~Ui', '\\0' . $head_prepend, $buffer, 1);
         }
         
         $buffer = $this->clean($buffer);
@@ -670,6 +677,8 @@ class W3_Plugin_Minify extends W3_Plugin
          * Skip if Minify is disabled
          */
         if (! $this->_config->get_boolean('minify.enabled')) {
+            $this->minify_reject_reason = 'minify is disabled';
+            
             return false;
         }
         
@@ -677,6 +686,8 @@ class W3_Plugin_Minify extends W3_Plugin
          * Skip if Admin
          */
         if (defined('WP_ADMIN')) {
+            $this->minify_reject_reason = 'wp-admin';
+            
             return false;
         }
         
@@ -684,6 +695,8 @@ class W3_Plugin_Minify extends W3_Plugin
          * Skip if doint AJAX
          */
         if (defined('DOING_AJAX')) {
+            $this->minify_reject_reason = 'doing AJAX';
+            
             return false;
         }
         
@@ -691,6 +704,8 @@ class W3_Plugin_Minify extends W3_Plugin
          * Skip if doing cron
          */
         if (defined('DOING_CRON')) {
+            $this->minify_reject_reason = 'doing cron';
+            
             return false;
         }
         
@@ -698,6 +713,8 @@ class W3_Plugin_Minify extends W3_Plugin
          * Skip if APP request
          */
         if (defined('APP_REQUEST')) {
+            $this->minify_reject_reason = 'application request';
+            
             return false;
         }
         
@@ -705,6 +722,8 @@ class W3_Plugin_Minify extends W3_Plugin
          * Skip if XMLRPC request
          */
         if (defined('XMLRPC_REQUEST')) {
+            $this->minify_reject_reason = 'XMLRPC request';
+            
             return false;
         }
         
@@ -712,6 +731,8 @@ class W3_Plugin_Minify extends W3_Plugin
          * Check User agent
          */
         if (! $this->check_ua()) {
+            $this->minify_reject_reason = 'user agent is rejected';
+            
             return false;
         }
         
@@ -719,6 +740,8 @@ class W3_Plugin_Minify extends W3_Plugin
          * Check request URI
          */
         if (! $this->check_request_uri()) {
+            $this->minify_reject_reason = 'request URI is rejected';
+            
             return false;
         }
         
