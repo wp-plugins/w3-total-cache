@@ -18,6 +18,13 @@ class W3_Plugin_Cdn extends W3_Plugin
     var $replaced_urls = array();
     
     /**
+     * CDN reject reason
+     * 
+     * @var string
+     */
+    var $cdn_reject_reason = '';
+    
+    /**
      * Run plugin
      */
     function run()
@@ -771,7 +778,7 @@ class W3_Plugin_Cdn extends W3_Plugin
     
     /**
      * Rename domain
-	 *
+     *
      * @param array $names
      * @param integer $limit
      * @param integer $offset
@@ -1232,6 +1239,8 @@ class W3_Plugin_Cdn extends W3_Plugin
          * Skip if CDN is disabled
          */
         if (! $this->_config->get_boolean('cdn.enabled')) {
+            $this->cdn_reject_reason = 'CDN is disabled';
+            
             return false;
         }
         
@@ -1239,6 +1248,8 @@ class W3_Plugin_Cdn extends W3_Plugin
          * Skip if admin
          */
         if (defined('WP_ADMIN')) {
+            $this->cdn_reject_reason = 'wp-admin';
+            
             return false;
         }
         
@@ -1246,6 +1257,8 @@ class W3_Plugin_Cdn extends W3_Plugin
          * Check User agent
          */
         if (! $this->check_ua()) {
+            $this->cdn_reject_reason = 'user agent is rejected';
+            
             return false;
         }
         
@@ -1253,6 +1266,8 @@ class W3_Plugin_Cdn extends W3_Plugin
          * Check request URI
          */
         if (! $this->check_request_uri()) {
+            $this->cdn_reject_reason = 'request URI is rejected';
+            
             return false;
         }
         

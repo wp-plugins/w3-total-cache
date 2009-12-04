@@ -693,7 +693,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
     
     /**
      * WP Upgrade action hack
-	 *
+     *
      * @param string $message
      */
     function update_feedback($message)
@@ -1046,10 +1046,10 @@ class W3_Plugin_TotalCache extends W3_Plugin
             'Bug Submission', 
             //'Priority Support (Same Day Response)', 
             //'Professional Configuration', 
-            'Plugin (add-on) Request', 
-            //'Ustream or Skype Training Session'
-        );
+            'Plugin (add-on) Request'
+        ); //'Ustream or Skype Training Session'
         
+
         require_once W3TC_LIB_W3_DIR . '/Request.php';
         
         $url = W3_Request::get_string('url', w3_get_domain_url());
@@ -1500,7 +1500,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
     
     /**
      * Returns button html
-	 *
+     *
      * @param string $text
      * @param string $onclick
      * @return string
@@ -1512,7 +1512,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
     
     /**
      * Returns button link html
-	 *
+     *
      * @param string $text
      * @param string $url
      * @return string
@@ -1526,7 +1526,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
     
     /**
      * Returns hide note button html
-	 *
+     *
      * @param string $text
      * @param string $note
      * @return string
@@ -1540,7 +1540,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
     
     /**
      * Returns popup button html
-	 *
+     *
      * @param string $text
      * @param string $w3tc_action
      * @param string $params
@@ -2131,7 +2131,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
     
     /**
      * Flush memcached cache
-	 *
+     *
      * @return void
      */
     function flush_memcached()
@@ -2150,7 +2150,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
     
     /**
      * Flush file cache
-	 *
+     *
      * @return void
      */
     function flush_file()
@@ -2260,17 +2260,23 @@ DATA;
             
             $buffer .= "\r\n\r\n";
             
-            $append = (is_user_logged_in() ? ' (you are logged in)' : '');
-            
             if ($this->_config->get_boolean('minify.enabled')) {
-                $buffer .= sprintf("Minified using %s%s\r\n", w3_get_engine_name($this->_config->get_string('minify.engine')), $append);
+                require_once W3TC_LIB_W3_DIR . '/Plugin/Minify.php';
+                $w3_plugin_minify = & W3_Plugin_Minify::instance();
+                
+                $buffer .= sprintf("Minified using %s%s\r\n", w3_get_engine_name($this->_config->get_string('minify.engine')), ($w3_plugin_minify->minify_reject_reason != '' ? sprintf(' (%s)', $w3_plugin_minify->minify_reject_reason) : ''));
             }
             
             if ($this->_config->get_boolean('pgcache.enabled')) {
-                $buffer .= sprintf("Page Caching using %s%s\r\n", w3_get_engine_name($this->_config->get_string('pgcache.engine')), $append);
+                require_once W3TC_LIB_W3_DIR . '/PgCache.php';
+                $w3_pgcache = & W3_PgCache::instance();
+                
+                $buffer .= sprintf("Page Caching using %s%s\r\n", w3_get_engine_name($this->_config->get_string('pgcache.engine')), ($w3_pgcache->cache_reject_reason != '' ? sprintf(' (%s)', $w3_pgcache->cache_reject_reason) : ''));
             }
             
             if ($this->_config->get_boolean('dbcache.enabled') && is_a($wpdb, 'W3_Db')) {
+                $append = (is_user_logged_in() ? ' (user is logged in)' : '');
+                
                 if ($wpdb->query_hits) {
                     $buffer .= sprintf("Database Caching %d/%d queries in %.3f seconds using %s%s\r\n", $wpdb->query_hits, $wpdb->query_total, $wpdb->time_total, w3_get_engine_name($this->_config->get_string('dbcache.engine')), $append);
                 } else {
@@ -2282,8 +2288,9 @@ DATA;
                 require_once W3TC_LIB_W3_DIR . '/Plugin/Cdn.php';
                 $w3_plugin_cdn = & W3_Plugin_Cdn::instance();
                 $cdn = & $w3_plugin_cdn->get_cdn();
+                $via = $cdn->get_via();
                 
-                $buffer .= sprintf("Content Delivery Network via %s\r\n", $cdn->get_via());
+                $buffer .= sprintf("Content Delivery Network via %s%s\r\n", ($via ? $via : 'N/A'), ($w3_plugin_cdn->cdn_reject_reason != '' ? sprintf(' (%s)', $w3_plugin_cdn->cdn_reject_reason) : ''));
             }
             
             $buffer .= sprintf("\r\nServed from: %s @ %s -->", $host, $date);

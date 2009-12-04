@@ -55,7 +55,7 @@ class W3_PgCache
      *
      * @var string
      */
-    var $_cache_reject_reason = '';
+    var $cache_reject_reason = '';
     
     /**
      * PHP5 Constructor
@@ -189,7 +189,7 @@ class W3_PgCache
             
             if ($this->_config->get_boolean('pgcache.debug')) {
                 $time_total = w3_microtime() - $this->_time_start;
-                $debug_info = $this->_get_debug_info(false, $this->_cache_reject_reason, false, $time_total);
+                $debug_info = $this->_get_debug_info(false, $this->cache_reject_reason, false, $time_total);
                 $buffer .= "\r\n\r\n" . $debug_info;
             }
             
@@ -354,7 +354,7 @@ class W3_PgCache
          * Skip if disabled
          */
         if (! $this->_config->get_boolean('pgcache.enabled')) {
-            $this->_cache_reject_reason = 'Caching is disabled';
+            $this->cache_reject_reason = 'page caching is disabled';
             return false;
         }
         
@@ -362,7 +362,7 @@ class W3_PgCache
          * Skip if posting
          */
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $this->_cache_reject_reason = 'Request method is POST';
+            $this->cache_reject_reason = 'request method is POST';
             return false;
         }
         
@@ -370,7 +370,7 @@ class W3_PgCache
          * Skip if session defined
          */
         if (defined('SID') && SID != '') {
-            $this->_cache_reject_reason = 'Session is started';
+            $this->cache_reject_reason = 'session is started';
             return false;
         }
         
@@ -378,7 +378,7 @@ class W3_PgCache
          * Skip if there is query in the request uri
          */
         if (! $this->_config->get_boolean('pgcache.cache.query') && strstr($_SERVER['REQUEST_URI'], '?') !== false) {
-            $this->_cache_reject_reason = 'Request URI contains query';
+            $this->cache_reject_reason = 'request URI contains query';
             return false;
         }
         
@@ -386,7 +386,7 @@ class W3_PgCache
          * Check request URI
          */
         if (! in_array($_SERVER['PHP_SELF'], $this->_config->get_array('pgcache.accept.files')) && ! $this->_check_request_uri()) {
-            $this->_cache_reject_reason = 'Request URI rejected';
+            $this->cache_reject_reason = 'request URI is rejected';
             return false;
         }
         
@@ -394,7 +394,7 @@ class W3_PgCache
          * Check User Agent
          */
         if (! $this->_check_ua()) {
-            $this->_cache_reject_reason = 'User Agent rejected';
+            $this->cache_reject_reason = 'user agent is rejected';
             return false;
         }
         
@@ -402,7 +402,7 @@ class W3_PgCache
          * Check WordPress cookies
          */
         if (! $this->_check_cookies()) {
-            $this->_cache_reject_reason = 'Cookie rejected';
+            $this->cache_reject_reason = 'cookie is rejected';
             return false;
         }
         
@@ -410,7 +410,7 @@ class W3_PgCache
          * Skip if user is logged in
          */
         if ($this->_config->get_boolean('pgcache.reject.logged') && ! $this->_check_logged_in()) {
-            $this->_cache_reject_reason = 'User is logged in';
+            $this->cache_reject_reason = 'user is logged in';
             
             return false;
         }
@@ -437,7 +437,7 @@ class W3_PgCache
          * Don't cache 404 pages
          */
         if (! $this->_config->get_boolean('pgcache.cache.404') && is_404()) {
-            $this->_cache_reject_reason = 'Page is 404';
+            $this->cache_reject_reason = 'Page is 404';
             
             return false;
         }
@@ -446,7 +446,7 @@ class W3_PgCache
          * Don't cache homepage
          */
         if (! $this->_config->get_boolean('pgcache.cache.home') && is_home()) {
-            $this->_cache_reject_reason = 'Page is home';
+            $this->cache_reject_reason = 'Page is home';
             
             return false;
         }
@@ -455,7 +455,7 @@ class W3_PgCache
          * Don't cache feed
          */
         if (! $this->_config->get_boolean('pgcache.cache.feed') && is_feed()) {
-            $this->_cache_reject_reason = 'Page is feed';
+            $this->cache_reject_reason = 'Page is feed';
             
             return false;
         }
