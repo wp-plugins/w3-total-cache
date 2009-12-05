@@ -658,7 +658,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
         }
         
         if ($this->_config->get_boolean('minify.enabled') && $this->_config->get_boolean('notes.plugins_updated')) {
-            $notes[] = sprintf('One or more plugins have been activated or deactivated, please check your %s to avoid loss of errors. %s', $this->button_link('minify settings', sprintf('options-general.php?page=%s&tab=minify', W3TC_FILE)), $this->button_hide_note('Hide this message', 'plugins_updated'));
+            $notes[] = sprintf('One or more plugins have been activated or deactivated, please check your %s to maintain the desired user experience. %s', $this->button_link('minify settings', sprintf('options-general.php?page=%s&tab=minify', W3TC_FILE)), $this->button_hide_note('Hide this message', 'plugins_updated'));
         }
         
         if ($this->_config->get_boolean('pgcache.enabled') && $this->_config->get('notes.need_empty_pgcache')) {
