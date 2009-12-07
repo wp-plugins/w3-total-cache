@@ -457,7 +457,7 @@ class W3_Plugin_PgCache extends W3_Plugin
         
         $rules .= "# END W3 Total Cache\n\n";
         
-        if (! $this->check_rules_wp()) {
+        if (! function_exists('is_site_admin') && ! $this->check_rules_wp()) {
             $rules .= "# BEGIN WordPress\n";
             $rules .= "<IfModule mod_rewrite.c>\n";
             $rules .= "    RewriteEngine On\n";

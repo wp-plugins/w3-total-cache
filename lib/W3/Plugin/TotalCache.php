@@ -831,11 +831,19 @@ class W3_Plugin_TotalCache extends W3_Plugin
                         $w3_plugin_pgcache = & W3_Plugin_PgCache::instance();
                         
                         if ($this->_config->get_boolean('notes.pgcache_rules_core') && ! $w3_plugin_pgcache->check_rules_core()) {
-                            $this->_errors[] = sprintf('You\'ve selected disk caching with enhanced mode however the .htaccess file is not properly configured. Please run <strong>chmod 777 %s.htaccess</strong>, then %s. To manually modify your server configuration for enhanced mode append the following code: <pre>%s</pre> and %s.', ABSPATH, $this->button_link('try again', sprintf('options-general.php?page=%s&tab=%s&pgcache_write_rules_core', W3TC_FILE, $this->_tab)), htmlspecialchars($w3_plugin_pgcache->generate_rules_core()), $this->button_hide_note('hide this message', 'pgcache_rules_core'));
+                            if (function_exists('is_site_admin')) {
+                                $this->_errors[] = sprintf('Enhanced mode page cache is not operational. Your .htaccess rules could not be modified. Please verify <strong>%s.htaccess</strong> has the following rules: <pre>%s</pre> %s', ABSPATH, htmlspecialchars($w3_plugin_pgcache->generate_rules_core()), $this->button_hide_note('Hide this message', 'pgcache_rules_core'));
+                            } else {
+                                $this->_errors[] = sprintf('You\'ve selected disk caching with enhanced mode however the .htaccess file is not properly configured. Please run <strong>chmod 777 %s.htaccess</strong>, then %s. To manually modify your server configuration for enhanced mode append the following code: <pre>%s</pre> and %s.', ABSPATH, $this->button_link('try again', sprintf('options-general.php?page=%s&tab=%s&pgcache_write_rules_core', W3TC_FILE, $this->_tab)), htmlspecialchars($w3_plugin_pgcache->generate_rules_core()), $this->button_hide_note('hide this message', 'pgcache_rules_core'));
+                            }
                         }
                         
                         if ($this->_config->get_boolean('notes.pgcache_rules_cache') && ! $w3_plugin_pgcache->check_rules_cache()) {
-                            $this->_errors[] = sprintf('You\'ve selected disk caching with enhanced mode however the .htaccess file is not properly configured. Please run <strong>chmod 777 %s/.htaccess</strong>, then %s. To manually modify your server configuration for enhanced mode append the following code: <pre>%s</pre> and %s.', W3TC_CACHE_FILE_PGCACHE_DIR, $this->button_link('try again', sprintf('options-general.php?page=%s&tab=%s&pgcache_write_rules_cache', W3TC_FILE, $this->_tab)), htmlspecialchars($w3_plugin_pgcache->generate_rules_cache()), $this->button_hide_note('hide this message', 'pgcache_rules_cache'));
+                            if (function_exists('is_site_admin')) {
+                                $this->_errors[] = sprintf('Enhanced mode page cache is not operational. Your .htaccess rules could not be modified. Please verify <strong>%s/.htaccess</strong> has the following rules: <pre>%s</pre> %s', W3TC_CACHE_FILE_PGCACHE_DIR, htmlspecialchars($w3_plugin_pgcache->generate_rules_cache()), $this->button_hide_note('Hide this message', 'pgcache_rules_cache'));
+                            } else {
+                                $this->_errors[] = sprintf('You\'ve selected disk caching with enhanced mode however the .htaccess file is not properly configured. Please run <strong>chmod 777 %s/.htaccess</strong>, then %s. To manually modify your server configuration for enhanced mode append the following code: <pre>%s</pre> and %s.', W3TC_CACHE_FILE_PGCACHE_DIR, $this->button_link('try again', sprintf('options-general.php?page=%s&tab=%s&pgcache_write_rules_cache', W3TC_FILE, $this->_tab)), htmlspecialchars($w3_plugin_pgcache->generate_rules_cache()), $this->button_hide_note('hide this message', 'pgcache_rules_cache'));
+                            }
                         }
                         break;
                     
@@ -861,7 +869,11 @@ class W3_Plugin_TotalCache extends W3_Plugin
                         $w3_plugin_minify = & W3_Plugin_Minify::instance();
                         
                         if ($this->_config->get_boolean('notes.minify_rules') && ! $w3_plugin_minify->check_rules()) {
-                            $this->_errors[] = sprintf('The "Rewrite URL Structure" feature, requires rewrite rules be present. Please run <strong>chmod 777 %s/.htaccess</strong>, then %s. To manually modify your server configuration for minify append the following code: <pre>%s</pre> and %s.', W3TC_CACHE_FILE_MINIFY_DIR, $this->button_link('try again', sprintf('options-general.php?page=%s&tab=%s&minify_write_rules', W3TC_FILE, $this->_tab)), htmlspecialchars($w3_plugin_minify->generate_rules()), $this->button_hide_note('hide this message', 'minify_rules'));
+                            if (function_exists('is_site_admin')) {
+                                $this->_errors[] = sprintf('Minify is not operational. Your .htaccess rules could not be modified. Please verify <strong>%s/.htaccess</strong> has the following rules: <pre>%s</pre> %s', W3TC_CACHE_FILE_MINIFY_DIR, htmlspecialchars($w3_plugin_minify->generate_rules()), $this->button_hide_note('Hide this message', 'minify_rules'));
+                            } else {
+                                $this->_errors[] = sprintf('The "Rewrite URL Structure" feature, requires rewrite rules be present. Please run <strong>chmod 777 %s/.htaccess</strong>, then %s. To manually modify your server configuration for minify append the following code: <pre>%s</pre> and %s.', W3TC_CACHE_FILE_MINIFY_DIR, $this->button_link('try again', sprintf('options-general.php?page=%s&tab=%s&minify_write_rules', W3TC_FILE, $this->_tab)), htmlspecialchars($w3_plugin_minify->generate_rules()), $this->button_hide_note('hide this message', 'minify_rules'));
+                            }
                         }
                     }
                     break;
@@ -1369,27 +1381,32 @@ class W3_Plugin_TotalCache extends W3_Plugin
             }
             
             /**
-             * Write page cache rewrite rules
+             * Only for WP not WPMU
              */
-            if ($this->_tab == 'general' || $this->_tab == 'pgcache') {
-                if ($this->_config->get_boolean('pgcache.enabled') && $this->_config->get_string('pgcache.engine') == 'file_pgcache') {
-                    $w3_plugin_pgcache->write_rules_core();
-                    $w3_plugin_pgcache->write_rules_cache();
-                } else {
-                    $w3_plugin_pgcache->remove_rules_core();
-                    $w3_plugin_pgcache->remove_rules_cache();
+            if (! function_exists('is_site_admin')) {
+                /**
+                 * Write page cache rewrite rules
+                 */
+                if ($this->_tab == 'general' || $this->_tab == 'pgcache') {
+                    if ($this->_config->get_boolean('pgcache.enabled') && $this->_config->get_string('pgcache.engine') == 'file_pgcache') {
+                        $w3_plugin_pgcache->write_rules_core();
+                        $w3_plugin_pgcache->write_rules_cache();
+                    } else {
+                        $w3_plugin_pgcache->remove_rules_core();
+                        $w3_plugin_pgcache->remove_rules_cache();
+                    }
                 }
-            }
-            
-            /**
-             * Write minify rewrite rules
-             */
-            if (W3TC_PHP5 && ($this->_tab == 'general' || $this->_tab == 'minify')) {
-                if ($this->_config->get_boolean('minify.enabled') && $this->_config->get_boolean('minify.rewrite')) {
-                    $w3_plugin_minify->write_rules();
-                } else {
-                    require_once W3TC_DIR . '/lib/W3/Plugin/Minify.php';
-                    $w3_plugin_minify->remove_rules();
+                
+                /**
+                 * Write minify rewrite rules
+                 */
+                if (W3TC_PHP5 && ($this->_tab == 'general' || $this->_tab == 'minify')) {
+                    if ($this->_config->get_boolean('minify.enabled') && $this->_config->get_boolean('minify.rewrite')) {
+                        $w3_plugin_minify->write_rules();
+                    } else {
+                        require_once W3TC_DIR . '/lib/W3/Plugin/Minify.php';
+                        $w3_plugin_minify->remove_rules();
+                    }
                 }
             }
             
