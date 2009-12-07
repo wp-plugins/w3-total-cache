@@ -168,8 +168,8 @@ class Minify_CSS_UriRewriter {
                     if ($parse_url && isset($parse_url['host'])) {
                         $scheme = $parse_url['scheme'];
                         $host = $parse_url['host'];
-                        $port = (isset($parse_url['port']) && $parse_url['port'] != 80 ? ':' . $parse_url['port'] : '');
-                        $path = (! empty($parse_url['path']) ? trim($parse_url['path']) : '/');
+                        $port = (isset($parse_url['port']) && $parse_url['port'] != 80 ? ':' . (int) $parse_url['port'] : '');
+                        $path = (! empty($parse_url['path']) ? $parse_url['path'] : '/');
                         $dir_css = preg_replace('~[^/]+$~', '', $path);
                         $dir_obj = preg_replace('~[^/]+$~', '', $uri);
                         $dir = ltrim((strpos($dir_obj, '/') === 0 ?  w3_realpath($dir_obj) : w3_realpath($dir_css . $dir_obj)), '/');

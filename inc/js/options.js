@@ -428,6 +428,7 @@ jQuery(function($) {
 
     $('#support_form').submit(function() {
         var url = $('#support_url');
+        var name = $('#support_name');
         var email = $('#support_email');
         var request_type = $('#support_request_type');
         var description = $('#support_description');
@@ -440,6 +441,12 @@ jQuery(function($) {
         if (url.val() == '') {
             alert('Please enter the address of your blog in the Blog URL field.');
             url.focus();
+            return false;
+        }
+
+        if (name.val() == '') {
+            alert('Please enter your name in the Name field.');
+            name.focus();
             return false;
         }
 
