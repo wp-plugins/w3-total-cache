@@ -536,7 +536,7 @@ class W3_Plugin_Minify extends W3_Plugin
             return sprintf('%s%s/%s.%s.%s', $site_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $group, $location, $type);
         }
         
-        return sprintf('%s%s/minify.php?gg=%s&g=%s&t=%s', $site_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $group, $location, $type);
+        return sprintf('%s%s/index.php?gg=%s&g=%s&t=%s', $site_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $group, $location, $type);
     }
     
     /**

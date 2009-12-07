@@ -35,6 +35,12 @@ class W3_Plugin_TotalCache extends W3_Plugin
     var $_support_reminder = false;
     
     /**
+     * Used in PHPMailer init function
+     * @var string
+     */
+    var $_phpmailer_sender = '';
+    
+    /**
      * Runs plugin
      */
     function run()
@@ -266,154 +272,6 @@ class W3_Plugin_TotalCache extends W3_Plugin
     {
         require_once W3TC_LIB_W3_DIR . '/Request.php';
         
-        /**
-         * Flush all caches
-         */
-        if (isset($_REQUEST['flush_all'])) {
-            $this->flush_memcached();
-            $this->flush_apc();
-            $this->flush_file();
-            
-            w3_redirect('', 'note=flush_all');
-        }
-        
-        /**
-         * Flush memcached cache
-         */
-        if (isset($_REQUEST['flush_memcached'])) {
-            $this->flush_memcached();
-            
-            w3_redirect('', 'note=flush_memcached');
-        }
-        
-        /**
-         * Flush APC cache
-         */
-        if (isset($_REQUEST['flush_apc'])) {
-            $this->flush_apc();
-            
-            w3_redirect('', 'note=flush_apc');
-        }
-        
-        /**
-         * Flush disk cache
-         */
-        if (isset($_REQUEST['flush_file'])) {
-            $this->flush_file();
-            
-            w3_redirect('', 'note=flush_file');
-        }
-        
-        /**
-         * Flush page cache
-         */
-        if (isset($_REQUEST['flush_pgcache'])) {
-            $this->flush_pgcache();
-            
-            $this->_config->set('notes.need_empty_pgcache', false);
-            
-            if (! $this->_config->save()) {
-                w3_redirect('', 'error=config_save');
-            }
-            
-            w3_redirect('', 'note=flush_pgcache');
-        }
-        
-        /**
-         * Flush db cache
-         */
-        if (isset($_REQUEST['flush_dbcache'])) {
-            $this->flush_dbcache();
-            
-            w3_redirect('', 'note=flush_dbcache');
-        }
-        
-        /**
-         * Flush minify cache
-         */
-        if (isset($_REQUEST['flush_minify'])) {
-            $this->flush_minify();
-            
-            $this->_config->set('notes.need_empty_minify', false);
-            
-            if (! $this->_config->save()) {
-                w3_redirect('', 'error=config_save');
-            }
-            
-            w3_redirect('', 'note=flush_minify');
-        }
-        
-        /**
-         * Hide notes
-         */
-        if (isset($_REQUEST['hide_note'])) {
-            $setting = sprintf('notes.%s', W3_Request::get_string('hide_note'));
-            
-            $this->_config->set($setting, false);
-            
-            if (! $this->_config->save()) {
-                w3_redirect('', 'error=config_save');
-            }
-            
-            w3_redirect();
-        }
-        
-        /**
-         * Write page cache rules
-         */
-        if (isset($_REQUEST['pgcache_write_rules_core'])) {
-            require_once W3TC_LIB_W3_DIR . '/Plugin/PgCache.php';
-            $w3_plugin_pgcache = & W3_Plugin_PgCache::instance();
-            
-            if ($w3_plugin_pgcache->write_rules_core()) {
-                w3_redirect('', 'note=pgcache_write_rules_core');
-            } else {
-                w3_redirect('', 'error=pgcache_write_rules_core');
-            }
-        }
-        
-        if (isset($_REQUEST['pgcache_write_rules_cache'])) {
-            require_once W3TC_LIB_W3_DIR . '/Plugin/PgCache.php';
-            $w3_plugin_pgcache = & W3_Plugin_PgCache::instance();
-            
-            if ($w3_plugin_pgcache->write_rules_cache()) {
-                w3_redirect('', 'note=pgcache_write_rules_cache');
-            } else {
-                w3_redirect('', 'error=pgcache_write_rules_cache');
-            }
-        }
-        
-        /**
-         * Write minify rules
-         */
-        if (W3TC_PHP5 && isset($_REQUEST['minify_write_rules'])) {
-            require_once W3TC_LIB_W3_DIR . '/Plugin/Minify.php';
-            $w3_plugin_minify = & W3_Plugin_Minify::instance();
-            
-            if ($w3_plugin_minify->write_rules()) {
-                w3_redirect('', 'note=minify_write_rules');
-            } else {
-                w3_redirect('', 'error=minify_write_rules');
-            }
-        }
-        
-        /**
-         * Save support us options
-         */
-        if (isset($_REQUEST['save_support_us'])) {
-            $support = W3_Request::get_string('support');
-            
-            $this->_config->set('common.support', $support);
-            
-            if (! $this->_config->save()) {
-                w3_redirect('', 'error=config_save');
-            }
-            
-            $this->link_update();
-            
-            w3_redirect('', 'note=config_save');
-        }
-        
         $this->_tab = W3_Request::get_string('tab');
         
         switch (true) {
@@ -430,6 +288,190 @@ class W3_Plugin_TotalCache extends W3_Plugin
             
             default:
                 $this->_tab = 'general';
+        }
+        
+        /**
+         * Flush all caches
+         */
+        if (isset($_REQUEST['flush_all'])) {
+            $this->flush_memcached();
+            $this->flush_apc();
+            $this->flush_file();
+            
+            $this->redirect(array(
+                'note' => 'flush_all'
+            ), true);
+        }
+        
+        /**
+         * Flush memcached cache
+         */
+        if (isset($_REQUEST['flush_memcached'])) {
+            $this->flush_memcached();
+            
+            $this->redirect(array(
+                'note' => 'flush_memcached'
+            ));
+        }
+        
+        /**
+         * Flush APC cache
+         */
+        if (isset($_REQUEST['flush_apc'])) {
+            $this->flush_apc();
+            
+            $this->redirect(array(
+                'note' => 'flush_apc'
+            ));
+        }
+        
+        /**
+         * Flush disk cache
+         */
+        if (isset($_REQUEST['flush_file'])) {
+            $this->flush_file();
+            
+            $this->redirect(array(
+                'note' => 'flush_file'
+            ));
+        }
+        
+        /**
+         * Flush page cache
+         */
+        if (isset($_REQUEST['flush_pgcache'])) {
+            $this->flush_pgcache();
+            
+            $this->_config->set('notes.need_empty_pgcache', false);
+            
+            if (! $this->_config->save()) {
+                $this->redirect(array(
+                    'error' => 'config_save'
+                ));
+            }
+            
+            $this->redirect(array(
+                'note' => 'flush_pgcache'
+            ));
+        }
+        
+        /**
+         * Flush db cache
+         */
+        if (isset($_REQUEST['flush_dbcache'])) {
+            $this->flush_dbcache();
+            
+            $this->redirect(array(
+                'note' => 'flush_dbcache'
+            ));
+        }
+        
+        /**
+         * Flush minify cache
+         */
+        if (isset($_REQUEST['flush_minify'])) {
+            $this->flush_minify();
+            
+            $this->_config->set('notes.need_empty_minify', false);
+            
+            if (! $this->_config->save()) {
+                $this->redirect(array(
+                    'error' => 'config_save'
+                ));
+            }
+            
+            $this->redirect(array(
+                'note' => 'flush_minify'
+            ));
+        }
+        
+        /**
+         * Hide notes
+         */
+        if (isset($_REQUEST['hide_note'])) {
+            $setting = sprintf('notes.%s', W3_Request::get_string('hide_note'));
+            
+            $this->_config->set($setting, false);
+            
+            if (! $this->_config->save()) {
+                $this->redirect(array(
+                    'error' => 'config_save'
+                ), true);
+            }
+            
+            $this->redirect(array(), true);
+        }
+        
+        /**
+         * Write page cache rules
+         */
+        if (isset($_REQUEST['pgcache_write_rules_core'])) {
+            require_once W3TC_LIB_W3_DIR . '/Plugin/PgCache.php';
+            $w3_plugin_pgcache = & W3_Plugin_PgCache::instance();
+            
+            if ($w3_plugin_pgcache->write_rules_core()) {
+                $this->redirect(array(
+                    'note' => 'pgcache_write_rules_core'
+                ));
+            } else {
+                $this->redirect(array(
+                    'error' => 'pgcache_write_rules_core'
+                ));
+            }
+        }
+        
+        if (isset($_REQUEST['pgcache_write_rules_cache'])) {
+            require_once W3TC_LIB_W3_DIR . '/Plugin/PgCache.php';
+            $w3_plugin_pgcache = & W3_Plugin_PgCache::instance();
+            
+            if ($w3_plugin_pgcache->write_rules_cache()) {
+                $this->redirect(array(
+                    'note' => 'pgcache_write_rules_cache'
+                ));
+            } else {
+                $this->redirect(array(
+                    'error' => 'pgcache_write_rules_cache'
+                ));
+            }
+        }
+        
+        /**
+         * Write minify rules
+         */
+        if (W3TC_PHP5 && isset($_REQUEST['minify_write_rules'])) {
+            require_once W3TC_LIB_W3_DIR . '/Plugin/Minify.php';
+            $w3_plugin_minify = & W3_Plugin_Minify::instance();
+            
+            if ($w3_plugin_minify->write_rules()) {
+                $this->redirect(array(
+                    'note' => 'minify_write_rules'
+                ));
+            } else {
+                $this->redirect(array(
+                    'error' => 'minify_write_rules'
+                ));
+            }
+        }
+        
+        /**
+         * Save support us options
+         */
+        if (isset($_REQUEST['save_support_us'])) {
+            $support = W3_Request::get_string('support');
+            
+            $this->_config->set('common.support', $support);
+            
+            if (! $this->_config->save()) {
+                $this->redirect(array(
+                    'error' => 'config_save'
+                ));
+            }
+            
+            $this->link_update();
+            
+            $this->redirect(array(
+                'note' => 'config_save'
+            ));
         }
         
         /**
@@ -580,6 +622,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
             'pgcache_write_rules_cache' => sprintf('The page cache rules (%s/.htaccess) could not be modified. Please run <strong>chmod 777 %s/.htaccess</strong> to resolve this issue.', W3TC_CACHE_FILE_PGCACHE_DIR, W3TC_CACHE_FILE_PGCACHE_DIR), 
             'minify_write_rules' => sprintf('The minify cache rules (%s/.htaccess) could not be modified. Please run <strong>chmod 777 %s/.htaccess</strong> to resolve this issue.', W3TC_CACHE_FILE_MINIFY_DIR, W3TC_CACHE_FILE_MINIFY_DIR), 
             'support_request_url' => 'Please enter the address of your blog in the Blog <acronym title="Uniform Resource Locator">URL</acronym> field.', 
+            'support_request_name' => 'Please enter your name in the Name field', 
             'support_request_email' => 'Please enter valid email address in the E-Mail field.', 
             'support_request_type' => 'Please select request type.', 
             'support_request_description' => 'Please describe the issue in the issue description field.', 
@@ -1040,23 +1083,28 @@ class W3_Plugin_TotalCache extends W3_Plugin
     function options_support()
     {
         $theme = get_theme(get_current_theme());
-        $templates = (isset($theme['Template Files']) ? (array) $theme['Template Files'] : array());
+        $template_files = (isset($theme['Template Files']) ? (array) $theme['Template Files'] : array());
         
         $request_types = array(
             'Bug Submission', 
-            //'Priority Support (Same Day Response)', 
-            //'Professional Configuration', 
             'Plugin (add-on) Request'
-        ); //'Ustream or Skype Training Session'
+        );
         
-
         require_once W3TC_LIB_W3_DIR . '/Request.php';
         
+        $user = get_user_by('login', 'admin');
+        
         $url = W3_Request::get_string('url', w3_get_domain_url());
-        $email = W3_Request::get_string('email', get_option('admin_email'));
+        $name = W3_Request::get_string('name', ($user ? $user->display_name : ''));
+        $email = W3_Request::get_string('email', ($user ? $user->user_email : ''));
         $request_type = W3_Request::get_string('request_type');
         $description = W3_Request::get_string('description');
-        $template = W3_Request::get_string('template');
+        $templates = W3_Request::get_array('templates');
+        $wp_login = W3_Request::get_string('wp_login');
+        $wp_password = W3_Request::get_string('wp_password');
+        $ftp_host = W3_Request::get_string('ftp_host');
+        $ftp_login = W3_Request::get_string('ftp_login');
+        $ftp_password = W3_Request::get_string('ftp_password');
         
         include W3TC_DIR . '/inc/options/support.phtml';
     }
@@ -1105,7 +1153,9 @@ class W3_Plugin_TotalCache extends W3_Plugin
              * Page cache tab
              */
             if ($config->get_boolean('pgcache.enabled') && $config->get_string('pgcache.engine') == 'file_pgcache' && get_option('permalink_structure') == '') {
-                w3_redirect('', 'error=fancy_permalinks_disabled');
+                $this->redirect(array(
+                    'error' => 'fancy_permalinks_disabled'
+                ));
             }
             
             /**
@@ -1343,9 +1393,13 @@ class W3_Plugin_TotalCache extends W3_Plugin
                 }
             }
             
-            w3_redirect('', 'note=config_save');
+            $this->redirect(array(
+                'note' => 'config_save'
+            ));
         } else {
-            w3_redirect('', 'error=config_save');
+            $this->redirect(array(
+                'error' => 'config_save'
+            ));
         }
     }
     
@@ -1357,6 +1411,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
         require_once W3TC_LIB_W3_DIR . '/Request.php';
         
         $url = W3_Request::get_string('url');
+        $name = W3_Request::get_string('name');
         $email = W3_Request::get_string('email');
         $request_type = W3_Request::get_string('request_type');
         $description = W3_Request::get_string('description');
@@ -1364,47 +1419,89 @@ class W3_Plugin_TotalCache extends W3_Plugin
         $attachments = array();
         $wp_login = W3_Request::get_string('wp_login');
         $wp_password = W3_Request::get_string('wp_password');
-        $ftp_host = W3_Request::get_string('ftp_login');
+        $ftp_host = W3_Request::get_string('ftp_host');
         $ftp_login = W3_Request::get_string('ftp_login');
         $ftp_password = W3_Request::get_string('ftp_password');
         
+        $params = array(
+            'url' => $url, 
+            'name' => $name, 
+            'email' => $email, 
+            'request_type' => $request_type, 
+            'description' => $description, 
+            'wp_login' => $wp_login, 
+            'wp_password' => $wp_password, 
+            'ftp_host' => $ftp_host, 
+            'ftp_login' => $ftp_login, 
+            'ftp_password' => $ftp_password
+        );
+        
+        foreach ($templates as $template_index => $template) {
+            $template_key = sprintf('templates[%d]', $template_index);
+            $params[$template_key] = $template;
+        }
+        
         if ($url == '') {
-            w3_redirect('', 'error=support_request_url');
+            $this->redirect(array_merge($params, array(
+                'error' => 'support_request_url'
+            )));
+        }
+        
+        if ($name == '') {
+            $this->redirect(array_merge($params, array(
+                'error' => 'support_request_name'
+            )));
         }
         
         if (! preg_match('~^[a-z0-9_\-\.]+@[a-z0-9-\.]+\.[a-z]{2,5}$~', $email)) {
-            w3_redirect('', 'error=support_request_email');
+            $this->redirect(array_merge($params, array(
+                'error' => 'support_request_email'
+            )));
         }
         
         if ($request_type == '') {
-            w3_redirect('', 'error=support_request_type');
+            $this->redirect(array_merge($params, array(
+                'error' => 'support_request_type'
+            )));
         }
         
         if ($description == '') {
-            w3_redirect('', 'error=support_request_description');
+            $this->redirect(array_merge($params, array(
+                'error' => 'support_request_description'
+            )));
         }
         
         if ($wp_login != '' || $wp_password != '') {
             if ($wp_login == '') {
-                w3_redirect('', 'error=support_request_wp_login');
+                $this->redirect(array_merge($params, array(
+                    'error' => 'support_request_wp_login'
+                )));
             }
             
             if ($wp_password == '') {
-                w3_redirect('', 'error=support_request_wp_password');
+                $this->redirect(array_merge($params, array(
+                    'error' => 'support_request_wp_password'
+                )));
             }
         }
         
         if ($ftp_host != '' || $ftp_login != '' || $ftp_password != '') {
             if ($ftp_host == '') {
-                w3_redirect('', 'error=support_request_ftp_host');
+                $this->redirect(array_merge($params, array(
+                    'error' => 'support_request_ftp_host'
+                )));
             }
             
             if ($ftp_login == '') {
-                w3_redirect('', 'error=support_request_ftp_login');
+                $this->redirect(array_merge($params, array(
+                    'error' => 'support_request_ftp_login'
+                )));
             }
             
             if ($ftp_password == '') {
-                w3_redirect('', 'error=support_request_ftp_password');
+                $this->redirect(array_merge($params, array(
+                    'error' => 'support_request_ftp_password'
+                )));
             }
         }
         
@@ -1482,20 +1579,52 @@ class W3_Plugin_TotalCache extends W3_Plugin
         /**
          * Send email
          */
-        $result = @wp_mail(W3TC_EMAIL, 'New support request', $body, 'Content-Type: text/html; charset=UTF-8', $attachments);
+        $subject = sprintf('W3TC Support Request: %s', $request_type);
+        
+        $headers = array(
+            sprintf('From: "%s" <%s>', addslashes($name), $email), 
+            sprintf('Reply-To: "%s" <%s>', addslashes($name), $email), 
+            'Content-Type: text/html; charset=UTF-8'
+        );
+        
+        $this->_phpmailer_sender = $email;
+        
+        add_action('phpmailer_init', array(
+            &$this, 
+            'phpmailer_init'
+        ));
+        
+        $result = @wp_mail(W3TC_EMAIL, $subject, $body, implode("\n", $headers), $attachments);
         
         /**
          * Remove temporary files
          */
         foreach ($attachments as $attachment) {
-            @unlink($attachment);
+            if (strstr($attachment, W3TC_TMP_DIR) !== false) {
+                @unlink($attachment);
+            }
         }
         
         if ($result) {
-            w3_redirect('', 'note=support_request');
+            $this->redirect(array(
+                'note' => 'support_request'
+            ));
         } else {
-            w3_redirect('', 'error=support_request');
+            $this->redirect(array_merge($params, array(
+                'error' => 'support_request'
+            )));
         }
+    }
+    
+    /**
+     * PHPMailer init function
+     * 
+     * @param PHPMailer $phpmailer
+     * @return void
+     */
+    function phpmailer_init(&$phpmailer)
+    {
+        $phpmailer->Sender = $this->_phpmailer_sender;
     }
     
     /**
@@ -2108,7 +2237,9 @@ class W3_Plugin_TotalCache extends W3_Plugin
             $this->_config->set('notes.need_empty_pgcache', false);
             
             if (! $this->_config->save()) {
-                w3_redirect('', 'error=config_save');
+                $this->redirect(array(
+                    'error' => 'config_save'
+                ));
             }
             
             $this->flush_pgcache();
@@ -2122,7 +2253,9 @@ class W3_Plugin_TotalCache extends W3_Plugin
             $this->_config->set('notes.need_empty_minify', false);
             
             if (! $this->_config->save()) {
-                w3_redirect('', 'error=config_save');
+                $this->redirect(array(
+                    'error' => 'config_save'
+                ));
             }
             
             $this->flush_minify();
@@ -2517,5 +2650,25 @@ DATA;
         }
         
         return $groups;
+    }
+    
+    /**
+     * Redirect function
+     * 
+     * @param boolean $check_referer
+     */
+    function redirect($params = array(), $check_referer = false)
+    {
+        if ($check_referer && ! empty($_SERVER['HTTP_REFERER'])) {
+            $url = $_SERVER['HTTP_REFERER'];
+        } else {
+            $url = 'options-general.php';
+            $params = array_merge(array(
+                'page' => W3TC_FILE, 
+                'tab' => $this->_tab
+            ), $params);
+        }
+        
+        w3_redirect($url, $params);
     }
 }

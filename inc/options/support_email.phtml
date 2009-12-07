@@ -13,6 +13,9 @@
 			<?php echo nl2br(htmlspecialchars($description)); ?>
 		</p>
 		<hr />
-		<font size="-1" color="#cccccc">E-mail sent from IP: <?php echo $_SERVER['REMOTE_ADDR']; ?></font>
+		<font size="-1" color="#cccccc">
+			E-mail sent from IP: <?php echo htmlspecialchars($_SERVER['REMOTE_ADDR']); ?><br />
+			User Agent: <?php echo htmlspecialchars($_SERVER['HTTP_USER_AGENT']); ?>
+		</font>
 	</body>
 </html>

@@ -372,14 +372,13 @@ function w3_get_domain_url()
     $site_url = w3_get_site_url();
     $parse_url = @parse_url($site_url);
     
-    if ($parse_url && isset($parse_url['scheme'])) {
+    if ($parse_url && isset($parse_url['scheme']) && isset($parse_url['host'])) {
         $scheme = $parse_url['scheme'];
-        if (isset($parse_url['host'])) {
-            $host = $parse_url['host'];
-            $port = (isset($parse_url['port']) && $parse_url['port'] != 80 ? ':' . $parse_url['port'] : '');
-            $domain_url = sprintf('%s://%s%s/', $scheme, $host, $port);
-            return $domain_url;
-        }
+        $host = $parse_url['host'];
+        $port = (isset($parse_url['port']) && $parse_url['port'] != 80 ? ':' . (int) $parse_url['port'] : '');
+        $domain_url = sprintf('%s://%s%s/', $scheme, $host, $port);
+        
+        return $domain_url;
     }
     
     return false;
@@ -451,42 +450,65 @@ function w3_upload_info()
  * 
  * @param string $url
  * @param string $params
+ * @return string
  */
-function w3_redirect($url = '', $params = '')
+function w3_redirect($url = '', $params = array())
 {
-    $url = (! empty($url) ? $url : (! empty($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : $_SERVER['REQUEST_URI']));
+    $fragment = '';
     
-    if (($parse_url = @parse_url($url))) {
-        $url = $parse_url['scheme'] . '://' . (! empty($parse_url['user']) ? $parse_url['user'] . (! empty($parse_url['pass']) ? ':' . $parse_url['pass'] : '') . '@' : '') . $parse_url['host'] . (! empty($parse_url['port']) ? ':' . $parse_url['port'] : '') . $parse_url['path'];
+    if ($url != '' && ($parse_url = @parse_url($url))) {
+        $url = '';
+        
+        if (! empty($parse_url['scheme'])) {
+            $url .= $parse_url['scheme'] . '://';
+        }
+        
+        if (! empty($parse_url['user'])) {
+            $url .= $parse_url['user'];
+            
+            if (! empty($parse_url['pass'])) {
+                $url .= ':' . $parse_url['pass'];
+            }
+        }
+        
+        if (! empty($parse_url['host'])) {
+            $url .= $parse_url['host'];
+        }
+        
+        if (! empty($parse_url['port']) && $parse_url['port'] != 80) {
+            $url .= ':' . (int) $parse_url['port'];
+        }
+        
+        $url .= (! empty($parse_url['path']) ? $parse_url['path'] : '/');
+        
+        if (! empty($parse_url['query'])) {
+            $old_params = array();
+            parse_str($parse_url['query'], $old_params);
+            
+            $params = array_merge($old_params, $params);
+        }
+        
+        if (! empty($parse_url['fragment'])) {
+            $fragment = '#' . $parse_url['fragment'];
+        }
     } else {
         $parse_url = array();
     }
     
-    $old_params = array();
-    if (! empty($parse_url['query'])) {
-        parse_str($parse_url['query'], $old_params);
-    }
-    
-    $new_params = array();
-    if (! empty($params)) {
-        parse_str($params, $new_params);
-    }
-    
-    $merged_params = array_merge($old_params, $new_params);
-    
-    if (! empty($merged_params)) {
-        $count = count($merged_params);
-        $query_string = '';
+    if (($count = count($params))) {
+        $query = '';
         
-        foreach ($merged_params as $param => $value) {
+        foreach ($params as $param => $value) {
             $count--;
-            $query_string .= urlencode($param) . (! empty($value) ? '=' . urlencode($value) : '') . ($count ? '&' : '');
+            $query .= urlencode($param) . (! empty($value) ? '=' . urlencode($value) : '') . ($count ? '&' : '');
         }
         
-        $url .= (strpos($url, '?') === false ? '?' : '&') . $query_string;
+        $url .= (strpos($url, '?') === false ? '?' : '&') . $query;
     }
     
-    $url .= (! empty($parse_url['fragment']) ? '#' . $parse_url['fragment'] : '');
+    if ($fragment != '') {
+        $url .= $fragment;
+    }
     
     @header('Location: ' . $url);
     exit();
@@ -595,11 +617,11 @@ function w3_url_request($method, $url, $data = '', $auth = '')
     } else {
         $parse_url = @parse_url($url);
         
-        if (isset($parse_url['host'])) {
+        if ($parse_url && isset($parse_url['host'])) {
             $host = $parse_url['host'];
-            $port = (isset($parse_url['port']) ? (int) $parse_url['path'] : 80);
-            $path = (! empty($parse_url['path']) ? trim($parse_url['path']) : '/');
-            $query = (isset($parse_url['query']) ? trim($parse_url['query']) : '');
+            $port = (isset($parse_url['port']) ? (int) $parse_url['port'] : 80);
+            $path = (! empty($parse_url['path']) ? $parse_url['path'] : '/');
+            $query = (isset($parse_url['query']) ? $parse_url['query'] : '');
             $request_uri = $path . ($query != '' ? '?' . $query : '');
             
             $headers = array(
