@@ -235,6 +235,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
         delete_option('w3tc_request_data');
         add_option('w3tc_request_data', '', null, 'no');
         add_option('w3tc_install_time', time(), null, 'no');
+        add_option('w3tc_tweeted', 0);
         
         $this->link_update();
     }
@@ -2605,7 +2606,7 @@ DATA;
         $error = 'OK';
         
         if (w3_twitter_status_update($username, $password, W3TC_TWITTER_STATUS, $error)) {
-            add_option('w3tc_tweeted', time(), null, 'no');
+            update_option('w3tc_tweeted', time());
             $result = true;
         } else {
             $result = false;

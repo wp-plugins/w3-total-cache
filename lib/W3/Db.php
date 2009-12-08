@@ -437,6 +437,7 @@ class W3_Db extends wpdb
             '^\s*alter', 
             '^\s*show', 
             '^\s*set', 
+            'sql_calc_found_rows', 
             'found_rows\(\)'
         );
         
