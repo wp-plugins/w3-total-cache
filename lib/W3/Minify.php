@@ -132,11 +132,11 @@ class W3_Minify
         switch ($type) {
             case 'text/css':
                 if ($this->_config->get_boolean('minify.css.strip.comments')) {
-                    $content = preg_replace('~/\*.*\*/~Us', ' ', $content);
+                    $content = preg_replace('~/\*.*\*/~Us', '', $content);
                 }
                 
                 if ($this->_config->get_boolean('minify.css.strip.crlf')) {
-                    $content = preg_replace("~[\r\n]+~", '', $content);
+                    $content = preg_replace("~[\r\n]+~", ' ', $content);
                 } else {
                     $content = preg_replace("~[\r\n]+~", "\n", $content);
                 }
@@ -221,10 +221,9 @@ class W3_Minify
      */
     function log($object, $label = null)
     {
-        $file = W3TC_LOG_DIR . '/minify.log';
         $data = sprintf("[%s] [%s] %s\n", date('r'), $_SERVER['REQUEST_URI'], $object);
         
-        $fp = @fopen($file, 'a');
+        $fp = @fopen(W3TC_MINIFY_LOG_FILE, 'a');
         if ($fp) {
             @fputs($fp, $data);
             @fclose($fp);

@@ -104,7 +104,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
             ));
         }
         
-        if ($this->_config->get_boolean('minify.enabled')) {
+        if ($this->_config->get_boolean('pgcache.enabled') || $this->_config->get_boolean('minify.enabled')) {
             add_filter('pre_update_option_active_plugins', array(
                 &$this, 
                 'pre_update_option_active_plugins'
@@ -228,14 +228,16 @@ class W3_Plugin_TotalCache extends W3_Plugin
             }
         }
         
-        if (! file_exists(W3TC_CONFIG_PATH) && ! $this->_config->save()) {
+        if (! $this->_config->get_integer('common.install')) {
+            $this->_config->set('common.install', time());
+        }
+        
+        if (! file_exists(W3TC_CONFIG_PATH) || ! $this->_config->save()) {
             w3_writable_error(W3TC_CONFIG_PATH);
         }
         
         delete_option('w3tc_request_data');
         add_option('w3tc_request_data', '', null, 'no');
-        add_option('w3tc_install_time', time(), null, 'no');
-        add_option('w3tc_tweeted', 0);
         
         $this->link_update();
     }
@@ -499,7 +501,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
             exit();
         }
         
-        $this->_support_reminder = ($this->_config->get_boolean('notes.support_us') && (int) get_option('w3tc_install_time') < (time() - W3TC_SUPPORT_US_TIMEOUT) && ! $this->is_supported());
+        $this->_support_reminder = ($this->_config->get_boolean('notes.support_us') && $this->_config->get_integer('common.install') < (time() - W3TC_SUPPORT_US_TIMEOUT) && ! $this->is_supported());
         
         wp_enqueue_style('w3tc-options', WP_PLUGIN_URL . '/w3-total-cache/inc/css/options.css');
         wp_enqueue_style('w3tc-lightbox', WP_PLUGIN_URL . '/w3-total-cache/inc/css/lightbox.css');
@@ -701,8 +703,20 @@ class W3_Plugin_TotalCache extends W3_Plugin
             }
         }
         
-        if ($this->_config->get_boolean('minify.enabled') && $this->_config->get_boolean('notes.plugins_updated')) {
-            $notes[] = sprintf('One or more plugins have been activated or deactivated, please check your %s to maintain the desired user experience. %s', $this->button_link('minify settings', sprintf('options-general.php?page=%s&tab=minify', W3TC_FILE)), $this->button_hide_note('Hide this message', 'plugins_updated'));
+        if ($this->_config->get_boolean('notes.plugins_updated')) {
+            $texts = array();
+            
+            if ($this->_config->get_boolean('pgcache.enabled')) {
+                $texts[] = $this->button_link('empty the page cache', sprintf('options-general.php?page=%s&tab=%s&flush_pgcache', W3TC_FILE, $this->_tab));
+            }
+            
+            if ($this->_config->get_boolean('minify.enabled')) {
+                $texts[] = sprintf('check your %s to maintain the desired user experience', $this->button_link('minify settings', sprintf('options-general.php?page=%s&tab=minify', W3TC_FILE)));
+            }
+            
+            if (count($texts)) {
+                $notes[] = sprintf('One or more plugins have been activated or deactivated, please %s. %s', implode(' and ', $texts), $this->button_hide_note('Hide this message', 'plugins_updated'));
+            }
         }
         
         if ($this->_config->get_boolean('pgcache.enabled') && $this->_config->get('notes.need_empty_pgcache')) {
@@ -911,6 +925,10 @@ class W3_Plugin_TotalCache extends W3_Plugin
             $this->_notes[] = sprintf('Unfortunately, <strong>PHP5</strong> is required for full functionality of this plugin; incompatible features are automatically disabled. Please upgrade if possible. %s', $this->button_hide_note('Hide this message', 'php_is_old'));
         }
         
+        if ($this->_config->get_boolean('notes.no_curl') && $this->_config->get_boolean('cdn.enabled') && ! $this->check_curl()) {
+            $this->_notes[] = sprintf('The <strong>CURL PHP</strong> extension is not available. Please install it to enable S3 or CloudFront functionality. %s', $this->button_hide_note('Hide this message', 'no_curl'));
+        }
+        
         /**
          * Show message when defaults are set
          */
@@ -992,6 +1010,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
         $enabled = ($pgcache_enabled || $dbcache_enabled || $minify_enabled || $cdn_enabled);
         
         $check_apc = $this->check_apc();
+        $check_curl = $this->check_curl();
         
         $pgcache_engine = $this->_config->get_string('pgcache.engine');
         $dbcache_engine = $this->_config->get_string('dbcache.engine');
@@ -1558,6 +1577,13 @@ class W3_Plugin_TotalCache extends W3_Plugin
             $attachments[] = $path;
         }
         
+        /**
+         * Attach minify log
+         */
+        if (file_exists(W3TC_MINIFY_LOG_FILE)) {
+            $attachments[] = W3TC_MINIFY_LOG_FILE;
+        }
+        
         $data = array();
         
         if (! empty($wp_login) && ! empty($wp_password)) {
@@ -1566,9 +1592,9 @@ class W3_Plugin_TotalCache extends W3_Plugin
         }
         
         if (! empty($ftp_host) && ! empty($ftp_login) && ! empty($ftp_password)) {
-            $data['FTP host'] = $ftp_host;
-            $data['FTP login'] = $ftp_login;
-            $data['FTP password'] = $ftp_password;
+            $data['SSH / FTP host'] = $ftp_host;
+            $data['SSH / FTP login'] = $ftp_login;
+            $data['SSH / FTP password'] = $ftp_password;
         }
         
         /**
@@ -2383,6 +2409,16 @@ class W3_Plugin_TotalCache extends W3_Plugin
     }
     
     /**
+     * Checks CURL availability
+     * 
+     * @return boolean
+     */
+    function check_curl()
+    {
+        return function_exists('curl_init');
+    }
+    
+    /**
      * Output buffering callback
      *
      * @param string $buffer
@@ -2606,8 +2642,14 @@ DATA;
         $error = 'OK';
         
         if (w3_twitter_status_update($username, $password, W3TC_TWITTER_STATUS, $error)) {
-            update_option('w3tc_tweeted', time());
-            $result = true;
+            $this->_config->set('common.tweeted', time());
+            
+            if ($this->_config->save()) {
+                $result = true;
+            } else {
+                $error = 'Unable to save config.';
+                $result = false;
+            }
         } else {
             $result = false;
         }
@@ -2642,7 +2684,7 @@ DATA;
      */
     function is_supported()
     {
-        return ($this->_config->get_string('common.support') != '' || get_option('w3tc_tweeted'));
+        return ($this->_config->get_string('common.support') != '' || $this->_config->get_string('common.tweeted'));
     }
     
     /**
