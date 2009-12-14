@@ -478,8 +478,11 @@ class W3_Plugin_PgCache extends W3_Plugin
      */
     function generate_rules_cache()
     {
+        $charset = get_option('blog_charset');
+        
         $rules = '';
         $rules .= "# BEGIN W3 Total Cache\n";
+        $rules .= "AddDefaultCharset " . ($charset ? $charset : 'UTF-8') . "\n";
         
         if ($this->_config->get_boolean('pgcache.compress')) {
             $rules .= "<IfModule mod_mime.c>\n";
@@ -491,7 +494,7 @@ class W3_Plugin_PgCache extends W3_Plugin
             $rules .= "</IfModule>\n";
             
             $rules .= "<IfModule mod_deflate.c>\n";
-            $rules .= "    SetEnvIfNoCase Request_URI \.(gzip|deflate)$ no-gzip\n";
+            $rules .= "    SetEnvIfNoCase Request_URI \\.(gzip|deflate)$ no-gzip\n";
             $rules .= "</IfModule>\n";
         }
         
@@ -501,9 +504,10 @@ class W3_Plugin_PgCache extends W3_Plugin
         $rules .= "</IfModule>\n";
         
         $rules .= "<IfModule mod_headers.c>\n";
-        $rules .= "    Header set Pragma public\n";
+        $rules .= "    Header set X-Pingback \"" . get_bloginfo('pingback_url') . "\"\n";
         $rules .= "    Header set X-Powered-By \"" . W3TC_POWERED_BY . "\"\n";
         $rules .= "    Header set Vary \"Accept-Encoding, Cookie\"\n";
+        $rules .= "    Header set Pragma public\n";
         $rules .= "    Header append Cache-Control \"public, must-revalidate\"\n";
         $rules .= "</IfModule>\n";
         

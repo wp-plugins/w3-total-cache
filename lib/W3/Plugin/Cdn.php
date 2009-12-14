@@ -113,7 +113,7 @@ class W3_Plugin_Cdn extends W3_Plugin
         
         $wpdb->query($sql);
         
-        $sql = sprintf("CREATE TABLE `%s%s` (
+        $sql = sprintf("CREATE TABLE IF NOT EXISTS `%s%s` (
             `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
             `local_path` varchar(150) NOT NULL DEFAULT '',
             `remote_path` varchar(150) NOT NULL DEFAULT '',

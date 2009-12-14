@@ -102,8 +102,8 @@
     	<tr>
     		<th valign="top"><label for="pgcache_cache_headers">Specify page headers:</label></th>
     		<td>
-    			<textarea id="pgcache_cache_headers" name="pgcache.cache.headers" cols="30" rows="5"<?php if ($this->_config->get_string('pgcache.engine') == 'file_pgcache'): ?> disabled="disabled"<?php endif; ?>><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('pgcache.cache.headers'))); ?></textarea><br />
-    			<span class="description">Specify which browser cache control methods to support.</span>
+    			<textarea id="pgcache_cache_headers" name="pgcache.cache.headers" cols="30" rows="5"<?php if (! W3TC_PHP5 || $this->_config->get_string('pgcache.engine') == 'file_pgcache'): ?> disabled="disabled"<?php endif; ?>><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('pgcache.cache.headers'))); ?></textarea><br />
+    			<span class="description">Specify additional page headers to cache.</span>
     		</td>
     	</tr>
     	<tr>

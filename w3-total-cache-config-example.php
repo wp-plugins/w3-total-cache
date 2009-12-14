@@ -227,6 +227,8 @@ return array(
     'cdn.reject.ua' => array(), 
     'cdn.reject.uri' => array(), 
     'common.support' => '', 
+    'common.install' => 0, 
+    'common.tweeted' => 0, 
     'common.widget.latest' => true, 
     'notes.defaults' => true, 
     'notes.wp_content_perms' => true, 
@@ -242,5 +244,6 @@ return array(
     'notes.pgcache_rules_core' => true, 
     'notes.pgcache_rules_cache' => true, 
     'notes.minify_rules' => true, 
-    'notes.support_us' => true
+    'notes.support_us' => true, 
+    'notes.no_curl' => true
 );

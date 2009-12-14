@@ -36,6 +36,8 @@ define('W3TC_TMP_DIR', W3TC_CONTENT_DIR . '/tmp');
 define('W3TC_CONFIG_PATH', WP_CONTENT_DIR . '/w3-total-cache-config' . (($w3_blog_id = w3_get_blog_id()) != '' ? '-' . $w3_blog_id : '') . '.php');
 define('W3TC_CONFIG_EXAMPLE_PATH', W3TC_DIR . '/w3-total-cache-config-example.php');
 
+define('W3TC_MINIFY_LOG_FILE', W3TC_LOG_DIR . '/minify.log');
+
 define('W3TC_CDN_COMMAND_UPLOAD', 1);
 define('W3TC_CDN_COMMAND_DELETE', 2);
 define('W3TC_CDN_TABLE_QUEUE', 'w3tc_cdn_queue');

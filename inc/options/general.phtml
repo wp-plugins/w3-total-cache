@@ -103,8 +103,8 @@
         	<td>
         		<select name="cdn.engine">
 					<option value="mirror"<?php selected($this->_config->get_string('cdn.engine'), 'mirror'); ?>>Origin Pull (Mirror)</option>
-					<option value="cf"<?php selected($this->_config->get_string('cdn.engine'), 'cf'); ?><?php if (! W3TC_PHP5): ?> disabled="disabled"<?php endif; ?>>Amazon CloudFront</option>
-					<option value="s3"<?php selected($this->_config->get_string('cdn.engine'), 's3'); ?><?php if (! W3TC_PHP5): ?> disabled="disabled"<?php endif; ?>>Amazon Simple Storage Service (Amazon S3)</option>
+					<option value="cf"<?php selected($this->_config->get_string('cdn.engine'), 'cf'); ?><?php if (! W3TC_PHP5 || ! $check_curl): ?> disabled="disabled"<?php endif; ?>>Amazon CloudFront</option>
+					<option value="s3"<?php selected($this->_config->get_string('cdn.engine'), 's3'); ?><?php if (! W3TC_PHP5 || ! $check_curl): ?> disabled="disabled"<?php endif; ?>>Amazon Simple Storage Service (Amazon S3)</option>
 					<option value="ftp"<?php selected($this->_config->get_string('cdn.engine'), 'ftp'); ?>>Self-hosted (File Transfer Protocol)</option>
         		</select><br />
         		<span class="description">Select the <acronym title="Content Delivery Network">CDN</acronym> type you wish to use.</span>

@@ -127,6 +127,8 @@ class W3_Config
         'cdn.reject.uri' => 'array', 
         
         'common.support' => 'string', 
+        'common.install' => 'integer', 
+        'common.tweeted' => 'integer', 
         'common.widget.latest' => 'boolean', 
         
         'notes.defaults' => 'boolean', 
@@ -142,8 +144,9 @@ class W3_Config
         'notes.need_empty_minify' => 'boolean', 
         'notes.pgcache_rules_core' => 'boolean', 
         'notes.pgcache_rules_cache' => 'boolean', 
-        'notes.minify_rules' => 'boolean',
-        'notes.support_us' => 'boolean'
+        'notes.minify_rules' => 'boolean', 
+        'notes.support_us' => 'boolean', 
+        'notes.no_curl' => 'boolean'
     );
     
     var $_defaults = array(
@@ -376,6 +379,8 @@ class W3_Config
         'cdn.reject.uri' => array(), 
         
         'common.support' => '', 
+        'common.install' => 0, 
+        'common.tweeted' => 0, 
         'common.widget.latest' => true, 
         
         'notes.defaults' => true, 
@@ -392,7 +397,8 @@ class W3_Config
         'notes.pgcache_rules_core' => true, 
         'notes.pgcache_rules_cache' => true, 
         'notes.minify_rules' => true, 
-        'notes.support_us' => true
+        'notes.support_us' => true, 
+        'notes.no_curl' => true
     );
     
     /**
@@ -438,23 +444,16 @@ class W3_Config
         
         switch ($key) {
             /**
-             * Disabled minify when PHP5 is not supported
+             * Don't support additional headers caching when PHP5 is not installed
              */
-            case 'minify.enabled':
-            case 'cdn.minify.enable':
+            case 'pgcache.cache.headers':
                 if (! W3TC_PHP5) {
-                    return false;
-                }
-                break;
-            
-            case 'cdn.engine':
-                if (! W3TC_PHP5 && ($value == 's3' || $value == 'cf')) {
-                    return 'mirror';
+                    return array();
                 }
                 break;
             
             /**
-             * Disabled some PgCache options when enchanced mode enabled
+             * Disabled some page cache options when enchanced mode enabled
              */
             case 'pgcache.cache.query':
                 if ($this->get_boolean('pgcache.enabled') && $this->get_string('pgcache.engine') == 'file_pgcache') {
@@ -465,6 +464,22 @@ class W3_Config
             case 'pgcache.cache.headers':
                 if ($this->get_boolean('pgcache.enabled') && $this->get_string('pgcache.engine') == 'file_pgcache') {
                     return array();
+                }
+                break;
+            
+            /**
+             * Disabled minify when PHP5 is not installed
+             */
+            case 'minify.enabled':
+            case 'cdn.minify.enable':
+                if (! W3TC_PHP5) {
+                    return false;
+                }
+                break;
+            
+            case 'cdn.engine':
+                if (($value == 's3' || $value == 'cf') && (! W3TC_PHP5 || ! function_exists('curl_init'))) {
+                    return 'mirror';
                 }
                 break;
         }

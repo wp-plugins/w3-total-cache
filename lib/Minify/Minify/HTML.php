@@ -210,11 +210,11 @@ class Minify_HTML {
         $css = call_user_func($minifier, $css);
         
         if ($this->_cssStripComments) {
-            $css = preg_replace('~/\*.*\*/~Us', ' ', $css);
+            $css = preg_replace('~/\*.*\*/~Us', '', $css);
         }
         
         if ($this->_cssStripCrlf) {
-            $css = preg_replace("~[\r\n]+~", '', $css);
+            $css = preg_replace("~[\r\n]+~", ' ', $css);
         } else {
             $css = preg_replace("~[\r\n]+~", "\n", $css);
         }        
