@@ -259,58 +259,56 @@ class W3_Plugin_Cdn extends W3_Plugin
      */
     function ob_callback($buffer)
     {
-        if (! w3_is_xml($buffer)) {
-            return $buffer;
-        }
-        
-        $site_url_regexp = w3_get_site_url_regexp();
-        $upload_info = w3_upload_info();
-        $regexps = array();
-        
-        if ($upload_info) {
-            $regexps[] = '~(["\'])((' . $site_url_regexp . ')?/?(' . w3_preg_quote($upload_info['upload_url']) . '[^"\'>]+))~';
-        }
-        
-        if ($this->_config->get_boolean('cdn.includes.enable')) {
-            $mask = $this->_config->get_string('cdn.includes.files');
-            if (! empty($mask)) {
-                $regexps[] = '~(["\'])((' . $site_url_regexp . ')?/?(' . w3_preg_quote(WPINC) . '/(' . $this->get_regexp_by_mask($mask) . ')))~';
+        if ($buffer != '' && w3_is_xml($buffer)) {
+            $site_url_regexp = w3_get_site_url_regexp();
+            $upload_info = w3_upload_info();
+            $regexps = array();
+            
+            if ($upload_info) {
+                $regexps[] = '~(["\'])((' . $site_url_regexp . ')?/?(' . w3_preg_quote($upload_info['upload_url']) . '[^"\'>]+))~';
             }
-        }
-        
-        if ($this->_config->get_boolean('cdn.theme.enable')) {
-            $theme_dir = preg_replace('~' . $site_url_regexp . '~i', '', get_stylesheet_directory_uri());
-            $mask = $this->_config->get_string('cdn.theme.files');
-            if (! empty($mask)) {
-                $regexps[] = '~(["\'])((' . $site_url_regexp . ')?/?(' . w3_preg_quote($theme_dir) . '/(' . $this->get_regexp_by_mask($mask) . ')))~';
-            }
-        }
-        
-        if ($this->_config->get_boolean('cdn.minify.enable')) {
-            $regexps[] = '~(["\'])((' . $site_url_regexp . ')?/?(' . w3_preg_quote(W3TC_CONTENT_MINIFY_DIR_NAME) . '/[a-z0-9-_]+\.include(-footer)?(-nb)?\.(css|js)))~';
-        }
-        
-        if ($this->_config->get_boolean('cdn.custom.enable')) {
-            $masks = $this->_config->get_array('cdn.custom.files');
-            if (! empty($masks)) {
-                $mask_regexps = array();
-                foreach ($masks as $mask) {
-                    $mask = ltrim(preg_replace('~' . $site_url_regexp . '~i', '', $mask), '/\\');
-                    $mask_regexps[] = $this->get_regexp_by_mask($mask);
+            
+            if ($this->_config->get_boolean('cdn.includes.enable')) {
+                $mask = $this->_config->get_string('cdn.includes.files');
+                if (! empty($mask)) {
+                    $regexps[] = '~(["\'])((' . $site_url_regexp . ')?/?(' . w3_preg_quote(WPINC) . '/(' . $this->get_regexp_by_mask($mask) . ')))~';
                 }
-                $regexps[] = '~(["\'])((' . $site_url_regexp . ')?/?(' . implode('|', $mask_regexps) . '))~';
             }
-        }
-        
-        foreach ($regexps as $regexp) {
-            $buffer = preg_replace_callback($regexp, array(
-                &$this, 
-                'link_replace_callback'
-            ), $buffer);
-        }
-        
-        if ($this->_config->get_boolean('cdn.debug')) {
-            $buffer .= "\r\n\r\n" . $this->get_debug_info();
+            
+            if ($this->_config->get_boolean('cdn.theme.enable')) {
+                $theme_dir = preg_replace('~' . $site_url_regexp . '~i', '', get_stylesheet_directory_uri());
+                $mask = $this->_config->get_string('cdn.theme.files');
+                if (! empty($mask)) {
+                    $regexps[] = '~(["\'])((' . $site_url_regexp . ')?/?(' . w3_preg_quote($theme_dir) . '/(' . $this->get_regexp_by_mask($mask) . ')))~';
+                }
+            }
+            
+            if ($this->_config->get_boolean('cdn.minify.enable')) {
+                $regexps[] = '~(["\'])((' . $site_url_regexp . ')?/?(' . w3_preg_quote(W3TC_CONTENT_MINIFY_DIR_NAME) . '/[a-z0-9-_]+\.include(-footer)?(-nb)?\.(css|js)))~';
+            }
+            
+            if ($this->_config->get_boolean('cdn.custom.enable')) {
+                $masks = $this->_config->get_array('cdn.custom.files');
+                if (! empty($masks)) {
+                    $mask_regexps = array();
+                    foreach ($masks as $mask) {
+                        $mask = ltrim(preg_replace('~' . $site_url_regexp . '~i', '', $mask), '/\\');
+                        $mask_regexps[] = $this->get_regexp_by_mask($mask);
+                    }
+                    $regexps[] = '~(["\'])((' . $site_url_regexp . ')?/?(' . implode('|', $mask_regexps) . '))~';
+                }
+            }
+            
+            foreach ($regexps as $regexp) {
+                $buffer = preg_replace_callback($regexp, array(
+                    &$this, 
+                    'link_replace_callback'
+                ), $buffer);
+            }
+            
+            if ($this->_config->get_boolean('cdn.debug')) {
+                $buffer .= "\r\n\r\n" . $this->get_debug_info();
+            }
         }
         
         return $buffer;

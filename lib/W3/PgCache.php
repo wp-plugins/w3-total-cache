@@ -24,20 +24,6 @@ class W3_PgCache
     var $_caching = false;
     
     /**
-     * Compression availability flag
-     *
-     * @var boolean
-     */
-    var $_compression = false;
-    
-    /**
-     * Page key
-     *
-     * @var string
-     */
-    var $_page_key = '';
-    
-    /**
      * Time start
      *
      * @var double
@@ -81,7 +67,6 @@ class W3_PgCache
         $this->_config = & W3_Config::instance();
         $this->_debug = $this->_config->get_boolean('pgcache.debug');
         $this->_lifetime = $this->_config->get_integer('pgcache.lifetime');
-        $this->_compression = ($this->_config->get_boolean('pgcache.compress') ? $this->_get_compression() : false);
         $this->_enchanced_mode = ($this->_config->get_string('pgcache.engine') == 'file_pgcache');
     }
     
@@ -116,7 +101,7 @@ class W3_PgCache
         $mobile_redirect = $this->_config->get_string('pgcache.mobile.redirect');
         
         if ($mobile_redirect != '' && $this->_is_mobile()) {
-            header('Location: ' . $mobile_redirect);
+            w3_redirect($mobile_redirect);
             exit();
         }
         
@@ -128,22 +113,22 @@ class W3_PgCache
         }
         
         $this->_caching = $this->_can_cache();
-        $this->_page_key = $this->_get_page_key($_SERVER['REQUEST_URI'], $this->_compression);
+        
+        $compression = $this->_get_compression();
+        $page_key = $this->_get_page_key($_SERVER['REQUEST_URI'], $compression);
         
         if ($this->_caching) {
-            $this->_send_compression_headers($this->_compression);
-            
             /**
              * Check if page is cached
              */
             $cache = & $this->_get_cache();
-            $data = $cache->get($this->_page_key);
+            $data = $cache->get($page_key);
             
             if ($data !== false) {
                 if ($this->_enchanced_mode) {
                     $is_404 = false;
                     $headers = array();
-                    $time = $cache->mtime($this->_page_key);
+                    $time = $cache->mtime($page_key);
                     $content = $data;
                 } else {
                     $is_404 = $data['404'];
@@ -153,37 +138,40 @@ class W3_PgCache
                 }
                 
                 /**
-                 * Handle 404 pages
+                 * Calculate content etag and length
                  */
+                $etag = md5($content);
+                $content_length = strlen($content);
+                
                 if ($is_404) {
-                    @header('HTTP/1.1 404 Not Found');
+                    /**
+                     * Send 404 header
+                     */
+                    $this->_send_headers_404();
                 } else {
-                    $etag = md5($content);
-                    $this->_handle_403($time, $etag);
-                    $this->_send_cache_control_headers($time, $etag);
+                    /**
+                     * Send 304 header if content is not modified
+                     */
+                    $this->_send_headers_304($time, $etag);
                 }
                 
                 /**
-                 * Send cached headers
+                 * Send headers
                  */
-                foreach ($headers as $header_name => $header_value) {
-                    @header(sprintf('%s: %s', $header_name, $header_value));
-                }
+                $this->_send_headers($time, $etag, $content_length, $compression, $headers);
                 
                 /**
-                 * Append debug info to content if debug mode is enabled
+                 * Append debug info
                  */
                 if ($this->_debug) {
                     $time_total = w3_microtime() - $this->_time_start;
-                    $debug_info = $this->_get_debug_info(true, '', true, $time_total);
-                    $this->_append_content($content, "\r\n\r\n" . $debug_info, $this->_compression);
+                    $debug_info = $this->_get_debug_info($page_key, true, '', true, $time_total);
+                    $this->_append_content($content, "\r\n\r\n" . $debug_info, $compression);
                 }
                 
                 echo $content;
                 exit();
             }
-        } else {
-            $this->_compression = false;
         }
         
         /**
@@ -203,77 +191,99 @@ class W3_PgCache
      */
     function ob_callback($buffer)
     {
-        $caching = $this->_can_cache2();
-        
-        if ($caching && w3_is_xml($buffer)) {
-            $compressions = array(
-                false, 
-                'gzip', 
-                'deflate'
-            );
-            
-            if ($this->_enchanced_mode) {
-                $is_404 = false;
-                $headers = array();
-            } else {
-                $is_404 = is_404();
-                $headers = $this->_get_data_headers($this->_compression);
-            }
-            
-            $time = time();
-            $cache = & $this->_get_cache();
-            
-            foreach ($compressions as $compression) {
-                $page_key = $this->_get_page_key($_SERVER['REQUEST_URI'], $compression);
+        if ($buffer != '') {
+            if ($this->_can_cache2() && w3_is_xml($buffer)) {
+                $compression = $this->_get_compression();
+                $compressions = $this->_get_compressions();
                 
-                /**
-                 * Encode content
-                 */
-                switch ($compression) {
-                    case false:
-                        $content = $buffer;
-                        break;
-                    
-                    case 'gzip':
-                        $content = gzencode($buffer);
-                        break;
-                    
-                    case 'deflate':
-                        $content = gzdeflate($buffer);
-                        break;
-                }
-                
-                /**
-                 * Store cache data
-                 */
                 if ($this->_enchanced_mode) {
-                    $cache->set($page_key, $content);
+                    $is_404 = false;
+                    $headers = array();
                 } else {
-                    $data = array(
-                        '404' => $is_404, 
-                        'headers' => $headers, 
-                        'time' => $time, 
-                        'content' => $content
-                    );
-                    
-                    $cache->set($page_key, $data, $this->_lifetime);
+                    $is_404 = (function_exists('is_404') ? is_404() : false);
+                    $headers = $this->_get_cached_headers();
                 }
                 
-                if ($compression == $this->_compression) {
-                    $buffer = $content;
+                $time = time();
+                $cache = & $this->_get_cache();
+                
+                foreach ($compressions as $_compression) {
+                    $_page_key = $this->_get_page_key($_SERVER['REQUEST_URI'], $_compression);
+                    
+                    /**
+                     * Encode content
+                     */
+                    switch ($_compression) {
+                        case false:
+                            $_content = $buffer;
+                            break;
+                        
+                        case 'gzip':
+                            $_content = gzencode($buffer);
+                            break;
+                        
+                        case 'deflate':
+                            $_content = gzdeflate($buffer);
+                            break;
+                    }
+                    
+                    /**
+                     * Store cache data
+                     */
+                    if ($this->_enchanced_mode) {
+                        $cache->set($_page_key, $_content);
+                    } else {
+                        $_data = array(
+                            '404' => $is_404, 
+                            'headers' => $headers, 
+                            'time' => $time, 
+                            'content' => $_content
+                        );
+                        
+                        $cache->set($_page_key, $_data, $this->_lifetime);
+                    }
+                    
+                    if ($compression == $_compression) {
+                        $page_key = $_page_key;
+                        $buffer = $_content;
+                    }
                 }
+                
+                /**
+                 * Calculate content etag and content length
+                 */
+                $etag = md5($buffer);
+                $content_length = strlen($buffer);
+                
+                if (! $is_404) {
+                    /**                
+                     * Send 304 header if content is not modified
+                     */
+                    $this->_send_headers_304($time, $etag);
+                }
+                
+                /**
+                 * Send headers
+                 */
+                $this->_send_headers($time, $etag, $content_length, $compression);
+                
+                /**
+                 * Append debug info
+                 */
+                if ($this->_debug) {
+                    $time_total = w3_microtime() - $this->_time_start;
+                    $debug_info = $this->_get_debug_info($page_key, true, '', false, $time_total);
+                    $this->_append_content($buffer, "\r\n\r\n" . $debug_info, $compression);
+                }
+            } elseif ($this->_debug) {
+                /**
+                 * Append debug info
+                 */
+                $page_key = $this->_get_page_key($_SERVER['REQUEST_URI'], false);
+                $time_total = w3_microtime() - $this->_time_start;
+                $debug_info = $this->_get_debug_info($page_key, false, $this->cache_reject_reason, false, $time_total);
+                $this->_append_content($buffer, "\r\n\r\n" . $debug_info, false);
             }
-            
-            $etag = md5($buffer);
-            
-            $this->_handle_403($time, $etag);
-            $this->_send_cache_control_headers($time, $etag);
-        }
-        
-        if ($this->_debug) {
-            $time_total = w3_microtime() - $this->_time_start;
-            $debug_info = $this->_get_debug_info($caching, $this->cache_reject_reason, false, $time_total);
-            $this->_append_content($buffer, "\r\n\r\n" . $debug_info, $this->_compression);
         }
         
         return $buffer;
@@ -435,7 +445,7 @@ class W3_PgCache
         /**
          * Don't cache 404 pages
          */
-        if (! $this->_config->get_boolean('pgcache.cache.404') && is_404()) {
+        if (! $this->_config->get_boolean('pgcache.cache.404') && function_exists('is_404') && is_404()) {
             $this->cache_reject_reason = 'page is 404';
             
             return false;
@@ -444,7 +454,7 @@ class W3_PgCache
         /**
          * Don't cache homepage
          */
-        if (! $this->_config->get_boolean('pgcache.cache.home') && is_home()) {
+        if (! $this->_config->get_boolean('pgcache.cache.home') && function_exists('is_home') && is_home()) {
             $this->cache_reject_reason = 'page is home';
             
             return false;
@@ -453,7 +463,7 @@ class W3_PgCache
         /**
          * Don't cache feed
          */
-        if (! $this->_config->get_boolean('pgcache.cache.feed') && is_feed()) {
+        if (! $this->_config->get_boolean('pgcache.cache.feed') && function_exists('is_feed') && is_feed()) {
             $this->cache_reject_reason = 'page is feed';
             
             return false;
@@ -604,17 +614,42 @@ class W3_PgCache
      */
     function _get_compression()
     {
-        if (ini_get('zlib.output_compression')) {
-            return false;
-        }
-        
-        if (strstr($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false) {
-            return 'gzip';
-        } elseif (strstr($_SERVER['HTTP_ACCEPT_ENCODING'], 'deflate') !== false) {
-            return 'deflate';
+        if (! w3_to_boolean(ini_get('zlib.output_compression')) && ! headers_sent()) {
+            $compressions = $this->_get_compressions();
+            
+            foreach ($compressions as $compression) {
+                if (stristr($_SERVER['HTTP_ACCEPT_ENCODING'], $compression) !== false) {
+                    return $compression;
+                }
+            }
         }
         
         return false;
+    }
+    
+    /**
+     * Returns array of supported compressions
+     * 
+     * @return array
+     */
+    function _get_compressions()
+    {
+        $compression = $this->_config->get_string('pgcache.compression');
+        $compressions = array(
+            false
+        );
+        
+        if ($compression != '') {
+            if (stristr($compression, 'gzip') !== false && function_exists('gzencode')) {
+                $compressions[] = 'gzip';
+            }
+            
+            if (stristr($compression, 'deflate') !== false && function_exists('gzdeflate')) {
+                $compressions[] = 'deflate';
+            }
+        }
+        
+        return $compressions;
     }
     
     /**
@@ -642,10 +677,9 @@ class W3_PgCache
     /**
      * Returns array of data headers
      *
-     * @param string $compression
      * @return array
      */
-    function _get_data_headers($compression)
+    function _get_cached_headers()
     {
         $data_headers = array();
         $cache_headers = $this->_config->get_array('pgcache.cache.headers');
@@ -734,17 +768,18 @@ class W3_PgCache
     /**
      * Returns debug info
      *
+     * @param string $page_key
      * @param boolean $cache
      * @param string $reason
      * @param boolean $status
      * @param double $time
      * @return string
      */
-    function _get_debug_info($cache, $reason, $status, $time)
+    function _get_debug_info($page_key, $cache, $reason, $status, $time)
     {
         $debug_info = "<!-- W3 Total Cache: Page cache debug info:\r\n";
         $debug_info .= sprintf("%s%s\r\n", str_pad('Engine: ', 20), w3_get_engine_name($this->_config->get_string('pgcache.engine')));
-        $debug_info .= sprintf("%s%s\r\n", str_pad('Key: ', 20), $this->_page_key);
+        $debug_info .= sprintf("%s%s\r\n", str_pad('Key: ', 20), $page_key);
         $debug_info .= sprintf("%s%s\r\n", str_pad('Caching: ', 20), ($cache ? 'enabled' : 'disabled'));
         if (! $cache) {
             $debug_info .= sprintf("%s%s\r\n", str_pad('Reject reason: ', 20), $reason);
@@ -777,7 +812,7 @@ class W3_PgCache
      */
     function _append_content(&$data, $content, $compression)
     {
-        switch ($this->_compression) {
+        switch ($compression) {
             case false:
                 $data .= $content;
                 break;
@@ -797,36 +832,99 @@ class W3_PgCache
     }
     
     /**
-     * Sends compression headers
-     *
-     * @param string $compression
-     * @return void
+     * Sends headers
+     * 
+     * @param array $headers
+     * @return boolean
      */
-    function _send_compression_headers($compression)
+    function _headers($headers)
     {
-        if ($compression !== false) {
-            @header('Content-Encoding: ' . $compression);
-            @header('Vary: Accept-Encoding, Cookie');
+        if (! headers_sent()) {
+            foreach ($headers as $name => $value) {
+                $header = ($name == 'Status' ? $value : $name . ': ' . $value);
+                @header($header);
+            }
+            
+            return true;
         }
+        
+        return false;
     }
     
     /**
-     * Sends cache control headers
-     * @param integer $time
+     * Sends headers
      * @param string $etag
-     * @return void
+     * @param integer $time
+     * @param integer $content_length
+     * @param string $compression
+     * @param array $custom_headers
+     * @return boolean
      */
-    function _send_cache_control_headers($time, $etag)
+    function _send_headers($time, $etag, $content_length, $compression, $custom_headers = array())
     {
         $curr_time = time();
         $expires = $time + $this->_lifetime;
         $max_age = ($expires > $curr_time ? $expires - $curr_time : 0);
         
-        @header('Pragma: public');
-        @header('Expires: ' . $this->_gmdate($expires));
-        @header('Cache-Control: max-age=' . $max_age . ', public, must-revalidate');
-        @header('Etag: ' . $etag);
-        @header('Last-Modified: ' . $this->_gmdate($time));
+        $headers = array(
+            'Pragma' => 'public', 
+            'Expires' => $this->_gmdate($expires), 
+            'Last-Modified' => $this->_gmdate($time), 
+            'Cache-Control' => 'max-age=' . $max_age . ', public, must-revalidate'
+        );
+        
+        $headers = array_merge($headers, $custom_headers);
+        
+        $headers = array_merge($headers, array(
+            'Vary' => 'Cookie', 
+            'Etag' => $etag, 
+            'Content-Length' => $content_length
+        ));
+        
+        if ($compression) {
+            $headers = array_merge($headers, array(
+                'Vary' => 'Accept-Encoding, Cookie', 
+                'Content-Encoding' => $compression
+            ));
+        }
+        
+        return $this->_headers($headers);
+    }
+    
+    /**
+     * Sends 304 header if content is not modified
+     * 
+     * @param integer $time
+     * @param string $etag
+     * @return boolean
+     */
+    function _send_headers_304($time, $etag)
+    {
+        if ($this->_check_modified_since($time) || $this->_check_match($etag)) {
+            $headers = array(
+                'Status' => 'HTTP/1.1 304 Not Modified', 
+                'Etag' => $etag, 
+                'Last-Modified' => $this->_gmdate($time)
+            );
+            
+            if ($this->_headers($headers)) {
+                exit();
+            }
+        }
+    }
+    
+    /**
+     * Sends 404 header
+     * 
+     * @return boolean
+     */
+    function _send_headers_404()
+    {
+        $headers = array(
+            'Status' => 'HTTP/1.1 404 Not Found'
+        );
+        
+        return $this->_headers($headers);
     }
     
     /**
@@ -889,22 +987,6 @@ class W3_PgCache
         }
         
         return false;
-    }
-    
-    /**
-     * Handles 304 response
-     * @param integer $time
-     * @param string $etag
-     * @return void
-     */
-    function _handle_403($time, $etag)
-    {
-        if ($this->_check_modified_since($time) || $this->_check_match($etag)) {
-            @header('HTTP/1.1 304 Not Modified');
-            @header('Etag: ' . $etag);
-            @header('Last-Modified: ' . $this->_gmdate($time));
-            exit();
-        }
     }
     
     /**

@@ -23,7 +23,7 @@ return array(
         'localhost:11211'
     ), 
     'pgcache.lifetime' => 3600, 
-    'pgcache.compress' => true, 
+    'pgcache.compression' => 'gzip', 
     'pgcache.cache.query' => true, 
     'pgcache.cache.home' => true, 
     'pgcache.cache.feed' => true, 

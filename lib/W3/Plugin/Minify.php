@@ -185,28 +185,26 @@ class W3_Plugin_Minify extends W3_Plugin
      */
     function ob_callback($buffer)
     {
-        if (! w3_is_xml($buffer)) {
-            return $buffer;
-        }
-        
-        $head_prepend = '';
-        
-        if ($this->_config->get_boolean('minify.css.enable')) {
-            $head_prepend .= $this->get_styles('include');
-        }
-        
-        if ($this->_config->get_boolean('minify.js.enable')) {
-            $head_prepend .= $this->get_scripts('include') . $this->get_scripts('include-nb');
-        }
-        
-        if (! empty($head_prepend)) {
-            $buffer = preg_replace('~<head(\s+[^<>]+)*>~Ui', '\\0' . $head_prepend, $buffer, 1);
-        }
-        
-        $buffer = $this->clean($buffer);
-        
-        if ($this->_config->get_boolean('minify.debug')) {
-            $buffer .= "\r\n\r\n" . $this->get_debug_info();
+        if ($buffer != '' && w3_is_xml($buffer)) {
+            $head_prepend = '';
+            
+            if ($this->_config->get_boolean('minify.css.enable')) {
+                $head_prepend .= $this->get_styles('include');
+            }
+            
+            if ($this->_config->get_boolean('minify.js.enable')) {
+                $head_prepend .= $this->get_scripts('include') . $this->get_scripts('include-nb');
+            }
+            
+            if (! empty($head_prepend)) {
+                $buffer = preg_replace('~<head(\s+[^<>]+)*>~Ui', '\\0' . $head_prepend, $buffer, 1);
+            }
+            
+            $buffer = $this->clean($buffer);
+            
+            if ($this->_config->get_boolean('minify.debug')) {
+                $buffer .= "\r\n\r\n" . $this->get_debug_info();
+            }
         }
         
         return $buffer;
@@ -806,23 +804,23 @@ class W3_Plugin_Minify extends W3_Plugin
             if ($this->_config->get_boolean('minify.compress')) {
                 $rules .= "<IfModule mod_mime.c>\n";
                 $rules .= "    AddEncoding gzip .gz\n";
-                
-                $rules .= "    <Files *.js.gz>\n";
-                $rules .= "        ForceType application/x-javascript\n";
-                $rules .= "    </Files>\n";
                 $rules .= "    <Files *.css.gz>\n";
                 $rules .= "        ForceType text/css\n";
+                $rules .= "    </Files>\n";
+                $rules .= "    <Files *.js.gz>\n";
+                $rules .= "        ForceType application/x-javascript\n";
                 $rules .= "    </Files>\n";
                 $rules .= "</IfModule>\n";
                 
                 $rules .= "<IfModule mod_deflate.c>\n";
-                $rules .= "    SetEnvIfNoCase Request_URI \.gz$ no-gzip\n";
+                $rules .= "    SetEnvIfNoCase Request_URI \\.gz$ no-gzip\n";
                 $rules .= "</IfModule>\n";
             }
             
             $rules .= "<IfModule mod_expires.c>\n";
             $rules .= "    ExpiresActive On\n";
-            $rules .= "    ExpiresByType text/html M" . $this->_config->get_integer('minify.lifetime') . "\n";
+            $rules .= "    ExpiresByType text/css M" . $this->_config->get_integer('minify.lifetime') . "\n";
+            $rules .= "    ExpiresByType application/x-javascript M" . $this->_config->get_integer('minify.lifetime') . "\n";
             $rules .= "</IfModule>\n";
             
             $rules .= "<IfModule mod_headers.c>\n";
@@ -846,7 +844,7 @@ class W3_Plugin_Minify extends W3_Plugin
             $rules .= "    RewriteRule (.*) $1%{ENV:APPEND_EXT} [L]\n";
         }
         
-        $rules .= "    RewriteRule ^([a-z0-9-_]+)\.(include(-footer)?(-nb)?)\.(css|js)$ index.php?gg=$1&g=$2&t=$5 [L]\n";
+        $rules .= "    RewriteRule ^([a-z0-9-_]+)\\.(include(-footer)?(-nb)?)\\.(css|js)$ index.php?gg=$1&g=$2&t=$5 [L]\n";
         
         $rules .= "</IfModule>\n";
         

@@ -593,23 +593,29 @@ class W3_Plugin_TotalCache extends W3_Plugin
      */
     function check_request()
     {
-        if (strpos($_SERVER['REQUEST_URI'], '/w3tc_request_data/') === 0 && strlen($_SERVER['REQUEST_URI']) == 51) {
-            $hash = substr($_SERVER['REQUEST_URI'], 19);
-            $request_data = get_option('w3tc_request_data');
+        $pos = strpos($_SERVER['REQUEST_URI'], '/w3tc_request_data/');
+        
+        if ($pos !== false) {
+            $hash = substr($_SERVER['REQUEST_URI'], $pos + 19, 32);
             
-            if ($request_data && isset($request_data[$hash])) {
-                echo '<pre>';
-                foreach ($request_data[$hash] as $key => $value) {
-                    printf("%s: %s\n", $key, $value);
+            if (strlen($hash) == 32) {
+                $request_data = (array) get_option('w3tc_request_data');
+                
+                if (isset($request_data[$hash])) {
+                    echo '<pre>';
+                    foreach ($request_data[$hash] as $key => $value) {
+                        printf("%s: %s\n", $key, $value);
+                    }
+                    echo '</pre>';
+                    
+                    unset($request_data[$hash]);
+                    update_option('w3tc_request_data', $request_data);
+                } else {
+                    echo 'Hash is expired or invalid';
                 }
-                echo '</pre>';
-            } else {
-                echo 'Hash is expired or invalid';
+                
+                exit();
             }
-            
-            unset($request_data[$hash]);
-            update_option('w3tc_request_data', $request_data);
-            exit();
         }
     }
     
@@ -1036,6 +1042,8 @@ class W3_Plugin_TotalCache extends W3_Plugin
     function options_pgcache()
     {
         $pgcache_enabled = $this->_config->get_boolean('pgcache.enabled');
+        $pgcache_gzip = function_exists('gzencode');
+        $pgcache_deflate = function_exists('gzdeflate');
         
         include W3TC_DIR . '/inc/options/pgcache.phtml';
     }
@@ -1262,6 +1270,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
         $pgcache_dependencies = array(
             'dbcache.debug', 
             'pgcache.debug', 
+            'pgcache.compression', 
             'minify.enabled', 
             'minify.debug', 
             'minify.rewrite', 
@@ -2428,63 +2437,54 @@ class W3_Plugin_TotalCache extends W3_Plugin
     {
         global $wpdb;
         
-        if (! w3_is_xml($buffer)) {
-            return $buffer;
-        }
-        
-        $host = gethostbyaddr($_SERVER['SERVER_ADDR']);
-        $date = date('Y-m-d H:i:s');
-        
-        if ($this->is_supported()) {
-            $buffer .= sprintf("\r\n<!-- Served from: %s @ %s by W3 Total Cache -->", $host, $date);
-        } else {
-            $buffer .= <<<DATA
-<!--
-This site's performance optimized by W3 Total Cache. Dramatically improve the speed and reliability of your blog!
-
-Learn more about our WordPress Plugins: http://www.w3-edge.com/wordpress-plugins/
-DATA;
+        if ($buffer != '' && w3_is_xml($buffer)) {
+            $host = gethostbyaddr($_SERVER['SERVER_ADDR']);
+            $date = date('Y-m-d H:i:s');
             
-            $buffer .= "\r\n\r\n";
-            
-            if ($this->_config->get_boolean('minify.enabled')) {
-                require_once W3TC_LIB_W3_DIR . '/Plugin/Minify.php';
-                $w3_plugin_minify = & W3_Plugin_Minify::instance();
+            if ($this->is_supported()) {
+                $buffer .= sprintf("\r\n<!-- Served from: %s @ %s by W3 Total Cache -->", $host, $date);
+            } else {
+                $buffer .= "\r\n<!-- This site's performance optimized by W3 Total Cache. Dramatically improve the speed and reliability of your blog!\r\n\r\nLearn more about our WordPress Plugins: http://www.w3-edge.com/wordpress-plugins/\r\n\r\n";
                 
-                $buffer .= sprintf("Minified using %s%s\r\n", w3_get_engine_name($this->_config->get_string('minify.engine')), ($w3_plugin_minify->minify_reject_reason != '' ? sprintf(' (%s)', $w3_plugin_minify->minify_reject_reason) : ''));
-            }
-            
-            if ($this->_config->get_boolean('pgcache.enabled')) {
-                require_once W3TC_LIB_W3_DIR . '/PgCache.php';
-                $w3_pgcache = & W3_PgCache::instance();
-                
-                $buffer .= sprintf("Page Caching using %s%s\r\n", w3_get_engine_name($this->_config->get_string('pgcache.engine')), ($w3_pgcache->cache_reject_reason != '' ? sprintf(' (%s)', $w3_pgcache->cache_reject_reason) : ''));
-            }
-            
-            if ($this->_config->get_boolean('dbcache.enabled') && is_a($wpdb, 'W3_Db')) {
-                $append = (is_user_logged_in() ? ' (user is logged in)' : '');
-                
-                if ($wpdb->query_hits) {
-                    $buffer .= sprintf("Database Caching %d/%d queries in %.3f seconds using %s%s\r\n", $wpdb->query_hits, $wpdb->query_total, $wpdb->time_total, w3_get_engine_name($this->_config->get_string('dbcache.engine')), $append);
-                } else {
-                    $buffer .= sprintf("Database Caching using %s%s\r\n", w3_get_engine_name($this->_config->get_string('dbcache.engine')), $append);
+                if ($this->_config->get_boolean('minify.enabled')) {
+                    require_once W3TC_LIB_W3_DIR . '/Plugin/Minify.php';
+                    $w3_plugin_minify = & W3_Plugin_Minify::instance();
+                    
+                    $buffer .= sprintf("Minified using %s%s\r\n", w3_get_engine_name($this->_config->get_string('minify.engine')), ($w3_plugin_minify->minify_reject_reason != '' ? sprintf(' (%s)', $w3_plugin_minify->minify_reject_reason) : ''));
                 }
-            }
-            
-            if ($this->_config->get_boolean('cdn.enabled')) {
-                require_once W3TC_LIB_W3_DIR . '/Plugin/Cdn.php';
-                $w3_plugin_cdn = & W3_Plugin_Cdn::instance();
-                $cdn = & $w3_plugin_cdn->get_cdn();
-                $via = $cdn->get_via();
                 
-                $buffer .= sprintf("Content Delivery Network via %s%s\r\n", ($via ? $via : 'N/A'), ($w3_plugin_cdn->cdn_reject_reason != '' ? sprintf(' (%s)', $w3_plugin_cdn->cdn_reject_reason) : ''));
+                if ($this->_config->get_boolean('pgcache.enabled')) {
+                    require_once W3TC_LIB_W3_DIR . '/PgCache.php';
+                    $w3_pgcache = & W3_PgCache::instance();
+                    
+                    $buffer .= sprintf("Page Caching using %s%s\r\n", w3_get_engine_name($this->_config->get_string('pgcache.engine')), ($w3_pgcache->cache_reject_reason != '' ? sprintf(' (%s)', $w3_pgcache->cache_reject_reason) : ''));
+                }
+                
+                if ($this->_config->get_boolean('dbcache.enabled') && is_a($wpdb, 'W3_Db')) {
+                    $append = (is_user_logged_in() ? ' (user is logged in)' : '');
+                    
+                    if ($wpdb->query_hits) {
+                        $buffer .= sprintf("Database Caching %d/%d queries in %.3f seconds using %s%s\r\n", $wpdb->query_hits, $wpdb->query_total, $wpdb->time_total, w3_get_engine_name($this->_config->get_string('dbcache.engine')), $append);
+                    } else {
+                        $buffer .= sprintf("Database Caching using %s%s\r\n", w3_get_engine_name($this->_config->get_string('dbcache.engine')), $append);
+                    }
+                }
+                
+                if ($this->_config->get_boolean('cdn.enabled')) {
+                    require_once W3TC_LIB_W3_DIR . '/Plugin/Cdn.php';
+                    $w3_plugin_cdn = & W3_Plugin_Cdn::instance();
+                    $cdn = & $w3_plugin_cdn->get_cdn();
+                    $via = $cdn->get_via();
+                    
+                    $buffer .= sprintf("Content Delivery Network via %s%s\r\n", ($via ? $via : 'N/A'), ($w3_plugin_cdn->cdn_reject_reason != '' ? sprintf(' (%s)', $w3_plugin_cdn->cdn_reject_reason) : ''));
+                }
+                
+                $buffer .= sprintf("\r\nServed from: %s @ %s -->", $host, $date);
             }
             
-            $buffer .= sprintf("\r\nServed from: %s @ %s -->", $host, $date);
-        }
-        
-        if ($this->_config->get_boolean('dbcache.enabled') && $this->_config->get_boolean('dbcache.debug') && is_a($wpdb, 'W3_Db')) {
-            $buffer .= "\r\n\r\n" . $wpdb->get_debug_info();
+            if ($this->_config->get_boolean('dbcache.enabled') && $this->_config->get_boolean('dbcache.debug') && is_a($wpdb, 'W3_Db')) {
+                $buffer .= "\r\n\r\n" . $wpdb->get_debug_info();
+            }
         }
         
         return $buffer;

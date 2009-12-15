@@ -37,17 +37,22 @@
 			</td>
     	</tr>
     	<tr>
+    		<th><label for="pgcache_compression"><acronym title="Hypertext Transfer Protocol">HTTP</acronym> compression:</label></th>
+    		<td>
+    			<select name="pgcache.compression">
+               		<option value="">None (not recommended)</option>
+                	<option value="gzip"<?php selected($this->_config->get_string('pgcache.compression'), 'gzip'); ?><?php if (! $pgcache_gzip): ?> disabled="disabled"<?php endif; ?>>gzip (good)</option>
+                	<option value="deflate"<?php selected($this->_config->get_string('pgcache.compression'), 'deflate'); ?><?php if (! $pgcache_deflate): ?> disabled="disabled"<?php endif; ?>>deflate (not recommended)</option>
+					<option value="gzip,deflate"<?php selected($this->_config->get_string('pgcache.compression'), 'gzip,deflate'); ?><?php if (! $pgcache_gzip || ! $pgcache_deflate): ?> disabled="disabled"<?php endif; ?>>gzip and deflate (best)</option>
+				</select><br />    			
+				<span class="description">Use <acronym>HTTP</acronym> compression to automatically reduce the load time of HTML documents in browsers that support it.</span>
+    		</td>
+    	</tr>
+    	<tr>
     		<th colspan="2">
     			<input type="hidden" name="pgcache.reject.logged" value="0" />
     			<label><input type="checkbox" name="pgcache.reject.logged" value="1"<?php checked($this->_config->get_boolean('pgcache.reject.logged'), true); ?> /> Don't cache pages for logged in users</label><br />
 				<span class="description">Users that have signed in to WordPress (e.g. administrators) will never view cached pages if enabled.</span>
-    		</th>
-    	</tr>
-    	<tr>
-    		<th colspan="2">
-    			<input type="hidden" name="pgcache.compress" value="0" />
-				<label><input type="checkbox" name="pgcache.compress" value="1"<?php checked($this->_config->get_boolean('pgcache.compress'), true); ?> /> <acronym title="Hypertext Transfer Protocol">HTTP</acronym> compression (<acronym title="GNU zip">gzip</acronym> / deflate)</label><br />
-				<span class="description">Reduce file size by automatically detecting the user agent's supported <acronym title="Hypertext Transfer Protocol">HTTP</acronym> compression method (if any).</span>
     		</th>
     	</tr>
     	<tr>

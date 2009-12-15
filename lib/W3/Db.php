@@ -438,7 +438,8 @@ class W3_Db extends wpdb
             '^\s*show', 
             '^\s*set', 
             'sql_calc_found_rows', 
-            'found_rows\(\)'
+            'found_rows\(\)', 
+            'w3tc_request_data'
         );
         
         if (preg_match('@' . implode('|', $auto_reject_strings) . '@is', $sql)) {
