@@ -420,8 +420,22 @@ class W3_Plugin_PgCache extends W3_Plugin
         
         $rules .= "<IfModule mod_rewrite.c>\n";
         
-        if ($this->_config->get_boolean('pgcache.compress')) {
-            $rules .= "    SetEnvIfNoCase Accept-Encoding (gzip|deflate) APPEND_EXT=.$1\n";
+        $compression = $this->_config->get_string('pgcache.compression');
+        
+        if ($compression != '') {
+            $compressions = array();
+            
+            if (stristr($compression, 'gzip') !== false) {
+                $compressions[] = 'gzip';
+            }
+            
+            if (stristr($compression, 'deflate') !== false) {
+                $compressions[] = 'deflate';
+            }
+            
+            if (count($compressions)) {
+                $rules .= "    SetEnvIfNoCase Accept-Encoding (" . implode('|', $compressions) . ") APPEND_EXT=.$1\n";
+            }
         }
         
         $rules .= "    RewriteEngine On\n";
@@ -484,18 +498,33 @@ class W3_Plugin_PgCache extends W3_Plugin
         $rules .= "# BEGIN W3 Total Cache\n";
         $rules .= "AddDefaultCharset " . ($charset ? $charset : 'UTF-8') . "\n";
         
-        if ($this->_config->get_boolean('pgcache.compress')) {
-            $rules .= "<IfModule mod_mime.c>\n";
-            $rules .= "    AddEncoding gzip .gzip\n";
-            $rules .= "    AddEncoding deflate .deflate\n";
+        $compression = $this->_config->get_string('pgcache.compression');
+        
+        if ($compression != '') {
+            $compressions = array();
             
-            $rules .= "    AddType text/html .gzip\n";
-            $rules .= "    AddType text/html .deflate\n";
-            $rules .= "</IfModule>\n";
+            if (stristr($compression, 'gzip') !== false) {
+                $compressions[] = 'gzip';
+            }
             
-            $rules .= "<IfModule mod_deflate.c>\n";
-            $rules .= "    SetEnvIfNoCase Request_URI \\.(gzip|deflate)$ no-gzip\n";
-            $rules .= "</IfModule>\n";
+            if (stristr($compression, 'deflate') !== false) {
+                $compressions[] = 'deflate';
+            }
+            
+            if (count($compressions)) {
+                $rules .= "<IfModule mod_mime.c>\n";
+                
+                foreach ($compressions as $_compression) {
+                    $rules .= "    AddType text/html ." . $_compression . "\n";
+                    $rules .= "    AddEncoding " . $_compression . " .$_compression\n";
+                }
+                
+                $rules .= "</IfModule>\n";
+                
+                $rules .= "<IfModule mod_deflate.c>\n";
+                $rules .= "    SetEnvIfNoCase Request_URI \\.(" . implode('|', $compressions) . ")$ no-gzip\n";
+                $rules .= "</IfModule>\n";
+            }
         }
         
         $rules .= "<IfModule mod_expires.c>\n";
@@ -506,7 +535,13 @@ class W3_Plugin_PgCache extends W3_Plugin
         $rules .= "<IfModule mod_headers.c>\n";
         $rules .= "    Header set X-Pingback \"" . get_bloginfo('pingback_url') . "\"\n";
         $rules .= "    Header set X-Powered-By \"" . W3TC_POWERED_BY . "\"\n";
-        $rules .= "    Header set Vary \"Accept-Encoding, Cookie\"\n";
+        
+        if ($compression != '') {
+            $rules .= "    Header set Vary \"Accept-Encoding, Cookie\"\n";
+        } else {
+            $rules .= "    Header set Vary \"Cookie\"\n";
+        }
+        
         $rules .= "    Header set Pragma public\n";
         $rules .= "    Header append Cache-Control \"public, must-revalidate\"\n";
         $rules .= "</IfModule>\n";

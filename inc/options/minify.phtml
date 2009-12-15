@@ -27,8 +27,8 @@
     	<tr>
     		<th colspan="2">
     			<input type="hidden" name="minify.compress" value="0" />
-				<label><input type="checkbox" name="minify.compress" value="1"<?php checked($this->_config->get_boolean('minify.compress'), true); ?> /> <acronym title="Hypertext Transfer Protocol">HTTP</acronym> compression (<acronym title="GNU zip">gzip</acronym> / deflate)</label><br />
-				<span class="description">Reduce file size by automatically detecting the user agent's supported <acronym title="Hypertext Transfer Protocol">HTTP</acronym> compression method (if any).</span>
+				<label><input type="checkbox" name="minify.compress" value="1"<?php checked($this->_config->get_boolean('minify.compress'), true); ?> /> <acronym title="Hypertext Transfer Protocol">HTTP</acronym> compression (<acronym title="GNU zip">gzip</acronym>)</label><br />
+				<span class="description">Use <acronym>HTTP</acronym> compression to automatically reduce the load time of <acronym>CSS</acronym> and <acronym>JS</acronym> files in browsers that support it.</span>
     		</th>
     	</tr>
     	<tr>

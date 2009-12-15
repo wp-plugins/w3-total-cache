@@ -46,7 +46,7 @@ class W3_Config
         'pgcache.memcached.engine' => 'string', 
         'pgcache.memcached.servers' => 'array', 
         'pgcache.lifetime' => 'integer', 
-        'pgcache.compress' => 'boolean', 
+        'pgcache.compression' => 'string', 
         'pgcache.cache.query' => 'boolean', 
         'pgcache.cache.home' => 'boolean', 
         'pgcache.cache.feed' => 'boolean', 
@@ -173,7 +173,7 @@ class W3_Config
             'localhost:11211'
         ), 
         'pgcache.lifetime' => 3600, 
-        'pgcache.compress' => true, 
+        'pgcache.compression' => 'gzip', 
         'pgcache.cache.query' => true, 
         'pgcache.cache.home' => true, 
         'pgcache.cache.feed' => true, 
@@ -443,6 +443,15 @@ class W3_Config
         }
         
         switch ($key) {
+            /**
+             * Disable compression if compression functions don't exist
+             */
+            case 'pgcache.compression':
+                if ((stristr($value, 'gzip') && ! function_exists('gzencode')) || (stristr($value, 'deflate') && ! function_exists('gzdeflate'))) {
+                    return '';
+                }
+                break;
+            
             /**
              * Don't support additional headers caching when PHP5 is not installed
              */
