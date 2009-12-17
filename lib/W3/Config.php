@@ -646,24 +646,24 @@ class W3_Config
      */
     function write($file)
     {
-        @$fp = fopen($file, 'w');
+        $fp = @fopen($file, 'w');
         
-        if (! $fp) {
-            return false;
+        if ($fp) {
+            @fputs($fp, "<?php\r\n\r\nreturn array(\r\n");
+            
+            $this->_tabs = 1;
+            
+            foreach ($this->_config as $key => $value) {
+                $this->_write($fp, $key, $value);
+            }
+            
+            @fputs($fp, ");");
+            @fclose($fp);
+            
+            return true;
         }
         
-        @fputs($fp, "<?php\r\n\r\nreturn array(\r\n");
-        
-        $this->_tabs = 1;
-        
-        foreach ($this->_config as $key => $value) {
-            $this->_write($fp, $key, $value);
-        }
-        
-        @fputs($fp, ");");
-        @fclose($fp);
-        
-        return true;
+        return false;
     }
     
     /**

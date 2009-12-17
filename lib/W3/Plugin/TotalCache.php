@@ -232,7 +232,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
             $this->_config->set('common.install', time());
         }
         
-        if (! file_exists(W3TC_CONFIG_PATH) || ! $this->_config->save()) {
+        if (! file_exists(W3TC_CONFIG_PATH) && ! $this->_config->save()) {
             w3_writable_error(W3TC_CONFIG_PATH);
         }
         
@@ -314,7 +314,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
             
             $this->redirect(array(
                 'note' => 'flush_memcached'
-            ));
+            ), true);
         }
         
         /**
@@ -325,7 +325,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
             
             $this->redirect(array(
                 'note' => 'flush_apc'
-            ));
+            ), true);
         }
         
         /**
@@ -336,7 +336,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
             
             $this->redirect(array(
                 'note' => 'flush_file'
-            ));
+            ), true);
         }
         
         /**
@@ -350,12 +350,12 @@ class W3_Plugin_TotalCache extends W3_Plugin
             if (! $this->_config->save()) {
                 $this->redirect(array(
                     'error' => 'config_save'
-                ));
+                ), true);
             }
             
             $this->redirect(array(
                 'note' => 'flush_pgcache'
-            ));
+            ), true);
         }
         
         /**
@@ -366,7 +366,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
             
             $this->redirect(array(
                 'note' => 'flush_dbcache'
-            ));
+            ), true);
         }
         
         /**
@@ -380,12 +380,12 @@ class W3_Plugin_TotalCache extends W3_Plugin
             if (! $this->_config->save()) {
                 $this->redirect(array(
                     'error' => 'config_save'
-                ));
+                ), true);
             }
             
             $this->redirect(array(
                 'note' => 'flush_minify'
-            ));
+            ), true);
         }
         
         /**
@@ -945,7 +945,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
         /**
          * Check wp-content permissions
          */
-        if ($this->_config->get_boolean('notes.wp_content_perms')) {
+        if (! W3TC_WIN && $this->_config->get_boolean('notes.wp_content_perms')) {
             $wp_content_stat = stat(WP_CONTENT_DIR);
             $wp_content_mode = ($wp_content_stat['mode'] & 0777);
             

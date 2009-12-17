@@ -138,6 +138,15 @@ class W3_PgCache
                 }
                 
                 /**
+                 * Append debug info
+                 */
+                if ($this->_debug) {
+                    $time_total = w3_microtime() - $this->_time_start;
+                    $debug_info = $this->_get_debug_info($page_key, true, '', true, $time_total);
+                    $this->_append_content($content, "\r\n\r\n" . $debug_info, $compression);
+                }
+                
+                /**
                  * Calculate content etag and length
                  */
                 $etag = md5($content);
@@ -159,15 +168,6 @@ class W3_PgCache
                  * Send headers
                  */
                 $this->_send_headers($time, $etag, $content_length, $compression, $headers);
-                
-                /**
-                 * Append debug info
-                 */
-                if ($this->_debug) {
-                    $time_total = w3_microtime() - $this->_time_start;
-                    $debug_info = $this->_get_debug_info($page_key, true, '', true, $time_total);
-                    $this->_append_content($content, "\r\n\r\n" . $debug_info, $compression);
-                }
                 
                 echo $content;
                 exit();
@@ -250,6 +250,15 @@ class W3_PgCache
                 }
                 
                 /**
+                 * Append debug info
+                 */
+                if ($this->_debug) {
+                    $time_total = w3_microtime() - $this->_time_start;
+                    $debug_info = $this->_get_debug_info($page_key, true, '', false, $time_total);
+                    $this->_append_content($buffer, "\r\n\r\n" . $debug_info, $compression);
+                }
+                
+                /**
                  * Calculate content etag and content length
                  */
                 $etag = md5($buffer);
@@ -266,15 +275,6 @@ class W3_PgCache
                  * Send headers
                  */
                 $this->_send_headers($time, $etag, $content_length, $compression);
-                
-                /**
-                 * Append debug info
-                 */
-                if ($this->_debug) {
-                    $time_total = w3_microtime() - $this->_time_start;
-                    $debug_info = $this->_get_debug_info($page_key, true, '', false, $time_total);
-                    $this->_append_content($buffer, "\r\n\r\n" . $debug_info, $compression);
-                }
             } elseif ($this->_debug) {
                 /**
                  * Append debug info
