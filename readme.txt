@@ -1,6 +1,6 @@
 === Plugin Name ===
 Contributors: fredericktownes
-Tags: user experience, cache, caching, page cache, css cache, js cache, db cache, disk cache, disk caching, database cache, http compression, gzip, deflate, minify, CDN, content delivery network, media library, performance, speed, multiple hosts, CSS, merge, combine, unobtrusive javascript, compress, optimize, optimizer, JavaScript, JS, cascading style sheet, plugin, yslow, YUI, google page speed, S3, CloudFront, AWS, Amazon Web Services, batcache, wp cache, wp super cache, w3 total cache
+Tags: user experience, cache, caching, page cache, css cache, js cache, db cache, disk cache, disk caching, database cache, http compression, gzip, deflate, minify, CDN, content delivery network, media library, performance, speed, multiple hosts, CSS, merge, combine, unobtrusive javascript, compress, optimize, optimizer, JavaScript, JS, cascading style sheet, plugin, yslow, YUI, google, google rank, google page speed, S3, CloudFront, AWS, Amazon Web Services, batcache, wp cache, wp super cache, w3 total cache
 Requires at least: 2.5
 Tested up to: 2.9
 Stable tag: 0.8.5
@@ -14,6 +14,7 @@ The fastest and most complete WordPress performance optimization plugin. Trusted
 Benefits:
 
 * At least 10x improvement in site performance (when fully configured: Grade A in YSlow or great Google Page Speed Improvements)
+* Improves the "[site performance](http://searchengineland.com/site-speed-googles-next-ranking-factor-29793)" which may affect your blog's rank google.com
 * "Instant" second page views (browser caching after first page view)
 * Reduced page load time: increased visitor time on site (visitors view more pages)
 * Optimized progressive render (pages appear to load instantly)

@@ -660,7 +660,7 @@ class W3_Plugin_Cdn extends W3_Plugin
                 %sposts
             WHERE
                 post_status = "publish"
-                AND post_type = "post"
+                AND (post_type = "post" OR post_type = "page") 
                 AND (post_content LIKE "%%src=%%"
                 	OR post_content LIKE "%%href=%%")
        		', $wpdb->prefix);
@@ -809,7 +809,7 @@ class W3_Plugin_Cdn extends W3_Plugin
                 %sposts
             WHERE
                 post_status = "publish"
-                AND post_type = "post"
+                AND (post_type = "post" OR post_type = "page")
                 AND (post_content LIKE "%%src=%%"
                 	OR post_content LIKE "%%href=%%")
        		', $wpdb->prefix);
@@ -896,7 +896,7 @@ class W3_Plugin_Cdn extends W3_Plugin
                 %sposts
             WHERE
                 post_status = "publish"
-                AND post_type = "post"
+                AND (post_type = "post" OR post_type = "page")
                 AND (post_content LIKE "%%src=%%"
                 	OR post_content LIKE "%%href=%%")
                 ', $wpdb->prefix);

@@ -94,6 +94,11 @@
         <li><a href="#q76">Hang on, don't I need to modify my <acronym title="Cascading Style Sheet">CSS</acronym> files so they'll work on the <acronym title="Content Delivery Network">CDN</acronym>?</a></li>
         <li><a href="#q77">I don't have time to deal with this, but I know I need it. Will you help me?</a></li>
         <li><a href="#q92">What about query string variables on <acronym title="Cascading Style Sheet">CSS</acronym> and <acronym title="JavaScript">JS</acronym>, do they matter?</a></li>
+        <li><a href="#q95">Is this plugin comptatible with GD Star Rating?</li>
+        <li><a href="#q96">How do I cache only the home page?</a></li>
+        <li><a href="#q97">I see garbage characters instead of the normal web site, what's going on here?</a></li>
+        <li><a href="#q98">What is the purpose of the "Media Library Import" tool and how do I use it?</a></li>
+        <li><a href="#q99">I'm getting blank pages or 500 error codes when trying to upgrade on WordPress MU</a></li>
       </ul>
     </li>
     <li class="col">
@@ -179,11 +184,17 @@
   <p id="q12"><strong>This is too good to be true, how can I test the results?</strong><br />
     You will be able to see it instantly on each page load, but for tangible metrics, consider the following tools:</p>
   <ul>
-    <li><a href="http://www.mozilla.com/firefox/" target="_blank">Firefox</a> + <a href="http://getfirebug.com/" target="_blank">Firebug</a> + <a href="http://developer.yahoo.com/yslow/" target="_blank">Yahoo! YSlow</a></li>
-    <li><a href="http://code.google.com/speed/page-speed/" target="_blank">Google Page Speed</a></li>
-    <li><a href="http://www.gomez.com/instant-test-pro/" target="_blank">Gomez Instant Test Pro</a></li>
+    <li><a href="http://www.mozilla.com/firefox/" target="_blank">Mozilla Firefox</a> + <a href="http://getfirebug.com/" target="_blank">Firebug</a> + <a href="http://developer.yahoo.com/yslow/" target="_blank">Yahoo! YSlow</a></li>
+    <li><a href="http://www.mozilla.com/firefox/" target="_blank">Mozilla Firefox</a> + <a href="http://getfirebug.com/" target="_blank">Firebug</a> + <a href="http://code.google.com/speed/page-speed/" target="_blank">Google Page Speed</a></li>
+    <li><a href="http://www.mozilla.com/firefox/" target="_blank">Mozilla Firefox</a> + <a href="http://getfirebug.com/" target="_blank">Firebug</a> + <a href="http://stevesouders.com/hammerhead/" target="_blank">Hammerhead</a></li>
+    <li><a href="http://www.google.com/chrome" target="_blank">Google Chrome</a> + <a href="http://code.google.com/webtoolkit/speedtracer/" target="_blank">Google Speed Tracer</a></li>
+  </ul>
+  <ul>
     <li><a href="http://tools.pingdom.com/" target="_blank">Pingdom</a></li>
     <li><a href="http://www.webpagetest.org/test" target="_blank">WebPagetest</a></li>
+    <li><a href="http://www.gomez.com/instant-test-pro/" target="_blank">Gomez Instant Test Pro</a></li>
+  </ul>
+  <ul>
 	<li><a href="http://www.port80software.com/tools/compresscheck.asp" target="_blank">Port80 Compression Check</a> (requires <acronym title="Microsoft Internet Explorer">MSIE</acronym>6 support to be enabled)</li>
 	<li><a href="http://www.gidnetwork.com/tools/gzip-test.php" target="_blank">A simple online web page compression / deflate / <acronym title="GNU zip">gzip</acronym> test tool</a></li>
     <li><a href="http://www.websiteoptimization.com/services/analyze/" target="_blank">Web Page Analyzer</a></li>
@@ -196,7 +207,7 @@
     Not sure, we'll get to that soon.</p>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q15"><strong>Which WordPress versions are supported?</strong><br />
-    To use all features in the suite, a minimum of version 2.5 is required. Earlier versions will benefit from our Media Library Importer to get them back on the upgrade path and into a <acronym title="Content Delivery Network">CDN</acronym> of their choosing.</p>
+    To use all features in the suite, a minimum version of 2.5 is required. Earlier versions will benefit from our Media Library Importer to get them back on the upgrade path and into a <acronym title="Content Delivery Network">CDN</acronym> of their choosing.</p>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q16"><strong>I understand the database caching and the page caching, but what's minify all about?</strong><br />
       We'll just quote the fine folks at yahoo on this one:</p>
@@ -445,6 +456,28 @@ No, you can drag and drop them into the desired order on the minify settings pag
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q92"><strong>What about query string variables on <acronym title="Cascading Style Sheet">CSS</acronym> and <acronym title="JavaScript">JS</acronym>, do they matter?</strong><br />
     This is definitely a special case. Files like "http://domain.com/wp-content/themes/default/js/script.js?ver=20090102" etc need to be specified with the full <acronym title="Uniform Resource Locator">URL</acronym>. This is an exception to the general rule of specifying a local path to file like: "wp-content/themes/default/js/script.js", which should also work fine. Be sure to click the "Verify <acronym title="Uniform Resource Indicator">URL</acronym>" button to be sure that everything is ok before saving changes.</p>
+  <p align="right"><a href="#toc">back to top</a></p>
+  <p id="q95"><strong>Is this plugin comptatible with GD Star Rating?</strong><br />
+    Yes. Follow these steps:</p>
+  <ol>
+    <li>Enable dynamic loading of ratings by checking GD Star Rating -> Settings -> Features "Cache support option"</li>
+    <li>If Database cache enabled in W3 Total Cache add "wp_gdsr" to "Ignored query stems" option on the Database Cache settings tab, otherwise ratings will not updated after voting</li>
+    <li>Empty all caches</li>
+  </ol>
+  <p align="right"><a href="#toc">back to top</a></p>
+  <p id="q96"><strong>How do I cache only the home page?</strong><br />
+    Add "/.+" (without the quotes) to page cache "Never cache the following pages" option on the page cache settings tab.</p>
+  <p align="right"><a href="#toc">back to top</a></p>
+  <p id="q97"><strong>I see garbage characters instead of the normal web site, what's going on here?</strong><br />
+    If a theme or it's files use the call php_flush() or function flush() that will interfere with the plugins normal operation; making the plugin send cached files before essential operations have finished. The flush() call is no longer necessary and should be removed.</p>
+  <p align="right"><a href="#toc">back to top</a></p>
+  <p id="q98"><strong>What is the purpose of the "Media Library Import" tool and how do I use it?</strong><br />
+    The media library import tool is for old or "messy" WordPress installations that have attachments (images etc in posts or pages) scattered about the web server or "hot linked" to 3rd party sites instead of properly using the media library.</p>
+  <p>The tool will scan your posts and pages for the cases above and copy them to your media library, update your posts to use the link addresses and produce a .htaccess file containing the list of of permanent redirects, so search engines can find the files in their new location.</p>
+  <p>You should backup your database before performing this operation.</p>
+  <p align="right"><a href="#toc">back to top</a></p>
+  <p id="q99"><strong>I'm getting blank pages or 500 error codes when trying to upgrade on WordPress MU</strong><br />
+    First, make sure the plugin is not active (disabled) site-wide. Then make sure it's deactivated site-wide. Now you should be able to successful upgrade without breaking your site.</p>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q78"><strong>Which web servers do you support?</strong><br />
     We are aware of no incompatibilities with <a href="http://httpd.apache.org/" target="_blank">apache</a> 1.3+, <a href="http://www.iis.net/" target="_blank">IIS</a> 5+ or <a href="http://litespeedtech.com/products/webserver/overview/" target="_blank">litespeed</a> 4.0.2+. If there's a web server you feel we should be actively testing (e.g. <a href="http://www.lighttpd.net/" target="_blank">lighttpd</a>), we're <a href="mailto:wordpressexperts@w3-edge.com">interested in hearing</a>.</p>
