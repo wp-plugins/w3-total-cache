@@ -13,8 +13,8 @@ The fastest and most complete WordPress performance optimization plugin. Trusted
 
 Benefits:
 
-* At least 10x improvement in site performance (when fully configured: Grade A in YSlow or great Google Page Speed Improvements)
-* Improves the "[site performance](http://searchengineland.com/site-speed-googles-next-ranking-factor-29793)" which may affect your blog's rank google.com
+* At least 10x improvement in site performance (when fully configured: Grade A in [YSlow](http://developer.yahoo.com/yslow/) or significant [Google Page Speed](http://code.google.com/speed/page-speed/) Improvements)
+* Improves "[site performance](http://googlewebmastercentral.blogspot.com/2009/12/your-sites-performance-in-webmaster.html)" which [may affect your blog's rank](http://searchengineland.com/site-speed-googles-next-ranking-factor-29793) google.com
 * "Instant" second page views (browser caching after first page view)
 * Reduced page load time: increased visitor time on site (visitors view more pages)
 * Optimized progressive render (pages appear to load instantly)
