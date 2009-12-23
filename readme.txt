@@ -200,6 +200,7 @@ Install the plugin to read the full FAQ.
 * Fixed another interface bug with management of minify files
 * Fixed minor bug with table column length for some MySQL version
 * Fixed minify bug with CRLF
+* Fixed minify bug with handling of zlib compression enabled
 * Fixed handling of pages with CDN Media Library import
 
 = 0.8.5 =
