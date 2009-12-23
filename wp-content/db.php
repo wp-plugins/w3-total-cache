@@ -12,11 +12,6 @@ if (! is_dir(W3TC_DIR) || ! file_exists(W3TC_DIR . '/inc/define.php')) {
 }
 
 require_once W3TC_DIR . '/inc/define.php';
-
-if (file_exists(W3TC_CONFIG_PATH)) {
-    require_once W3TC_DIR . '/lib/W3/Db.php';
+require_once W3TC_DIR . '/lib/W3/Db.php';
     
-    $GLOBALS['wpdb'] = & W3_Db::instance();
-} else {
-    require_once ABSPATH . WPINC . '/wp-db.php';
-}
+$GLOBALS['wpdb'] = & W3_Db::instance();

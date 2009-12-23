@@ -71,7 +71,7 @@
     	</tr>
     	<tr>
     		<th colspan="2">
-    			<input type="hidden" name="pgcache.cache.query" value="0" />
+    			<input type="hidden" name="pgcache.cache.query" value="0"<?php if ($this->_config->get_string('pgcache.engine') == 'file_pgcache'): ?> disabled="disabled"<?php endif; ?> />
     			<label><input type="checkbox" name="pgcache.cache.query" value="1"<?php checked($this->_config->get_boolean('pgcache.cache.query'), true); ?><?php if ($this->_config->get_string('pgcache.engine') == 'file_pgcache'): ?> disabled="disabled"<?php endif; ?> /> Cache <acronym title="Uniform Resource Identifier">URI</acronym>s with query string variables</label><br />
 				<span class="description">Search result (and similar) pages will be cached if enabled.</span>
     		</th>
@@ -79,42 +79,42 @@
     	<tr>
     		<th valign="top"><label for="pgcache_reject_ua">Rejected User Agents:</label></th>
     		<td>
-    			<textarea id="pgcache_reject_ua" name="pgcache.reject.ua" cols="30" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('pgcache.reject.ua'))); ?></textarea><br />
+    			<textarea id="pgcache_reject_ua" name="pgcache.reject.ua" cols="40" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('pgcache.reject.ua'))); ?></textarea><br />
     			<span class="description">Never send cached pages to these user agents.</span>
     		</td>
     	</tr>
     	<tr>
     		<th valign="top"><label for="pgcache_reject_cookie">Rejected Cookies:</label></th>
     		<td>
-    			<textarea id="pgcache_reject_cookie" name="pgcache.reject.cookie" cols="30" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('pgcache.reject.cookie'))); ?></textarea><br />
+    			<textarea id="pgcache_reject_cookie" name="pgcache.reject.cookie" cols="40" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('pgcache.reject.cookie'))); ?></textarea><br />
     			<span class="description">Never cache pages that use the specified cookies.</span>
     		</td>
     	</tr>
     	<tr>
     		<th valign="top"><label for="pgcache_reject_uri">Never cache the following pages:</label></th>
     		<td>
-    			<textarea id="pgcache_reject_uri" name="pgcache.reject.uri" cols="30" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('pgcache.reject.uri'))); ?></textarea><br />
+    			<textarea id="pgcache_reject_uri" name="pgcache.reject.uri" cols="40" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('pgcache.reject.uri'))); ?></textarea><br />
     			<span class="description">Always ignore the specified pages / directories.</span>
     		</td>
     	</tr>
     	<tr>
     		<th valign="top"><label for="pgcache_accept_files">Caching exception list:</label></th>
     		<td>
-    			<textarea id="pgcache_accept_files" name="pgcache.accept.files" cols="30" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('pgcache.accept.files'))); ?></textarea><br />
+    			<textarea id="pgcache_accept_files" name="pgcache.accept.files" cols="40" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('pgcache.accept.files'))); ?></textarea><br />
     			<span class="description">Cache the specified pages / directories even if listed in the "never cache the following pages" field.</span>
     		</td>
     	</tr>
     	<tr>
     		<th valign="top"><label for="pgcache_cache_headers">Specify page headers:</label></th>
     		<td>
-    			<textarea id="pgcache_cache_headers" name="pgcache.cache.headers" cols="30" rows="5"<?php if (! W3TC_PHP5 || $this->_config->get_string('pgcache.engine') == 'file_pgcache'): ?> disabled="disabled"<?php endif; ?>><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('pgcache.cache.headers'))); ?></textarea><br />
+    			<textarea id="pgcache_cache_headers" name="pgcache.cache.headers" cols="40" rows="5"<?php if (! W3TC_PHP5 || $this->_config->get_string('pgcache.engine') == 'file_pgcache'): ?> disabled="disabled"<?php endif; ?>><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('pgcache.cache.headers'))); ?></textarea><br />
     			<span class="description">Specify additional page headers to cache.</span>
     		</td>
     	</tr>
     	<tr>
     		<th valign="top"><label for="pgcache_mobile_agents">Mobile user agents:</label></th>
     		<td>
-    			<textarea id="pgcache_mobile_agents" name="pgcache.mobile.agents" cols="30" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('pgcache.mobile.agents'))); ?></textarea><br />
+    			<textarea id="pgcache_mobile_agents" name="pgcache.mobile.agents" cols="40" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('pgcache.mobile.agents'))); ?></textarea><br />
     			<span class="description">Specify which mobile devices to detect.</span>
     		</td>
     	</tr>

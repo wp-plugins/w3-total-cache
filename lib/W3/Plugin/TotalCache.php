@@ -406,6 +406,21 @@ class W3_Plugin_TotalCache extends W3_Plugin
         }
         
         /**
+         * Save config
+         */
+        if (isset($_REQUEST['save_config'])) {
+            if ($this->_config->save()) {
+                $this->redirect(array(
+                    'note' => 'config_save'
+                ), true);
+            } else {
+                $this->redirect(array(
+                    'error' => 'config_save'
+                ), true);
+            }
+        }
+        
+        /**
          * Write page cache rules
          */
         if (isset($_REQUEST['pgcache_write_rules_core'])) {
@@ -649,7 +664,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
             'flush_memcached' => 'Memcached cache(s) successfully emptied.', 
             'flush_apc' => 'Opcode (APC) cache successfully emptied.', 
             'flush_file' => 'Disk cache successfully emptied.', 
-            'flush_pgcache' => 'Page cache successfull emptied.', 
+            'flush_pgcache' => 'Page cache successfully emptied.', 
             'flush_dbcache' => 'Database cache successfully emptied.', 
             'flush_minify' => 'Minify cache successfully emptied.', 
             'pgcache_write_rules_core' => 'Page cache rewrite rules have been successfully written.', 
@@ -678,29 +693,48 @@ class W3_Plugin_TotalCache extends W3_Plugin
         }
         
         /**
-         * Do checks and show messages
+         * Check config file
          */
-        if ($this->_config->get_boolean('cdn.enabled')) {
+        if (! file_exists(W3TC_CONFIG_PATH)) {
+            $errors[] = sprintf('<strong>W3 Total Cache Error:</strong> Default settings are in use. The configuration file could not be read or doesn\'t exist. Please %s to create the file.', $this->button_link('save your settings', sprintf('options-general.php?page=%s&tab=%s&save_config', W3TC_FILE, $this->_tab)));
+        }
+        
+        /**
+         * CDN notifications
+         */
+        if ($this->_config->get_boolean('cdn.enabled') && $this->_config->get_string('cdn.engine') != 'mirror') {
+            /**
+             * Show notification after theme change
+             */
             if ($this->_config->get_boolean('notes.theme_changed')) {
                 $notes[] = sprintf('Your active theme has changed, please %s now to ensure proper operation. %s', $this->button_popup('upload active theme files', 'cdn_export', 'cdn_export_type=theme'), $this->button_hide_note('Hide this message', 'theme_changed'));
             }
             
+            /**
+             * Show notification after WP upgrade
+             */
             if ($this->_config->get_boolean('notes.wp_upgraded')) {
                 $notes[] = sprintf('Have you upgraded WordPress? Please %s files now to ensure proper operation. %s', $this->button_popup('upload wp-includes', 'cdn_export', 'cdn_export_type=includes'), $this->button_hide_note('Hide this message', 'wp_upgraded'));
             }
             
-            if ($this->_config->get_boolean('notes.cdn_upload') && $this->_config->get_string('cdn.engine') != 'mirror') {
+            /**
+             * Show notification after CDN enable
+             */
+            if ($this->_config->get_boolean('notes.cdn_upload')) {
                 $cdn_upload_buttons = array();
                 
                 if ($this->_config->get_boolean('cdn.includes.enable')) {
                     $cdn_upload_buttons[] = $this->button_popup('wp-includes', 'cdn_export', 'cdn_export_type=includes');
                 }
+                
                 if ($this->_config->get_boolean('cdn.theme.enable')) {
                     $cdn_upload_buttons[] = $this->button_popup('theme files', 'cdn_export', 'cdn_export_type=theme');
                 }
-                if ($this->_config->get_boolean('cdn.minify.enable')) {
+                
+                if ($this->_config->get_boolean('minify.enabled') && $this->_config->get_boolean('cdn.minify.enable')) {
                     $cdn_upload_buttons[] = $this->button_popup('minify files', 'cdn_export', 'cdn_export_type=minify');
                 }
+                
                 if ($this->_config->get_boolean('cdn.custom.enable')) {
                     $cdn_upload_buttons[] = $this->button_popup('custom files', 'cdn_export', 'cdn_export_type=custom');
                 }
@@ -709,6 +743,9 @@ class W3_Plugin_TotalCache extends W3_Plugin
             }
         }
         
+        /**
+         * Show notification after plugin activate/deactivate
+         */
         if ($this->_config->get_boolean('notes.plugins_updated')) {
             $texts = array();
             
@@ -725,11 +762,16 @@ class W3_Plugin_TotalCache extends W3_Plugin
             }
         }
         
+        /**
+         * Show notification when page cache needs to be emptied
+         */
         if ($this->_config->get_boolean('pgcache.enabled') && $this->_config->get('notes.need_empty_pgcache')) {
             $notes[] = sprintf('The setting change(s) made either invalidate your cached data or modify the behavior of your site. %s now to provide a consistent user experience.', $this->button_link('Empty the page cache', sprintf('options-general.php?page=%s&tab=%s&flush_pgcache', W3TC_FILE, $this->_tab)));
-        
         }
         
+        /**
+         * Show notification when minify needs to be emptied
+         */
         if ($this->_config->get_boolean('minify.enabled') && $this->_config->get('notes.need_empty_minify')) {
             $notes[] = sprintf('The setting change(s) made either invalidate your cached data or modify the behavior of your site. %s now to provide a consistent user experience.', $this->button_link('Empty the minify cache', sprintf('options-general.php?page=%s&tab=%s&flush_minify', W3TC_FILE, $this->_tab)));
         }
@@ -738,11 +780,11 @@ class W3_Plugin_TotalCache extends W3_Plugin
          * Show messages
          */
         foreach ($errors as $error) {
-            echo sprintf('<div id="message" class="error"><p>%s</p></div>', $error);
+            echo sprintf('<div class="error"><p>%s</p></div>', $error);
         }
         
         foreach ($notes as $note) {
-            echo sprintf('<div id="message" class="updated fade"><p>%s</p></div>', $note);
+            echo sprintf('<div class="updated fade"><p>%s</p></div>', $note);
         }
     }
     
@@ -838,7 +880,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
     function options()
     {
         /**
-         * Check for Page Cache availability
+         * Check for page cache availability
          */
         if ($this->_config->get_boolean('pgcache.enabled')) {
             if (! $this->check_advanced_cache()) {
@@ -910,7 +952,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
         }
         
         /**
-         * Check for DbCache availability
+         * Check for database cache availability
          */
         if ($this->_config->get_boolean('dbcache.enabled')) {
             if (! $this->check_db()) {
@@ -931,8 +973,25 @@ class W3_Plugin_TotalCache extends W3_Plugin
             $this->_notes[] = sprintf('Unfortunately, <strong>PHP5</strong> is required for full functionality of this plugin; incompatible features are automatically disabled. Please upgrade if possible. %s', $this->button_hide_note('Hide this message', 'php_is_old'));
         }
         
-        if ($this->_config->get_boolean('notes.no_curl') && $this->_config->get_boolean('cdn.enabled') && ! $this->check_curl()) {
+        /**
+         * Check CURL extension
+         */
+        if ($this->_config->get_boolean('notes.no_curl') && $this->_config->get_boolean('cdn.enabled') && ! function_exists('curl_init')) {
             $this->_notes[] = sprintf('The <strong>CURL PHP</strong> extension is not available. Please install it to enable S3 or CloudFront functionality. %s', $this->button_hide_note('Hide this message', 'no_curl'));
+        }
+        
+        /**
+         * Check Zlib extension
+         */
+        if ($this->_config->get_boolean('notes.no_zlib') && (! function_exists('gzencode') || ! function_exists('gzdeflate'))) {
+            $this->_notes[] = sprintf('Unfortunately the PHP installation is incomplete, the <strong>zlib module is missing</strong>. This is a core PHP module. Please notify your server administrator and ask for it to be installed. %s', $this->button_hide_note('Hide this message', 'no_zlib'));
+        }
+        
+        /**
+         * Check if Zlib output compression is enabled
+         */
+        if ($this->_config->get_boolean('notes.zlib_output_compression') && w3_zlib_output_compression()) {
+            $this->_notes[] = sprintf('Either the PHP configuration, Web Server configuration or a script somewhere in your WordPress installation is has set <strong>zlib.output_compression</strong> to enabled.<br />Please locate and disable this setting to ensure proper HTTP compression management. %s', $this->button_hide_note('Hide this message', 'zlib_output_compression'));
         }
         
         /**
@@ -955,10 +1014,28 @@ class W3_Plugin_TotalCache extends W3_Plugin
         }
         
         /**
-         * Check for memcached & APC
+         * Check CDN settings
          */
-        if ($this->_config->get_boolean('notes.no_memcached_nor_apc') && ! $this->check_memcache() && ! $this->check_apc()) {
-            $this->_notes[] = sprintf('<strong>Memcached</strong> nor an <strong>opcode cache (APC)</strong> appear to be installed correctly. %s', $this->button_hide_note('Hide this message', 'no_memcached_nor_apc'));
+        if ($this->_config->get_boolean('cdn.enabled')) {
+            $cdn_engine = $this->_config->get_string('cdn.engine');
+            
+            switch (true) {
+                case ($cdn_engine == 'mirror' && $this->_config->get_string('cdn.mirror.domain') == ''):
+                    $this->_errors[] = 'The <strong>"Replace default hostname with"</strong> field must be populated.';
+                    break;
+                
+                case ($cdn_engine == 'ftp' && $this->_config->get_string('cdn.ftp.domain') == ''):
+                    $this->_errors[] = 'The <strong>"Replace default hostname with"</strong> field must be populated. Enter the hostname of your <acronym title="Content Delivery Network">CDN</acronym> provider. <em>This is the hostname you would enter into your address bar in order to view objects in your browser.</em>';
+                    break;
+                
+                case ($cdn_engine == 's3' && ($this->_config->get_string('cdn.s3.key') == '' || $this->_config->get_string('cdn.s3.bucket') == '' || $this->_config->get_string('cdn.s3.bucket') == '')):
+                    $this->_errors[] = 'The <strong>"Access key", "Secret key" and "Bucket"</strong> fields must be populated.';
+                    break;
+                
+                case ($cdn_engine == 'cf' && ($this->_config->get_string('cdn.cf.key') == '' || $this->_config->get_string('cdn.cf.secret') == '' || $this->_config->get_string('cdn.cf.bucket') == '' || ($this->_config->get_string('cdn.cf.id') == '' && $this->_config->get_string('cdn.cf.cname') == ''))):
+                    $this->_errors[] = 'The <strong>"Access key", "Secret key", "Bucket" and "Replace default hostname with"</strong> fields must be populated.';
+                    break;
+            }
         }
         
         /**
@@ -1015,8 +1092,8 @@ class W3_Plugin_TotalCache extends W3_Plugin
         
         $enabled = ($pgcache_enabled || $dbcache_enabled || $minify_enabled || $cdn_enabled);
         
-        $check_apc = $this->check_apc();
-        $check_curl = $this->check_curl();
+        $check_apc = function_exists('apc_store');
+        $check_curl = function_exists('curl_init');
         
         $pgcache_engine = $this->_config->get_string('pgcache.engine');
         $dbcache_engine = $this->_config->get_string('dbcache.engine');
@@ -1082,28 +1159,10 @@ class W3_Plugin_TotalCache extends W3_Plugin
         $cdn_engine = $this->_config->get_string('cdn.engine');
         $cdn_mirror = ($cdn_engine == 'mirror');
         
+        $minify_enabled = $this->_config->get_boolean('minify.enabled');
+        
         if ($this->_config->get_boolean('notes.cdn_first_time')) {
             $this->_notes[] = sprintf('It appears this is the first time you are using CDN feature. Unless you wish to first import attachments in your posts that are not already in the media library, please start a <strong>"manual export to <acronym title="Content Delivery Network">CDN</acronym>"</strong> and only enable this module after pending attachments have been successfully uploaded. %s', $this->button_hide_note('Hide this message', 'cdn_first_time'));
-        }
-        
-        if ($cdn_enabled) {
-            switch (true) {
-                case ($cdn_engine == 'mirror' && $this->_config->get_string('cdn.mirror.domain') == ''):
-                    $this->_errors[] = 'The <strong>"Replace default hostname with"</strong> field must be populated.';
-                    break;
-                
-                case ($cdn_engine == 'ftp' && $this->_config->get_string('cdn.ftp.domain') == ''):
-                    $this->_errors[] = 'The <strong>"Replace default hostname with"</strong> field must be populated. Enter the hostname of your <acronym title="Content Delivery Network">CDN</acronym> provider. <em>This is the hostname you would enter into your address bar in order to view objects in your browser.</em>';
-                    break;
-                
-                case ($cdn_engine == 's3' && ($this->_config->get_string('cdn.s3.key') == '' || $this->_config->get_string('cdn.s3.bucket') == '' || $this->_config->get_string('cdn.s3.bucket') == '')):
-                    $this->_errors[] = 'The <strong>"Access key", "Secret key" and "Bucket"</strong> fields must be populated.';
-                    break;
-                
-                case ($cdn_engine == 'cf' && ($this->_config->get_string('cdn.cf.key') == '' || $this->_config->get_string('cdn.cf.secret') == '' || $this->_config->get_string('cdn.cf.bucket') == '' || ($this->_config->get_string('cdn.cf.id') == '' && $this->_config->get_string('cdn.cf.cname') == ''))):
-                    $this->_errors[] = 'The <strong>"Access key", "Secret key", "Bucket" and "Replace default hostname with"</strong> fields must be populated.';
-                    break;
-            }
         }
         
         include W3TC_DIR . '/inc/options/cdn.phtml';
@@ -1240,7 +1299,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
                     }
                     foreach ((array) $files as $file) {
                         if (! empty($file)) {
-                            $js_groups[$group][$location]['files'][] = ltrim($file, '/\\');
+                            $js_groups[$group][$location]['files'][] = w3_normalize_file($file);
                         }
                     }
                 }
@@ -1254,7 +1313,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
                 foreach ((array) $locations as $location => $files) {
                     foreach ((array) $files as $file) {
                         if (! empty($file)) {
-                            $css_groups[$group][$location]['files'][] = ltrim($file, '/\\');
+                            $css_groups[$group][$location]['files'][] = w3_normalize_file($file);
                         }
                     }
                 }
@@ -1779,7 +1838,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
         }
         
         $queue = $w3_plugin_cdn->queue_get();
-        $title = 'Unsuccessfull transfers queue.';
+        $title = 'Unsuccessful transfers queue.';
         
         include W3TC_DIR . '/inc/popup/cdn_queue.phtml';
     }
@@ -2398,36 +2457,6 @@ class W3_Plugin_TotalCache extends W3_Plugin
     }
     
     /**
-     * Checks Memcache availability
-     *
-     * @return boolean
-     */
-    function check_memcache()
-    {
-        return class_exists('Memcache');
-    }
-    
-    /**
-     * Checks APC availability
-     *
-     * @return boolean
-     */
-    function check_apc()
-    {
-        return function_exists('apc_store');
-    }
-    
-    /**
-     * Checks CURL availability
-     * 
-     * @return boolean
-     */
-    function check_curl()
-    {
-        return function_exists('curl_init');
-    }
-    
-    /**
      * Output buffering callback
      *
      * @param string $buffer
@@ -2438,8 +2467,8 @@ class W3_Plugin_TotalCache extends W3_Plugin
         global $wpdb;
         
         if ($buffer != '' && w3_is_xml($buffer)) {
-            $host = gethostbyaddr($_SERVER['SERVER_ADDR']);
             $date = date('Y-m-d H:i:s');
+            $host = (! empty($_SERVER['SERVER_ADDR']) ? @gethostbyaddr($_SERVER['SERVER_ADDR']) : $_SERVER['HTTP_HOST']);
             
             if ($this->is_supported()) {
                 $buffer .= sprintf("\r\n<!-- Served from: %s @ %s by W3 Total Cache -->", $host, $date);
@@ -2472,6 +2501,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
                 
                 if ($this->_config->get_boolean('cdn.enabled')) {
                     require_once W3TC_LIB_W3_DIR . '/Plugin/Cdn.php';
+                    
                     $w3_plugin_cdn = & W3_Plugin_Cdn::instance();
                     $cdn = & $w3_plugin_cdn->get_cdn();
                     $via = $cdn->get_via();
@@ -2480,10 +2510,6 @@ class W3_Plugin_TotalCache extends W3_Plugin
                 }
                 
                 $buffer .= sprintf("\r\nServed from: %s @ %s -->", $host, $date);
-            }
-            
-            if ($this->_config->get_boolean('dbcache.enabled') && $this->_config->get_boolean('dbcache.debug') && is_a($wpdb, 'W3_Db')) {
-                $buffer .= "\r\n\r\n" . $wpdb->get_debug_info();
             }
         }
         
@@ -2535,6 +2561,13 @@ class W3_Plugin_TotalCache extends W3_Plugin
          * Check request URI
          */
         if (! $this->check_request_uri()) {
+            return false;
+        }
+        
+        /**
+         * Skip if debug mode is enabled
+         */
+        if ($this->_config->get_boolean('pgcache.debug') || $this->_config->get_boolean('dbcache.debug') || $this->_config->get_boolean('minify.debug') || $this->_config->get_boolean('cdn.debug')) {
             return false;
         }
         

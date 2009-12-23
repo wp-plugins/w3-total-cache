@@ -138,19 +138,9 @@ class W3_PgCache
                 }
                 
                 /**
-                 * Append debug info
-                 */
-                if ($this->_debug) {
-                    $time_total = w3_microtime() - $this->_time_start;
-                    $debug_info = $this->_get_debug_info($page_key, true, '', true, $time_total);
-                    $this->_append_content($content, "\r\n\r\n" . $debug_info, $compression);
-                }
-                
-                /**
-                 * Calculate content etag and length
+                 * Calculate content etag
                  */
                 $etag = md5($content);
-                $content_length = strlen($content);
                 
                 if ($is_404) {
                     /**
@@ -167,7 +157,16 @@ class W3_PgCache
                 /**
                  * Send headers
                  */
-                $this->_send_headers($time, $etag, $content_length, $compression, $headers);
+                $this->_send_headers($time, $etag, $compression, $headers);
+                
+                /**
+                 * Append debug info
+                 */
+                if ($this->_debug) {
+                    $time_total = w3_microtime() - $this->_time_start;
+                    $debug_info = $this->_get_debug_info($page_key, true, '', true, $time_total);
+                    $this->_append_content($content, "\r\n\r\n" . $debug_info, $compression);
+                }
                 
                 echo $content;
                 exit();
@@ -250,19 +249,9 @@ class W3_PgCache
                 }
                 
                 /**
-                 * Append debug info
-                 */
-                if ($this->_debug) {
-                    $time_total = w3_microtime() - $this->_time_start;
-                    $debug_info = $this->_get_debug_info($page_key, true, '', false, $time_total);
-                    $this->_append_content($buffer, "\r\n\r\n" . $debug_info, $compression);
-                }
-                
-                /**
-                 * Calculate content etag and content length
+                 * Calculate content etag
                  */
                 $etag = md5($buffer);
-                $content_length = strlen($buffer);
                 
                 if (! $is_404) {
                     /**                
@@ -274,7 +263,16 @@ class W3_PgCache
                 /**
                  * Send headers
                  */
-                $this->_send_headers($time, $etag, $content_length, $compression);
+                $this->_send_headers($time, $etag, $compression);
+                
+                /**
+                 * Append debug info
+                 */
+                if ($this->_debug) {
+                    $time_total = w3_microtime() - $this->_time_start;
+                    $debug_info = $this->_get_debug_info($page_key, true, '', false, $time_total);
+                    $this->_append_content($buffer, "\r\n\r\n" . $debug_info, $compression);
+                }
             } elseif ($this->_debug) {
                 /**
                  * Append debug info
@@ -614,7 +612,7 @@ class W3_PgCache
      */
     function _get_compression()
     {
-        if (! w3_to_boolean(ini_get('zlib.output_compression')) && ! headers_sent()) {
+        if (! w3_zlib_output_compression() && ! headers_sent()) {
             $compressions = $this->_get_compressions();
             
             foreach ($compressions as $compression) {
@@ -855,12 +853,11 @@ class W3_PgCache
      * Sends headers
      * @param string $etag
      * @param integer $time
-     * @param integer $content_length
      * @param string $compression
      * @param array $custom_headers
      * @return boolean
      */
-    function _send_headers($time, $etag, $content_length, $compression, $custom_headers = array())
+    function _send_headers($time, $etag, $compression, $custom_headers = array())
     {
         $curr_time = time();
         $expires = $time + $this->_lifetime;
@@ -877,8 +874,7 @@ class W3_PgCache
         
         $headers = array_merge($headers, array(
             'Vary' => 'Cookie', 
-            'Etag' => $etag, 
-            'Content-Length' => $content_length
+            'Etag' => $etag
         ));
         
         if ($compression) {

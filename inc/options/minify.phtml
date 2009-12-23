@@ -65,7 +65,7 @@
     	</tr>
     	<tr>
     		<th><label for="minify_file_gc">Garbage collection interval:</label></th>
-    		<td><input id="minify_file_gc" type="text" name="minify.file.gc" value="<?php echo $this->_config->get_integer('minify.file.gc'); ?>" size="8"<?php if ($this->_config->get_string('minify.engine') != 'file' && $this->_config->get_string('minify.engine') != 'file'): ?> disabled="disabled"<?php endif; ?> /> seconds
+    		<td><input id="minify_file_gc" type="text" name="minify.file.gc" value="<?php echo $this->_config->get_integer('minify.file.gc'); ?>" size="8"<?php if ($this->_config->get_string('minify.engine') != 'file'): ?> disabled="disabled"<?php endif; ?> /> seconds
     			<br /><span class="description">If caching to disk, specify how frequently expired cache data is removed. For busy sites, a lower value is best.</span>
 			</td>
     	</tr>
@@ -113,7 +113,7 @@
     	<tr>
     		<th valign="top"><label for="minify_reject_ua">Rejected user agents:</label></th>
     		<td>
-    			<textarea id="minify_reject_ua" name="minify.reject.ua" cols="30" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('minify.reject.ua'))); ?></textarea><br />
+    			<textarea id="minify_reject_ua" name="minify.reject.ua" cols="40" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('minify.reject.ua'))); ?></textarea><br />
     			<span class="description">Specify user agents that will never receive minified content.</span>
     		</td>
     	</tr>

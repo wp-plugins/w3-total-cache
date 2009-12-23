@@ -48,7 +48,7 @@
         <tr>
         	<th valign="top">Minify:</th>
         	<td>
-        		<input type="hidden" name="minify.enabled" value="0" />
+        		<input type="hidden" name="minify.enabled" value="0"<?php if (! W3TC_PHP5): ?> disabled="disabled"<?php endif; ?> />
         		<label><input class="enabled" type="checkbox" name="minify.enabled" value="1"<?php checked($minify_enabled, true); ?><?php if (! W3TC_PHP5): ?> disabled="disabled"<?php endif; ?> />&nbsp;<strong>Enable</strong></label><br />
         		<span class="description">Minification can decrease file size of <acronym title="Hypertext Markup Language">HTML</acronym>, <acronym title="Cascading Style Sheets">CSS</acronym>, <acronym title="JavaScript">JS</acronym> and feeds respectively by ~10% on average.</span>    	
         	</td>

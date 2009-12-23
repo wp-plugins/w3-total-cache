@@ -172,12 +172,12 @@ class Minify_CSS_UriRewriter {
                         $path = (! empty($parse_url['path']) ? $parse_url['path'] : '/');
                         $dir_css = preg_replace('~[^/]+$~', '', $path);
                         $dir_obj = preg_replace('~[^/]+$~', '', $uri);
-                        $dir = ltrim((strpos($dir_obj, '/') === 0 ?  w3_realpath($dir_obj) : w3_realpath($dir_css . $dir_obj)), '/');
+                        $dir = (ltrim((strpos($dir_obj, '/') === 0 ?  w3_realpath($dir_obj) : w3_realpath($dir_css . $dir_obj)), '/'));
                         $file = basename($uri);
                         
                         $uri = sprintf('%s://%s%s/%s%s', $scheme, $host, $port, $dir, $file);
                     }
-                }  else {
+                } else {
                    $uri =  self::$_prependPath . $uri;
                 }             
             } else {

@@ -18,11 +18,13 @@ class W3_Request
      */
     function get($key, $default = null)
     {
-        if (isset($_REQUEST[$key])) {
-            $value = $_REQUEST[$key];
+        $request = W3_Request::get_request();
+        
+        if (isset($request[$key])) {
+            $value = $request[$key];
             
-            if (is_string($value) && get_magic_quotes_gpc()) {
-                $value = stripslashes($value);
+            if (defined('TEMPLATEPATH') || get_magic_quotes_gpc()) {
+                $value = w3_stripslashes($value);
             }
             
             return $value;
@@ -100,5 +102,15 @@ class W3_Request
         }
         
         return $default;
+    }
+    
+    /**
+     * Returns request array
+     * 
+     * @return array
+     */
+    function get_request()
+    {
+        return array_merge($_GET, $_POST);
     }
 }

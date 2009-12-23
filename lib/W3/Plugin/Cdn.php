@@ -260,9 +260,9 @@ class W3_Plugin_Cdn extends W3_Plugin
     function ob_callback($buffer)
     {
         if ($buffer != '' && w3_is_xml($buffer)) {
-            $site_url_regexp = w3_get_site_url_regexp();
-            $upload_info = w3_upload_info();
             $regexps = array();
+            $upload_info = w3_upload_info();
+            $site_url_regexp = w3_get_site_url_regexp();
             
             if ($upload_info) {
                 $regexps[] = '~(["\'])((' . $site_url_regexp . ')?/?(' . w3_preg_quote($upload_info['upload_url']) . '[^"\'>]+))~';
@@ -289,13 +289,15 @@ class W3_Plugin_Cdn extends W3_Plugin
             
             if ($this->_config->get_boolean('cdn.custom.enable')) {
                 $masks = $this->_config->get_array('cdn.custom.files');
+                
                 if (! empty($masks)) {
                     $mask_regexps = array();
+                    
                     foreach ($masks as $mask) {
-                        $mask = ltrim(preg_replace('~' . $site_url_regexp . '~i', '', $mask), '/\\');
                         $mask_regexps[] = $this->get_regexp_by_mask($mask);
                     }
-                    $regexps[] = '~(["\'])((' . $site_url_regexp . ')?/?(' . implode('|', $mask_regexps) . '))~';
+                    
+                    $regexps[] = '~(["\'])((' . $site_url_regexp . ')?/?(' . implode('|', $mask_regexps) . '))~i';
                 }
             }
             
@@ -648,7 +650,6 @@ class W3_Plugin_Cdn extends W3_Plugin
         $results = array();
         
         $site_url = w3_get_site_url();
-        $site_url_regexp = w3_get_site_url_regexp();
         $upload_info = w3_upload_info();
         
         if ($upload_info) {
@@ -687,7 +688,7 @@ class W3_Plugin_Cdn extends W3_Plugin
                     
                     if (preg_match_all('~(href|src)=[\'"]?([^\'"<>\s]+)[\'"]?~', $post_content, $matches, PREG_SET_ORDER)) {
                         foreach ($matches as $match) {
-                            $src = ltrim(preg_replace('~' . $site_url_regexp . '~i', '', $match[2]), '/\\');
+                            $src = w3_normalize_file($match[2]);
                             
                             if (preg_match('~(' . $regexp . ')$~', $src)) {
                                 $src_dir = date('Y/m', strtotime($post->post_date));
@@ -963,17 +964,17 @@ class W3_Plugin_Cdn extends W3_Plugin
      */
     function get_files_custom()
     {
-        $site_url_regexp = w3_get_site_url_regexp();
-        $custom_files = $this->_config->get_array('cdn.custom.files');
         $files = array();
+        $custom_files = $this->_config->get_array('cdn.custom.files');
         
         foreach ($custom_files as $custom_file) {
             if (! empty($custom_file)) {
-                $custom_file = ltrim(preg_replace('~' . $site_url_regexp . '~i', '', $custom_file), '/\\');
                 $dir = trim(dirname($custom_file), '/\\');
+                
                 if ($dir == '.') {
                     $dir = '';
                 }
+                
                 $mask = basename($custom_file);
                 $files = array_merge($files, $this->search_files(ABSPATH . $dir, $dir, $mask));
             }
@@ -1032,7 +1033,7 @@ class W3_Plugin_Cdn extends W3_Plugin
     function link_replace_callback($matches)
     {
         global $wpdb;
-        static $queue = null;
+        static $queue = null, $reject_files = null;
         
         if (in_array($matches[2], $this->replaced_urls)) {
             return $matches[0];
@@ -1043,10 +1044,31 @@ class W3_Plugin_Cdn extends W3_Plugin
             $queue = $wpdb->get_col($sql);
         }
         
+        if ($reject_files === null) {
+            $reject_files = $this->_config->get_array('cdn.reject.files');
+        }
+        
+        /**
+         * Don't replace links that are in the queue
+         */
         if (in_array(ltrim($matches[4], '/'), $queue)) {
             return $matches[0];
         }
         
+        /**
+         * Don't replace link for rejected files
+         */
+        foreach ($reject_files as $reject_file) {
+            $reject_file_regexp = '~^' . $this->get_regexp_by_mask($reject_file) . '$~i';
+            
+            if (preg_match($reject_file_regexp, $matches[4])) {
+                return $matches[0];
+            }
+        }
+        
+        /**
+         * Do replacement
+         */
         $path = '/' . w3_get_site_path() . $matches[4];
         
         $cdn = & $this->get_cdn();

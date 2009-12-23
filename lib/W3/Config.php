@@ -125,6 +125,7 @@ class W3_Config
         'cdn.cf.cname' => 'string', 
         'cdn.reject.ua' => 'array', 
         'cdn.reject.uri' => 'array', 
+        'cdn.reject.files' => 'array', 
         
         'common.support' => 'string', 
         'common.install' => 'integer', 
@@ -134,7 +135,6 @@ class W3_Config
         'notes.defaults' => 'boolean', 
         'notes.wp_content_perms' => 'boolean', 
         'notes.cdn_first_time' => 'boolean', 
-        'notes.no_memcached_nor_apc' => 'boolean', 
         'notes.php_is_old' => 'boolean', 
         'notes.theme_changed' => 'boolean', 
         'notes.wp_upgraded' => 'boolean', 
@@ -146,7 +146,9 @@ class W3_Config
         'notes.pgcache_rules_cache' => 'boolean', 
         'notes.minify_rules' => 'boolean', 
         'notes.support_us' => 'boolean', 
-        'notes.no_curl' => 'boolean'
+        'notes.no_curl' => 'boolean', 
+        'notes.no_zlib' => 'boolean', 
+        'notes.zlib_output_compression' => 'boolean'
     );
     
     var $_defaults = array(
@@ -161,7 +163,9 @@ class W3_Config
         'dbcache.reject.logged' => true, 
         'dbcache.reject.uri' => array(), 
         'dbcache.reject.cookie' => array(), 
-        'dbcache.reject.sql' => array(), 
+        'dbcache.reject.sql' => array(
+            'gdsr_'
+        ), 
         'dbcache.lifetime' => 180, 
         
         'pgcache.enabled' => true, 
@@ -204,103 +208,107 @@ class W3_Config
         'pgcache.reject.cookie' => array(), 
         'pgcache.mobile.redirect' => '', 
         'pgcache.mobile.agents' => array(
-            'Android', 
             '2.0 MMP', 
             '240x320', 
+            'ASUS', 
+            'AU-MIC', 
+            'Alcatel', 
+            'Amoi', 
+            'Android', 
+            'Audiovox', 
             'AvantGo', 
+            'BenQ', 
+            'Bird', 
             'BlackBerry', 
             'Blazer', 
+            'CDM', 
             'Cellphone', 
+            'DDIPOCKET', 
             'Danger', 
             'DoCoMo', 
             'Elaine/3.0', 
+            'Ericsson', 
             'EudoraWeb', 
-            'hiptop', 
+            'Fly', 
+            'HP.iPAQ', 
+            'Haier', 
+            'Huawei', 
             'IEMobile', 
-            'iPhone', 
-            'iPod', 
+            'J-PHONE', 
+            'KDDI', 
+            'KONKA', 
+            'KWC', 
             'KYOCERA/WX310K', 
+            'LG', 
             'LG/U990', 
+            'Lenovo', 
             'MIDP-2.0', 
             'MMEF20', 
             'MOT-V', 
+            'MobilePhone', 
+            'Motorola', 
+            'NEWGEN', 
             'NetFront', 
             'Newt', 
             'Nintendo Wii', 
             'Nitro', 
             'Nokia', 
+            'Novarra', 
+            'O2', 
             'Opera Mini', 
+            'Opera.Mobi', 
+            'PANTECH', 
+            'PDXGW', 
+            'PG', 
+            'PPC', 
+            'PT', 
             'Palm', 
+            'Panasonic', 
+            'Philips', 
             'Playstation Portable', 
-            'portalmmm', 
-            'Proxinet', 
             'ProxiNet', 
+            'Proxinet', 
+            'Qtek', 
+            'SCH', 
+            'SEC', 
+            'SGH', 
             'SHARP-TQ-GX10', 
+            'SIE', 
+            'SPH', 
+            'Sagem', 
+            'Samsung', 
+            'Sanyo', 
+            'Sendo', 
+            'Sharp', 
             'Small', 
+            'Smartphone', 
+            'SoftBank', 
             'SonyEricsson', 
+            'Symbian', 
             'Symbian OS', 
             'SymbianOS', 
             'TS21i-10', 
-            'UP.Browser', 
-            'UP.Link', 
-            'Windows CE', 
-            'WinWAP', 
-            'Ericsson', 
-            'htc', 
-            'Huawei', 
-            'MobilePhone', 
-            'Motorola', 
-            'nokia', 
-            'Novarra', 
-            'O2', 
-            'Samsung', 
-            'Sanyo', 
-            'Smartphone', 
-            'Symbian', 
             'Toshiba', 
             'Treo', 
-            'vodafone', 
-            'Xda', 
-            'Alcatel', 
-            'Amoi', 
-            'ASUS', 
-            'Audiovox', 
-            'AU-MIC', 
-            'BenQ', 
-            'Bird', 
-            'CDM', 
-            'dopod', 
-            'Fly', 
-            'Haier', 
-            'HP.iPAQ', 
-            'i-mobile', 
-            'KDDI', 
-            'KONKA', 
-            'KWC', 
-            'Lenovo', 
-            'LG', 
-            'NEWGEN', 
-            'Panasonic', 
-            'PANTECH', 
-            'PG', 
-            'Philips', 
-            'PPC', 
-            'PT', 
-            'Qtek', 
-            'Sagem', 
-            'SCH', 
-            'SEC', 
-            'Sendo', 
-            'SGH', 
-            'Sharp', 
-            'SIE', 
-            'SoftBank', 
-            'SPH', 
+            'UP.Browser', 
+            'UP.Link', 
             'UTS', 
             'Vertu', 
-            'Opera.Mobi', 
+            'WILLCOME', 
+            'WinWAP', 
+            'Windows CE', 
             'Windows.CE', 
-            'ZTE'
+            'Xda', 
+            'ZTE', 
+            'dopod', 
+            'hiptop', 
+            'htc', 
+            'i-mobile', 
+            'iPhone', 
+            'iPod', 
+            'nokia', 
+            'portalmmm', 
+            'vodafone'
         ), 
         
         'minify.enabled' => true, 
@@ -349,7 +357,7 @@ class W3_Config
         'cdn.debug' => false, 
         'cdn.engine' => 'ftp', 
         'cdn.includes.enable' => true, 
-        'cdn.includes.files' => '*.css;*.js;*.gif;*.png;*.jpg', 
+        'cdn.includes.files' => 'wlwmanifest.xml;*.css;*.js;*.gif;*.png;*.jpg', 
         'cdn.theme.enable' => true, 
         'cdn.theme.files' => '*.css;*.js;*.gif;*.png;*.jpg;*.ico', 
         'cdn.minify.enable' => true, 
@@ -377,6 +385,9 @@ class W3_Config
         'cdn.cf.cname' => '', 
         'cdn.reject.ua' => array(), 
         'cdn.reject.uri' => array(), 
+        'cdn.reject.files' => array(
+            'wp-content/uploads/wpcf7_captcha/*'
+        ), 
         
         'common.support' => '', 
         'common.install' => 0, 
@@ -386,7 +397,6 @@ class W3_Config
         'notes.defaults' => true, 
         'notes.wp_content_perms' => true, 
         'notes.cdn_first_time' => true, 
-        'notes.no_memcached_nor_apc' => true, 
         'notes.php_is_old' => true, 
         'notes.theme_changed' => false, 
         'notes.wp_upgraded' => false, 
@@ -398,29 +408,27 @@ class W3_Config
         'notes.pgcache_rules_cache' => true, 
         'notes.minify_rules' => true, 
         'notes.support_us' => true, 
-        'notes.no_curl' => true
+        'notes.no_curl' => true, 
+        'notes.no_zlib' => true, 
+        'notes.zlib_output_compression' => true
     );
     
     /**
      * PHP5 Constructor
-     * @param boolean $check_config
      */
-    function __construct($check_config = true)
+    function __construct()
     {
         $this->load_defaults();
-        
-        if (! $this->load() && $check_config) {
-            die(sprintf('<strong>W3 Total Cache Error:</strong> Unable to read config file or it is broken. Please create <strong>%s</strong> from <strong>%s</strong>.', W3TC_CONFIG_PATH, W3TC_CONFIG_EXAMPLE_PATH));
-        }
+        $this->load();
     }
     
     /**
      * PHP4 Constructor
      * @param booleab $check_config
      */
-    function W3_Config($check_config = true)
+    function W3_Config()
     {
-        $this->__construct($check_config);
+        $this->__construct();
     }
     
     /**
@@ -444,20 +452,22 @@ class W3_Config
         
         switch ($key) {
             /**
+             * Check cache engines
+             */
+            case 'pgcache.engine':
+            case 'dbcache.engine':
+            case 'minify.engine':
+                if ($value == 'apc' && ! function_exists('apc_store')) {
+                    return 'file';
+                }
+                break;
+            
+            /**
              * Disable compression if compression functions don't exist
              */
             case 'pgcache.compression':
                 if ((stristr($value, 'gzip') && ! function_exists('gzencode')) || (stristr($value, 'deflate') && ! function_exists('gzdeflate'))) {
                     return '';
-                }
-                break;
-            
-            /**
-             * Don't support additional headers caching when PHP5 is not installed
-             */
-            case 'pgcache.cache.headers':
-                if (! W3TC_PHP5) {
-                    return array();
                 }
                 break;
             
@@ -470,8 +480,11 @@ class W3_Config
                 }
                 break;
             
+            /**
+             * Don't support additional headers in some cases
+             */
             case 'pgcache.cache.headers':
-                if ($this->get_boolean('pgcache.enabled') && $this->get_string('pgcache.engine') == 'file_pgcache') {
+                if (! W3TC_PHP5 || ($this->get_boolean('pgcache.enabled') && $this->get_string('pgcache.engine') == 'file_pgcache')) {
                     return array();
                 }
                 break;
@@ -480,17 +493,50 @@ class W3_Config
              * Disabled minify when PHP5 is not installed
              */
             case 'minify.enabled':
-            case 'cdn.minify.enable':
                 if (! W3TC_PHP5) {
                     return false;
                 }
                 break;
             
+            /**
+             * Disable minify compressions if zlib is not installed
+             */
+            case 'minify.compress':
+            case 'minify.compress.ie6':
+                if (! function_exists('gzencode')) {
+                    return false;
+                }
+                break;
+            
+            /**
+             * Disable CDN minify when PHP5 is not installed or minify is disabled
+             */
+            case 'cdn.minify.enable':
+                if (! W3TC_PHP5 || ! $this->get_boolean('minify.enabled')) {
+                    return false;
+                }
+                break;
+            
+            /**
+             * Check CDN engines
+             */
             case 'cdn.engine':
                 if (($value == 's3' || $value == 'cf') && (! W3TC_PHP5 || ! function_exists('curl_init'))) {
                     return 'mirror';
                 }
                 break;
+            
+            /**
+             * Normalize files
+             */
+            case 'dbcache.reject.uri':
+            case 'pgcache.accept.files':
+            case 'pgcache.reject.uri':
+            case 'minify.reject.uri':
+            case 'cdn.custom.files':
+            case 'cdn.reject.uri':
+            case 'cdn.reject.files':
+                return array_map('w3_normalize_file', $value);
         }
         
         return $value;
@@ -604,10 +650,12 @@ class W3_Config
     {
         require_once W3TC_LIB_W3_DIR . '/Request.php';
         
+        $request = W3_Request::get_request();
+        
         foreach ($this->_keys as $key => $type) {
             $request_key = str_replace('.', '_', $key);
             
-            if (! isset($_REQUEST[$request_key])) {
+            if (! isset($request[$request_key])) {
                 continue;
             }
             

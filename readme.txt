@@ -3,9 +3,9 @@ Contributors: fredericktownes
 Tags: user experience, cache, caching, page cache, css cache, js cache, db cache, disk cache, disk caching, database cache, http compression, gzip, deflate, minify, CDN, content delivery network, media library, performance, speed, multiple hosts, CSS, merge, combine, unobtrusive javascript, compress, optimize, optimizer, JavaScript, JS, cascading style sheet, plugin, yslow, YUI, google, google rank, google page speed, S3, CloudFront, AWS, Amazon Web Services, batcache, wp cache, wp super cache, w3 total cache
 Requires at least: 2.5
 Tested up to: 2.9
-Stable tag: 0.8.5
+Stable tag: 0.8.5.1
 
-Dramatically improve the user experience of your blog. Add page caching, database caching, minify and content delivery network functionality and more to WordPress.
+Dramatically improve the speed and user experience of your blog. Add page caching, database caching, minify and content delivery network functionality and more to WordPress.
 
 == Description ==
 
@@ -13,7 +13,7 @@ The fastest and most complete WordPress performance optimization plugin. Trusted
 
 Benefits:
 
-* At least 10x improvement in site performance (when fully configured: Grade A in [YSlow](http://developer.yahoo.com/yslow/) or significant [Google Page Speed](http://code.google.com/speed/page-speed/) Improvements)
+* At least 10x improvement in overall site performance (when fully configured: Grade A in [YSlow](http://developer.yahoo.com/yslow/) or significant [Google Page Speed](http://code.google.com/speed/page-speed/) Improvements)
 * Improves "[site performance](http://googlewebmastercentral.blogspot.com/2009/12/your-sites-performance-in-webmaster.html)" which [may affect your blog's rank](http://searchengineland.com/site-speed-googles-next-ranking-factor-29793) google.com
 * "Instant" second page views (browser caching after first page view)
 * Reduced page load time: increased visitor time on site (visitors view more pages)
@@ -66,10 +66,6 @@ Rarely do readers take the time to complain. They typically just stop browsing e
 
 -4 - That's right; a youngster in junior high school can get started with this plugin. Seriously, if you did your own WordPress install or have ever installed a plugin before you're in good shape. If you need help, let us know or perhaps we'll make some videos or the like.
 
-= But even Matt Mullenweg doesn't agree that additional caching is so important, why bother? =
-
-You're right, [Matt did say that](http://ma.tt/2008/03/wordpress-is-open-source/#comment-439787). However, this plugin provides more than just "caching". Because he is correct, the web is dynamic and must remain so. But as we explain throughout this FAQ, our goal is to improve the performance of any blog and we deliver. Furthermore, the techniques we use, are well documented from past [WordCamp presentations](http://www.slideshare.net/bazza/high-performance-wordpress), we simply have combined them in a way that we have found stands up to the highest traffic situations.
-
 = Which WordPress versions are supported? =
 
 To use all features in the suite, a minimum of version WordPress 2.5 with PHP 5 is required. Earlier versions will benefit from our Media Library Importer to get them back on the upgrade path and into a CDN of their choosing.
@@ -113,6 +109,10 @@ We feel that caching objects after the first request and checking for updates be
 
 Technically no, a CDN is a high performance cache that stores static assets (your theme files, media library etc) in various locations throughout the world in order to provide low latency access to them by readers in those regions. So indeed a CDN is a high performance cache, many of which actually store your frequently requested assets in memory for fastest possible response.
 
+= But even Matt Mullenweg doesn't agree that additional caching is so important, why bother? =
+
+You're right, [Matt did say that](http://ma.tt/2008/03/wordpress-is-open-source/#comment-439787). However, this plugin provides more than just "caching". Because he is correct, the web is dynamic and must remain so. But as we explain throughout this FAQ, our goal is to improve the performance of any blog and we deliver. Furthermore, the techniques we use, are well documented from past [WordCamp presentations](http://www.slideshare.net/bazza/high-performance-wordpress), we simply have combined them in a way that we have found stands up to the highest traffic situations.
+
 = Will this plugin speed up WP Admin? =
 
 Yes, indirectly - if you have a lot of bloggers working with you, you will find that it feels like you have a server dedicated only to WP Admin once this plugin is enabled; the result, increased productivity.
@@ -125,26 +125,82 @@ We are aware of no incompatibilities with [apache](http://httpd.apache.org/) 1.3
 
 Yes, built from the ground up with scale and current hosting paradigms in mind.
 
-= Aren't there any troubleshooting tips? =
+= What if I don't want to work with a CDN right now, is there any other use for this feature? =
 
-No, however we do have an extensive FAQ in the plugin.
+Yes! You can take advantage of the [pipelining](http://www.mozilla.org/projects/netlib/http/pipelining-faq.html) support in some browsers by creating a sub-domain for the static content for your site. So you could create static.domain.com on your server (and update your DNS zone) and then specify the FTP details for it in the plugin configuration panel and you're done. If you disable the scripting options on your server you'll find that your server will actually respond slightly faster from that sub-domain because it's just sending files and not processing them.
 
-In general, due to the manner in which this plugin works the only issues with you may encounter existed before you installed this plugin. In other words, the order or location of JavaScript or CSS files etc will need to be paid attention to as you configure your settings.
+= I don't have time to deal with this, but I know I need it. Will you help me? =
+
+Yes! Please [reach out to us](mailto:wordpressexperts@w3-edge.com) and we'll get you acclimated so you can "set it and forget it."
+
+= Is this plugin comptatible with GD Star Rating? =
+
+Yes. Follow these steps:
+
+1. Enable dynamic loading of ratings by checking GD Star Rating -> Settings -> Features "Cache support option"
+1. If Database cache enabled in W3 Total Cache add "wp_gdsr" to "Ignored query stems" option on the Database Cache settings tab, otherwise ratings will not updated after voting
+1. Empty all caches
+
+= I see garbage characters instead of the normal web site, what's going on here? =
+
+If a theme or it's files use the call php_flush() or function flush() that will interfere with the plugins normal operation; making the plugin send cached files before essential operations have finished. The flush() call is no longer necessary and should be removed.
+
+= How do I cache only the home page? =
+
+Add `/.+` to page cache "Never cache the following pages" option on the page cache settings tab.
+
+= I'm getting blank pages or 500 error codes when trying to upgrade on WordPress MU =
+
+First, make sure the plugin is not active (disabled) site-wide. Then make sure it's deactivated site-wide. Now you should be able to successful upgrade without breaking your site.
+
+= What is the purpose of the "Media Library Import" tool and how do I use it? =
+
+The media library import tool is for old or "messy" WordPress installations that have attachments (images etc in posts or pages) scattered about the web server or "hot linked" to 3rd party sites instead of properly using the media library.
+
+The tool will scan your posts and pages for the cases above and copy them to your media library, update your posts to use the link addresses and produce a .htaccess file containing the list of of permanent redirects, so search engines can find the files in their new location.
+
+You should backup your database before performing this operation.
+
+= How do I find the JS and CSS to optimize (minify) them with this plugin? =
+
+View your page source in your browser and search for any <style>, <link> or <script> tags that contain external CSS or JS files and one by one add them to the minify settings page. Do not include any CSS in conditional statements (unless you know what you are doing) like:
+
+<!--[if lte IE 8]><link rel="stylesheet" type="text/css" href="/wp-content/themes/default/lte.css" media="screen,projection" /><![endif]-->
+
+The plugin will concatenate, minify, HTTP compress and check for updates to these files automatically from now on. If you have any CSS or JS that are inline consider making them external files so that you can use them with minify.
+
 
 Install the plugin to read the full FAQ.
 
 == Installation ==
 
-1. Disable and remove any other caching plugin you may be using &mdash; most plugins have uninstall procedures you can follow. Make sure wp-content/ has 777 permissions before proceeding, e.g.: `# chmod 777 /var/www/vhosts/domain.com/httpdocs/wp-content/`
-1. Unzip and upload the plugin to your plugins directory (wp-content/plugins/), when done wp-content/plugins/w3-total-cache/ should exist.
-1. Ensure that wp-config.php contains the statement below; if you previously used a caching plugin, this statement is likely to exist already: `define('WP_CACHE', true);`
-1. Locate and activate the plugin on the plugins page, then click the Settings link to proceed to the General Settings tab. Set the permissions of wp-content back to 755, e.g.: `# chmod 755 /var/www/vhosts/domain.com/httpdocs/wp-content/`
-1. Select your caching preferences for page, database and minify. If memcached is used this will require you to confirm or modify the default settings and add any additional memcached servers you wish to use. To (optionally) utilize APC / memcached + memcache installation guides have been provided under the Installation tab. For those in shared hosting environments, contact your provider to see if either of these is supported.
-1. If you already have a content delivery network provider, proceed to the CDN Settings tab and populate the fields and set your preferences. If you're not running a version of WordPress with the Media Library feature, use the Media Library Import Tool to migrate your post images etc to appropriate locations. If you do not have a CDN provider, you can still improve your site's performance using this feature. Create and use a subdomain on your own server; e.g. static.domain.com and configure options on the CDN tab accordingly.
-1. On the Minify Settings tab all of the recommended settings are preset. Specify any CSS and JS files in the respective sections, view your site's HTML source and search for .css and .js files. In the case of JS files you can specify the type and location of the embedding using the drop down menu.
+1. Disable and remove any other caching plugin you may be using &mdash; most plugins have uninstall procedures you can follow. Make sure wp-content/ has 777 permissions before proceeding, e.g.: `# chmod 777 /var/www/vhosts/domain.com/httpdocs/wp-content/` using your web hosting control panel or your SSH account.
+1. Login as an administrator to your WordPress Admin account. Using the "Add New" menu item under the "Plugins" section of the navigation, you can either search for: w3 total cache or if you’ve downloaded the plugin already, click the "Upload" link, find the .zip file you download and then click "Install Now". Or you can unzip and FTP upload the plugin to your plugins directory (wp-content/plugins/). In either case, when done wp-content/plugins/w3-total-cache/ should exist.
+1. Ensure that wp-config.php (typically found in the root directory) contains the statement: `define('WP_CACHE', true);` If you previously used a caching plugin, this statement is likely to exist already.
+1. Locate and activate the plugin on the "Plugins" page. Page and database caching will now automatically be running with their default settings. Set the permissions of wp-content back to 755, e.g.: `# chmod 755 /var/www/vhosts/domain.com/httpdocs/wp-content/`
+1. Now click the "Settings" link to proceed to the "General Settings" tab and select your caching methods for page, database and minify. In most cases, "disk enhanced" mode for page cache, "disk" mode for minify and "disk" mode for database caching are "good" settings.
+1. On the "Minify Settings" tab all of the recommended settings are preset. View your site's HTML source and search for .css and .js files and then specify any CSS and JS files in the respective section. In the case of JS files you can (optionally) specify the type and location of the embedding using the drop down menu. See the plugin’s FAQ for more information on usage.
+1. If you already have a content delivery network provider, proceed to the "CDN Settings" tab and populate the fields and set your preferences. If you do not use the Media Library, you will need to import your images etc into the default locations. Use the Media Library Import Tool on the CDN Setting tab to perform this task. If you do not have a CDN provider, you can still improve your site's performance using the "Self-hosted" method. Create and use a subdomain on your own server and matching DNS Zone record; e.g. static.domain.com and configure options on the CDN tab accordingly. Be sure to FTP upload the appropriate files, using the available upload buttons.
 1. You're done! Get back to blogging!
 
 == Changelog ==
+
+= 0.8.5.1 =
+* Added option to CDN Settings to skip specified directories
+* Added option to allow for full control of HTTP compression options for page cache. Some WordPress installations have issues with deflate
+* Added sql_calc_found_rows to default auto reject SQL list
+* Added more notification cases identified and configured
+* Added new mobile user agents for Japanese market * Page cache performance improvements for disk enhanced mode
+* Improved FAQ and option descriptions
+* Improved apache directives for minify headers
+* Improved handling of redirects
+* Improved name space to avoid issues with other plugins
+* Improved handling of incomplete installations, caching runs with default options if custom settings file does not exist
+* Fixed anomalies with memcached-client.php in some environments
+* Fixed another interface bug with management of minify files
+* Fixed minor bug with table column length for some MySQL version
+* Fixed minify bug with CRLF
+* Fixed handling of pages with CDN Media Library import
 
 = 0.8.5 =
 * Added "enhanced" disk caching mode for page cache, a 160% performance improvement over basic mode

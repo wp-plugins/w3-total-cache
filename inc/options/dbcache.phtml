@@ -46,7 +46,7 @@
     	<tr>
     		<th valign="top"><label for="dbcache_reject_sql">Ignored query stems:</label></th>
     		<td>
-    			<textarea id="dbcache_reject_sql" name="dbcache.reject.sql" cols="30" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('dbcache.reject.sql'))); ?></textarea><br />
+    			<textarea id="dbcache_reject_sql" name="dbcache.reject.sql" cols="40" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('dbcache.reject.sql'))); ?></textarea><br />
     			<span class="description">Do not cache queries that contain these input contents. The entered prefix (set in wp-config.php) will be replaced with current database prefix (default: wp_).</span>
     		</td>
     	</tr>

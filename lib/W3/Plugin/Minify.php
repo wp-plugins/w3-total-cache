@@ -844,7 +844,7 @@ class W3_Plugin_Minify extends W3_Plugin
             $rules .= "    RewriteRule (.*) $1%{ENV:APPEND_EXT} [L]\n";
         }
         
-        $rules .= "    RewriteRule ^([a-z0-9-_]+)\\.(include(-footer)?(-nb)?)\\.(css|js)$ index.php?gg=$1&g=$2&t=$5 [L]\n";
+        $rules .= "    RewriteRule ^([a-z0-9\\-_]+)\\.(include(-footer)?(-nb)?)\\.(css|js)$ index.php?gg=$1&g=$2&t=$5 [L]\n";
         
         $rules .= "</IfModule>\n";
         

@@ -1,6 +1,6 @@
 <?php
 
-define('W3TC_VERSION', '0.8.5');
+define('W3TC_VERSION', '0.8.5.1');
 define('W3TC_POWERED_BY', 'W3 Total Cache/' . W3TC_VERSION);
 define('W3TC_LINK_URL', 'http://www.w3-edge.com/wordpress-plugins/');
 define('W3TC_LINK_NAME', 'WordPress Plugins');
@@ -34,7 +34,6 @@ define('W3TC_LOG_DIR', W3TC_CONTENT_DIR . '/log');
 define('W3TC_TMP_DIR', W3TC_CONTENT_DIR . '/tmp');
 
 define('W3TC_CONFIG_PATH', WP_CONTENT_DIR . '/w3-total-cache-config' . (($w3_blog_id = w3_get_blog_id()) != '' ? '-' . $w3_blog_id : '') . '.php');
-define('W3TC_CONFIG_EXAMPLE_PATH', W3TC_DIR . '/w3-total-cache-config-example.php');
 
 define('W3TC_MINIFY_LOG_FILE', W3TC_LOG_DIR . '/minify.log');
 
@@ -50,7 +49,7 @@ define('W3TC_FEED_URL', 'http://feeds.feedburner.com/W3TOTALCACHE');
 define('W3TC_FEED_ITEMS', 3);
 define('W3TC_README_URL', 'http://plugins.trac.wordpress.org/browser/w3-total-cache/trunk/readme.txt?format=txt');
 
-define('W3TC_TWITTER_STATUS', 'I just optimized my #wordpress blog\'s performance using the W3 Total Cache #plugin by @w3edge. Check it out! http://j.mp/A69xX');
+define('W3TC_TWITTER_STATUS', 'I just optimized my #wordpress blog\'s #performance using the W3 Total Cache #plugin by @w3edge. Check it out! http://j.mp/A69xX');
 define('W3TC_SUPPORT_US_TIMEOUT', 2592000);
 
 /**
@@ -63,7 +62,11 @@ define('W3TC_SUPPORT_US_TIMEOUT', 2592000);
 function w3_writable_error($path, $die = true)
 {
     if (w3_check_open_basedir($path)) {
-        $error = sprintf('<strong>%s</strong> could not be created, please run following command:<br /><strong style="color: #f00;">chmod 777 %s</strong><br />then re-activate plugin.', $path, dirname($path));
+        if (file_exists($path)) {
+            $error = sprintf('<strong>%s</strong> is not write-able, please run following command:<br /><strong style="color: #f00;">chmod 777 %s</strong><br />then re-activate plugin.', $path, $path);
+        } else {
+            $error = sprintf('<strong>%s</strong> could not be created, please run following command:<br /><strong style="color: #f00;">chmod 777 %s</strong><br />then re-activate plugin.', $path, dirname($path));
+        }
     } else {
         $error = sprintf('<strong>%s</strong> could not be created, <strong>open_basedir</strong> restriction in effect, please check your php.ini settings:<br /><strong style="color: #f00;">open_basedir = "%s"</strong></br />then re-activate plugin.', $path, ini_get('open_basedir'));
     }
@@ -298,27 +301,6 @@ function w3_get_blog_id()
 }
 
 /**
- * Returns domain from host
- *
- * @param string $host
- * @return string
- */
-function w3_get_domain($host)
-{
-    $host = strtolower($host);
-    
-    if (strpos($host, 'www.') === 0) {
-        $host = str_replace('www.', '', $host);
-    }
-    
-    if (($pos = strpos($host, ':'))) {
-        $host = substr($host, 0, $pos);
-    }
-    
-    return $host;
-}
-
-/**
  * Returns site url [fast]
  *
  * @return string
@@ -328,8 +310,23 @@ function w3_get_site_url()
     static $site_url = null;
     
     if ($site_url === null) {
-        $site_url = get_option('siteurl');
-        $site_url = rtrim($site_url, '/') . '/';
+        if (function_exists('get_option')) {
+            $site_url = get_option('siteurl');
+            $site_url = rtrim($site_url, '/') . '/';
+        } else {
+            $site_url = sprintf('http://%s/', $_SERVER['HTTP_HOST']);
+            
+            if (! empty($_SERVER['DOCUMENT_ROOT'])) {
+                $document_root = realpath($_SERVER['DOCUMENT_ROOT']);
+                $abspath = realpath(ABSPATH);
+                $path = str_replace($abspath, '', $document_root);
+                $path = trim($path, '/\\');
+                
+                if ($path != '') {
+                    $site_url .= $path . '/';
+                }
+            }
+        }
     }
     
     return $site_url;
@@ -365,6 +362,51 @@ function w3_get_site_url_regexp()
 }
 
 /**
+ * Returns blog path
+ *
+ * @return string
+ */
+function w3_get_site_path()
+{
+    static $site_path = null;
+    
+    if ($site_path === null) {
+        $site_url = w3_get_site_url();
+        $domain_url = w3_get_domain_url();
+        
+        $site_path = str_replace($domain_url, '', $site_url);
+        $site_path = rtrim($site_path, '/');
+        
+        if ($site_path != '') {
+            $site_path .= '/';
+        }
+    }
+    
+    return $site_path;
+}
+
+/**
+ * Returns domain from host
+ *
+ * @param string $host
+ * @return string
+ */
+function w3_get_domain($host)
+{
+    $host = strtolower($host);
+    
+    if (strpos($host, 'www.') === 0) {
+        $host = str_replace('www.', '', $host);
+    }
+    
+    if (($pos = strpos($host, ':'))) {
+        $host = substr($host, 0, $pos);
+    }
+    
+    return $host;
+}
+
+/**
  * Get domain URL
  *
  * @return string
@@ -397,30 +439,6 @@ function w3_get_domain_url_regexp()
     $domain = preg_replace('~https?://~i', '', $domain_url);
     $regexp = 'https?://' . w3_preg_quote($domain);
     return $regexp;
-}
-
-/**
- * Returns blog path
- *
- * @return string
- */
-function w3_get_site_path()
-{
-    static $site_path = null;
-    
-    if ($site_path === null) {
-        $site_url = w3_get_site_url();
-        $domain_url = w3_get_domain_url();
-        
-        $site_path = str_replace($domain_url, '', $site_url);
-        $site_path = rtrim($site_path, '/');
-        
-        if ($site_path != '') {
-            $site_path .= '/';
-        }
-    }
-    
-    return $site_path;
 }
 
 /**
@@ -825,7 +843,7 @@ function w3_phpinfo()
         '', 
         '', 
         '', 
-        '</$1>' . "\n", 
+        '<$1>' . "\n", 
         '<', 
         ' ', 
         ' ', 
@@ -978,6 +996,51 @@ function w3_preg_quote($string, $delimiter = null)
     ));
     
     return $string;
+}
+
+/**
+ * Normalize file path
+ * 
+ * @param string $file
+ * @return string
+ */
+function w3_normalize_file($file)
+{
+    if (function_exists('get_option')) {
+        $site_url_regexp = '~' . w3_get_site_url_regexp() . '~i';
+        $file = preg_replace($site_url_regexp, '', $file);
+    }
+    
+    $file = ltrim($file, '/\\');
+    
+    return $file;
+}
+
+/**
+ * Returns true if zlib output compression is enabled otherwise false
+ * 
+ * @return boolean
+ */
+function w3_zlib_output_compression()
+{
+    return w3_to_boolean(ini_get('zlib.output_compression'));
+}
+
+/**
+ * Recursive strips slahes from the var
+ * 
+ * @param mixed $var
+ * @return mixed
+ */
+function w3_stripslashes($var)
+{
+    if (is_string($var)) {
+        return stripslashes($var);
+    } elseif (is_array($var)) {
+        $var = array_map('w3_stripslashes', $var);
+    }
+    
+    return $var;
 }
 
 /**

@@ -25,7 +25,7 @@
 			<h1><?php echo htmlspecialchars($title); ?></h1>
 					
         	<?php if (count($errors)): ?>
-            <div id="message" class="error">
+            <div class="error">
             	<?php foreach ($errors as $error): ?>
             	<p><?php echo $error; ?></p>
             	<?php endforeach; ?>
@@ -33,7 +33,7 @@
         	<?php endif; ?>
         	
         	<?php if (count($notes)): ?>
-            <div id="message" class="updated fade">
+            <div class="updated fade">
             	<?php foreach ($notes as $note): ?>
             	<p><?php echo $note; ?></p>
             	<?php endforeach; ?>

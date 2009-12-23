@@ -466,7 +466,7 @@ class W3_Plugin_PgCache extends W3_Plugin
         }
         
         $rules .= "    RewriteCond " . str_replace('\\', '/', W3TC_CACHE_FILE_PGCACHE_DIR) . "/%{HTTP_HOST}/$1/index.html%{ENV:APPEND_EXT} -f\n";
-        $rules .= "    RewriteRule ^(.*) " . str_replace(ABSPATH, '', W3TC_CACHE_FILE_PGCACHE_DIR) . "/%{HTTP_HOST}/$1/index.html%{ENV:APPEND_EXT} [L]\n";
+        $rules .= "    RewriteRule (.*) " . str_replace(ABSPATH, '', W3TC_CACHE_FILE_PGCACHE_DIR) . "/%{HTTP_HOST}/$1/index.html%{ENV:APPEND_EXT} [L]\n";
         $rules .= "</IfModule>\n";
         
         $rules .= "# END W3 Total Cache\n\n";

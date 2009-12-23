@@ -1,8 +1,8 @@
 <?php
 /*
 Plugin Name: W3 Total Cache
-Description: The fastest and most complete WordPress performance plugin. Dramatically improve the user experience of your blog by adding: page caching, database caching, minify, content delivery network (CDN) functionality and more...
-Version: 0.8.5
+Description: The fastest and most complete WordPress performance plugin. Dramatically improve the speed user experience of your blog by adding: page caching, database caching, minify, content delivery network (CDN) functionality and more...
+Version: 0.8.5.1
 Plugin URI: http://www.w3-edge.com/wordpress-plugins/w3-total-cache/
 Author: Frederick Townes
 Author URI: http://www.linkedin.com/in/w3edge

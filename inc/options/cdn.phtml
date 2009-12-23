@@ -41,7 +41,8 @@
     	<tr>
     		<th<?php if ($cdn_mirror): ?> colspan="2"<?php endif; ?>>
     			<input type="hidden" name="cdn.includes.enable" value="0" />
-    			<label><input type="checkbox" name="cdn.includes.enable" value="1"<?php checked($this->_config->get_boolean('cdn.includes.enable'), true); ?> /> Host wp-includes/ files</label>
+    			<label><input type="checkbox" name="cdn.includes.enable" value="1"<?php checked($this->_config->get_boolean('cdn.includes.enable'), true); ?> /> Host wp-includes/ files</label><br />
+				<span class="description">If checked, WordPress static core file types specified in the "wp-includes file types to upload" field below will be hosted with the <acronym title="Content Delivery Network">CDN</acronym>.</span>
     		</th>
     		<?php if (! $cdn_mirror): ?>
     		<td>
@@ -52,7 +53,8 @@
     	<tr>
     		<th<?php if ($cdn_mirror): ?> colspan="2"<?php endif; ?>>
     			<input type="hidden" name="cdn.theme.enable" value="0" />
-    			<label><input type="checkbox" name="cdn.theme.enable" value="1"<?php checked($this->_config->get_boolean('cdn.theme.enable'), true); ?> /> Host active theme files</label>
+    			<label><input type="checkbox" name="cdn.theme.enable" value="1"<?php checked($this->_config->get_boolean('cdn.theme.enable'), true); ?> /> Host active theme files</label><br />
+				<span class="description">If checked, all active theme file types specified in the "theme file types to upload" field below will be hosted with the <acronym title="Content Delivery Network">CDN</acronym>.</span>
     		</th>
     		<?php if (! $cdn_mirror): ?>
     		<td>
@@ -62,19 +64,21 @@
     	</tr>
     	<tr>
     		<th<?php if ($cdn_mirror): ?> colspan="2"<?php endif; ?>>
-    			<input type="hidden" name="cdn.minify.enable" value="0" />
-    			<label><input type="checkbox" name="cdn.minify.enable" value="1"<?php if (! W3TC_PHP5): ?> disabled="disabled"<?php endif; ?><?php checked($this->_config->get_boolean('cdn.minify.enable'), true); ?> /> Host minified <acronym title="Cascading Style Sheets">CSS</acronym> and <acronym title="JavaScript">JS</acronym> files</label>
+    			<input type="hidden" name="cdn.minify.enable" value="0"<?php if (! W3TC_PHP5 || ! $minify_enabled): ?> disabled="disabled"<?php endif; ?> />
+    			<label><input type="checkbox" name="cdn.minify.enable" value="1"<?php checked($this->_config->get_boolean('cdn.minify.enable'), true); ?><?php if (! W3TC_PHP5 || ! $minify_enabled): ?> disabled="disabled"<?php endif; ?> /> Host minified <acronym title="Cascading Style Sheets">CSS</acronym> and <acronym title="JavaScript">JS</acronym> files</label><br />
+				<span class="description">If checked, minified <acronym>CSS</acronym> and <acronym>JS</acronym> files will be hosted with the <acronym title="Content Delivery Network">CDN</acronym>.</span>
     		</th>
     		<?php if (! $cdn_mirror): ?>
     		<td>
-				<input class="button cdn_export" type="button" name="minify" value="Upload minify files"<?php if (! W3TC_PHP5): ?> disabled="disabled"<?php endif; ?> />
+				<input class="button cdn_export" type="button" name="minify" value="Upload minify files"<?php if (! W3TC_PHP5 || ! $minify_enabled): ?> disabled="disabled"<?php endif; ?> />
     		</td>
     		<?php endif; ?>
     	</tr>
     	<tr>
     		<th<?php if ($cdn_mirror): ?> colspan="2"<?php endif; ?>>
     			<input type="hidden" name="cdn.custom.enable" value="0" />
-    			<label><input type="checkbox" name="cdn.custom.enable" value="1"<?php checked($this->_config->get_boolean('cdn.custom.enable'), true); ?> /> Host custom files</label>
+    			<label><input type="checkbox" name="cdn.custom.enable" value="1"<?php checked($this->_config->get_boolean('cdn.custom.enable'), true); ?> /> Host custom files</label><br />
+				<span class="description">If checked, any file names or paths specified in the "custom file list" field below will be hosted with the <acronym title="Content Delivery Network">CDN</acronym>.</span>
     		</th>
     		<?php if (! $cdn_mirror): ?>
     		<td>
@@ -83,7 +87,7 @@
     		<?php endif; ?>
     	</tr>
     	<tr>
-    		<th style="width: 300px;"><label for="cdn_includes_files">wp-includes/ file types to upload:</label></th>
+    		<th style="width: 300px;"><label for="cdn_includes_files">wp-includes file types to upload:</label></th>
     		<td>
     			<input id="cdn_includes_files" type="text" name="cdn.includes.files" value="<?php echo htmlspecialchars($this->_config->get_string('cdn.includes.files')); ?>" size="40" /><br />
     			<span class="description">Specify the file types within the WordPress core to host with the <acronym title="Content Delivery Network">CDN</acronym>.</span>
@@ -99,15 +103,22 @@
     	<tr>
     		<th valign="top"><label for="cdn_custom_files">Custom file list:</label></th>
     		<td>
-    			<textarea id="cdn_custom_files" name="cdn.custom.files" cols="30" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('cdn.custom.files'))); ?></textarea><br />
+    			<textarea id="cdn_custom_files" name="cdn.custom.files" cols="40" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('cdn.custom.files'))); ?></textarea><br />
     			<span class="description">Specify any files outside of theme or other common directories to host with the <acronym title="Content Delivery Network">CDN</acronym>.</span>
     		</td>
     	</tr>
     	<tr>
     		<th valign="top"><label for="cdn_reject_ua">Rejected user agents:</label></th>
     		<td>
-    			<textarea id="cdn_reject_ua" name="cdn.reject.ua" cols="30" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('cdn.reject.ua'))); ?></textarea><br />
+    			<textarea id="cdn_reject_ua" name="cdn.reject.ua" cols="40" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('cdn.reject.ua'))); ?></textarea><br />
     			<span class="description">Specify user agents that should not access files hosted with the <acronym title="Content Delivery Network">CDN</acronym>.</span>
+    		</td>
+    	</tr>
+    	<tr>
+    		<th valign="top"><label for="cdn_reject_files">Rejected files:</label></th>
+    		<td>
+    			<textarea id="cdn_reject_files" name="cdn.reject.files" cols="40" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('cdn.reject.files'))); ?></textarea><br />
+    			<span class="description">Specify the path of files that should not use the <acronym title="Content Delivery Network">CDN</acronym>.</span>
     		</td>
     	</tr>
     	<?php if (! $cdn_mirror): ?>

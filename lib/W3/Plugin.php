@@ -22,7 +22,8 @@ class W3_Plugin
     function __construct()
     {
         require_once W3TC_LIB_W3_DIR . '/Config.php';
-        $this->_config = & W3_Config::instance(false);
+        
+        $this->_config = & W3_Config::instance();
     }
     
     /**

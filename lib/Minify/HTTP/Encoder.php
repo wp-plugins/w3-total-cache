@@ -195,6 +195,8 @@ class HTTP_Encoder {
         // @link http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
         
         if (! isset($_SERVER['HTTP_ACCEPT_ENCODING'])
+            || w3_zlib_output_compression()
+            || headers_sent()
             || self::_isBuggyIe())
         {
             return array('', '');
