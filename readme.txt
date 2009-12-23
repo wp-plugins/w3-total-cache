@@ -165,7 +165,7 @@ You should backup your database before performing this operation.
 
 View your page source in your browser and search for any <style>, <link> or <script> tags that contain external CSS or JS files and one by one add them to the minify settings page. Do not include any CSS in conditional statements (unless you know what you are doing) like:
 
-<!--[if lte IE 8]><link rel="stylesheet" type="text/css" href="/wp-content/themes/default/lte.css" media="screen,projection" /><![endif]-->
+&lt;!--[if lte IE 8]&gt;&lt;link rel="stylesheet" type="text/css" href="/wp-content/themes/default/lte.css" media="screen,projection" /&gt;&lt;![endif]--&gt;
 
 The plugin will concatenate, minify, HTTP compress and check for updates to these files automatically from now on. If you have any CSS or JS that are inline consider making them external files so that you can use them with minify.
 
@@ -175,11 +175,11 @@ Install the plugin to read the full FAQ.
 == Installation ==
 
 1. Disable and remove any other caching plugin you may be using &mdash; most plugins have uninstall procedures you can follow. Make sure wp-content/ has 777 permissions before proceeding, e.g.: `# chmod 777 /var/www/vhosts/domain.com/httpdocs/wp-content/` using your web hosting control panel or your SSH account.
-1. Login as an administrator to your WordPress Admin account. Using the "Add New" menu item under the "Plugins" section of the navigation, you can either search for: w3 total cache or if you’ve downloaded the plugin already, click the "Upload" link, find the .zip file you download and then click "Install Now". Or you can unzip and FTP upload the plugin to your plugins directory (wp-content/plugins/). In either case, when done wp-content/plugins/w3-total-cache/ should exist.
+1. Login as an administrator to your WordPress Admin account. Using the "Add New" menu item under the "Plugins" section of the navigation, you can either search for: w3 total cache or if you've downloaded the plugin already, click the "Upload" link, find the .zip file you download and then click "Install Now". Or you can unzip and FTP upload the plugin to your plugins directory (wp-content/plugins/). In either case, when done wp-content/plugins/w3-total-cache/ should exist.
 1. Ensure that wp-config.php (typically found in the root directory) contains the statement: `define('WP_CACHE', true);` If you previously used a caching plugin, this statement is likely to exist already.
 1. Locate and activate the plugin on the "Plugins" page. Page and database caching will now automatically be running with their default settings. Set the permissions of wp-content back to 755, e.g.: `# chmod 755 /var/www/vhosts/domain.com/httpdocs/wp-content/`
 1. Now click the "Settings" link to proceed to the "General Settings" tab and select your caching methods for page, database and minify. In most cases, "disk enhanced" mode for page cache, "disk" mode for minify and "disk" mode for database caching are "good" settings.
-1. On the "Minify Settings" tab all of the recommended settings are preset. View your site's HTML source and search for .css and .js files and then specify any CSS and JS files in the respective section. In the case of JS files you can (optionally) specify the type and location of the embedding using the drop down menu. See the plugin’s FAQ for more information on usage.
+1. On the "Minify Settings" tab all of the recommended settings are preset. View your site's HTML source and search for .css and .js files and then specify any CSS and JS files in the respective section. In the case of JS files you can (optionally) specify the type and location of the embedding using the drop down menu. See the plugin's FAQ for more information on usage.
 1. If you already have a content delivery network provider, proceed to the "CDN Settings" tab and populate the fields and set your preferences. If you do not use the Media Library, you will need to import your images etc into the default locations. Use the Media Library Import Tool on the CDN Setting tab to perform this task. If you do not have a CDN provider, you can still improve your site's performance using the "Self-hosted" method. Create and use a subdomain on your own server and matching DNS Zone record; e.g. static.domain.com and configure options on the CDN tab accordingly. Be sure to FTP upload the appropriate files, using the available upload buttons.
 1. You're done! Get back to blogging!
 
