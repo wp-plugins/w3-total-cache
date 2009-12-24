@@ -187,10 +187,11 @@ Install the plugin to read the full FAQ.
 
 = 0.8.5.1 =
 * Added option to CDN Settings to skip specified directories
-* Added option to allow for full control of HTTP compression options for page cache. Some WordPress installations have issues with deflate
+* Added option to allow for full control of HTTP compression options for page cache (some WordPress installations have issues with deflate)
 * Added sql_calc_found_rows to default auto reject SQL list
 * Added more notification cases identified and configured
-* Added new mobile user agents for Japanese market * Page cache performance improvements for disk enhanced mode
+* Added new mobile user agents for Japanese market
+* Page cache performance improvements for disk enhanced mode
 * Improved FAQ and option descriptions
 * Improved apache directives for minify headers
 * Improved handling of redirects
