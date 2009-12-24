@@ -124,7 +124,9 @@ class W3_Plugin_PgCache extends W3_Plugin
     {
         if (! $this->locked()) {
             if (! $this->update_wp_config()) {
-                die('<strong>' . ABSPATH . 'wp-config.php</strong> could not be written, please edit config and add:<br /><strong style="color:#f00;">define(\'WP_CACHE\', true);</strong> before <strong style="color:#f00;">require_once(ABSPATH . \'wp-settings.php\');</strong><br />then re-activate plugin.');
+                $error = sprintf('<strong>%swp-config.php</strong> could not be written, please edit config and add:<br /><strong style="color:#f00;">define(\'WP_CACHE\', true);</strong> before <strong style="color:#f00;">require_once(ABSPATH . \'wp-settings.php\');</strong><br />then re-activate plugin.', ABSPATH);
+                
+                w3_activate_error($error);
             }
             
             if ($this->_config->get_boolean('pgcache.enabled') && $this->_config->get_string('pgcache.engine') == 'file_pgcache') {

@@ -472,7 +472,7 @@ class W3_Config
                 break;
             
             /**
-             * Disabled some page cache options when enchanced mode enabled
+             * Disabled some page cache options when enhanced mode enabled
              */
             case 'pgcache.cache.query':
                 if ($this->get_boolean('pgcache.enabled') && $this->get_string('pgcache.engine') == 'file_pgcache') {
@@ -525,18 +525,6 @@ class W3_Config
                     return 'mirror';
                 }
                 break;
-            
-            /**
-             * Normalize files
-             */
-            case 'dbcache.reject.uri':
-            case 'pgcache.accept.files':
-            case 'pgcache.reject.uri':
-            case 'minify.reject.uri':
-            case 'cdn.custom.files':
-            case 'cdn.reject.uri':
-            case 'cdn.reject.files':
-                return array_map('w3_normalize_file', $value);
         }
         
         return $value;

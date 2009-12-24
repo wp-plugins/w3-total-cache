@@ -232,7 +232,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
             $this->_config->set('common.install', time());
         }
         
-        if (! file_exists(W3TC_CONFIG_PATH) && ! $this->_config->save()) {
+        if (! $this->_config->save()) {
             w3_writable_error(W3TC_CONFIG_PATH);
         }
         
@@ -1299,7 +1299,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
                     }
                     foreach ((array) $files as $file) {
                         if (! empty($file)) {
-                            $js_groups[$group][$location]['files'][] = w3_normalize_file($file);
+                            $js_groups[$group][$location]['files'][] = ltrim($file, '/\\');
                         }
                     }
                 }
@@ -1313,7 +1313,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
                 foreach ((array) $locations as $location => $files) {
                     foreach ((array) $files as $file) {
                         if (! empty($file)) {
-                            $css_groups[$group][$location]['files'][] = w3_normalize_file($file);
+                            $css_groups[$group][$location]['files'][] = ltrim($file, '/\\');
                         }
                     }
                 }

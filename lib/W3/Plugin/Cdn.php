@@ -128,7 +128,9 @@ class W3_Plugin_Cdn extends W3_Plugin
         $wpdb->query($sql);
         
         if (! $wpdb->result) {
-            die(sprintf('Unable to create table <strong>%s%s</strong>: %s', $wpdb->prefix, W3TC_CDN_TABLE_QUEUE, $wpdb->last_error));
+            $error = sprintf('Unable to create table <strong>%s%s</strong>: %s', $wpdb->prefix, W3TC_CDN_TABLE_QUEUE, $wpdb->last_error);
+            
+            w3_activate_error($error);
         }
         
         $this->schedule();
@@ -270,7 +272,7 @@ class W3_Plugin_Cdn extends W3_Plugin
             
             if ($this->_config->get_boolean('cdn.includes.enable')) {
                 $mask = $this->_config->get_string('cdn.includes.files');
-                if (! empty($mask)) {
+                if ($mask != '') {
                     $regexps[] = '~(["\'])((' . $site_url_regexp . ')?/?(' . w3_preg_quote(WPINC) . '/(' . $this->get_regexp_by_mask($mask) . ')))~';
                 }
             }
@@ -278,7 +280,7 @@ class W3_Plugin_Cdn extends W3_Plugin
             if ($this->_config->get_boolean('cdn.theme.enable')) {
                 $theme_dir = preg_replace('~' . $site_url_regexp . '~i', '', get_stylesheet_directory_uri());
                 $mask = $this->_config->get_string('cdn.theme.files');
-                if (! empty($mask)) {
+                if ($mask != '') {
                     $regexps[] = '~(["\'])((' . $site_url_regexp . ')?/?(' . w3_preg_quote($theme_dir) . '/(' . $this->get_regexp_by_mask($mask) . ')))~';
                 }
             }
@@ -290,11 +292,14 @@ class W3_Plugin_Cdn extends W3_Plugin
             if ($this->_config->get_boolean('cdn.custom.enable')) {
                 $masks = $this->_config->get_array('cdn.custom.files');
                 
-                if (! empty($masks)) {
+                if (count($masks)) {
                     $mask_regexps = array();
                     
                     foreach ($masks as $mask) {
-                        $mask_regexps[] = $this->get_regexp_by_mask($mask);
+                        if ($mask != '') {
+                            $mask = w3_normalize_file($mask);
+                            $mask_regexps[] = $this->get_regexp_by_mask($mask);
+                        }
                     }
                     
                     $regexps[] = '~(["\'])((' . $site_url_regexp . ')?/?(' . implode('|', $mask_regexps) . '))~i';
@@ -968,7 +973,8 @@ class W3_Plugin_Cdn extends W3_Plugin
         $custom_files = $this->_config->get_array('cdn.custom.files');
         
         foreach ($custom_files as $custom_file) {
-            if (! empty($custom_file)) {
+            if ($custom_file != '') {
+                $custom_file = w3_normalize_file($custom_file);
                 $dir = trim(dirname($custom_file), '/\\');
                 
                 if ($dir == '.') {
@@ -1059,10 +1065,13 @@ class W3_Plugin_Cdn extends W3_Plugin
          * Don't replace link for rejected files
          */
         foreach ($reject_files as $reject_file) {
-            $reject_file_regexp = '~^' . $this->get_regexp_by_mask($reject_file) . '$~i';
-            
-            if (preg_match($reject_file_regexp, $matches[4])) {
-                return $matches[0];
+            if ($reject_file != '') {
+                $reject_file = w3_normalize_file($reject_file);
+                $reject_file_regexp = '~^' . $this->get_regexp_by_mask($reject_file) . '$~i';
+                
+                if (preg_match($reject_file_regexp, $matches[4])) {
+                    return $matches[0];
+                }
             }
         }
         
