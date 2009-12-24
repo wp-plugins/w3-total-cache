@@ -163,9 +163,9 @@ You should backup your database before performing this operation.
 
 = How do I find the JS and CSS to optimize (minify) them with this plugin? =
 
-View your page source in your browser and search for any <style>, <link> or <script> tags that contain external CSS or JS files and one by one add them to the minify settings page. Do not include any CSS in conditional statements (unless you know what you are doing) like:
+View your page source in your browser and search for any `<style>`, `<link>` or `<script>` tags that contain external CSS or JS files and one by one add them to the minify settings page. Do not include any CSS in conditional statements (unless you know what you are doing) like:
 
-&lt;!--[if lte IE 8]&gt;&lt;link rel="stylesheet" type="text/css" href="/wp-content/themes/default/lte.css" media="screen,projection" /&gt;&lt;![endif]--&gt;
+`<!--[if lte IE 8]><link rel="stylesheet" type="text/css" href="/wp-content/themes/default/lte.css" media="screen,projection" /><![endif]-->`
 
 The plugin will concatenate, minify, HTTP compress and check for updates to these files automatically from now on. If you have any CSS or JS that are inline consider making them external files so that you can use them with minify.
 
