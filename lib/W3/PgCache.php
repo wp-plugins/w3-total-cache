@@ -37,11 +37,11 @@ class W3_PgCache
     var $_lifetime = 0;
     
     /**
-     * Enchanced mode flag
+     * Enhanced mode flag
      * 
      * @var boolean
      */
-    var $_enchanced_mode = false;
+    var $_enhanced_mode = false;
     
     /**
      * Debug flag
@@ -67,7 +67,7 @@ class W3_PgCache
         $this->_config = & W3_Config::instance();
         $this->_debug = $this->_config->get_boolean('pgcache.debug');
         $this->_lifetime = $this->_config->get_integer('pgcache.lifetime');
-        $this->_enchanced_mode = ($this->_config->get_string('pgcache.engine') == 'file_pgcache');
+        $this->_enhanced_mode = ($this->_config->get_string('pgcache.engine') == 'file_pgcache');
     }
     
     /**
@@ -125,7 +125,7 @@ class W3_PgCache
             $data = $cache->get($page_key);
             
             if ($data !== false) {
-                if ($this->_enchanced_mode) {
+                if ($this->_enhanced_mode) {
                     $is_404 = false;
                     $headers = array();
                     $time = $cache->mtime($page_key);
@@ -195,7 +195,7 @@ class W3_PgCache
                 $compression = $this->_get_compression();
                 $compressions = $this->_get_compressions();
                 
-                if ($this->_enchanced_mode) {
+                if ($this->_enhanced_mode) {
                     $is_404 = false;
                     $headers = array();
                 } else {
@@ -229,7 +229,7 @@ class W3_PgCache
                     /**
                      * Store cache data
                      */
-                    if ($this->_enchanced_mode) {
+                    if ($this->_enhanced_mode) {
                         $cache->set($_page_key, $_content);
                     } else {
                         $_data = array(

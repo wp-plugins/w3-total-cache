@@ -53,29 +53,56 @@ define('W3TC_TWITTER_STATUS', 'I just optimized my #wordpress blog\'s #performan
 define('W3TC_SUPPORT_US_TIMEOUT', 2592000);
 
 /**
+ * W3 activate error
+ * 
+ * @param string $error
+ * @return void
+ */
+function w3_activate_error($error)
+{
+    $active_plugins = (array) get_option('active_plugins');
+    
+    $key = array_search(W3TC_FILE, $active_plugins);
+    
+    if ($key !== false) {
+        do_action('deactivate_plugin', W3TC_FILE);
+        
+        array_splice($active_plugins, $key, 1);
+        
+        do_action('deactivate_' . W3TC_FILE);
+        do_action('deactivated_plugin', W3TC_FILE);
+        
+        update_option('active_plugins', $active_plugins);
+    } else {
+        do_action('deactivate_' . W3TC_FILE);
+    }
+    
+    include W3TC_DIR . '/inc/error.phtml';
+    exit();
+}
+
+/**
  * W3 writable error
  *
  * @param string $path
- * @param boolean $die
  * @return string
  */
-function w3_writable_error($path, $die = true)
+function w3_writable_error($path)
 {
+    $activate_url = wp_nonce_url('plugins.php?action=activate&plugin=' . W3TC_FILE, 'activate-plugin_' . W3TC_FILE);
+    $reactivate_button = sprintf('<input type="button" value="re-activate plugin" onclick="top.location.href = \'%s\'" />', addslashes($activate_url));
+    
     if (w3_check_open_basedir($path)) {
         if (file_exists($path)) {
-            $error = sprintf('<strong>%s</strong> is not write-able, please run following command:<br /><strong style="color: #f00;">chmod 777 %s</strong><br />then re-activate plugin.', $path, $path);
+            $error = sprintf('<strong>%s</strong> is not write-able, please run following command:<br /><strong style="color: #f00;">chmod 777 %s</strong><br />then %s.', $path, $path, $reactivate_button);
         } else {
-            $error = sprintf('<strong>%s</strong> could not be created, please run following command:<br /><strong style="color: #f00;">chmod 777 %s</strong><br />then re-activate plugin.', $path, dirname($path));
+            $error = sprintf('<strong>%s</strong> could not be created, please run following command:<br /><strong style="color: #f00;">chmod 777 %s</strong><br />then %s.', $path, dirname($path), $reactivate_button);
         }
     } else {
-        $error = sprintf('<strong>%s</strong> could not be created, <strong>open_basedir</strong> restriction in effect, please check your php.ini settings:<br /><strong style="color: #f00;">open_basedir = "%s"</strong></br />then re-activate plugin.', $path, ini_get('open_basedir'));
+        $error = sprintf('<strong>%s</strong> could not be created, <strong>open_basedir</strong> restriction in effect, please check your php.ini settings:<br /><strong style="color: #f00;">open_basedir = "%s"</strong></br />then %s.', $path, ini_get('open_basedir'), $reactivate_button);
     }
     
-    if ($die) {
-        die($error);
-    }
-    
-    return $error;
+    w3_activate_error($error);
 }
 
 /**
@@ -556,7 +583,7 @@ function w3_get_engine_name($engine)
             break;
         
         case 'file_pgcache':
-            $engine_name = 'disk (enchanced)';
+            $engine_name = 'disk (enhanced)';
             break;
         
         default:
@@ -843,7 +870,7 @@ function w3_phpinfo()
         '', 
         '', 
         '', 
-        '<$1>' . "\n", 
+        '</$1>' . "\n", 
         '<', 
         ' ', 
         ' ', 
@@ -1006,11 +1033,8 @@ function w3_preg_quote($string, $delimiter = null)
  */
 function w3_normalize_file($file)
 {
-    if (function_exists('get_option')) {
-        $site_url_regexp = '~' . w3_get_site_url_regexp() . '~i';
-        $file = preg_replace($site_url_regexp, '', $file);
-    }
-    
+    $site_url_regexp = '~' . w3_get_site_url_regexp() . '~i';
+    $file = preg_replace($site_url_regexp, '', $file);
     $file = ltrim($file, '/\\');
     
     return $file;
