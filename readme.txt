@@ -2,14 +2,14 @@
 Contributors: fredericktownes
 Tags: user experience, cache, caching, page cache, css cache, js cache, db cache, disk cache, disk caching, database cache, http compression, gzip, deflate, minify, CDN, content delivery network, media library, performance, speed, multiple hosts, CSS, merge, combine, unobtrusive javascript, compress, optimize, optimizer, JavaScript, JS, cascading style sheet, plugin, yslow, YUI, google, google rank, google page speed, S3, CloudFront, AWS, Amazon Web Services, batcache, wp cache, wp super cache, w3 total cache
 Requires at least: 2.5
-Tested up to: 2.9
+Tested up to: 2.9.1
 Stable tag: 0.8.5.1
 
 Dramatically improve the speed and user experience of your blog. Add page caching, database caching, minify and content delivery network functionality and more to WordPress.
 
 == Description ==
 
-The fastest and most complete WordPress performance optimization plugin. Trusted by many popular blogs like: mashable.com, pearsonified.com, noupe.com, webdesignerdepot.com, freelanceswitch.com, briansolis.com, tutsplus.com, yoast.com, css3.info and others &mdash; W3 Total Cache improves the user experience of your blog by improving your server performance, caching every aspect of your site, reducing the download time of your theme and providing transparent content delivery network (CDN) integration.
+The fastest and most complete WordPress performance optimization plugin. Trusted by many popular blogs like: mashable.com, briansolis.com, pearsonified.com, ilovetypography.com, noupe.com, webdesignerdepot.com, freelanceswitch.com, tutsplus.com, yoast.com, css-tricks.com, css3.info and others &mdash; W3 Total Cache improves the user experience of your blog by improving your server performance, caching every aspect of your site, reducing the download time of your theme and providing transparent content delivery network (CDN) integration.
 
 Benefits:
 
@@ -17,7 +17,7 @@ Benefits:
 * Improves "[site performance](http://googlewebmastercentral.blogspot.com/2009/12/your-sites-performance-in-webmaster.html)" which [may affect your blog's rank](http://searchengineland.com/site-speed-googles-next-ranking-factor-29793) google.com
 * "Instant" second page views (browser caching after first page view)
 * Reduced page load time: increased visitor time on site (visitors view more pages)
-* Optimized progressive render (pages appear to load instantly)
+* Optimized progressive render (pages appear to render immediately)
 * Improved web server performance (easily sustain high traffic spikes)
 * Up to 80% Bandwidth savings via Minify and HTTP compression of HTML, CSS, JavaScript and RSS feeds
 
@@ -27,7 +27,7 @@ Features:
 * Transparent content delivery network (CDN) integration with Media Library, theme files and WordPress itself
 * Caching of (minified and compressed) pages and posts in memory or on disk
 * Caching of (minified and compressed) CSS and JavaScript in memory, on disk or on CDN
-* Caching of RSS (comments, page and site) feeds in memory or on disk
+* Caching of RSS (site, categories, tags, comments) feeds in memory or on disk
 * Caching of search results pages (i.e. URIs with query string variables) in memory or on disk
 * Caching of database objects in memory
 * Minification of posts and pages and RSS feeds
@@ -91,6 +91,7 @@ On the contrary, as with any other action a user can perform on a site, faster p
 That depends on how you use your blog and where most of your readers read your blog (regionally). Here's a short list:
 
 * [MaxCDN](http://www.maxcdn.com/)
+* [Rackspace Cloud Files](http://www.rackspacecloud.com/cloud_hosting_products/files)
 * [Cotendo](http://www.cotendo.com/)
 * [VPS NET](https://vps.net/cdn-signup)
 * [Amazon S3](http://aws.amazon.com/s3/) &amp; [Amazon Cloudfront](http://aws.amazon.com/cloudfront/)
@@ -101,9 +102,24 @@ That depends on how you use your blog and where most of your readers read your b
 * [SimpleCDN](http://www.simplecdn.com/)
 * [Voxel](http://www.voxel.net/products-services/voxcast-cdn)
 
-= Why would I want to cache my feeds? =
+= How do I configure Amazon Simple Storage Service (Amazon S3) or Amazon CloudFront as my CDN? =
 
-We feel that caching objects after the first request and checking for updates before responding subsequent requests (which is kind of how web browsers work too) creates more opportunities for interesting applications and mashups where the blogosphere doesn't require institutional investment to be able to handle developers making hundreds of requests every day the same way we use Google, Twitter and Facebook (for example) APIs today. Think about it, even when major search engines crawl your site, they have to be "gentle" so they don't bring it down, let's turn the paradigm around so that every blog can deliver content in real-time in various ways.
+First [create an S3 account](http://aws.amazon.com/). Next, you need to obtain your "Access key" and "Secret key" from the "Access Credentials" section of the "[Security Credentials](http://aws-portal.amazon.com/gp/aws/developer/account/index.html?action=access-key)" page of "My Account." Make sure the status is "active." Next, make sure that "Amazon Simple Storage Service (Amazon S3)" is the selected type of CDN on the General Settings tab (if not change the setting and save the changes). Now on the CDN Settings tab enter your "Access key," "Secret key" and create a bucket. Click the "Test S3 Upload" button and make sure that the test is successful, if not check your settings and try again.
+
+Save your settings. Make sure that you export your media library, upload your wp-includes (WordPress core files) theme files, and custom files if you wish to host each of those with AWS. Unless you wish to use CloudFront, you're almost done, skip to the next paragraph if you're using CloudFront. Just go to the General Settings tab and click the checkbox and save the settings to enable CDN functionality and empty the cache for the changes to take effect.
+
+To use CloudFront, perform all of the steps above, except select the "Amazon CloudFront" CDN type in the CDN section of the General Settings tab. Proceed to the [AWS Management Console](https://console.aws.amazon.com/cloudfront/) and create a new distribution: select the S3 Bucket you created earlier as the "Origin," enter a [CNAME](http://docs.amazonwebservices.com/AmazonCloudFront/latest/DeveloperGuide/index.html?CNAMEs.html) if you wish to add one to your DNS Zone. Make sure that "Distribution Status" is enabled and "State" is deployed. Now on CDN Settings tab of the plugin, copy the subdomain found in the AWS Management Console and enter the CNAME used for the distribution in the "CNAME" field.
+
+Now go to the General Settings tab and click the checkbox and save the settings to enable CDN functionality and empty the cache for the changes to take effect.
+
+= How do I use an Origin Pull (Mirror) CDN? =
+Login to your CDN providers control panel or account management area. Following any set up steps they provide, create a new "pull zone" or "bucket" for your site's domain name. If there's a set up wizard or any troubleshooting tips your provider offers, be sure to review them. In the CDN Settings tab of the plugin, enter the hostname your CDN provider provided in the "replace default hostname with" field. You should always do a quick check by opening a test file from the CDN hostname, e.g. http://cdn.domain.com/favicon.ico. Troubleshoot with yoru CDN provider until this test is successful.
+
+Now go to the General Settings tab and click the checkbox and save the settings to enable CDN functionality and empty the cache for the changes to take effect.
+
+= What if I don't want to work with a CDN right now, is there any other use for this feature? =
+
+Yes! You can take advantage of the [pipelining](http://www.mozilla.org/projects/netlib/http/pipelining-faq.html) support in some browsers by creating a sub-domain for the static content for your site. So you could select the "Origin Push / Self-hosted" method of the General Settings tab. Create static.domain.com on your server (and update your DNS zone) and then specify the FTP details for it in the plugin configuration panel and you're done. If you disable the scripting options on your server you'll find that your server will actually respond slightly faster from that sub-domain because it's just sending files and not processing them.
 
 = I don't understand what a CDN has to do with caching, that's completely different, no? =
 
@@ -113,25 +129,25 @@ Technically no, a CDN is a high performance cache that stores static assets (you
 
 You're right, [Matt did say that](http://ma.tt/2008/03/wordpress-is-open-source/#comment-439787). However, this plugin provides more than just "caching". Because he is correct, the web is dynamic and must remain so. But as we explain throughout this FAQ, our goal is to improve the performance of any blog and we deliver. Furthermore, the techniques we use, are well documented from past [WordCamp presentations](http://www.slideshare.net/bazza/high-performance-wordpress), we simply have combined them in a way that we have found stands up to the highest traffic situations.
 
+= Why would I want to cache my feeds? =
+
+We feel that caching objects after the first request and checking for updates before responding subsequent requests (which is kind of how web browsers work too) creates more opportunities for interesting applications and mashups where the blogosphere doesn't require institutional investment to be able to handle developers making hundreds of requests every day the same way we use Google, Twitter and Facebook (for example) APIs today. Think about it, even when major search engines crawl your site, they have to be "gentle" so they don't bring it down, let's turn the paradigm around so that every blog can deliver content in real-time in various ways.
+
 = Will this plugin speed up WP Admin? =
 
 Yes, indirectly - if you have a lot of bloggers working with you, you will find that it feels like you have a server dedicated only to WP Admin once this plugin is enabled; the result, increased productivity.
 
 = Which web servers do you support? =
 
-We are aware of no incompatibilities with [apache](http://httpd.apache.org/) 1.3+, [IIS](http://www.iis.net/) 5+ or [litespeed](http://litespeedtech.com/products/webserver/overview/) 4.0.2+. If there's a web server you feel we should be actively testing (e.g. [lighttpd](http://www.lighttpd.net/)), we're [interested in hearing](mailto:wordpressexperts@w3-edge.com).
+We are aware of no incompatibilities with [apache](http://httpd.apache.org/) 1.3+, [IIS](http://www.iis.net/) 5+ or [litespeed](http://litespeedtech.com/products/webserver/overview/) 4.0.2+. If there's a web server you feel we should be actively testing (e.g. [lighttpd](http://www.lighttpd.net/)), we're [interested in hearing](http://www.w3-edge.com/contact/).
 
 = Is this plugin server cluster and load balancer friendly? =
 
 Yes, built from the ground up with scale and current hosting paradigms in mind.
 
-= What if I don't want to work with a CDN right now, is there any other use for this feature? =
-
-Yes! You can take advantage of the [pipelining](http://www.mozilla.org/projects/netlib/http/pipelining-faq.html) support in some browsers by creating a sub-domain for the static content for your site. So you could create static.domain.com on your server (and update your DNS zone) and then specify the FTP details for it in the plugin configuration panel and you're done. If you disable the scripting options on your server you'll find that your server will actually respond slightly faster from that sub-domain because it's just sending files and not processing them.
-
 = I don't have time to deal with this, but I know I need it. Will you help me? =
 
-Yes! Please [reach out to us](mailto:wordpressexperts@w3-edge.com) and we'll get you acclimated so you can "set it and forget it."
+Yes! Please [reach out to us](http://www.w3-edge.com/contact/) and we'll get you acclimated so you can "set it and forget it."
 
 = Is this plugin comptatible with GD Star Rating? =
 
@@ -169,6 +185,21 @@ View your page source in your browser and search for any `<style>`, `<link>` or 
 
 The plugin will concatenate, minify, HTTP compress and check for updates to these files automatically from now on. If you have any CSS or JS that are inline consider making them external files so that you can use them with minify.
 
+= This is too good to be true, how can I test the results? =
+You will be able to see it instantly on each page load, but for tangible metrics, consider the following tools:
+
+* [Mozilla Firefox](http://www.mozilla.com/firefox/) + [Firebug](http://getfirebug.com/) + [Yahoo! YSlow](http://developer.yahoo.com/yslow/)
+* [Mozilla Firefox](http://www.mozilla.com/firefox/) + [Firebug](http://getfirebug.com/) + [Google Page Speed](http://code.google.com/speed/page-speed/)
+* [Mozilla Firefox](http://www.mozilla.com/firefox/) + [Firebug](http://getfirebug.com/) + [Hammerhead](http://stevesouders.com/hammerhead/)
+* [Google Chrome](http://www.google.com/chrome) + [Google Speed Tracer](http://code.google.com/webtoolkit/speedtracer/)
+
+* [Pingdom](http://tools.pingdom.com/)
+* [WebPagetest](http://www.webpagetest.org/test)
+* [Gomez Instant Test Pro](http://www.gomez.com/instant-test-pro/)
+
+* [Port80 Compression Check (minify requires MSIE6 support to be enabled)](http://www.port80software.com/tools/compresscheck.asp)
+* [A simple online web page compression / deflate / gzip test tool](http://www.gidnetwork.com/tools/gzip-test.php)
+* [Web Page Analyzer](http://www.websiteoptimization.com/services/analyze/)
 
 Install the plugin to read the full FAQ.
 
@@ -179,8 +210,8 @@ Install the plugin to read the full FAQ.
 1. Ensure that wp-config.php (typically found in the root directory) contains the statement: `define('WP_CACHE', true);` If you previously used a caching plugin, this statement is likely to exist already.
 1. Locate and activate the plugin on the "Plugins" page. Page and database caching will now automatically be running with their default settings. Set the permissions of wp-content back to 755, e.g.: `# chmod 755 /var/www/vhosts/domain.com/httpdocs/wp-content/`
 1. Now click the "Settings" link to proceed to the "General Settings" tab and select your caching methods for page, database and minify. In most cases, "disk enhanced" mode for page cache, "disk" mode for minify and "disk" mode for database caching are "good" settings.
-1. On the "Minify Settings" tab all of the recommended settings are preset. View your site's HTML source and search for .css and .js files and then specify any CSS and JS files in the respective section. In the case of JS files you can (optionally) specify the type and location of the embedding using the drop down menu. See the plugin's FAQ for more information on usage.
-1. If you already have a content delivery network provider, proceed to the "CDN Settings" tab and populate the fields and set your preferences. If you do not use the Media Library, you will need to import your images etc into the default locations. Use the Media Library Import Tool on the CDN Setting tab to perform this task. If you do not have a CDN provider, you can still improve your site's performance using the "Self-hosted" method. Create and use a subdomain on your own server and matching DNS Zone record; e.g. static.domain.com and configure options on the CDN tab accordingly. Be sure to FTP upload the appropriate files, using the available upload buttons.
+1. Optional: On the "Minify Settings" tab all of the recommended settings are preset. View your site's HTML source and search for .css and .js files and then specify any CSS and JS files in the respective section. In the case of JS files you can (optionally) specify the type and location of the embedding using the drop down menu. See the plugin's FAQ for more information on usage.
+1. Optional: If you already have a content delivery network (CDN) provider, proceed to the "CDN Settings" tab and populate the fields and set your preferences. If you do not use the Media Library, you will need to import your images etc into the default locations. Use the Media Library Import Tool on the CDN Setting tab to perform this task. If you do not have a CDN provider, you can still improve your site's performance using the "Self-hosted" method. On your own server, create a subdomain and matching DNS Zone record; e.g. static.domain.com and configure FTP options on the CDN tab accordingly. Be sure to FTP upload the appropriate files, using the available upload buttons.
 1. You're done! Get back to blogging!
 
 == Changelog ==
@@ -199,7 +230,7 @@ Install the plugin to read the full FAQ.
 * Improved handling of incomplete installations, caching runs with default options if custom settings file does not exist
 * Fixed anomalies with memcached-client.php in some environments
 * Fixed another interface bug with management of minify files
-* Fixed minor bug with table column length for some MySQL version
+* Fixed minor bug with table column length for some MySQL versions
 * Fixed minify bug with CRLF
 * Fixed minify bug with handling of zlib compression enabled
 * Fixed handling of pages with CDN Media Library import
