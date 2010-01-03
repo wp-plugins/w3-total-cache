@@ -94,7 +94,7 @@
         <li><a href="#q76">Hang on, don't I need to modify my <acronym title="Cascading Style Sheet">CSS</acronym> files so they'll work on the <acronym title="Content Delivery Network">CDN</acronym>?</a></li>
         <li><a href="#q77">I don't have time to deal with this, but I know I need it. Will you help me?</a></li>
         <li><a href="#q92">What about query string variables on <acronym title="Cascading Style Sheet">CSS</acronym> and <acronym title="JavaScript">JS</acronym>, do they matter?</a></li>
-        <li><a href="#q95">Is this plugin comptatible with GD Star Rating?</li>
+        <li><a href="#q95">Is this plugin comptatible with GD Star Rating?</a></li>
         <li><a href="#q96">How do I cache only the home page?</a></li>
         <li><a href="#q97">I see garbage characters instead of the normal web site, what's going on here?</a></li>
         <li><a href="#q98">What is the purpose of the "Media Library Import" tool and how do I use it?</a></li>
@@ -189,13 +189,15 @@
     <li><a href="http://www.mozilla.com/firefox/" target="_blank">Mozilla Firefox</a> + <a href="http://getfirebug.com/" target="_blank">Firebug</a> + <a href="http://stevesouders.com/hammerhead/" target="_blank">Hammerhead</a></li>
     <li><a href="http://www.google.com/chrome" target="_blank">Google Chrome</a> + <a href="http://code.google.com/webtoolkit/speedtracer/" target="_blank">Google Speed Tracer</a></li>
   </ul>
+<ul>
+<li><a href="http://tools.pingdom.com/" target="_blank">Pingdom</a></li>
+<li><a href="http://www.webpagetest.org/test" target="_blank">WebPagetest</a></li>
+<li><a href="http://www.gomez.com/instant-test-pro/" target="_blank">Gomez Instant Test Pro</a></li>
+</ul>
   <ul>
-    <li><a href="http://tools.pingdom.com/" target="_blank">Pingdom</a></li>
-    <li><a href="http://www.webpagetest.org/test" target="_blank">WebPagetest</a></li>
-    <li><a href="http://www.gomez.com/instant-test-pro/" target="_blank">Gomez Instant Test Pro</a></li>
-  </ul>
-  <ul>
-	<li><a href="http://www.port80software.com/tools/compresscheck.asp" target="_blank">Port80 Compression Check</a> (requires <acronym title="Microsoft Internet Explorer">MSIE</acronym>6 support to be enabled)</li>
+	<li><a href="http://redbot.org/" target="_blank">Resource Expert Droid</a></li>
+	<li><a href="http://www.procata.com/cachetest/" target="_blank">Web Caching Tests</a></li>
+	<li><a href="http://www.port80software.com/tools/compresscheck.asp" target="_blank">Port80 Compression Check</a> (minify requires <acronym title="Microsoft Internet Explorer">MSIE</acronym>6 support to be enabled)</li>
 	<li><a href="http://www.gidnetwork.com/tools/gzip-test.php" target="_blank">A simple online web page compression / deflate / <acronym title="GNU zip">gzip</acronym> test tool</a></li>
     <li><a href="http://www.websiteoptimization.com/services/analyze/" target="_blank">Web Page Analyzer</a></li>
   </ul>
@@ -428,7 +430,7 @@ No, you can drag and drop them into the desired order on the minify settings pag
     Yes, you can specify which file types you would like served by <acronym title="Content Delivery Network">CDN</acronym> and they will be uploaded and always downloaded from that location. This includes the smilies, JavaScript files et al. By default we take care of them all.</p>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q73"><strong>What if I don't want to work with a <acronym title="Content Delivery Network">CDN</acronym> right now, is there any other use for this feature?</strong><br />
-    Yes! You can take advantage of the <a href="http://www.mozilla.org/projects/netlib/http/pipelining-faq.html">pipelining</a> support in some browsers by creating a sub-domain for the static content for your site. So you could create static.domain.com on your server (and update your <acronym title="Domain Name System">DNS</acronym> zone) and then specify the <acronym title="File Transfer Protocol">FTP</acronym> details for it in the plugin configuration panel and you're done. If you disable the scripting options on your server you'll find that your server will actually respond slightly faster from that sub-domain because it's just sending files and not processing them.</p>
+    Yes! You can take advantage of the <a href="http://www.mozilla.org/projects/netlib/http/pipelining-faq.html">pipelining</a> support in some browsers by creating a sub-domain for the static content for your site. So you could select the "Origin Push / Self-hosted" method of the General Settings tab. Create static.domain.com on your server (and update your <acronym title="Domain Name System">DNS</acronym> zone) and then specify the <acronym title="File Transfer Protocol">FTP</acronym> details for it in the plugin configuration panel and you're done. If you disable the scripting options on your server you'll find that your server will actually respond slightly faster from that sub-domain because it's just sending files and not processing them.</p>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q74"><strong>Are minified files uploaded to my <acronym title="Content Delivery Network">CDN</acronym> provider?</strong><br />
     Yes, any <acronym title="Cascading Style Sheet">CSS</acronym> and <acronym title="JavaScript">JS</acronym> you manage with the plugin are minified before being uploaded to your <acronym title="Content Delivery Network">CDN</acronym>. You don't have to make any special changes to your theme. We encourage you to make sure that your provider supports <acronym title="Hypertext Transfer Protocol">HTTP</acronym> compression as the benefit of having your static assets available from more than one <acronym title="Point of Presence">POP</acronym> alone is not enough.</p>
@@ -437,6 +439,7 @@ No, you can drag and drop them into the desired order on the minify settings pag
     That depends on how you use your blog and where most of your readers read your blog (regionally). Here's a short list:</p>
   <ul>
     <li><a href="http://www.maxcdn.com/" target="_blank">MaxCDN</a></li>
+    <li><a href="http://www.rackspacecloud.com/cloud_hosting_products/files" target="_blank">Rackspace Cloud Files</a></li>
     <li><a href="http://www.cotendo.com/" target="_blank">Cotendo</a></li>
     <li><a href="https://vps.net/cdn-signup" target="_blank">VPS NET</a></li>
     <li><a href="http://aws.amazon.com/s3/" target="_blank">Amazon S3</a> / <a href="http://aws.amazon.com/cloudfront/" target="_blank">Cloudfront</a></li>

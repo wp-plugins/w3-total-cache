@@ -195,6 +195,8 @@ You will be able to see it instantly on each page load, but for tangible metrics
 * [Pingdom](http://tools.pingdom.com/)
 * [WebPagetest](http://www.webpagetest.org/test)
 * [Gomez Instant Test Pro](http://www.gomez.com/instant-test-pro/)
+* [Resource Expert Droid](http://redbot.org/)
+* [Web Caching Tests](http://www.procata.com/cachetest/)
 * [Port80 Compression Check (minify requires MSIE6 support to be enabled)](http://www.port80software.com/tools/compresscheck.asp)
 * [A simple online web page compression / deflate / gzip test tool](http://www.gidnetwork.com/tools/gzip-test.php)
 * [Web Page Analyzer](http://www.websiteoptimization.com/services/analyze/)
