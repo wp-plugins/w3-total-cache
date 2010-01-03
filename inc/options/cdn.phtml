@@ -12,7 +12,7 @@
 <p>
 	You can <input id="cdn_export_library" class="button" type="button" value="export media library to CDN" />,
 	use the <input id="cdn_rename_domain" class="button" type="button" value="domain rename tool" />,
-	<input id="cdn_import_library" class="button" type="button" value="import attachments into the Media Library &amp; CDN" /> or
+	<input id="cdn_import_library" class="button" type="button" value="import attachments into the Media Library" /> or
 	<input id="cdn_queue" class="button" type="button" value="view unsuccessful file transfers" /> now.
 </p>
 <?php endif; ?>
@@ -65,7 +65,7 @@
     	<tr>
     		<th<?php if ($cdn_mirror): ?> colspan="2"<?php endif; ?>>
     			<input type="hidden" name="cdn.minify.enable" value="0"<?php if (! W3TC_PHP5 || ! $minify_enabled): ?> disabled="disabled"<?php endif; ?> />
-    			<label><input type="checkbox" name="cdn.minify.enable" value="1"<?php checked($this->_config->get_boolean('cdn.minify.enable'), true); ?><?php if (! W3TC_PHP5 || ! $minify_enabled): ?> disabled="disabled"<?php endif; ?> /> Host minified <acronym title="Cascading Style Sheets">CSS</acronym> and <acronym title="JavaScript">JS</acronym> files</label><br />
+    			<label><input type="checkbox" name="cdn.minify.enable" value="1"<?php checked($this->_config->get_boolean('cdn.minify.enable'), true); ?><?php if (! W3TC_PHP5 || ! $minify_enabled): ?> disabled="disabled"<?php endif; ?> /> Host minified <acronym title="Cascading Style Sheet">CSS</acronym> and <acronym title="JavaScript">JS</acronym> files</label><br />
 				<span class="description">If checked, minified <acronym>CSS</acronym> and <acronym>JS</acronym> files will be hosted with the <acronym title="Content Delivery Network">CDN</acronym>.</span>
     		</th>
     		<?php if (! $cdn_mirror): ?>
