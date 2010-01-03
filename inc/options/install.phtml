@@ -153,7 +153,7 @@
     <p><strong>Note(s):</strong></p>
     <ul>
       <li>The provided instructions are for 32-bit CentOS, however we can provide others based on <a href="mailto:wordpressexperts@w3-edge.com">your requests</a>.</li>
-      <li>In the case where the "Rewrite <acronym>URL</acronym> Structure" (in <a href="options-general.php?page=w3-total-cache/w3-total-cache.php&amp;tab=minify">Minify Settings</a> tab) is desired, and apache is not used, the file located in wp-content/plugins/w3-total-cache/wp-content/w3tc/.htaccess contains directives that must be created for the directory: wp-content/w3tc/.</li>
+      <li>In the case where Apache is not used, the .htaccess file located in the root directory of the WordPress installation, wp-content/w3tc/pgcache/.htaccess and wp-content/w3tc/min/.htaccess contain directives that must be re-created for your web server software.</li>
       <li>Restarting the web server will empty your <acronym title="Alternative PHP Cache">APC</acronym> cache, which means it will have to be rebuilt over time and your site's performance will suffer during this period. Still, <acronym title="Alternative PHP Cache">APC</acronym> should be installed in any case to maximize WordPress performance.</li>
       <li>Consider using memcached for objects that must persist across web server restarts or that you wish to share amongst your pool of servers (or cluster), e.g.: database objects or page cache.</li>
       <li>Some yum or mirrors may not have the necessary packages, in such cases you may have to do a manual installation.</li>
