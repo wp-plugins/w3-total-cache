@@ -42,14 +42,14 @@
     		<th colspan="2">
     			<input type="hidden" name="minify.rewrite" value="0" />			
     			<label><input type="checkbox" name="minify.rewrite" value="1"<?php checked($this->_config->get_boolean('minify.rewrite'), true); ?> /> Rewrite <acronym title="Uniform Resource Locator">URL</acronym> structure</label><br />
-				<span class="description">If disabled, <acronym title="Cascading Style Sheets">CSS</acronym> and <acronym title="JavaScript">JS</acronym> embeddings will use GET variables instead of "fancy links."</span>
+				<span class="description">If disabled, <acronym title="Cascading Style Sheet">CSS</acronym> and <acronym title="JavaScript">JS</acronym> embeddings will use GET variables instead of "fancy links."</span>
     		</th>
     	</tr>
     	<tr>
     		<th colspan="2">
     			<input type="hidden" name="minify.upload" value="0" />			
     			<label><input type="checkbox" name="minify.upload" value="1"<?php checked($this->_config->get_boolean('minify.upload'), true); ?> /> Automatically upload modified files</label><br />
-				<span class="description">If CDN is enabled (and not using the origin pull method), your minified files will be automatically uploaded.</span>
+				<span class="description">If <acronym title="Content Delivery Network">CDN</acronym> is enabled (and not using the origin pull method), your minified files will be automatically uploaded.</span>
     		</th>
     	</tr>
     	<tr>
@@ -79,7 +79,7 @@
     			<input type="hidden" name="minify.html.strip.crlf" value="0" />
     			<label><input id="html_enabled" type="checkbox" name="minify.html.enable" value="1"<?php checked($this->_config->get_boolean('minify.html.enable'), true); ?> /> Minify</label><br />
     			<label><input class="html_enabled" type="checkbox" name="minify.html.reject.admin" value="1"<?php checked($this->_config->get_boolean('minify.html.reject.admin'), true); ?> /> Don't Minify <acronym title="Hypertext Markup Language">HTML</acronym> for logged in administrators</label><br />
-    			<label><input class="html_enabled" type="checkbox" name="minify.html.inline.css" value="1"<?php checked($this->_config->get_boolean('minify.html.inline.css'), true); ?> /> Inline <acronym title="Cascading Style Sheets">CSS</acronym> Minification</label><br />
+    			<label><input class="html_enabled" type="checkbox" name="minify.html.inline.css" value="1"<?php checked($this->_config->get_boolean('minify.html.inline.css'), true); ?> /> Inline <acronym title="Cascading Style Sheet">CSS</acronym> Minification</label><br />
     			<label><input class="html_enabled" type="checkbox" name="minify.html.inline.js" value="1"<?php checked($this->_config->get_boolean('minify.html.inline.js'), true); ?> /> Inline <acronym title="JavaScript">JS</acronym> Minification</label><br />
     			<label><input class="html_enabled" type="checkbox" name="minify.html.strip.crlf" value="1"<?php checked($this->_config->get_boolean('minify.html.strip.crlf'), true); ?> /> Line break removal</label><br />
     		</td>
@@ -100,7 +100,7 @@
     		</td>
     	</tr>
     	<tr>
-    		<th valign="top"><acronym title="Cascading Style Sheets">CSS</acronym> minify settings:</th>
+    		<th valign="top"><acronym title="Cascading Style Sheet">CSS</acronym> minify settings:</th>
     		<td>
     			<input type="hidden" name="minify.css.enable" value="0" />
     			<input type="hidden" name="minify.css.strip.comments" value="0" />
@@ -122,13 +122,14 @@
     		<td>
     			<p>
     				<label>
-            			<select id="js_groups" class="js_enabled">
-            			<?php foreach ($groups as $groupKey => $groupText): ?>
-            				<option value="<?php echo $groupKey; ?>"><?php echo $groupText; ?></option>
+            			<select id="js_groups" class="js_enabled" name="js_group">
+            			<?php foreach ($groups as $group_key => $group_text): ?>
+            				<option value="<?php echo $group_key; ?>"<?php selected($group_key, $js_group); ?>><?php echo htmlspecialchars($group_text); ?></option>
             			<?php endforeach; ?>
             			</select> 
 						Group:
-        			</label>
+        			</label><br />
+					<span class="description">Add scripts used in all templates to the default group. Use the menu above to manage scripts unique to a specific template.</span>
     			</p>
     			<ol id="js_files">
                 <?php foreach ($js_groups as $js_group => $js_locations): ?>
@@ -146,17 +147,18 @@
     		</td>
     	</tr>
     	<tr>
-    		<th valign="top"><acronym title="Cascading Style Sheets">CSS</acronym> file management:</th>
+    		<th valign="top"><acronym title="Cascading Style Sheet">CSS</acronym> file management:</th>
     		<td>
     			<p>
     				<label>
-            			<select id="css_groups" class="css_enabled">
-            			<?php foreach ($groups as $groupKey => $groupText): ?>
-            				<option value="<?php echo $groupKey; ?>"><?php echo $groupText; ?></option>
+            			<select id="css_groups" class="css_enabled" name="css_group">
+            			<?php foreach ($groups as $group_key => $group_text): ?>
+            				<option value="<?php echo $group_key; ?>"<?php selected($group_key, $css_group); ?>><?php echo htmlspecialchars($group_text); ?></option>
             			<?php endforeach; ?>
             			</select> 
 						Group:
-        			</label>
+        			</label><br />
+					<span class="description">Add style sheets used in all templates to the default group. Use the menu above to manage style sheets unique to a specific template.</span>
     			</p>
     			<ol id="css_files">
                 <?php foreach ($css_groups as $css_group => $css_locations): ?>
@@ -169,7 +171,7 @@
                 	<?php endforeach; ?>
                 <?php endforeach; ?>
     			</ol>
-                <div id="css_files_empty" class="w3tc-empty" style="display: none;">No <acronym title="Cascading Style Sheets">CSS</acronym> files added</div>
+                <div id="css_files_empty" class="w3tc-empty" style="display: none;">No <acronym title="Cascading Style Sheet">CSS</acronym> files added</div>
     			<input id="css_file_add" class="css_enabled button" type="button" value="Add a style sheet" /> 
     		</td>
     	</tr>

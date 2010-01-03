@@ -42,7 +42,7 @@
         </tr>
     </table>
      
-	<p>Enable minify to combine, remove white space / comments and compress (<acronym title="GNU zip">gzip</acronym> / deflate) your (theme's / plugin's / external) <acronym title="Cascading Style Sheets">CSS</acronym> and <acronym title="JavaScript">JS</acronym> files.</p>
+	<p>Enable minify to combine, remove white space / comments and compress (<acronym title="GNU zip">gzip</acronym> / deflate) your (theme's / plugin's / external) <acronym title="Cascading Style Sheet">CSS</acronym> and <acronym title="JavaScript">JS</acronym> files.</p>
 
     <table class="form-table">
         <tr>
@@ -50,7 +50,7 @@
         	<td>
         		<input type="hidden" name="minify.enabled" value="0"<?php if (! W3TC_PHP5): ?> disabled="disabled"<?php endif; ?> />
         		<label><input class="enabled" type="checkbox" name="minify.enabled" value="1"<?php checked($minify_enabled, true); ?><?php if (! W3TC_PHP5): ?> disabled="disabled"<?php endif; ?> />&nbsp;<strong>Enable</strong></label><br />
-        		<span class="description">Minification can decrease file size of <acronym title="Hypertext Markup Language">HTML</acronym>, <acronym title="Cascading Style Sheets">CSS</acronym>, <acronym title="JavaScript">JS</acronym> and feeds respectively by ~10% on average.</span>    	
+        		<span class="description">Minification can decrease file size of <acronym title="Hypertext Markup Language">HTML</acronym>, <acronym title="Cascading Style Sheet">CSS</acronym>, <acronym title="JavaScript">JS</acronym> and feeds respectively by ~10% on average.</span>    	
         	</td>
         </tr>
         <tr>
@@ -73,7 +73,7 @@
      		<td>
      			<input type="hidden" name="dbcache.enabled" value="0" />
     			<label><input class="enabled" type="checkbox" name="dbcache.enabled" value="1"<?php checked($dbcache_enabled, true); ?> />&nbsp;<strong>Enable</strong></label><br />
-				<span class="description">Caching database objects may decrease the response time of your blog by at least an order of magnitude.</span>
+				<span class="description">Caching database objects may decrease the response time of your blog by up to 100x.</span>
     		</td>
     	</tr>
     	<tr>
@@ -88,7 +88,7 @@
     	</tr>
     </table>
     
-    <p>Host your wp-includes/ (WordPress' core files), media library, theme images / <acronym title="Cascading Style Sheets">CSS</acronym> / <acronym title="JavaScript">JS</acronym> with your <acronym title="Content Delivery Network">CDN</acronym> provider.</p>
+    <p>Host your wp-includes (WordPress' core files), media library, theme images / <acronym title="Cascading Style Sheet">CSS</acronym> / <acronym title="JavaScript">JS</acronym> with your <acronym title="Content Delivery Network">CDN</acronym> provider.</p>
     
     <table class="form-table">
         <tr>
@@ -103,9 +103,9 @@
         	<td>
         		<select name="cdn.engine">
 					<option value="mirror"<?php selected($this->_config->get_string('cdn.engine'), 'mirror'); ?>>Origin Pull (Mirror)</option>
+					<option value="ftp"<?php selected($this->_config->get_string('cdn.engine'), 'ftp'); ?>>Origin Push / Self-hosted (File Transfer Protocol Upload)</option>
 					<option value="cf"<?php selected($this->_config->get_string('cdn.engine'), 'cf'); ?><?php if (! W3TC_PHP5 || ! $check_curl): ?> disabled="disabled"<?php endif; ?>>Amazon CloudFront</option>
-					<option value="s3"<?php selected($this->_config->get_string('cdn.engine'), 's3'); ?><?php if (! W3TC_PHP5 || ! $check_curl): ?> disabled="disabled"<?php endif; ?>>Amazon Simple Storage Service (Amazon S3)</option>
-					<option value="ftp"<?php selected($this->_config->get_string('cdn.engine'), 'ftp'); ?>>Self-hosted (File Transfer Protocol)</option>
+					<option value="s3"<?php selected($this->_config->get_string('cdn.engine'), 's3'); ?><?php if (! W3TC_PHP5 || ! $check_curl): ?> disabled="disabled"<?php endif; ?>>Amazon Simple Storage Service (S3)</option>
         		</select><br />
         		<span class="description">Select the <acronym title="Content Delivery Network">CDN</acronym> type you wish to use.</span>
         	</td>
@@ -119,14 +119,15 @@
      		<th valign="top">Debug Mode:</th>
      		<td>
      			<input type="hidden" name="debug" value="0" />
-    			<label><input type="checkbox" name="debug" value="1"<?php checked($debug, true); ?> />&nbsp;<strong>Enable</strong></label>
+    			<label><input type="checkbox" name="debug" value="1"<?php checked($debug, true); ?> />&nbsp;<strong>Enable</strong></label><br />
+        		<span class="description">If selected, detailed caching information will be appear at the end of each page in a <acronym title="Hypertext Markup Language">HTML</acronym> comment. View a page's source code to review.</span>
     		</td>
     	</tr>
     </table>    
 
     <h3>Support Us</h3>
      
-	<p>We're working to make WordPress better. Please support us!</p>
+	<p>We're working to make WordPress better. Please support us, here's how:</p>
 	
 	<p>
     	<label>Link to us:
@@ -136,7 +137,7 @@
         		<option value="<?php echo $support_id; ?>"<?php selected($support, $support_id); ?>><?php echo htmlspecialchars($support_name); ?></option>
         		<?php endforeach; ?>
         	</select>
-        </label> (easy) or tell your friends with a <a href="#" class="link-tweet">tweet</a> (easiest).
+        </label> (easy) or tell your friends with a <input type="button" class="button button-tweet" value="tweet" /> (easiest).
 	</p>
 
     <p>If you want to place the link manually here is the code:</p>
