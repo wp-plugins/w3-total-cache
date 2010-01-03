@@ -192,11 +192,9 @@ You will be able to see it instantly on each page load, but for tangible metrics
 * [Mozilla Firefox](http://www.mozilla.com/firefox/) + [Firebug](http://getfirebug.com/) + [Google Page Speed](http://code.google.com/speed/page-speed/)
 * [Mozilla Firefox](http://www.mozilla.com/firefox/) + [Firebug](http://getfirebug.com/) + [Hammerhead](http://stevesouders.com/hammerhead/)
 * [Google Chrome](http://www.google.com/chrome) + [Google Speed Tracer](http://code.google.com/webtoolkit/speedtracer/)
-
 * [Pingdom](http://tools.pingdom.com/)
 * [WebPagetest](http://www.webpagetest.org/test)
 * [Gomez Instant Test Pro](http://www.gomez.com/instant-test-pro/)
-
 * [Port80 Compression Check (minify requires MSIE6 support to be enabled)](http://www.port80software.com/tools/compresscheck.asp)
 * [A simple online web page compression / deflate / gzip test tool](http://www.gidnetwork.com/tools/gzip-test.php)
 * [Web Page Analyzer](http://www.websiteoptimization.com/services/analyze/)
