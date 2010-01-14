@@ -81,7 +81,7 @@ ExpiresByType text/xsd						A259200
 ExpiresByType text/xsl						A259200
 </IfModule>
 
-<FilesMatch "\.(bmp|ico|html?|tiff?|gif|jpe?g|png|svgz?|swf|txt|xsd|xsl|xml)$">
+<FilesMatch "\.(bmp|css|ico|html?|js|tiff?|gif|jpe?g|png|svgz?|swf|txt|xsd|xsl|xml)$">
 <IfModule mod_headers.c>
 # Set Pragma header
 Header set Pragma "public"
