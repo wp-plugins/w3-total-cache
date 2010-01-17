@@ -86,7 +86,7 @@ ExpiresByType text/xsl						A259200
 # Set Pragma header
 Header set Pragma "public"
 # Set Cache-Control header
-Header set Cache-Control "max-age=259200, public"
+Header set Cache-Control "max-age=259200, public, must-revalidate, proxy-revalidate"
 # For optimal performance remove cookies
 #Header unset Set-Cookie
 </IfModule>
