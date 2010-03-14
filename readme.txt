@@ -5,7 +5,7 @@ Requires at least: 2.6
 Tested up to: 2.9.1
 Stable tag: 0.8.5.2
 
-Dramatically improve the speed and user experience of your blog. Add page caching, database caching, minify and content delivery network functionality and more to WordPress.
+Improve the speed and user experience of your site. Add page caching, database caching, minify and content delivery network and more to WordPress.
 
 == Description ==
 
@@ -220,10 +220,10 @@ Install the plugin to read the full FAQ.
 
 It's quite difficult to recall all of the innovators that have shared their thoughts, code and experiences in the blogosphere over the years, but here are some names to get you started:
 
+* [Steve Souders](http://stevesouders.com/)
 * [Steve Clay](http://mrclay.org/)
 * [Ryan Grove](http://wonko.com/)
 * [Nicholas Zakas](http://www.nczonline.net/blog/2009/06/23/loading-javascript-without-blocking/)
-* [Steve Souders](http://stevesouders.com/)
 * [Ryan Dean](http://rtdean.livejournal.com/)
 * [Andrei Zmievski](http://gravitonic.com/)
 * George Schlossnagle
@@ -249,7 +249,7 @@ Please reach out to all of these people and support their projects if you're so 
 == Changelog ==
 
 = 0.8.5.2 =
-* Added support for [Bad Behavior](http://wordpress.org/extend/plugins/bad-behavior/)
+* Added support for Bad Behavior plugin
 * Added support for eAccelerator and XCache opcode caches
 * Added support for rewriting href attribute of anchors for images that use the CDN
 * Added deflate http compression support to minify
@@ -257,7 +257,7 @@ Please reach out to all of these people and support their projects if you're so 
 * Added check of file modification time and file size before FTP upload
 * Added check of file hash before uploading to Amazon S3
 * Added option to force replacement of uploaded attachments on CDN
-* Added option to toggle feed  minification
+* Added option to toggle feed minification
 * Added combine only option for CSS minification to overcome invalid CSS files
 * Database caching now disabled by default to improve compatibility with some shared hosting environments
 * Default page caching method now disk enhanced
@@ -278,9 +278,9 @@ Please reach out to all of these people and support their projects if you're so 
 * Improved memcached detection by supporting only PECL memcache
 * Fixed bug with disk enhanced method of page cache in WordPress MU
 * Fixed false match of page cache files in disk enhanced method of page cache
-* Fixed a bug with cron anomalies cause by caching of wp_options table
+* Fixed a bug with cron anomalies caused by caching of wp_options table
 * Fixed trailing slash missing issue when using disk enhanced page caching
-* Fixed a bug that would still auto-embed CSS and JS when already manually embedded
+* Fixed a bug that would auto-embed CSS and JS when already manually embedded
 
 = 0.8.5.1 =
 * Added option to CDN Settings to skip specified directories
