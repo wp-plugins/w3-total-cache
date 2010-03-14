@@ -212,7 +212,6 @@ You will be able to see it instantly on each page load, but for tangible metrics
 
 Yes! Please [reach out to us](http://www.w3-edge.com/contact/) and we'll get you acclimated so you can "set it and forget it."
 
-
 Install the plugin to read the full FAQ.
 
 == Other Notes ==
