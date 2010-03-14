@@ -9,7 +9,7 @@ Improve the speed and user experience of your site. Add page caching, database c
 
 == Description ==
 
-The fastest and most complete WordPress performance optimization plugin. Trusted by many popular sites like: mashable.com, smashingmagazine.com, makeuseof.com, pbs.org, kiss925.com, lockergnome.com, tutsplus.com, ilovetypography.com, webdesignerdepot.com, pearsonified.com, css-tricks.com, freelanceswitch.com, yoast.com and others &mdash; W3 Total Cache improves the user experience of your blog by improving your server performance, caching every aspect of your site, reducing the download time of your theme and providing transparent content delivery network (CDN) integration.
+The fastest and most complete WordPress performance optimization plugin. Trusted by many popular sites like: mashable.com, smashingmagazine.com, makeuseof.com, kiss925.com, lockergnome.com, tutsplus.com, ilovetypography.com, webdesignerdepot.com, pearsonified.com, css-tricks.com, freelanceswitch.com, yoast.com and others &mdash; W3 Total Cache improves the user experience of your blog by improving your server performance, caching every aspect of your site, reducing the download time of your theme and providing transparent content delivery network (CDN) integration.
 
 Benefits:
 
