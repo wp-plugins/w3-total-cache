@@ -7,19 +7,27 @@
 /**
  * W3 Cache engine types
  */
-if (! defined('W3_CACHE_MEMCACHED')) {
+if (!defined('W3_CACHE_MEMCACHED')) {
     define('W3_CACHE_MEMCACHED', 'memcached');
 }
 
-if (! defined('W3_CACHE_APC')) {
+if (!defined('W3_CACHE_APC')) {
     define('W3_CACHE_APC', 'apc');
 }
 
-if (! defined('W3_CACHE_FILE')) {
+if (!defined('W3_CACHE_EACCELERATOR')) {
+    define('W3_CACHE_EACCELERATOR', 'eaccelerator');
+}
+
+if (!defined('W3_CACHE_XCACHE')) {
+    define('W3_CACHE_XCACHE', 'xcache');
+}
+
+if (!defined('W3_CACHE_FILE')) {
     define('W3_CACHE_FILE', 'file');
 }
 
-if (! defined('W3_CACHE_FILE_PGCACHE')) {
+if (!defined('W3_CACHE_FILE_PGCACHE')) {
     define('W3_CACHE_FILE_PGCACHE', 'file_pgcache');
 }
 
@@ -41,16 +49,26 @@ class W3_Cache
         
         $instance_key = sprintf('%s_%s', $engine, md5(serialize($config)));
         
-        if (! isset($instances[$instance_key])) {
+        if (!isset($instances[$instance_key])) {
             switch ($engine) {
                 case W3_CACHE_MEMCACHED:
                     require_once W3TC_LIB_W3_DIR . '/Cache/Memcached.php';
-                    $instances[$instance_key] = & W3_Cache_Memcached::instance($config['engine'], $config);
+                    $instances[$instance_key] = & new W3_Cache_Memcached($config);
                     break;
                 
                 case W3_CACHE_APC:
                     require_once W3TC_LIB_W3_DIR . '/Cache/Apc.php';
                     $instances[$instance_key] = & new W3_Cache_Apc();
+                    break;
+                
+                case W3_CACHE_EACCELERATOR:
+                    require_once W3TC_LIB_W3_DIR . '/Cache/Eaccelerator.php';
+                    $instances[$instance_key] = & new W3_Cache_Eaccelerator();
+                    break;
+                
+                case W3_CACHE_XCACHE:
+                    require_once W3TC_LIB_W3_DIR . '/Cache/Xcache.php';
+                    $instances[$instance_key] = & new W3_Cache_Xcache();
                     break;
                 
                 case W3_CACHE_FILE:

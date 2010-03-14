@@ -78,13 +78,26 @@ class W3_Cdn_Ftp extends W3_Cdn_Base
     }
     
     /**
+     * Sends MDTM command
+     * @param string $remote_file
+     * @return boolean
+     */
+    function _mdtm($remote_file, $mtime)
+    {
+        $command = sprintf('MDTM %s %s', date('YmdHis', $mtime), $remote_file);
+        
+        return @ftp_raw($this->_ftp, $command);
+    }
+    
+    /**
      * Uploads files to FTP
      *
      * @param array $files
      * @param array $results
+     * @param boolean $force_rewrite
      * @return boolean
      */
-    function upload($files, &$results)
+    function upload($files, &$results, $force_rewrite = false)
     {
         $count = 0;
         $error = null;
@@ -126,13 +139,22 @@ class W3_Cdn_Ftp extends W3_Cdn_Base
             }
             
             $remote_file = basename($remote_path);
+            $mtime = @filemtime($local_path);
             
-            if (@ftp_size($this->_ftp, $remote_file) == filesize($local_path)) {
-                $results[] = $this->get_result($local_path, $remote_path, W3_CDN_RESULT_ERROR, 'File already exists');
-                continue;
+            if (! $force_rewrite) {
+                $size = @filesize($local_path);
+                $ftp_size = @ftp_size($this->_ftp, $remote_file);
+                $ftp_mtime = @ftp_mdtm($this->_ftp, $remote_file);
+                
+                if ($size === $ftp_size && $mtime === $ftp_mtime) {
+                    $results[] = $this->get_result($local_path, $remote_path, W3_CDN_RESULT_ERROR, 'File already exists');
+                    continue;
+                }
             }
             
             $result = @ftp_put($this->_ftp, $remote_file, $local_path, FTP_BINARY);
+            $this->_mdtm($remote_file, $mtime);
+            
             $results[] = $this->get_result($local_path, $remote_path, ($result ? W3_CDN_RESULT_OK : W3_CDN_RESULT_ERROR), ($result ? 'OK' : 'Unable to upload file'));
             
             if ($result) {
@@ -198,10 +220,7 @@ class W3_Cdn_Ftp extends W3_Cdn_Base
         $tmp_file = 'test_file_' . $rand;
         $tmp_path = $upload_info['path'] . '/' . $tmp_file;
         
-        if (($fp = @fopen($tmp_path, 'w'))) {
-            @fputs($fp, $rand);
-            @fclose($fp);
-        } else {
+        if (! @file_put_contents($tmp_path, $rand)) {
             $error = sprintf('Unable to create file: %s.', $tmp_path);
             return false;
         }
@@ -244,7 +263,7 @@ class W3_Cdn_Ftp extends W3_Cdn_Base
     
     /**
      * Returns CDN domain
-	 *
+     *
      * @return string
      */
     function get_domain()

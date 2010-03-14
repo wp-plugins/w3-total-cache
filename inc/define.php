@@ -1,14 +1,19 @@
 <?php
 
-define('W3TC_VERSION', '0.8.5.1');
+define('W3TC_VERSION', '0.8.5.2');
 define('W3TC_POWERED_BY', 'W3 Total Cache/' . W3TC_VERSION);
+define('W3TC_EMAIL', 'w3tc@w3-edge.com');
 define('W3TC_LINK_URL', 'http://www.w3-edge.com/wordpress-plugins/');
 define('W3TC_LINK_NAME', 'WordPress Plugins');
+define('W3TC_FEED_URL', 'http://feeds.feedburner.com/W3TOTALCACHE');
+define('W3TC_README_URL', 'http://plugins.trac.wordpress.org/browser/w3-total-cache/trunk/readme.txt?format=txt');
+define('W3TC_TWITTER_STATUS', 'I just optimized my #wordpress blog\'s #performance using the W3 Total Cache #plugin by @w3edge. Check it out! http://j.mp/A69xX');
+define('W3TC_SUPPORT_US_TIMEOUT', 2592000);
 
-if (! defined('W3TC_DIR')) {
-    define('W3TC_DIR', realpath(dirname(__FILE__) . '/..'));
-}
+define('W3TC_PHP5', PHP_VERSION >= 5);
+define('W3TC_WIN', (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN'));
 
+defined('W3TC_DIR') || define('W3TC_DIR', realpath(dirname(__FILE__) . '/..'));
 define('W3TC_FILE', 'w3-total-cache/w3-total-cache.php');
 define('W3TC_LIB_DIR', W3TC_DIR . '/lib');
 define('W3TC_LIB_W3_DIR', W3TC_LIB_DIR . '/W3');
@@ -17,40 +22,40 @@ define('W3TC_PLUGINS_DIR', W3TC_DIR . '/plugins');
 define('W3TC_INSTALL_DIR', W3TC_DIR . '/wp-content');
 define('W3TC_INSTALL_MINIFY_DIR', W3TC_INSTALL_DIR . '/w3tc/min');
 
-if (! defined('WP_CONTENT_DIR')) {
-    define('WP_CONTENT_DIR', realpath(W3TC_DIR . '/../..'));
-}
+$GLOBALS['w3_reserved_blognames'] = array(
+    'page', 
+    'comments', 
+    'blog', 
+    'wp-admin', 
+    'wp-includes', 
+    'wp-content', 
+    'files', 
+    'feed'
+);
 
+define('W3TC_BLOGNAME', w3_get_blogname());
+define('W3TC_PREFIX', (W3TC_BLOGNAME != '' ? '-' . W3TC_BLOGNAME : ''));
+
+defined('WP_CONTENT_DIR') || define('WP_CONTENT_DIR', realpath(W3TC_DIR . '/../..'));
 define('WP_CONTENT_DIR_NAME', basename(WP_CONTENT_DIR));
-
-define('W3TC_CONTENT_DIR_NAME', WP_CONTENT_DIR_NAME . '/w3tc');
+define('W3TC_CONTENT_DIR_NAME', WP_CONTENT_DIR_NAME . '/w3tc' . W3TC_PREFIX);
 define('W3TC_CONTENT_DIR', ABSPATH . W3TC_CONTENT_DIR_NAME);
-define('W3TC_CONTENT_MINIFY_DIR_NAME', WP_CONTENT_DIR_NAME . '/w3tc/min');
+define('W3TC_CONTENT_MINIFY_DIR_NAME', W3TC_CONTENT_DIR_NAME . '/min');
 define('W3TC_CONTENT_MINIFY_DIR', ABSPATH . W3TC_CONTENT_DIR_NAME . '/min');
 define('W3TC_CACHE_FILE_DBCACHE_DIR', W3TC_CONTENT_DIR . '/dbcache');
 define('W3TC_CACHE_FILE_PGCACHE_DIR', W3TC_CONTENT_DIR . '/pgcache');
 define('W3TC_CACHE_FILE_MINIFY_DIR', W3TC_CONTENT_DIR . '/min');
 define('W3TC_LOG_DIR', W3TC_CONTENT_DIR . '/log');
 define('W3TC_TMP_DIR', W3TC_CONTENT_DIR . '/tmp');
-
-define('W3TC_CONFIG_PATH', WP_CONTENT_DIR . '/w3-total-cache-config' . (($w3_blog_id = w3_get_blog_id()) != '' ? '-' . $w3_blog_id : '') . '.php');
-
+define('W3TC_CONFIG_PATH', WP_CONTENT_DIR . '/w3-total-cache-config' . W3TC_PREFIX . '.php');
+define('W3TC_CONFIG_MASTER_PATH', WP_CONTENT_DIR . '/w3-total-cache-config.php');
 define('W3TC_MINIFY_LOG_FILE', W3TC_LOG_DIR . '/minify.log');
-
 define('W3TC_CDN_COMMAND_UPLOAD', 1);
 define('W3TC_CDN_COMMAND_DELETE', 2);
 define('W3TC_CDN_TABLE_QUEUE', 'w3tc_cdn_queue');
 
-define('W3TC_PHP5', PHP_VERSION >= 5);
-define('W3TC_WIN', (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN'));
-
-define('W3TC_EMAIL', 'w3tc@w3-edge.com');
-define('W3TC_FEED_URL', 'http://feeds.feedburner.com/W3TOTALCACHE');
-define('W3TC_FEED_ITEMS', 3);
-define('W3TC_README_URL', 'http://plugins.trac.wordpress.org/browser/w3-total-cache/trunk/readme.txt?format=txt');
-
-define('W3TC_TWITTER_STATUS', 'I just optimized my #wordpress blog\'s #performance using the W3 Total Cache #plugin by @w3edge. Check it out! http://j.mp/A69xX');
-define('W3TC_SUPPORT_US_TIMEOUT', 2592000);
+ini_set('pcre.backtrack_limit', 4194304);
+ini_set('pcre.recursion_limit', 4194304);
 
 /**
  * W3 activate error
@@ -58,6 +63,7 @@ define('W3TC_SUPPORT_US_TIMEOUT', 2592000);
  * @param string $error
  * @return void
  */
+
 function w3_activate_error($error)
 {
     $active_plugins = (array) get_option('active_plugins');
@@ -99,7 +105,7 @@ function w3_writable_error($path)
             $error = sprintf('<strong>%s</strong> could not be created, please run following command:<br /><strong style="color: #f00;">chmod 777 %s</strong><br />then %s.', $path, dirname($path), $reactivate_button);
         }
     } else {
-        $error = sprintf('<strong>%s</strong> could not be created, <strong>open_basedir</strong> restriction in effect, please check your php.ini settings:<br /><strong style="color: #f00;">open_basedir = "%s"</strong></br />then %s.', $path, ini_get('open_basedir'), $reactivate_button);
+        $error = sprintf('<strong>%s</strong> could not be created, <strong>open_basedir</strong> restriction in effect, please check your php.ini settings:<br /><strong style="color: #f00;">open_basedir = "%s"</strong><br />then %s.', $path, ini_get('open_basedir'), $reactivate_button);
     }
     
     w3_activate_error($error);
@@ -176,7 +182,7 @@ function w3_gzdecode($data)
  */
 function w3_mkdir($path, $mask = 0755, $curr_path = '')
 {
-    $path = preg_replace('~[\\\/]+~', '/', $path);
+    $path = w3_realpath($path);
     $path = trim($path, '/');
     $dirs = explode('/', $path);
     
@@ -255,80 +261,95 @@ function w3_is_xml($content)
 }
 
 /**
- * Returns blog ID
- *
- * @return string
+ * Returns true if it's WPMU
+ * @return boolean
  */
-function w3_get_blog_id()
+function w3_is_wpmu()
 {
-    static $id = null;
+    static $wpmu = null;
     
-    if ($id === null) {
-        $wpmu = false;
-        
-        if (defined('VHOST')) {
-            $wpmu = true;
-        } else {
-            $wpmu = file_exists(ABSPATH . 'wpmu-settings.php');
-        }
-        
-        if ($wpmu) {
-            if (defined('VHOST') && VHOST === 'yes') {
-                $id = w3_get_domain($_SERVER['HTTP_HOST']);
-            } else {
-                if (defined('PATH_CURRENT_SITE')) {
-                    $base = PATH_CURRENT_SITE;
-                } elseif (isset($GLOBALS['base'])) {
-                    $base = $GLOBALS['base'];
-                } else {
-                    $base = '/';
-                }
-                
-                if (empty($base)) {
-                    $base = '/';
-                }
-                
-                $id = strtolower($_SERVER['REQUEST_URI']);
-                
-                if (strpos($id, $base) === 0) {
-                    $id = substr_replace($id, '', 0, strlen($base));
-                }
-                
-                if (($pos = strpos($id, '/'))) {
-                    $id = substr($id, 0, $pos);
-                }
-                
-                if (($pos = strpos($id, '?'))) {
-                    $id = substr($id, 0, $pos);
-                }
-                
-                if ($id != '') {
-                    $id = trim($id, '/');
-                    
-                    if (in_array($id, array(
-                        'page', 
-                        'comments', 
-                        'blog', 
-                        'wp-admin', 
-                        'wp-includes', 
-                        'wp-content', 
-                        'files', 
-                        'feed'
-                    )) || is_file($id)) {
-                        $id = '';
-                    } else {
-                        $id = $id . '.' . w3_get_domain($_SERVER['HTTP_HOST']);
-                    }
-                }
-            }
-        }
+    if ($wpmu === null) {
+        $wpmu = (w3_is_vhost() || file_exists(ABSPATH . 'wpmu-settings.php'));
     }
     
-    return $id;
+    return $wpmu;
 }
 
 /**
- * Returns site url [fast]
+ * Returns true if WPMU uses vhosts
+ * @return boolean
+ */
+function w3_is_vhost()
+{
+    return (defined('VHOST') && VHOST == 'yes');
+}
+
+/**
+ * Detect WPMU blogname
+ *
+ * @return string
+ */
+function w3_get_blogname()
+{
+    static $blogname = null;
+    
+    if ($blogname === null) {
+        if (w3_is_wpmu()) {
+            $domain = w3_get_domain($_SERVER['HTTP_HOST']);
+            
+            if (w3_is_vhost()) {
+                $blogname = $domain;
+            } else {
+                $uri = $_SERVER['REQUEST_URI'];
+                $site_path = w3_get_site_path();
+                
+                if ($site_path != '' && strpos($uri, $site_path) === 0) {
+                    $uri = substr_replace($uri, '/', 0, strlen($site_path));
+                }
+                
+                $blogname = w3_get_blogname_from_uri($uri);
+                
+                if ($blogname != '') {
+                    $blogname = $blogname . '.' . $domain;
+                } else {
+                    $blogname = $domain;
+                }
+            }
+        } else {
+            $blogname = '';
+        }
+    }
+    
+    return $blogname;
+}
+
+/**
+ * Returns blogname from URI
+ * 
+ * @param string $uri
+ * @param string
+ */
+function w3_get_blogname_from_uri($uri)
+{
+    global $w3_reserved_blognames;
+    
+    $blogname = '';
+    $matches = null;
+    $uri = strtolower($uri);
+    
+    if (preg_match('~^/([a-z0-9-]+)/~', $uri, $matches)) {
+        $blogname = $matches[1];
+        
+        if (in_array($blogname, $w3_reserved_blognames) || file_exists($blogname)) {
+            $blogname = '';
+        }
+    }
+    
+    return $blogname;
+}
+
+/**
+ * Returns site url
  *
  * @return string
  */
@@ -339,21 +360,11 @@ function w3_get_site_url()
     if ($site_url === null) {
         if (function_exists('get_option')) {
             $site_url = get_option('siteurl');
-            $site_url = rtrim($site_url, '/') . '/';
         } else {
-            $site_url = sprintf('http://%s/', $_SERVER['HTTP_HOST']);
-            
-            if (! empty($_SERVER['DOCUMENT_ROOT'])) {
-                $document_root = realpath($_SERVER['DOCUMENT_ROOT']);
-                $abspath = realpath(ABSPATH);
-                $path = str_replace($abspath, '', $document_root);
-                $path = trim($path, '/\\');
-                
-                if ($path != '') {
-                    $site_url .= $path . '/';
-                }
-            }
+            $site_url = sprintf('http://%s%s', $_SERVER['HTTP_HOST'], w3_get_site_path());
         }
+        
+        $site_url = rtrim($site_url, '/');
     }
     
     return $site_url;
@@ -395,21 +406,60 @@ function w3_get_site_url_regexp()
  */
 function w3_get_site_path()
 {
-    static $site_path = null;
+    $document_root = w3_get_document_root();
+    $path = str_replace($document_root, '', w3_path(ABSPATH));
+    $path = '/' . ltrim($path, '/');
     
-    if ($site_path === null) {
-        $site_url = w3_get_site_url();
-        $domain_url = w3_get_domain_url();
-        
-        $site_path = str_replace($domain_url, '', $site_url);
-        $site_path = rtrim($site_path, '/');
-        
-        if ($site_path != '') {
-            $site_path .= '/';
-        }
+    if (substr($path, - 1) != '/') {
+        $path .= '/';
     }
     
-    return $site_path;
+    return $path;
+}
+
+/**
+ * Returns blog path
+ * 
+ * @return string
+ */
+function w3_get_blog_path()
+{
+    $domain_url = w3_get_domain_url();
+    $site_url = w3_get_site_url();
+    
+    $path = str_replace($domain_url, '', $site_url);
+    $path = '/' . ltrim($path, '/');
+    
+    if (substr($path, - 1) != '/') {
+        $path .= '/';
+    }
+    
+    return $path;
+}
+
+/**
+ * Returns document root
+ * @return string
+ */
+function w3_get_document_root()
+{
+    static $document_root = null;
+    
+    if ($document_root === null) {
+        if (isset($_SERVER['DOCUMENT_ROOT'])) {
+            $document_root = $_SERVER['DOCUMENT_ROOT'];
+        } elseif (isset($_SERVER['SCRIPT_FILENAME'])) {
+            $document_root = substr($_SERVER['SCRIPT_FILENAME'], 0, - strlen($_SERVER['PHP_SELF']));
+        } elseif (isset($_SERVER['PATH_TRANSLATED'])) {
+            $document_root = substr($_SERVER['PATH_TRANSLATED'], 0, - strlen($_SERVER['PHP_SELF']));
+        } else {
+            $document_root = ABSPATH;
+        }
+        
+        $document_root = w3_path($document_root);
+    }
+    
+    return $document_root;
 }
 
 /**
@@ -423,12 +473,14 @@ function w3_get_domain($host)
     $host = strtolower($host);
     
     if (strpos($host, 'www.') === 0) {
-        $host = str_replace('www.', '', $host);
+        $host = substr($host, 4);
     }
     
-    if (($pos = strpos($host, ':'))) {
+    if (($pos = strpos($host, ':')) !== false) {
         $host = substr($host, 0, $pos);
     }
+    
+    $host = rtrim($host, '.');
     
     return $host;
 }
@@ -447,7 +499,7 @@ function w3_get_domain_url()
         $scheme = $parse_url['scheme'];
         $host = $parse_url['host'];
         $port = (isset($parse_url['port']) && $parse_url['port'] != 80 ? ':' . (int) $parse_url['port'] : '');
-        $domain_url = sprintf('%s://%s%s/', $scheme, $host, $port);
+        $domain_url = sprintf('%s://%s%s', $scheme, $host, $port);
         
         return $domain_url;
     }
@@ -482,8 +534,8 @@ function w3_upload_info()
         
         if (empty($upload_info['error'])) {
             $site_url = w3_get_site_url();
-            $upload_info['upload_url'] = ltrim(str_replace($site_url, '', $upload_info['baseurl']), '/');
-            $upload_info['upload_dir'] = ltrim(str_replace(ABSPATH, '', $upload_info['basedir']), '/\\');
+            $upload_info['upload_url'] = trim(str_replace($site_url, '', $upload_info['baseurl']), '/');
+            $upload_info['upload_dir'] = trim(str_replace(ABSPATH, '', $upload_info['basedir']), '/');
         } else {
             $upload_info = false;
         }
@@ -578,6 +630,14 @@ function w3_get_engine_name($engine)
             $engine_name = 'apc';
             break;
         
+        case 'eaccelerator':
+            $engine_name = 'eaccelerator';
+            break;
+        
+        case 'xcache':
+            $engine_name = 'xcache';
+            break;
+        
         case 'file':
             $engine_name = 'disk';
             break;
@@ -638,14 +698,17 @@ function w3_to_boolean($value)
  */
 function w3_url_request($method, $url, $data = '', $auth = '')
 {
+    $status = 0;
     $method = strtoupper($method);
     
-    if (function_exists('curl_init')) {
+    if (! function_exists('curl_init')) {
         $ch = curl_init();
         
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_USERAGENT, W3TC_POWERED_BY);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
         
         if ($method == 'POST') {
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -658,9 +721,9 @@ function w3_url_request($method, $url, $data = '', $auth = '')
         
         $contents = curl_exec($ch);
         
-        curl_close($ch);
+        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         
-        return $contents;
+        curl_close($ch);
     } else {
         $parse_url = @parse_url($url);
         
@@ -671,7 +734,7 @@ function w3_url_request($method, $url, $data = '', $auth = '')
             $query = (isset($parse_url['query']) ? $parse_url['query'] : '');
             $request_uri = $path . ($query != '' ? '?' . $query : '');
             
-            $headers = array(
+            $request_headers_array = array(
                 sprintf('%s %s HTTP/1.1', $method, $request_uri), 
                 sprintf('Host: %s', $host), 
                 sprintf('User-Agent: %s', W3TC_POWERED_BY), 
@@ -679,32 +742,46 @@ function w3_url_request($method, $url, $data = '', $auth = '')
             );
             
             if (! empty($data)) {
-                $headers[] = sprintf('Content-Length: %d', strlen($data));
+                $request_headers_array[] = sprintf('Content-Length: %d', strlen($data));
             }
             
             if (! empty($auth)) {
-                $headers[] = sprintf('Authorization: Basic %s', base64_encode($auth));
+                $request_headers_array[] = sprintf('Authorization: Basic %s', base64_encode($auth));
             }
             
-            $request = implode("\r\n", $headers) . "\r\n\r\n" . $data;
+            $request_headers = implode("\r\n", $request_headers_array);
+            $request = $request_headers . "\r\n\r\n" . $data;
             
-            if (($fp = @fsockopen($host, $port))) {
-                $response = '';
-                @fputs($fp, $request);
-                
-                while (! @feof($fp)) {
-                    $response .= @fgets($fp, 4096);
-                }
-                
-                @fclose($fp);
-                
-                list (, $contents) = explode("\r\n\r\n", $response, 2);
-                
-                return $contents;
+            $fp = @fsockopen($host, $port);
+            
+            if (! $fp) {
+                return false;
+            }
+            
+            $response = '';
+            @fputs($fp, $request);
+            
+            while (! @feof($fp)) {
+                $response .= @fgets($fp, 4096);
+            }
+            
+            @fclose($fp);
+            
+            list ($response_headers, $contents) = explode("\r\n\r\n", $response, 2);
+            
+            $matches = null;
+            
+            if (preg_match('~^HTTP/1.[01] (\d+)~', $response_headers, $matches)) {
+                $status = (int) $matches[1];
             }
         }
     }
-
+    
+    if ($status == 200) {
+        return $contents;
+    }
+    
+    return false;
 }
 
 /**
@@ -729,6 +806,24 @@ function w3_url_get($url)
 function w3_url_post($url, $data = '', $auth = '')
 {
     return w3_url_request('POST', $url, $data, $auth);
+}
+
+/**
+ * Downloads data to a file
+ * 
+ * @param string $url
+ * @param string $file
+ * @return boolean
+ */
+function w3_download($url, $file)
+{
+    $data = w3_url_get($url);
+    
+    if ($data !== false) {
+        return @file_put_contents($file, $data);
+    }
+    
+    return false;
 }
 
 /**
@@ -767,13 +862,26 @@ function w3_is_https()
 }
 
 /**
+ * Converts win path to unix
+ * @param string $path
+ * @return string
+ */
+function w3_path($path)
+{
+    $path = preg_replace('~[/\\\]+~', '/', $path);
+    $path = rtrim($path, '/');
+    
+    return $path;
+}
+
+/**
  * Returns realpath of given path
  *
  * @param string $path
  */
 function w3_realpath($path)
 {
-    $path = preg_replace('~[/\\\]+~', '/', $path);
+    $path = w3_path($path);
     $parts = explode('/', $path);
     $absolutes = array();
     
@@ -837,72 +945,6 @@ function w3_check_open_basedir($path)
 }
 
 /**
- * Returns PHP info
- *
- * @return array
- */
-function w3_phpinfo()
-{
-    ob_start();
-    phpinfo();
-    $phpinfo = ob_get_clean();
-    
-    $phpinfo = preg_replace(array(
-        '#^.*<body>(.*)</body>.*$#ms', 
-        '#<h2>PHP License</h2>.*$#ms', 
-        '#<h1>Configuration</h1>#', 
-        "#\r?\n#", 
-        "#</(h1|h2|h3|tr)>#", 
-        '# +<#', 
-        "#[ \t]+#", 
-        '#&nbsp;#', 
-        '#  +#', 
-        '# class=".*?"#', 
-        '%&#039;%', 
-        '#<tr>(?:.*?)" src="(?:.*?)=(.*?)" alt="PHP Logo" /></a>' . '<h1>PHP Version (.*?)</h1>(?:\n+?)</td></tr>#', 
-        '#<h1><a href="(?:.*?)\?=(.*?)">PHP Credits</a></h1>#', 
-        '#<tr>(?:.*?)" src="(?:.*?)=(.*?)"(?:.*?)Zend Engine (.*?),(?:.*?)</tr>#', 
-        "# +#", 
-        '#<tr>#', 
-        '#</tr>#'
-    ), array(
-        '$1', 
-        '', 
-        '', 
-        '', 
-        '</$1>' . "\n", 
-        '<', 
-        ' ', 
-        ' ', 
-        ' ', 
-        '', 
-        ' ', 
-        '<h2>PHP Configuration</h2>' . "\n" . '<tr><td>PHP Version</td><td>$2</td></tr>' . "\n" . '<tr><td>PHP Egg</td><td>$1</td></tr>', 
-        '<tr><td>PHP Credits Egg</td><td>$1</td></tr>', 
-        '<tr><td>Zend Engine</td><td>$2</td></tr>' . "\n" . '<tr><td>Zend Egg</td><td>$1</td></tr>', 
-        ' ', 
-        '%S%', 
-        '%E%'
-    ), $phpinfo);
-    
-    $sections = explode('<h2>', strip_tags($phpinfo, '<h2><th><td>'));
-    
-    $pi = array();
-    
-    foreach ($sections as $section) {
-        $n = substr($section, 0, strpos($section, '</h2>'));
-        $askapache = null;
-        if (preg_match_all('#%S%(?:<td>(.*?)</td>)?(?:<td>(.*?)</td>)?(?:<td>(.*?)</td>)?%E%#', $section, $askapache, PREG_SET_ORDER)) {
-            foreach ($askapache as $m) {
-                $pi[$n][$m[1]] = (! isset($m[3]) || $m[2] == $m[3]) ? $m[2] : array_slice($m, 2);
-            }
-        }
-    }
-    
-    return $pi;
-}
-
-/**
  * Returns file mime type
  *
  * @param string $file
@@ -910,54 +952,7 @@ function w3_phpinfo()
  */
 function w3_get_mime_type($file)
 {
-    $mime_types = array(
-        'jpg|jpeg|jpe' => 'image/jpeg', 
-        'gif' => 'image/gif', 
-        'png' => 'image/png', 
-        'bmp' => 'image/bmp', 
-        'tif|tiff' => 'image/tiff', 
-        'ico' => 'image/x-icon', 
-        'asf|asx|wax|wmv|wmx' => 'video/asf', 
-        'avi' => 'video/avi', 
-        'divx' => 'video/divx', 
-        'mov|qt' => 'video/quicktime', 
-        'mpeg|mpg|mpe' => 'video/mpeg', 
-        'txt|c|cc|h' => 'text/plain', 
-        'svg' => 'image/svg+xml', 
-        'rtx' => 'text/richtext', 
-        'css' => 'text/css', 
-        'xsl|xsd|xml' => 'text/xml', 
-        'htm|html' => 'text/html', 
-        'mp3|m4a' => 'audio/mpeg', 
-        'mp4|m4v' => 'video/mp4', 
-        'ra|ram' => 'audio/x-realaudio', 
-        'wav' => 'audio/wav', 
-        'ogg' => 'audio/ogg', 
-        'mid|midi' => 'audio/midi', 
-        'wma' => 'audio/wma', 
-        'rtf' => 'application/rtf', 
-        'js' => 'application/x-javascript', 
-        'pdf' => 'application/pdf', 
-        'doc|docx' => 'application/msword', 
-        'pot|pps|ppt|pptx' => 'application/vnd.ms-powerpoint', 
-        'wri' => 'application/vnd.ms-write', 
-        'xla|xls|xlsx|xlt|xlw' => 'application/vnd.ms-excel', 
-        'mdb' => 'application/vnd.ms-access', 
-        'mpp' => 'application/vnd.ms-project', 
-        'swf' => 'application/x-shockwave-flash', 
-        'class' => 'application/java', 
-        'tar' => 'application/x-tar', 
-        'zip' => 'application/zip', 
-        'gz|gzip' => 'application/x-gzip', 
-        'exe' => 'application/x-msdownload', 
-        'odt' => 'application/vnd.oasis.opendocument.text', 
-        'odp' => 'application/vnd.oasis.opendocument.presentation', 
-        'ods' => 'application/vnd.oasis.opendocument.spreadsheet', 
-        'odg' => 'application/vnd.oasis.opendocument.graphics', 
-        'odc' => 'application/vnd.oasis.opendocument.chart', 
-        'odb' => 'application/vnd.oasis.opendocument.database', 
-        'odf' => 'application/vnd.oasis.opendocument.formula'
-    );
+    $mime_types = include W3TC_DIR . '/inc/mime.php';
     
     $file_ext = strrchr($file, '.');
     
@@ -1026,18 +1021,50 @@ function w3_preg_quote($string, $delimiter = null)
 }
 
 /**
- * Normalize file path
+ * Converts file path to relative 
  * 
  * @param string $file
  * @return string
  */
 function w3_normalize_file($file)
 {
-    $site_url_regexp = '~' . w3_get_site_url_regexp() . '~i';
-    $file = preg_replace($site_url_regexp, '', $file);
-    $file = ltrim($file, '/\\');
+    if (w3_is_url($file)) {
+        if (strstr($file, '?') === false) {
+            $domain_url_regexp = '~' . w3_get_domain_url_regexp() . '~i';
+            $file = preg_replace($domain_url_regexp, '', $file);
+        }
+    } else {
+        $abspath = w3_path(ABSPATH);
+        $file = w3_path($file);
+        $file = str_replace($abspath, '', $file);
+    }
+    
+    $file = ltrim($file, '/');
     
     return $file;
+}
+
+/**
+ * Translates URL to local path
+ * @param string $url
+ * @return string
+ */
+function w3_translate_file($url)
+{
+    if (! w3_is_url($url)) {
+        $url = w3_get_domain_url() . '/' . ltrim($url, '/\\');
+    }
+    
+    $site_url_regexp = '~' . w3_get_site_url_regexp() . '~i';
+    
+    if (preg_match($site_url_regexp, $url) && strstr($url, '?') === false) {
+        $url = preg_replace($site_url_regexp, '', $url);
+        $url = w3_get_site_path() . ltrim($url, '/\\');
+    }
+    
+    $url = ltrim($url, '/');
+    
+    return $url;
 }
 
 /**
@@ -1067,6 +1094,48 @@ function w3_stripslashes($var)
     return $var;
 }
 
+if (! function_exists('file_put_contents')) {
+    if (! defined('FILE_APPEND')) {
+        define('FILE_APPEND', 8);
+    }
+    
+    /**
+     * Puts contents to the file
+     * 
+     * @param string $filename
+     * @param string $data
+     * @param integer $flags
+     * @return boolean
+     */
+    function file_put_contents($filename, $data, $flags = 0)
+    {
+        $fp = fopen($filename, ($flags & FILE_APPEND ? 'a' : 'w'));
+        
+        if ($fp) {
+            fputs($fp, $data);
+            fclose($fp);
+            
+            return true;
+        }
+        
+        return false;
+    }
+}
+
+/**
+ * Cleanup .htaccess rules
+ * @param string $rules
+ * @return string
+ */
+function w3_clean_rules($rules)
+{
+    $rules = preg_replace('~[\r\n]+~', "\n", $rules);
+    $rules = preg_replace('~^\s+~m', '', $rules);
+    $rules = trim($rules);
+    
+    return $rules;
+}
+
 /**
  * Send powered by header
  */
@@ -1082,6 +1151,10 @@ function w3_send_x_powered_by()
     }
     
     @header('X-Powered-By: ' . W3TC_POWERED_BY);
+}
+
+if (w3_is_wpmu()) {
+    unset($_GET['sitewide']);
 }
 
 w3_send_x_powered_by();

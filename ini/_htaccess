@@ -8,6 +8,7 @@ AddType application/x-javascript		.js
 AddType application/x-shockwave-flash	.swf
 AddType image/bmp						.bmp
 AddType image/gif						.gif
+AddType image/pjpeg						.pjpeg
 AddType image/jpeg						.jpeg
 AddType image/jpg						.jpg
 AddType image/png						.png
@@ -65,6 +66,7 @@ ExpiresByType application/x-shockwave-flash	A259200
 ExpiresByType application/wlwmanifest+xml	A259200
 ExpiresByType image/bmp						A259200
 ExpiresByType image/gif						A259200
+ExpiresByType image/pjpeg					A259200
 ExpiresByType image/jpeg					A259200
 ExpiresByType image/jpg						A259200
 ExpiresByType image/png						A259200
@@ -81,7 +83,7 @@ ExpiresByType text/xsd						A259200
 ExpiresByType text/xsl						A259200
 </IfModule>
 
-<FilesMatch "\.(bmp|css|ico|html?|js|tiff?|gif|jpe?g|png|svgz?|swf|txt|xsd|xsl|xml)$">
+<FilesMatch "\.(bmp|css|ico|html?|js|tiff?|gif|p?jpe?g|png|svgz?|swf|txt|xsd|xsl|xml)$">
 <IfModule mod_headers.c>
 # Set Pragma header
 Header set Pragma "public"
@@ -105,7 +107,7 @@ RewriteCond %{REQUEST_FILENAME} !^.*\.css [NC]
 RewriteCond %{REQUEST_FILENAME} !^.*\.gif [NC]
 RewriteCond %{REQUEST_FILENAME} !^.*\.html? [NC]
 RewriteCond %{REQUEST_FILENAME} !^.*\.js [NC]
-RewriteCond %{REQUEST_FILENAME} !^.*\.jpe?g [NC]
+RewriteCond %{REQUEST_FILENAME} !^.*\.p?jpe?g [NC]
 RewriteCond %{REQUEST_FILENAME} !^.*\.png [NC]
 RewriteCond %{REQUEST_FILENAME} !^.*\.svgz? [NC]
 RewriteCond %{REQUEST_FILENAME} !^.*\.swf [NC]

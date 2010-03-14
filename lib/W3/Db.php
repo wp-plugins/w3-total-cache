@@ -107,11 +107,11 @@ class W3_Db extends wpdb
      */
     function query($query)
     {
-        if (! $this->ready) {
+        if (!$this->ready) {
             return false;
         }
         
-        ++ $this->query_total;
+        ++$this->query_total;
         
         // Filter the query, if filters are available
         // NOTE: Some queries are made before the plugins have been loaded, and thus cannot be filtered with this method
@@ -148,7 +148,7 @@ class W3_Db extends wpdb
          * Check if query was cached
          */
         if (is_array($data)) {
-            ++ $this->query_hits;
+            ++$this->query_hits;
             $cached = true;
             
             /**
@@ -160,8 +160,8 @@ class W3_Db extends wpdb
             $this->col_info = $data['col_info'];
             $this->num_rows = $data['num_rows'];
         } else {
-            ++ $this->num_queries;
-            ++ $this->query_misses;
+            ++$this->num_queries;
+            ++$this->query_misses;
             
             // Perform the query via std mysql_query function..
             $this->timer_start();
@@ -255,7 +255,7 @@ class W3_Db extends wpdb
         /**
          * Skip if disabled
          */
-        if (! $this->_config->get_boolean('dbcache.enabled')) {
+        if (!$this->_config->get_boolean('dbcache.enabled')) {
             $cache_reject_reason = 'database caching is disabled';
             return false;
         }
@@ -303,7 +303,7 @@ class W3_Db extends wpdb
         /**
          * Skip if SQL is rejected
          */
-        if (! $this->_check_sql($sql)) {
+        if (!$this->_check_sql($sql)) {
             $cache_reject_reason = 'query is rejected';
             return false;
         }
@@ -311,7 +311,7 @@ class W3_Db extends wpdb
         /**
          * Skip if request URI is rejected
          */
-        if (! $this->_check_request_uri()) {
+        if (!$this->_check_request_uri()) {
             $cache_reject_reason = 'request URI is rejected';
             return false;
         }
@@ -319,7 +319,7 @@ class W3_Db extends wpdb
         /**
          * Skip if cookie is rejected
          */
-        if (! $this->_check_cookies()) {
+        if (!$this->_check_cookies()) {
             $cache_reject_reason = 'cookie is rejected';
             return false;
         }
@@ -327,7 +327,7 @@ class W3_Db extends wpdb
         /**
          * Skip if user is logged in
          */
-        if ($this->_config->get_boolean('dbcache.reject.logged') && ! $this->_check_logged_in()) {
+        if ($this->_config->get_boolean('dbcache.reject.logged') && !$this->_check_logged_in()) {
             $cache_reject_reason = 'user is logged in';
             return false;
         }
@@ -356,7 +356,7 @@ class W3_Db extends wpdb
     {
         static $instances = array();
         
-        if (! isset($instances[0])) {
+        if (!isset($instances[0])) {
             $class = __CLASS__;
             $instances[0] = & new $class(DB_USER, DB_PASSWORD, DB_NAME, DB_HOST);
         }
@@ -388,15 +388,14 @@ class W3_Db extends wpdb
     {
         static $cache = array();
         
-        if (! isset($cache[0])) {
+        if (!isset($cache[0])) {
             $engine = $this->_config->get_string('dbcache.engine');
             
             switch ($engine) {
                 case 'memcached':
                     $engineConfig = array(
-                        'engine' => $this->_config->get_string('dbcache.memcached.engine'), 
                         'servers' => $this->_config->get_array('dbcache.memcached.servers'), 
-                        'persistant' => true
+                        'persistant' => $this->_config->get_boolean('dbcache.memcached.persistant')
                     );
                     break;
                 
@@ -434,9 +433,9 @@ class W3_Db extends wpdb
             '^\s*alter', 
             '^\s*show', 
             '^\s*set', 
-            'sql_calc_found_rows', 
-            'found_rows\(\)', 
-            'w3tc_request_data'
+            '\bsql_calc_found_rows\b', 
+            '\bfound_rows\(\)\b', 
+            sprintf('\b%soptions\b', $this->prefix)
         );
         
         if (preg_match('@' . implode('|', $auto_reject_strings) . '@is', $sql)) {
@@ -540,13 +539,13 @@ class W3_Db extends wpdb
      */
     function _get_cache_key($sql)
     {
-        $blog_id = w3_get_blog_id();
+        $blogname = w3_get_blogname();
         
-        if (empty($blog_id)) {
-            $blog_id = $_SERVER['HTTP_HOST'];
+        if ($blogname == '') {
+            $blogname = $_SERVER['HTTP_HOST'];
         }
         
-        return sprintf('w3tc_%s_sql_%s', md5($blog_id), md5($sql));
+        return sprintf('w3tc_%s_sql_%s', md5($blogname), md5($sql));
     }
     
     /**

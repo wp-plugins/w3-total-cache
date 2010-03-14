@@ -173,7 +173,7 @@ class W3_Plugin_DbCache extends W3_Plugin
     
     /**
      * Does disk cache cleanup
-	 *
+     *
      * @return void
      */
     function cleanup()

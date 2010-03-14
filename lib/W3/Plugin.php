@@ -67,26 +67,30 @@ class W3_Plugin
      */
     function locked()
     {
-        global $blog_id;
         static $locked = null;
         
         if ($locked === null) {
-            $locked = false;
-            
-            // check only for WP MU
-            if ($blog_id && function_exists('get_blog_option')) {
-                $blogs = get_blog_list();
-                
-                foreach ($blogs as $blog) {
-                    if ($blog['blog_id'] != $blog_id) {
-                        $active_plugins = get_blog_option($blog['blog_id'], 'active_plugins');
-                        
-                        if (in_array(W3TC_FILE, $active_plugins)) {
-                            $locked = true;
-                            break;
+            if (w3_is_wpmu()) {
+                if (isset($_GET['sitewide'])) {
+                    $locked = false;
+                } else {
+                    global $blog_id;
+                    
+                    $blogs = get_blog_list();
+                    
+                    foreach ($blogs as $blog) {
+                        if ($blog['blog_id'] != $blog_id) {
+                            $active_plugins = get_blog_option($blog['blog_id'], 'active_plugins');
+                            
+                            if (in_array(W3TC_FILE, $active_plugins)) {
+                                $locked = true;
+                                break;
+                            }
                         }
                     }
                 }
+            } else {
+                $locked = false;
             }
         }
         

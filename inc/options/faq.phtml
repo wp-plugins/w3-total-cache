@@ -27,7 +27,7 @@
         <li><a href="#q16">I understand the database caching and the page caching, but what's minify all about?</a></li>
         <li><a href="#q17">What do you use to minify?</a></li>
         <li><a href="#q18">What's the point of downloading and caching 3rd party files (e.g. <acronym title="JavaScript">JS</acronym>)?</a></li>
-        <li><a href="#q19">Will you support other memory or opcode caches</a>?</li>
+        <!--<li><a href="#q19">Will you support other memory or opcode caches</a>?</li>-->
         <li><a href="#q20">Will this plugin break my theme by changing the order of conditional statements or the like?</a></li>
         <li><a href="#q21">Will this speed up <acronym title="WordPress">WP</acronym> Admin?</a></li>
         <li><a href="#q22">Does this plugin modify how the WordPress core works?</a></li>
@@ -39,7 +39,7 @@
         <li><a href="#q28">Ok I get it, this all sounds nice and everything, but is this perfect?</a></li>
         <li><a href="#q29">Seriously, tell me what the downside is, there must be something?</a></li>
         <li><a href="#q30">If this plugin does everything you claim, why would you give it away free? Cui Bono?</a></li>
-		<li><a href="#q31">Who in the world uses memcached or <acronym title="Alternative PHP Cache">APC</acronym> etc anyway?</a></li>
+		<li><a href="#q31">Who in the world uses memcached or opcode caching etc anyway?</a></li>
         <li><a href="#q32">I don't understand what a <acronym title="Content Delivery Network">CDN</acronym> has to do with caching, that's completely different, no?</a></li>
         <li><a href="#q33">We run many blogs on many servers here at my company, is this plugin still for me?</a></li>
         <li><a href="#q34">So you appear to know what you're talking about, will there be any negative effect on my SEO rankings?</a></li>
@@ -77,7 +77,7 @@
         <li><a href="#q59">What's this thing doing? Where are the statistics?</a></li>
         <li><a href="#q60">How can I tell if it's working? Aren't there any statistics at all?</a></li>
         <li><a href="#q61">I'm an advanced theme developer and I want to have different combinations of <acronym title="Cascading Style Sheet">CSS</acronym> or <acronym title="JavaScript">JS</acronym> files on different types of pages in my theme; how is this done?</a></li>
-		<li><a href="#q62">Which features can I use if I haven't yet installed <acronym title="Alternative PHP Cache">APC</acronym> or memcached?</a></li>
+		<li><a href="#q62">Which features can I use if I haven't yet installed an opcode cache or memcached?</a></li>
         <li><a href="#q63">How can I host my favicon with my <acronym title="Content Delivery Network">CDN</acronym>?</a></li>
         <li><a href="#q64">Why do you set the value of the media attribute of &lt;link&gt; to all?</a></li>
         <li><a href="#q65">Why can't I specify other &lt;script&gt; types or encoding?</a></li>
@@ -99,6 +99,10 @@
         <li><a href="#q97">I see garbage characters instead of the normal web site, what's going on here?</a></li>
         <li><a href="#q98">What is the purpose of the "Media Library Import" tool and how do I use it?</a></li>
         <li><a href="#q99">I'm getting blank pages or 500 error codes when trying to upgrade on WordPress MU</a></li>
+        <li><a href="#q100">How can I embed the minified CSS file at the location I choose?</a></li>
+        <li><a href="#q101">Is this plugin comptatible with TDO Mini Forms?</a></li>
+        <li><a href="#q102">My YSlow score is low because doesn't recognize my <acronym title="Content Delivery Network">CDN</acronym>, what can I do?</a></li>
+        <li><a href="#q103">What is the purpose of the "modify attachment <acronym title="Uniform Resource Indicator">URL</acronym>s" button?</a></li>
       </ul>
     </li>
     <li class="col">
@@ -108,7 +112,7 @@
         <li><a href="#q79">Do I need to enable mod_gzip, mod_rewrite or install any <acronym title="Hypertext Transfer Protocol">HTTP</acronym> compression software on my server?</a></li>
         <li><a href="#q80">Is this plugin compatible with varnish or squid?</a></li>
         <li><a href="#q81">My server is state of the art with 15,000 <acronym title="Rotations per Minute">RPM</acronym> <acronym title="Redundant Array of Independent Disks">RAID</acronym>, why do I need to cache anything in memory?</a></li>
-		<li><a href="#q82">Why would I choose <acronym title="Alternative PHP Cache">APC</acronym> over memcached or vice versa?</a></li>
+		<li><a href="#q82">Why would I choose an opcode cache over memcached or vice versa?</a></li>
         <li><a href="#q83">I already use <acronym title="Hypertext Transfer Protocol">HTTP</acronym> compression on my server, why does it matter if I minify my code?</a></li>
         <li><a href="#q84">How much memory (<acronym title="Random Access Memory">RAM</acronym>) do I need to delegate to caching?</a></li>
         <li><a href="#q85">What version of <acronym title="Hypertext Preprocessor">PHP</acronym> do I need for this thing?</a></li>
@@ -150,8 +154,8 @@
       <li>Bandwidth savings via <acronym title="Hypertext Transfer Protocol">HTTP</acronym> compression (<acronym title="GNU zip">gzip</acronym> / deflate) for <acronym title="Hypertext Markup Language">HTML</acronym>, <acronym title="Cascading Style Sheet">CSS</acronym> and <acronym title="JavaScript">JS</acronym></li>
     <li>Minification (concatenation, white space removal) of inline, external or 3rd party <acronym title="JavaScript">JS</acronym> and <acronym title="Cascading Style Sheet">CSS</acronym> with scheduled updates</li>
     <li>Optional embedding of <acronym title="JavaScript">JS</acronym> just above &lt;/body&gt;</li>
-      <li>Support for caching pages, posts, feeds, database objects, <acronym title="Cascading Style Sheet">CSS</acronym>, <acronym title="JavaScript">JS</acronym> in memory with <acronym title="Alternative PHP Cache">APC</acronym> or memcached or both</li>
-    <li>Caching of RSS/Atom Feeds (Comments, Page and site), <acronym title="Uniform Resource Indicator">URL</acronym>s with query string variables (like search result pages), Database queries, Pages, Posts, <acronym title="Cascading Style Sheet">CSS</acronym> and <acronym title="JavaScript">JS</acronym></li>
+      <li>Support for caching pages, posts, feeds, database objects, <acronym title="Cascading Style Sheet">CSS</acronym>, <acronym title="JavaScript">JS</acronym> in memory with an opcode cache or memcached or both</li>
+    <li>Caching of feeds (comments, page and site), <acronym title="Uniform Resource Indicator">URL</acronym>s with query string variables (like search result pages), Database queries, Pages, Posts, <acronym title="Cascading Style Sheet">CSS</acronym> and <acronym title="JavaScript">JS</acronym></li>
     <li>Complete header management including Etags</li>
     <li>Increased web server concurrency and reduced resource consumption, increased scale</li>
   </ul>
@@ -199,17 +203,16 @@
 	<li><a href="http://www.procata.com/cachetest/" target="_blank">Web Caching Tests</a></li>
 	<li><a href="http://www.port80software.com/tools/compresscheck.asp" target="_blank">Port80 Compression Check</a> (minify requires <acronym title="Microsoft Internet Explorer">MSIE</acronym>6 support to be enabled)</li>
 	<li><a href="http://www.gidnetwork.com/tools/gzip-test.php" target="_blank">A simple online web page compression / deflate / <acronym title="GNU zip">gzip</acronym> test tool</a></li>
-    <li><a href="http://www.websiteoptimization.com/services/analyze/" target="_blank">Web Page Analyzer</a></li>
   </ul>
   <p align="right"><a href="#toc">back to top</a></p>
     <p id="q13"><strong>Does this plugin work with WordPress <acronym title="Multi-User">MU</acronym>?</strong><br />
     Indeed it does.</p>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q14"><strong>Does this plugin work with BuddyPress (bbPress)?</strong><br />
-    Not sure, we'll get to that soon.</p>
+    Yes.</p>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q15"><strong>Which WordPress versions are supported?</strong><br />
-    To use all features in the suite, a minimum version of 2.5 is required. Earlier versions will benefit from our Media Library Importer to get them back on the upgrade path and into a <acronym title="Content Delivery Network">CDN</acronym> of their choosing.</p>
+    To use all features in the suite, a minimum version of 2.6 is required. Earlier versions will benefit from our Media Library Importer to get them back on the upgrade path and into a <acronym title="Content Delivery Network">CDN</acronym> of their choosing.</p>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q16"><strong>I understand the database caching and the page caching, but what's minify all about?</strong><br />
       We'll just quote the fine folks at yahoo on this one:</p>
@@ -225,9 +228,11 @@
   <p id="q18"><strong>What's the point of downloading and caching 3rd party files (e.g. <acronym title="JavaScript">JS</acronym>)?</strong><br />
     With the various hosted 3rd party applications available (from web site statistics to social media sharing widgets), the problems we've noticed are: additional <acronym title="Hypertext Transfer Protocol">HTTP</acronym> transactions, <acronym title="Domain Name System">DNS</acronym> lookups and latencies from busy servers that we can't control and often un-minified files with no <acronym title="Hypertext Transfer Protocol">HTTP</acronym> compression all add up to a very slow page load and poor user experience. With your own copy of external files, updated as frequently as you wish, none of these problems exist.</p>
   <p align="right"><a href="#toc">back to top</a></p>
+<!--
   <p id="q19"><strong>Will you support other memory or </strong><a href="http://en.wikipedia.org/wiki/PHP_accelerator" target="_blank"><strong>opcode caches</strong></a><strong>?</strong><br />
     Possibly, we just <a href="mailto:wordpressexperts@w3-edge.com">need to know which</a> others are popular in the WordPress community and we will address them.</p>
   <p align="right"><a href="#toc">back to top</a></p>
+-->
   <p id="q20"><strong>Will this plugin break my theme by changing the order of conditional statements or the like?</strong><br />
     No, the plugin looks for conditional statements in your markup used for <acronym title="Cascading Style Sheet">CSS</acronym> (and sometimes <acronym title="JavaScript">JS</acronym>) and makes sure that the minified files precede it, so keep that in mind.</p>
   <p align="right"><a href="#toc">back to top</a></p>
@@ -266,7 +271,7 @@
     <li><a href="http://code.google.com/speed/articles/" target="_blank">Google</a> and <a href="http://developer.yahoo.com/yui/" target="_blank">Yahoo</a> offer quite a bit, but they did not offer a WordPress solution yet. This is our contribution to speeding up the web (starting with the blogosphere).</li>
   </ul>
   <p align="right"><a href="#toc">back to top</a></p>
-    <p id="q31"><strong>Who in the world uses memcached or <acronym title="Alternative PHP Cache">APC</acronym> etc anyway?</strong><br />
+    <p id="q31"><strong>Who in the world uses memcached or an opcode cache etc anyway?</strong><br />
     Great question! Basically anyone that needs to make their application scale. For example, <a href="http://www.wordpress.com/" target="_blank">WordPress.com</a>, <a href="http://twitter.com" target="_blank">Twitter</a>, <a href="http://www.facebook.com/" target="_blank">Facebook</a>, LiveJournal (the inventors of the software) and so on all use some sort of memory cache to increase application performance.</p>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q32"><strong>I don't understand what a <acronym title="Content Delivery Network">CDN</acronym> has to do with caching, that's completely different, no?</strong><br />
@@ -300,23 +305,25 @@
   <p id="q41"><strong>Who do I thank for all of this?</strong><br />
       It's quite difficult to recall all of the innovators that have shared their thoughts, code and experiences in the blogosphere over the years, but here are some names to get you started:</p>
   <ul>
+    <li><a href="http://stevesouders.com/" target="_blank">Steve Souders</a></li>
     <li><a href="http://mrclay.org/" target="_blank">Steve Clay</a></li>
     <li><a href="http://wonko.com/" target="_blank">Ryan Grove</a></li>
     <li><a href="http://www.nczonline.net/blog/2009/06/23/loading-javascript-without-blocking/" target="_blank">Nicholas Zakas</a> </li>
-    <li><a href="http://stevesouders.com/" target="_blank">Steve Souders</a></li>
     <li><a href="http://rtdean.livejournal.com/" target="_blank">Ryan Dean</a></li>
     <li><a href="http://gravitonic.com/" target="_blank">Andrei Zmievski</a></li>
     <li>George Schlossnagle</li>
     <li>Daniel Cowgill</li>
     <li><a href="http://toys.lerdorf.com/" target="_blank">Rasmus Lerdorf</a></li>
     <li><a href="http://t3.dotgnu.info/" target="_blank">Gopal Vijayaraghavan</a></li>
+	<li><a href="http://eaccelerator.net/" target="_blank">Bart Vanbraban</a></li>
+	<li><a href="http://xcache.lighttpd.net/" target="_blank">mOo</a></li>
   </ul>
   <p>Please reach out to all of these people and support their projects if you're so inclined.</p>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q42"><strong>How do I find the <acronym title="JavaScript">JS</acronym> and <acronym title="Cascading Style Sheet">CSS</acronym> to optimize (minify) them with this plugin?</strong><br />
     View your page source in your browser and search for any &lt;style&gt;, &lt;link&gt; or &lt;script&gt; tags that contain external <acronym title="Cascading Style Sheet">CSS</acronym> or <acronym title="JavaScript">JS</acronym> files and one by one add them to the minify settings page. Do not include any <acronym title="Cascading Style Sheet">CSS</acronym> in conditional statements (unless you know what you are doing) like:</p>
     <p>&lt;!--[if lte IE 8]&gt;&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;/wp-content/themes/default/lte.css&quot; media=&quot;screen,projection&quot; /&gt;&lt;![endif]--&gt;</p>
-  <p>The plugin will concatenate, minify, <acronym title="Hypertext Transfer Protocol">HTTP</acronym> compress and check for updates to these files automatically from now on. If you have any <acronym title="Cascading Style Sheet">CSS</acronym> or <acronym title="JavaScript">JS</acronym> that are inline consider making them external files so that you can use them with minify.</p>
+  <p>The plugin will combine, minify, <acronym title="Hypertext Transfer Protocol">HTTP</acronym> compress and check for updates to these files automatically from now on. If you have any <acronym title="Cascading Style Sheet">CSS</acronym> or <acronym title="JavaScript">JS</acronym> that are inline consider making them external files so that you can use them with minify.</p>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q43"><strong>I've used the plugin to optimize all my theme's <acronym title="JavaScript">JS</acronym> and plugins <acronym title="JavaScript">JS</acronym>, but there are some function calls, where do those go?</strong><br />
     Just place them above &lt;/head&gt; if that's where your embed is done or above &lt;/body&gt; if that's where you need them. Wherever they need to be to be called after the <acronym title="JavaScript">JS</acronym> that needs them, it'll be fine.</p>
@@ -331,7 +338,7 @@
   <p>Now go to the General Settings tab and click the checkbox and save the settings to enable <acronym title="Content Delivery Network">CDN</acronym> functionality and empty the cache for the changes to take effect.</p>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q94"><strong>How do I use an Origin Pull (Mirror) <acronym title="Content Delivery Network">CDN</acronym>?</strong><br />
-    Login to your <acronym title="Content Delivery Network">CDN</acronym> providers control panel or account management area. Following any set up steps they provide, create a new "pull zone" or "bucket" for your site's domain name. If there's a set up wizard or any troubleshooting tips your provider offers, be sure to review them. In the <acronym title="Content Delivery Network">CDN</acronym> Settings tab of the plugin, enter the hostname your <acronym title="Content Delivery Network">CDN</acronym> provider provided in the "replace default hostname with" field. You should always do a quick check by opening a test file from the <acronym title="Content Delivery Network">CDN</acronym> hostname, e.g. http://cdn.domain.com/favicon.ico. Troubleshoot with yoru <acronym title="Content Delivery Network">CDN</acronym> provider until this test is successful.</p>
+    Login to your <acronym title="Content Delivery Network">CDN</acronym> providers control panel or account management area. Following any set up steps they provide, create a new "pull zone" or "bucket" for your site's domain name. If there's a set up wizard or any troubleshooting tips your provider offers, be sure to review them. In the <acronym title="Content Delivery Network">CDN</acronym> Settings tab of the plugin, enter the hostname your <acronym title="Content Delivery Network">CDN</acronym> provider provided in the "replace site's hostname with" field. You should always do a quick check by opening a test file from the <acronym title="Content Delivery Network">CDN</acronym> hostname, e.g. http://cdn.domain.com/favicon.ico. Troubleshoot with yoru <acronym title="Content Delivery Network">CDN</acronym> provider until this test is successful.</p>
   <p>Now go to the General Settings tab and click the checkbox and save the settings to enable <acronym title="Content Delivery Network">CDN</acronym> functionality and empty the cache for the changes to take effect.</p>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q45"><strong>In the past, I always had to modify my theme to run dynamic code. Don't I need to do that again for this plugin?</strong><br />
@@ -388,7 +395,7 @@ No, you can drag and drop them into the desired order on the minify settings pag
   <p id="q61"><strong>I'm an advanced theme developer and I want to have different combinations of <acronym title="Cascading Style Sheet">CSS</acronym> or <acronym title="JavaScript">JS</acronym> files on different types of pages in my theme; how is this done?</strong><br />
     On the minify settings tab, use the drop-down selection menu to define the <acronym title="Cascading Style Sheet">CSS</acronym> or <acronym title="JavaScript">JS</acronym> files that appear on all pages using the "Default" group first. Then specify unie files for the other pages.</p>
   <p align="right"><a href="#toc">back to top</a></p>
-    <p id="q62"><strong>Which features can I use if I haven't yet installed <acronym title="Alternative PHP Cache">APC</acronym> or memcached?</strong><br />
+    <p id="q62"><strong>Which features can I use if I haven't yet installed an opcode cache or memcached?</strong><br />
 		  Memory caching will not be possible. However you will be able to use both the page cache and minify in "disk" mode, as well <acronym title="Content Delivery Network">CDN</acronym> functionality without issue.</p>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q63"><strong>How can I host my favicon with my <acronym title="Content Delivery Network">CDN</acronym>?</strong><br />
@@ -400,15 +407,23 @@ No, you can drag and drop them into the desired order on the minify settings pag
   <p id="q65"><strong>Why can't I specify other &lt;script&gt; types or encoding?</strong><br />
     We have not found a use case where this appears to be of any consequence. If you're aware of one <a href="mailto:wordpressexperts@w3-edge.com">please let us know</a>.</p>
   <p align="right"><a href="#toc">back to top</a></p>
-  <p id="q66"><strong>My theme doesn't call wp_footer(), how do I set this plugin up?</strong><br />
-    If you need to embed JavaScript at the bottom of the page and your theme doesn't use wp_footer(), you'll need to manually update your theme. The calls you'll want to make for the various cases are:</p>
+  <p id="q66"><strong>My theme doesn't call wp_footer() or wp_head(), how do I set this plugin up?</strong><br />
+    You'll need to manually update your theme to include your <acronym title="Cascading Style Sheet">CSS</acronym> and <acronym title="JavaScript">JS</acronym> minify groups. The calls you'll want to make for the various cases are:</p>
   <ul>
-    <li>&lt;?php if (function_exists('w3tc_scripts')){w3tc_scripts('include-footer');} ?&gt;<br />
-      Inserts the footer <acronym title="JavaScript">JS</acronym> group at the location you specify in your theme.</li>
-    <li>&lt;?php if (function_exists('w3tc_scripts')){w3tc_scripts('include-footer-nb');} ?&gt;<br />
-      Inserts the footer non-blocking <acronym title="JavaScript">JS</acronym> group at the location you specify in your theme.</li>
-    <li>&lt;?php if (function_exists('w3tc_scripts')){w3tc_scripts('include-footer');w3tc_scripts('include-footer-nb');} ?&gt;<br />
-      Inserts both of the above <acronym title="JavaScript">JS</acronym> groups at the location you specify in your theme.</li>
+    <li>&lt;?php if (function_exists('w3tc_styles')): w3tc_styles('include'); endif; ?&gt;<br />
+      Inserts the &lt;head&gt; <acronym title="Cascading Style Sheet">CSS</acronym> group at the location you choose. Multiple occurrences are allowed.</li>
+    <li>&lt;?php if (function_exists('w3tc_scripts')): w3tc_scripts('include'); endif; ?&gt;<br />
+      Inserts the &lt;head&gt; blocking <acronym title="JavaScript">JS</acronym> group at the location you choose.</li>
+    <li>&lt;?php if (function_exists('w3tc_scripts')): w3tc_scripts('include-nb'); endif; ?&gt;<br />
+      Inserts the &lt;head&gt; non-blocking <acronym title="JavaScript">JS</acronym> group at the location you choose.</li>
+    <li>&lt;?php if (function_exists('w3tc_scripts')): w3tc_scripts('include');w3tc_scripts('include-nb'); endif; ?&gt;<br />
+      Inserts both the blocking and non-blocking &lt;head&gt; <acronym title="JavaScript">JS</acronym> group at the location you choose.</li>
+    <li>&lt;?php if (function_exists('w3tc_scripts')): w3tc_scripts('include-footer'); endif; ?&gt;<br />
+      Inserts the footer <acronym title="JavaScript">JS</acronym> group at the location you choose.</li>
+    <li>&lt;?php if (function_exists('w3tc_scripts')): w3tc_scripts('include-footer-nb'); endif; ?&gt;<br />
+      Inserts the footer non-blocking <acronym title="JavaScript">JS</acronym> group at the location you choose.</li>
+    <li>&lt;?php if (function_exists('w3tc_scripts')): w3tc_scripts('include-footer');w3tc_scripts('include-footer-nb'); endif; ?&gt;<br />
+      Inserts both the blocking and non-blocking <acronym title="JavaScript">JS</acronym> groups at the location you choose.</li>
   </ul>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q67"><strong>Is this plugin compatible with other popular caching plugins?</strong><br />
@@ -438,17 +453,15 @@ No, you can drag and drop them into the desired order on the minify settings pag
   <p id="q75"><strong>Who do you recommend as a <acronym title="Content Delivery Network">CDN</acronym> provider?</strong><br />
     That depends on how you use your blog and where most of your readers read your blog (regionally). Here's a short list:</p>
   <ul>
-    <li><a href="http://www.maxcdn.com/" target="_blank">MaxCDN</a></li>
-    <li><a href="http://www.rackspacecloud.com/cloud_hosting_products/files" target="_blank">Rackspace Cloud Files</a></li>
-    <li><a href="http://www.cotendo.com/" target="_blank">Cotendo</a></li>
-    <li><a href="https://vps.net/cdn-signup" target="_blank">VPS NET</a></li>
-    <li><a href="http://aws.amazon.com/s3/" target="_blank">Amazon S3</a> / <a href="http://aws.amazon.com/cloudfront/" target="_blank">Cloudfront</a></li>
-    <li><a href="http://www.netdna.com/" target="_blank">NetDNA</a></li>
-    <li><a href="http://www.edgecast.com/" target="_blank">EdgeCast</a></li>
-    <li><a href="http://www.akamai.com/" target="_blank">Akamai</a></li>
-    <li><a href="http://www.limelightnetworks.com/" target="_blank">Limelight Networks</a></li>
-    <li><a href="http://www.simplecdn.com/" target="_blank">Simple<acronym title="Content Delivery Network">CDN</acronym></a></li>
-    <li><a href="http://www.voxel.net/products-services/voxcast-cdn" target="_blank">Voxel</a></li>
+    <li><a href="http://bit.ly/acaXXt" target="_blank">MaxCDN</a></li>
+    <li><a href="http://bit.ly/9hpX8T" target="_blank">Rackspace Cloud Files</a></li>
+    <li><a href="http://bit.ly/bnVs0a" target="_blank">Cotendo</a></li>
+    <li><a href="http://bit.ly/d5hfFt" target="_blank">VPS NET</a></li>
+    <li><a href="http://bit.ly/ao1sGt" target="_blank">Cloudfront</a></li>
+    <li><a href="http://bit.ly/bIjSWC" target="_blank">EdgeCast</a></li>
+    <li><a href="http://bit.ly/a5GBLV" target="_blank">Akamai</a></li>
+    <li><a href="http://bit.ly/aCW04j" target="_blank">Limelight Networks</a></li>
+    <li><a href="http://bit.ly/93EAKK" target="_blank">Simple<acronym title="Content Delivery Network">CDN</acronym></a></li>
   </ul>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q76"><strong>Hang on, don't I need to modify my <acronym title="Cascading Style Sheet">CSS</acronym> files so they'll work on the <acronym title="Content Delivery Network">CDN</acronym>?</strong><br />
@@ -464,7 +477,7 @@ No, you can drag and drop them into the desired order on the minify settings pag
     Yes. Follow these steps:</p>
   <ol>
     <li>Enable dynamic loading of ratings by checking GD Star Rating -> Settings -> Features "Cache support option"</li>
-    <li>If Database cache enabled in W3 Total Cache add "wp_gdsr" to "Ignored query stems" option on the Database Cache settings tab, otherwise ratings will not updated after voting</li>
+    <li>If Database cache enabled in W3 Total Cache add "wp_gdsr" to "Ignored query stems" field in the Database Cache settings tab, otherwise ratings will not updated after voting</li>
     <li>Empty all caches</li>
   </ol>
   <p align="right"><a href="#toc">back to top</a></p>
@@ -482,6 +495,29 @@ No, you can drag and drop them into the desired order on the minify settings pag
   <p id="q99"><strong>I'm getting blank pages or 500 error codes when trying to upgrade on WordPress MU</strong><br />
     First, make sure the plugin is not active (disabled) site-wide. Then make sure it's deactivated site-wide. Now you should be able to successful upgrade without breaking your site.</p>
   <p align="right"><a href="#toc">back to top</a></p>
+  <p id="q100"><strong>How can I embed the minified CSS file at the location I choose?</strong></p>
+  <ul>
+    <li>&lt;?php if (function_exists('w3tc_styles')){w3tc_styles('include');} ?&gt;<br />
+      Inserts the minified CSS files at the location you specify in your theme. More than one instance per template is ok; e.g. embedding in multiple conditional statements.</li>
+  </ul>
+  <p align="right"><a href="#toc">back to top</a></p>
+  <p id="q101"><strong>Is this plugin comptatible with TDO Mini Forms?</strong><br />
+	Captcha and recaptcha will work fine, however you will need to prevent any pages with forms from being cached. Add the page's URI to the "Never cache the following pages" box on the Page Cache Settings tab.</p>
+  <p align="right"><a href="#toc">back to top</a></p>
+  <p id="q102"><strong>My YSlow score is low because it doesn't recognize my <acronym title="Content Delivery Network">CDN</acronym>, what can I do?</strong><br />
+	Rule 2 says to use a content delivery network (<acronym title="Content Delivery Network">CDN</acronym>). The score for this rule is computed by checking the hostname of each component against the list of known <acronym title="Content Delivery Network">CDN</acronym>s. Unfortunately, the list of "known <acronym title="Content Delivery Network">CDN</acronym>s" are the ones used by Yahoo!. Most likely these are not relevant to your web site, except for potentially yui.yahooapis.com. If you want an accurate score for your web site, you can add your <acronym title="Content Delivery Network">CDN</acronym> hostnames to YSlow using Firefox's preferences. Here are the steps to follow:</p>
+  <ul>
+    <li>Go to about:config in Firefox. You'll see the current list of preferences.</li>
+    <li>Right-click in the window and choose New and String to create a new string preference.</li>
+    <li>Enter extensions.yslow.cdnHostnames for the preference name.</li>
+    <li>For the string value, enter the hostname of your <acronym title="Content Delivery Network">CDN</acronym>, for example, mycdn.com. Do not use quotes. If you have multiple <acronym title="Content Delivery Network">CDN</acronym> hostnames, separate them with commas.</li>
+  </ul>
+  <p>If you specify <acronym title="Content Delivery Network">CDN</acronym> hostnames in your preferences, they'll be shown under the details for Rule 2 in the Performance view.</p>
+  <p align="right"><a href="#toc">back to top</a></p>
+  <p id="q103"><strong>What is the purpose of the "modify attachment <acronym title="Uniform Resource Indicator">URL</acronym>s" button?</strong><br />
+	If the domain name of your site has changed, this tool is useful in updating your posts and pages to use the current addresses. For example, if your site used to be www.domain.com, and you decided to change it to domain.com, the result would either be many "broken" images or many unncessary redirects (which slow down the visitor's browsing experience). You can use this tool to correct this and similar cases. Correcting the <acronym title="Uniform Resource Indicator">URL</acronym>s of your images also allows the plugin to do a better job of determining which images are actually hosted with the <acronym title="Content Delivery Network">CDN</acronym></p>
+  <p>As always, it never hurts to back up your database first.</p>
+  <p align="right"><a href="#toc">back to top</a></p>
   <p id="q78"><strong>Which web servers do you support?</strong><br />
     We are aware of no incompatibilities with <a href="http://httpd.apache.org/" target="_blank">apache</a> 1.3+, <a href="http://www.iis.net/" target="_blank">IIS</a> 5+ or <a href="http://litespeedtech.com/products/webserver/overview/" target="_blank">litespeed</a> 4.0.2+. If there's a web server you feel we should be actively testing (e.g. <a href="http://www.lighttpd.net/" target="_blank">lighttpd</a>), we're <a href="mailto:wordpressexperts@w3-edge.com">interested in hearing</a>.</p>
   <p align="right"><a href="#toc">back to top</a></p>
@@ -495,20 +531,20 @@ No, you can drag and drop them into the desired order on the minify settings pag
   <p id="q81"><strong>My server is state of the art with 15,000 RPM RAID, why do I need to cache anything in memory?</strong><br />
     Even if your server was using an array of solid state disks (SSD), your server's <acronym title="Random Access Memory">RAM</acronym> is still going to be faster and introduce less overhead to access than even the fastest solid state drives on a PCIe bus. If you didn't invest in solid state disks for your server, then even worse off - at least an order of magnitude speed difference in read operations in <acronym title="Random Access Memory">RAM</acronym> versus HDD. For write operations delta the latency differences is even more pronounced. <acronym title="Random Access Memory">RAM</acronym> is the winner hands down. We won't even discuss the blocking and arbitration issues that happen with disk arrays under certain circumstances.</p>
   <p align="right"><a href="#toc">back to top</a></p>
-    <p id="q82"><strong>Why would I choose <acronym title="Alternative PHP Cache">APC</acronym> over memcached or vice versa?</strong><br />
-      There's no straight answer for this one. Since WordPress is a PHP-based application, we encourage everyone to install <acronym title="Alternative PHP Cache">APC</acronym> and subsequently realize a minimum of 10x performance gain. It will obviously make our plugin faster as well, so again please check out the installation instructions if you do not already use <acronym title="Alternative PHP Cache">APC</acronym>. Once installed, you can select <acronym title="Alternative PHP Cache">APC</acronym> as your caching engine in our plugin and get back to blogging.</p>
-    <p><acronym title="Alternative PHP Cache">APC</acronym> does have a couple weaknesses:</p>
+    <p id="q82"><strong>Why would I choose opcode caching over memcached or vice versa?</strong><br />
+      There's no straight answer for this one. Since WordPress is a PHP-based application, we encourage everyone to install an opcode cache and realize a minimum of 10x performance gain. It will obviously make our plugin faster as well, so again please check out the installation instructions if you do not already use an opcode cache. Once installed, you can select an opcode cache as the method and get back to blogging.</p>
+    <p>Opcode caching does have a couple weaknesses:</p>
 	<ul>
 		<li>If you frequently restart your web server (e.g. apache) especially during high traffic periods, you will lose your cache and your site will slow down as it rebuilds the cache (which happens very quickly). However if you use memcached you would not lose your cache if your web server is restarted.</li>
-		<li>More importantly, <acronym title="Alternative PHP Cache">APC</acronym> is best suited for single server environments; an <acronym title="Alternative PHP Cache">APC</acronym> cache is only accessible on the local server, it cannot be shared with other servers in a multi-server (cluster) environment.</li>
+		<li>More importantly, opcode caching is best suited for single server environments because the cache is only accessible to the local server, it cannot be shared with other servers in a multi-server (cluster) environment.</li>
 	</ul>
-  <p>It would appear that using <acronym title="Alternative PHP Cache">APC</acronym> for all cases is best, but your mileage may vary. So depending on what software you install and how you manage your server, you can choose the options to fit your needs. If you need help with the install on your dedicated or virtual dedicated linux-based server ask us!</p>
+  <p>It would appear that using <acronym title="Alternative PHP Cache">APC</acronym> database caching, but your mileage may vary. So depending on what software you install and how you manage your server, you can choose the options to fit your needs. If you need help with the install on your dedicated or virtual dedicated linux-based server ask us!</p>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q83"><strong>I already use <acronym title="Hypertext Transfer Protocol">HTTP</acronym> compression on my server, why does it matter if I minify my code?</strong><br />
     Let's say you had a file of 10240 bytes, which becomes 2048 bytes when compressed, savings of ~80% (typical for <acronym title="Cascading Style Sheet">CSS</acronym> files). That same file will now have an <strong>additional</strong> ~3x-10x transfer speed improvement when minified. That's a big return from a small operation. The larger your files, the more significant the proportional performance gains.</p>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q84"><strong>How much memory (<acronym title="Random Access Memory">RAM</acronym>) do I need to delegate to caching?</strong><br />
-      Probably the hardest question of all. At the time of this writing the default WordPress install and theme will consume about 50MB of memory in an <acronym title="Alternative PHP Cache">APC</acronym> cache while running our plugin. Keep in mind that the following factors will determine the minimum size of your cache beyond this noted 50MB:</p>
+      Probably the hardest question of all. At the time of this writing the default WordPress install and theme will consume about 50MB of memory in an opcode cache while running our plugin. Keep in mind that the following factors will determine the minimum size of your cache beyond this noted 50MB:</p>
   <ul>
     <li>Number of typically requested pages per day (if your blog is popular this number is quite large)</li>
     <li>Size of minified <acronym title="Cascading Style Sheet">CSS</acronym>, <acronym title="JavaScript">JS</acronym> and <acronym title="Hypertext Markup Language">HTML</acronym> pages (smaller is better)</li>
@@ -519,7 +555,7 @@ No, you can drag and drop them into the desired order on the minify settings pag
   <p>For those that don't want or have time to learn anything new to get started, sample configuration files are included with the plugin containing inline comments for you.</p>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q85"><strong>What version of <acronym title="Hypertext Preprocessor">PHP</acronym> do I need for this thing?</strong><br />
-      Version 4.3 is supported for some modules, however version 5 preferred (it's much much faster especially with <acronym title="Alternative PHP Cache">APC</acronym>). It is likely version 3.0 of WordPress will no longer support <acronym title="Hypertext Preprocessor">PHP</acronym> 4.3.</p>
+      Version 4.3 is supported for some modules, however version 5 preferred (it's much much faster especially with an opcode cache). It is likely version 3.0 of WordPress will no longer support <acronym title="Hypertext Preprocessor">PHP</acronym> 4.3.</p>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q86"><strong>What version of mySQL is needed?</strong><br />
     If your WordPress installation is works, you're all set.</p>
@@ -537,7 +573,7 @@ No, you can drag and drop them into the desired order on the minify settings pag
     </strong>Yes.</p>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q91"><strong>What is the intended impact of this plugin on the web hosting landscape?</strong><br />
-      We feel that shared or virtual hosting providers will begin offering secure containers (similar to what <a href="http://mediatemple.net/" target="_blank">mediatemple.net</a> does for mySQL and Ruby etc) for <acronym title="Alternative PHP Cache">APC</acronym> and memcached. Whoever brings this offering to market first will lower the bar for more web sites/applications (and startups) to build better performing applications with greater ease. The same hosting provider would also possess a new value added service, thereby realizing a competitive advantage in a highly competitive marketplace. Not to mention be able to increase the density of domains per server (or cluster) without shortchanging customers.</p>
+      We feel that shared or virtual hosting providers will begin offering secure containers (similar to what <a href="http://mediatemple.net/" target="_blank">mediatemple.net</a> does for mySQL and Ruby etc) for opcode caching and memcached. Whoever brings this offering to market first will lower the bar for more web sites/applications (and startups) to build better performing applications with greater ease. The same hosting provider would also possess a new value added service, thereby realizing a competitive advantage in a highly competitive marketplace. Not to mention be able to increase the density of domains per server (or cluster) without shortchanging customers.</p>
   <p>One day hopefully this plugin will contribute to making web servers greener and reduce the ecological footprint of the web by reducing the computational effort required to deliver high performance rich user experiences.</p>
   <p align="right"><a href="#toc">back to top</a></p>
 </div>

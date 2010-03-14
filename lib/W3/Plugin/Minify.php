@@ -18,6 +18,18 @@ class W3_Plugin_Minify extends W3_Plugin
     var $minify_reject_reason = '';
     
     /**
+     * Array of printed styles
+     * @var array
+     */
+    var $printed_styles = array();
+    
+    /**
+     * Array of printed scripts
+     * @var array
+     */
+    var $printed_scripts = array();
+    
+    /**
      * Runs plugin
      */
     function run()
@@ -49,11 +61,6 @@ class W3_Plugin_Minify extends W3_Plugin
                 &$this, 
                 'ob_callback'
             ));
-            
-            add_action('wp_footer', array(
-                &$this, 
-                'footer'
-            ));
         }
     }
     
@@ -66,7 +73,7 @@ class W3_Plugin_Minify extends W3_Plugin
     {
         static $instances = array();
         
-        if (! isset($instances[0])) {
+        if (!isset($instances[0])) {
             $class = __CLASS__;
             $instances[0] = & new $class();
         }
@@ -79,26 +86,24 @@ class W3_Plugin_Minify extends W3_Plugin
      */
     function activate()
     {
-        if (! $this->locked()) {
-            if (! is_dir(W3TC_CONTENT_DIR)) {
-                if (@mkdir(W3TC_CONTENT_DIR, 0755)) {
-                    @chmod(W3TC_CONTENT_DIR, 0755);
-                } else {
-                    w3_writable_error(W3TC_CONTENT_DIR);
-                }
-            }
-            
-            $file_index = W3TC_CONTENT_MINIFY_DIR . '/index.php';
-            
-            if (@copy(W3TC_INSTALL_MINIFY_DIR . '/index.php', $file_index)) {
-                @chmod($file_index, 0644);
+        if (!is_dir(W3TC_CONTENT_MINIFY_DIR)) {
+            if (@mkdir(W3TC_CONTENT_MINIFY_DIR, 0755)) {
+                @chmod(W3TC_CONTENT_MINIFY_DIR, 0755);
             } else {
-                w3_writable_error($file_index);
+                w3_writable_error(W3TC_CONTENT_MINIFY_DIR);
             }
-            
-            if ($this->_config->get_boolean('minify.rewrite') && ! $this->write_rules()) {
-                w3_writable_error(W3TC_CONTENT_MINIFY_DIR . '/.htaccess');
-            }
+        }
+        
+        $file_index = W3TC_CONTENT_MINIFY_DIR . '/index.php';
+        
+        if (@copy(W3TC_INSTALL_MINIFY_DIR . '/index.php', $file_index)) {
+            @chmod($file_index, 0644);
+        } else {
+            w3_writable_error($file_index);
+        }
+        
+        if ($this->_config->get_boolean('minify.rewrite') && !$this->write_rules()) {
+            w3_writable_error(W3TC_CONTENT_MINIFY_DIR . '/.htaccess');
         }
         
         $this->schedule();
@@ -111,11 +116,9 @@ class W3_Plugin_Minify extends W3_Plugin
     {
         $this->unschedule();
         
-        if (! $this->locked()) {
-            @unlink(W3TC_CONTENT_MINIFY_DIR . '/index.php');
-            
-            $this->remove_rules();
-        }
+        @unlink(W3TC_CONTENT_MINIFY_DIR . '/index.php');
+        
+        $this->remove_rules();
     }
     
     /**
@@ -124,7 +127,7 @@ class W3_Plugin_Minify extends W3_Plugin
     function schedule()
     {
         if ($this->_config->get_boolean('minify.enabled') && $this->_config->get_string('minify.engine') == 'file') {
-            if (! wp_next_scheduled('w3_minify_cleanup')) {
+            if (!wp_next_scheduled('w3_minify_cleanup')) {
                 wp_schedule_event(time(), 'w3_minify_cleanup', 'w3_minify_cleanup');
             }
         } else {
@@ -185,19 +188,38 @@ class W3_Plugin_Minify extends W3_Plugin
      */
     function ob_callback($buffer)
     {
-        if ($buffer != '' && w3_is_xml($buffer)) {
+        if ($buffer != '' && w3_is_xml($buffer) && $this->can_minify2()) {
             $head_prepend = '';
+            $body_append = '';
             
-            if ($this->_config->get_boolean('minify.css.enable')) {
+            if ($this->_config->get_boolean('minify.css.enable') && !in_array('include', $this->printed_styles)) {
                 $head_prepend .= $this->get_styles('include');
             }
             
             if ($this->_config->get_boolean('minify.js.enable')) {
-                $head_prepend .= $this->get_scripts('include') . $this->get_scripts('include-nb');
+                if (!in_array('include', $this->printed_scripts)) {
+                    $head_prepend .= $this->get_scripts('include');
+                }
+                
+                if (!in_array('include-nb', $this->printed_scripts)) {
+                    $head_prepend .= $this->get_scripts('include-nb');
+                }
+                
+                if (!in_array('include-footer', $this->printed_scripts)) {
+                    $body_append .= $this->get_scripts('include-footer');
+                }
+                
+                if (!in_array('include-footer-nb', $this->printed_scripts)) {
+                    $body_append .= $this->get_scripts('include-footer-nb');
+                }
             }
             
-            if (! empty($head_prepend)) {
+            if ($head_prepend != '') {
                 $buffer = preg_replace('~<head(\s+[^<>]+)*>~Ui', '\\0' . $head_prepend, $buffer, 1);
+            }
+            
+            if ($body_append != '') {
+                $buffer = preg_replace('~<\\/body>~', $body_append . '\\0', $buffer, 1);
             }
             
             $buffer = $this->clean($buffer);
@@ -211,16 +233,6 @@ class W3_Plugin_Minify extends W3_Plugin
     }
     
     /**
-     * Footer action
-     */
-    function footer()
-    {
-        if ($this->_config->get_boolean('minify.js.enable')) {
-            echo $this->get_scripts('include-footer') . $this->get_scripts('include-footer-nb');
-        }
-    }
-    
-    /**
      * Cleans content
      *
      * @param string $content
@@ -228,9 +240,10 @@ class W3_Plugin_Minify extends W3_Plugin
      */
     function clean($content)
     {
-        if (! is_feed()) {
+        if (!is_feed()) {
             if ($this->_config->get_boolean('minify.css.enable')) {
                 $content = $this->clean_styles($content);
+                $content = preg_replace('~<style[^<>]*>\s*</style>~', '', $content);
             }
             
             if ($this->_config->get_boolean('minify.js.enable')) {
@@ -238,11 +251,9 @@ class W3_Plugin_Minify extends W3_Plugin
             }
         }
         
-        if ($this->_config->get_boolean('minify.html.enable') && ! ($this->_config->get_boolean('minify.html.reject.admin') && current_user_can('manage_options'))) {
+        if ($this->_config->get_boolean('minify.html.enable') && !($this->_config->get_boolean('minify.html.reject.admin') && current_user_can('manage_options'))) {
             $content = $this->minify_html($content);
         }
-        
-        $content = preg_replace('~<style[^<>]*>\s*</style>~', '', $content);
         
         return $content;
     }
@@ -262,9 +273,9 @@ class W3_Plugin_Minify extends W3_Plugin
         
         foreach ($groups as $group => $locations) {
             foreach ((array) $locations as $location => $config) {
-                if (! empty($config['files'])) {
+                if (!empty($config['files'])) {
                     foreach ((array) $config['files'] as $file) {
-                        if (w3_is_url($file) && ! preg_match('~' . $domain_url_regexp . '~i', $file)) {
+                        if (w3_is_url($file) && !preg_match('~' . $domain_url_regexp . '~i', $file)) {
                             // external CSS files
                             $regexps[] = w3_preg_quote($file);
                         } else {
@@ -300,9 +311,9 @@ class W3_Plugin_Minify extends W3_Plugin
         
         foreach ($groups as $group => $locations) {
             foreach ((array) $locations as $location => $config) {
-                if (! empty($config['files'])) {
+                if (!empty($config['files'])) {
                     foreach ((array) $config['files'] as $file) {
-                        if (w3_is_url($file) && ! preg_match('~' . $domain_url_regexp . '~i', $file)) {
+                        if (w3_is_url($file) && !preg_match('~' . $domain_url_regexp . '~i', $file)) {
                             // external JS files
                             $regexps[] = w3_preg_quote($file);
                         } else {
@@ -433,12 +444,12 @@ class W3_Plugin_Minify extends W3_Plugin
         } else {
             $script = '';
             
-            if (! $non_blocking_function) {
+            if (!$non_blocking_function) {
                 $non_blocking_function = true;
-                $script = "<script type=\"text/javascript\">/*<![CDATA[*/function w3tc_load_js(u){var d=document;var p=d.getElementsByTagName('HEAD')[0];var c=d.createElement('script');c.type='text/javascript';c.src=u;p.appendChild(c);}/*]]>*/</script>";
+                $script = "<script type=\"text/javascript\">function w3tc_load_js(u){var d=document,p=d.getElementsByTagName('HEAD')[0],c=d.createElement('script');c.type='text/javascript';c.src=u;p.appendChild(c);}</script>";
             }
             
-            $script .= "<script type=\"text/javascript\">/*<![CDATA[*/w3tc_load_js('" . $url . "');/*]]>*/</script>";
+            $script .= "<script type=\"text/javascript\">w3tc_load_js('" . $url . "');</script>";
             
             return $script;
         }
@@ -463,7 +474,7 @@ class W3_Plugin_Minify extends W3_Plugin
             $group = 'default';
         }
         
-        if (! empty($groups[$group][$location]['files'])) {
+        if (!empty($groups[$group][$location]['files'])) {
             $styles .= $this->get_style($this->format_url($group, $location, 'css'), isset($groups[$group][$location]['import']) ? (boolean) $groups[$group][$location]['import'] : false);
         }
         
@@ -489,7 +500,7 @@ class W3_Plugin_Minify extends W3_Plugin
             $group = 'default';
         }
         
-        if (! empty($groups[$group][$location]['files'])) {
+        if (!empty($groups[$group][$location]['files'])) {
             $scripts .= $this->get_script($this->format_url($group, $location, 'js'), isset($groups[$group][$location]['blocking']) ? (boolean) $groups[$group][$location]['blocking'] : true);
         }
         
@@ -531,10 +542,10 @@ class W3_Plugin_Minify extends W3_Plugin
         $site_url_ssl = w3_get_site_url_ssl();
         
         if ($this->_config->get_boolean('minify.rewrite')) {
-            return sprintf('%s%s/%s.%s.%s', $site_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $group, $location, $type);
+            return sprintf('%s/%s/%s.%s.%s', $site_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $group, $location, $type);
         }
         
-        return sprintf('%s%s/index.php?gg=%s&g=%s&t=%s', $site_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $group, $location, $type);
+        return sprintf('%s/%s/index.php?gg=%s&g=%s&t=%s', $site_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $group, $location, $type);
     }
     
     /**
@@ -545,7 +556,7 @@ class W3_Plugin_Minify extends W3_Plugin
      */
     function format_custom_url($files)
     {
-        if (! is_array($files)) {
+        if (!is_array($files)) {
             $files = array(
                 (string) $files
             );
@@ -564,7 +575,7 @@ class W3_Plugin_Minify extends W3_Plugin
         }
         
         $site_url_ssl = w3_get_site_url_ssl();
-        $url = sprintf('%s%s/minify.php?f=%s', $site_url_ssl, W3TC_CONTENT_DIR_NAME, implode(',', $files));
+        $url = sprintf('%s/%s/minify.php?f=%s', $site_url_ssl, W3TC_CONTENT_DIR_NAME, implode(',', $files));
         
         if ($base) {
             $url .= sprintf('&b=%s', $base);
@@ -587,7 +598,7 @@ class W3_Plugin_Minify extends W3_Plugin
         
         foreach ($js_groups as $js_group => $js_locations) {
             foreach ((array) $js_locations as $js_location => $js_config) {
-                if (! empty($js_config['files'])) {
+                if (!empty($js_config['files'])) {
                     $files[] = $this->format_url($js_group, $js_location, 'js');
                 }
             }
@@ -595,7 +606,7 @@ class W3_Plugin_Minify extends W3_Plugin
         
         foreach ($css_groups as $css_group => $css_locations) {
             foreach ((array) $css_locations as $css_location => $css_config) {
-                if (! empty($css_config['files'])) {
+                if (!empty($css_config['files'])) {
                     $files[] = $this->format_url($css_group, $css_location, 'css');
                 }
             }
@@ -674,7 +685,7 @@ class W3_Plugin_Minify extends W3_Plugin
         /**
          * Skip if Minify is disabled
          */
-        if (! $this->_config->get_boolean('minify.enabled')) {
+        if (!$this->_config->get_boolean('minify.enabled')) {
             $this->minify_reject_reason = 'minify is disabled';
             
             return false;
@@ -728,7 +739,7 @@ class W3_Plugin_Minify extends W3_Plugin
         /**
          * Check User agent
          */
-        if (! $this->check_ua()) {
+        if (!$this->check_ua()) {
             $this->minify_reject_reason = 'user agent is rejected';
             
             return false;
@@ -737,8 +748,24 @@ class W3_Plugin_Minify extends W3_Plugin
         /**
          * Check request URI
          */
-        if (! $this->check_request_uri()) {
+        if (!$this->check_request_uri()) {
             $this->minify_reject_reason = 'request URI is rejected';
+            
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Check if we can do minify logic
+     *
+     * @return boolean
+     */
+    function can_minify2()
+    {
+        if ($this->_config->get_boolean('minify.html.reject.feed') && function_exists('is_feed') && is_feed()) {
+            $this->minify_reject_reason = 'feed is rejected';
             
             return false;
         }
@@ -797,55 +824,72 @@ class W3_Plugin_Minify extends W3_Plugin
      */
     function generate_rules()
     {
+        $compressions = array();
+        $engine = $this->_config->get_string('minify.engine');
+        $lifetime = $this->_config->get_integer('minify.lifetime');
+        
         $rules = '';
         $rules .= "# BEGIN W3TC Minify\n";
         
-        if ($this->_config->get_string('minify.engine') == 'file') {
-            if ($this->_config->get_boolean('minify.compress')) {
+        if ($engine == 'file') {
+            $compression = $this->_config->get_string('minify.compression');
+            
+            if ($compression != '') {
+                if (stristr($compression, 'gzip') !== false) {
+                    $compressions[] = 'gzip';
+                }
+                
+                if (stristr($compression, 'deflate') !== false) {
+                    $compressions[] = 'deflate';
+                }
+            }
+            
+            if (count($compressions)) {
                 $rules .= "<IfModule mod_mime.c>\n";
-                $rules .= "    AddEncoding gzip .gz\n";
-                $rules .= "    <Files *.css.gz>\n";
-                $rules .= "        ForceType text/css\n";
-                $rules .= "    </Files>\n";
-                $rules .= "    <Files *.js.gz>\n";
-                $rules .= "        ForceType application/x-javascript\n";
-                $rules .= "    </Files>\n";
+                
+                foreach ($compressions as $_compression) {
+                    $rules .= "    AddEncoding " . $_compression . " ." . $_compression . "\n";
+                    $rules .= "    <Files *.css." . $_compression . ">\n";
+                    $rules .= "        ForceType text/css\n";
+                    $rules .= "    </Files>\n";
+                    $rules .= "    <Files *.js." . $_compression . ">\n";
+                    $rules .= "        ForceType application/x-javascript\n";
+                    $rules .= "    </Files>\n";
+                }
+                
                 $rules .= "</IfModule>\n";
                 
-                $rules .= "<IfModule mod_deflate.c>\n";
-                $rules .= "    SetEnvIfNoCase Request_URI \\.gz$ no-gzip\n";
+                $rules .= "<IfModule mod_setenvif.c>\n";
+                $rules .= "    SetEnvIfNoCase Accept-Encoding (" . implode('|', $compressions) . ") APPEND_EXT=.$1\n";
+                $rules .= "    <IfModule mod_deflate.c>\n";
+                $rules .= "        SetEnvIfNoCase Request_URI \\.(" . implode('|', $compressions) . ")$ no-gzip\n";
+                $rules .= "    </IfModule>\n";
                 $rules .= "</IfModule>\n";
             }
             
             $rules .= "<IfModule mod_expires.c>\n";
             $rules .= "    ExpiresActive On\n";
-            $rules .= "    ExpiresByType text/css M" . $this->_config->get_integer('minify.lifetime') . "\n";
-            $rules .= "    ExpiresByType application/x-javascript M" . $this->_config->get_integer('minify.lifetime') . "\n";
+            $rules .= "    ExpiresByType text/css M" . $lifetime . "\n";
+            $rules .= "    ExpiresByType application/x-javascript M" . $lifetime . "\n";
             $rules .= "</IfModule>\n";
             
             $rules .= "<IfModule mod_headers.c>\n";
             $rules .= "    Header set Pragma public\n";
             $rules .= "    Header set X-Powered-By \"" . W3TC_POWERED_BY . "\"\n";
             $rules .= "    Header set Vary \"Accept-Encoding\"\n";
-            $rules .= "    Header append Cache-Control \"public, must-revalidate\"\n";
+            $rules .= "    Header append Cache-Control \"public, must-revalidate, proxy-revalidate\"\n";
             $rules .= "</IfModule>\n";
         }
         
         $rules .= "<IfModule mod_rewrite.c>\n";
-        
         $rules .= "    RewriteEngine On\n";
         
-        if ($this->_config->get_string('minify.engine') == 'file') {
-            if ($this->_config->get_boolean('minify.compress')) {
-                $rules .= "    SetEnvIfNoCase Accept-Encoding gzip APPEND_EXT=.gz\n";
-            }
-            
+        if ($engine == 'file') {
             $rules .= "    RewriteCond %{REQUEST_FILENAME}%{ENV:APPEND_EXT} -f\n";
             $rules .= "    RewriteRule (.*) $1%{ENV:APPEND_EXT} [L]\n";
         }
         
         $rules .= "    RewriteRule ^([a-z0-9\\-_]+)\\.(include(-footer)?(-nb)?)\\.(css|js)$ index.php?gg=$1&g=$2&t=$5 [L]\n";
-        
         $rules .= "</IfModule>\n";
         
         $rules .= "# END W3TC Minify\n\n";
@@ -874,14 +918,7 @@ class W3_Plugin_Minify extends W3_Plugin
         
         $data = trim($this->generate_rules() . $data);
         
-        if (($fp = @fopen($path, 'w'))) {
-            @fputs($fp, $data);
-            @fclose($fp);
-            
-            return true;
-        }
-        
-        return false;
+        return @file_put_contents($path, $data);
     }
     
     /**
@@ -892,7 +929,7 @@ class W3_Plugin_Minify extends W3_Plugin
      */
     function erase_rules($data)
     {
-        $data = preg_replace('~# BEGIN W3TC Minify.*# END W3TC Minify~s', '', $data);
+        $data = preg_replace('~# BEGIN W3TC Minify.*# END W3TC Minify~Us', '', $data);
         $data = trim($data);
         
         return $data;
@@ -918,9 +955,9 @@ class W3_Plugin_Minify extends W3_Plugin
     function check_rules()
     {
         $path = W3TC_CACHE_FILE_MINIFY_DIR . '/.htaccess';
-        $search = trim($this->generate_rules());
+        $search = $this->generate_rules();
         
-        return (($data = @file_get_contents($path)) && strstr($data, $search) !== false);
+        return (($data = @file_get_contents($path)) && strstr(w3_clean_rules($data), w3_clean_rules($search)) !== false);
     }
 }
 
@@ -933,6 +970,8 @@ class W3_Plugin_Minify extends W3_Plugin
 function w3tc_scripts($location, $group = null)
 {
     $w3_plugin_minify = & W3_Plugin_Minify::instance();
+    $w3_plugin_minify->printed_scripts[] = $location;
+    
     echo $w3_plugin_minify->get_scripts($location, $group);
 }
 
@@ -945,6 +984,8 @@ function w3tc_scripts($location, $group = null)
 function w3tc_styles($location, $group = null)
 {
     $w3_plugin_minify = & W3_Plugin_Minify::instance();
+    $w3_plugin_minify->printed_styles[] = $location;
+    
     echo $w3_plugin_minify->get_styles($location, $group);
 }
 

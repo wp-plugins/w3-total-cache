@@ -64,7 +64,7 @@ var Cdn_Export_File = {
     },
 
     clear_log: function() {
-        jQuery('#cdn_export_library_log').val('');
+        jQuery('#cdn_export_file_log').html('');
     },
 
     process: function() {

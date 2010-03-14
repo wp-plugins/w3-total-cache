@@ -124,7 +124,12 @@ class W3_PgCache
             $cache = & $this->_get_cache();
             $data = $cache->get($page_key);
             
-            if ($data !== false) {
+            if ($data) {
+                /**
+                 * Do Bad Behavior check
+                 */
+                $this->_bad_behavior();
+                
                 if ($this->_enhanced_mode) {
                     $is_404 = false;
                     $headers = array();
@@ -142,22 +147,10 @@ class W3_PgCache
                  */
                 $etag = md5($content);
                 
-                if ($is_404) {
-                    /**
-                     * Send 404 header
-                     */
-                    $this->_send_headers_404();
-                } else {
-                    /**
-                     * Send 304 header if content is not modified
-                     */
-                    $this->_send_headers_304($time, $etag);
-                }
-                
                 /**
                  * Send headers
                  */
-                $this->_send_headers($time, $etag, $compression, $headers);
+                $this->_send_headers($is_404, $time, $etag, $compression, $headers);
                 
                 /**
                  * Append debug info
@@ -191,7 +184,7 @@ class W3_PgCache
     function ob_callback($buffer)
     {
         if ($buffer != '') {
-            if ($this->_can_cache2() && w3_is_xml($buffer)) {
+            if (w3_is_xml($buffer) && $this->_can_cache2()) {
                 $compression = $this->_get_compression();
                 $compressions = $this->_get_compressions();
                 
@@ -253,17 +246,10 @@ class W3_PgCache
                  */
                 $etag = md5($buffer);
                 
-                if (! $is_404) {
-                    /**                
-                     * Send 304 header if content is not modified
-                     */
-                    $this->_send_headers_304($time, $etag);
-                }
-                
                 /**
                  * Send headers
                  */
-                $this->_send_headers($time, $etag, $compression);
+                $this->_send_headers($is_404, $time, $etag, $compression, $headers);
                 
                 /**
                  * Append debug info
@@ -307,7 +293,7 @@ class W3_PgCache
      */
     function flush_post($post_id)
     {
-        if (! $post_id) {
+        if (!$post_id) {
             $post_id = $this->_detect_post_id();
         }
         
@@ -342,7 +328,7 @@ class W3_PgCache
     {
         static $instances = array();
         
-        if (! isset($instances[0])) {
+        if (!isset($instances[0])) {
             $class = __CLASS__;
             $instances[0] = & new $class();
         }
@@ -360,7 +346,7 @@ class W3_PgCache
         /**
          * Skip if disabled
          */
-        if (! $this->_config->get_boolean('pgcache.enabled')) {
+        if (!$this->_config->get_boolean('pgcache.enabled')) {
             $this->cache_reject_reason = 'page caching is disabled';
             return false;
         }
@@ -384,7 +370,7 @@ class W3_PgCache
         /**
          * Skip if there is query in the request uri
          */
-        if (! $this->_config->get_boolean('pgcache.cache.query') && strstr($_SERVER['REQUEST_URI'], '?') !== false) {
+        if (!$this->_config->get_boolean('pgcache.cache.query') && strstr($_SERVER['REQUEST_URI'], '?') !== false) {
             $this->cache_reject_reason = 'request URI contains query';
             return false;
         }
@@ -392,7 +378,7 @@ class W3_PgCache
         /**
          * Check request URI
          */
-        if (! in_array($_SERVER['PHP_SELF'], $this->_config->get_array('pgcache.accept.files')) && ! $this->_check_request_uri()) {
+        if (!in_array($_SERVER['PHP_SELF'], $this->_config->get_array('pgcache.accept.files')) && !$this->_check_request_uri()) {
             $this->cache_reject_reason = 'request URI is rejected';
             return false;
         }
@@ -400,7 +386,7 @@ class W3_PgCache
         /**
          * Check User Agent
          */
-        if (! $this->_check_ua()) {
+        if (!$this->_check_ua()) {
             $this->cache_reject_reason = 'user agent is rejected';
             return false;
         }
@@ -408,7 +394,7 @@ class W3_PgCache
         /**
          * Check WordPress cookies
          */
-        if (! $this->_check_cookies()) {
+        if (!$this->_check_cookies()) {
             $this->cache_reject_reason = 'cookie is rejected';
             return false;
         }
@@ -416,7 +402,7 @@ class W3_PgCache
         /**
          * Skip if user is logged in
          */
-        if ($this->_config->get_boolean('pgcache.reject.logged') && ! $this->_check_logged_in()) {
+        if ($this->_config->get_boolean('pgcache.reject.logged') && !$this->_check_logged_in()) {
             $this->cache_reject_reason = 'user is logged in';
             
             return false;
@@ -436,14 +422,14 @@ class W3_PgCache
         /**
          * Skip if caching is disabled
          */
-        if (! $this->_caching) {
+        if (!$this->_caching) {
             return false;
         }
         
         /**
          * Don't cache 404 pages
          */
-        if (! $this->_config->get_boolean('pgcache.cache.404') && function_exists('is_404') && is_404()) {
+        if (!$this->_config->get_boolean('pgcache.cache.404') && function_exists('is_404') && is_404()) {
             $this->cache_reject_reason = 'page is 404';
             
             return false;
@@ -452,7 +438,7 @@ class W3_PgCache
         /**
          * Don't cache homepage
          */
-        if (! $this->_config->get_boolean('pgcache.cache.home') && function_exists('is_home') && is_home()) {
+        if (!$this->_config->get_boolean('pgcache.cache.home') && function_exists('is_home') && is_home()) {
             $this->cache_reject_reason = 'page is home';
             
             return false;
@@ -461,7 +447,7 @@ class W3_PgCache
         /**
          * Don't cache feed
          */
-        if (! $this->_config->get_boolean('pgcache.cache.feed') && function_exists('is_feed') && is_feed()) {
+        if (!$this->_config->get_boolean('pgcache.cache.feed') && function_exists('is_feed') && is_feed()) {
             $this->cache_reject_reason = 'page is feed';
             
             return false;
@@ -479,15 +465,14 @@ class W3_PgCache
     {
         static $cache = array();
         
-        if (! isset($cache[0])) {
+        if (!isset($cache[0])) {
             $engine = $this->_config->get_string('pgcache.engine');
             
             switch ($engine) {
                 case 'memcached':
                     $engineConfig = array(
-                        'engine' => $this->_config->get_string('pgcache.memcached.engine'), 
                         'servers' => $this->_config->get_array('pgcache.memcached.servers'), 
-                        'persistant' => true
+                        'persistant' => $this->_config->get_boolean('pgcache.memcached.persistant')
                     );
                     break;
                 
@@ -612,7 +597,7 @@ class W3_PgCache
      */
     function _get_compression()
     {
-        if (! w3_zlib_output_compression() && ! headers_sent()) {
+        if (!w3_zlib_output_compression() && !headers_sent() && !$this->_is_buggy_ie()) {
             $compressions = $this->_get_compressions();
             
             foreach ($compressions as $compression) {
@@ -663,13 +648,31 @@ class W3_PgCache
             $headers_list = headers_list();
             if ($headers_list) {
                 foreach ($headers_list as $header) {
-                    list ($header_name, $header_value) = explode(': ', $header, 2);
+                    list($header_name, $header_value) = explode(': ', $header, 2);
                     $headers[$header_name] = $header_value;
                 }
             }
         }
         
         return $headers;
+    }
+    
+    /**
+     * Checks for buggy IE6 that doesn't support compression
+     * 
+     * @return boolean
+     */
+    function _is_buggy_ie()
+    {
+        $ua = $_SERVER['HTTP_USER_AGENT'];
+        
+        if (strpos($ua, 'Mozilla/4.0 (compatible; MSIE ') === 0 && strpos($ua, 'Opera') === false) {
+            $version = (float) substr($ua, 30);
+            
+            return ($version < 6 || ($version == 6 && strpos($ua, 'SV1') === false));
+        }
+        
+        return false;
     }
     
     /**
@@ -704,36 +707,34 @@ class W3_PgCache
     function _get_page_key($request_uri, $compression)
     {
         if ($this->_config->get_string('pgcache.engine') == 'file_pgcache') {
-            $request_uri = preg_replace('~\?.*$~', '', $request_uri);
-            $request_uri = str_replace('/index.php', '/', $request_uri);
-            $request_uri = preg_replace('~[/\\\]+~', '/', $request_uri);
-            $request_uri = w3_realpath($request_uri);
+            $key = preg_replace('~[/\\\]+~', '/', $key);
+            $key = preg_replace('~\?.*$~', '', $request_uri);
+            $key = str_replace(w3_get_site_path(), '/', $key);
+            $key = str_replace('/index.php', '/', $key);
             
-            if (empty($request_uri)) {
-                $request_uri = '/';
+            if ($key == '') {
+                $key = '/';
             }
             
-            if (substr($request_uri, - 1) == '/') {
-                $request_uri .= 'index.html';
+            if (substr($key, -1) == '/') {
+                $key .= '_default_.html';
             }
             
-            $request_uri = ltrim($request_uri, '/');
+            $key = ltrim($key, '/');
             
-            $key = sprintf('%s/%s', $_SERVER['HTTP_HOST'], $request_uri);
-            
-            if (! empty($compression)) {
+            if (!empty($compression)) {
                 $key .= '.' . $compression;
             }
         } else {
-            $blog_id = w3_get_blog_id();
+            $blogname = w3_get_blogname();
             
-            if (empty($blog_id)) {
-                $blog_id = $_SERVER['HTTP_HOST'];
+            if ($blogname == '') {
+                $blogname = $_SERVER['HTTP_HOST'];
             }
             
-            $key = sprintf('w3tc_%s_page_%s', md5($blog_id), md5($request_uri));
+            $key = sprintf('w3tc_%s_page_%s', md5($blogname), md5($request_uri));
             
-            if (! empty($compression)) {
+            if (!empty($compression)) {
                 $key .= '_' . $compression;
             }
         }
@@ -779,7 +780,7 @@ class W3_PgCache
         $debug_info .= sprintf("%s%s\r\n", str_pad('Engine: ', 20), w3_get_engine_name($this->_config->get_string('pgcache.engine')));
         $debug_info .= sprintf("%s%s\r\n", str_pad('Key: ', 20), $page_key);
         $debug_info .= sprintf("%s%s\r\n", str_pad('Caching: ', 20), ($cache ? 'enabled' : 'disabled'));
-        if (! $cache) {
+        if (!$cache) {
             $debug_info .= sprintf("%s%s\r\n", str_pad('Reject reason: ', 20), $reason);
         }
         $debug_info .= sprintf("%s%s\r\n", str_pad('Status: ', 20), ($status ? 'cached' : 'not cached'));
@@ -837,7 +838,7 @@ class W3_PgCache
      */
     function _headers($headers)
     {
-        if (! headers_sent()) {
+        if (!headers_sent()) {
             foreach ($headers as $name => $value) {
                 $header = ($name == 'Status' ? $value : $name . ': ' . $value);
                 @header($header);
@@ -851,76 +852,79 @@ class W3_PgCache
     
     /**
      * Sends headers
+     * @param boolean $is_404
      * @param string $etag
      * @param integer $time
      * @param string $compression
      * @param array $custom_headers
      * @return boolean
      */
-    function _send_headers($time, $etag, $compression, $custom_headers = array())
+    function _send_headers($is_404, $time, $etag, $compression, $custom_headers = array())
     {
+        $exit = false;
+        $headers = array();
         $curr_time = time();
         $expires = $time + $this->_lifetime;
         $max_age = ($expires > $curr_time ? $expires - $curr_time : 0);
         
-        $headers = array(
+        if ($is_404) {
+            /**
+             * Add 404 header
+             */
+            $headers = array_merge($headers, array(
+                'Status' => 'HTTP/1.1 404 Not Found'
+            ));
+        } elseif ($this->_check_modified_since($time) || $this->_check_match($etag)) {
+            /**
+             * Add 304 header
+             */
+            $headers = array_merge($headers, array(
+                'Status' => 'HTTP/1.1 304 Not Modified'
+            ));
+            
+            /**
+             * Don't send content if it isn't modified
+             */
+            $exit = true;
+        }
+        
+        /**
+         * Add default headers
+         */
+        $headers = array_merge($headers, array(
             'Pragma' => 'public', 
             'Expires' => $this->_gmdate($expires), 
             'Last-Modified' => $this->_gmdate($time), 
-            'Cache-Control' => 'max-age=' . $max_age . ', public, must-revalidate'
-        );
-        
-        $headers = array_merge($headers, $custom_headers);
-        
-        $headers = array_merge($headers, array(
+            'Cache-Control' => sprintf('max-age=%d, public, must-revalidate, proxy-revalidate', $max_age), 
             'Vary' => 'Cookie', 
             'Etag' => $etag
         ));
         
         if ($compression) {
+            /**
+             * Add Content-Encoding header
+             */
             $headers = array_merge($headers, array(
                 'Vary' => 'Accept-Encoding, Cookie', 
                 'Content-Encoding' => $compression
             ));
         }
         
-        return $this->_headers($headers);
-    }
-    
-    /**
-     * Sends 304 header if content is not modified
-     * 
-     * @param integer $time
-     * @param string $etag
-     * @return boolean
-     */
-    function _send_headers_304($time, $etag)
-    {
-        if ($this->_check_modified_since($time) || $this->_check_match($etag)) {
-            $headers = array(
-                'Status' => 'HTTP/1.1 304 Not Modified', 
-                'Etag' => $etag, 
-                'Last-Modified' => $this->_gmdate($time)
-            );
-            
-            if ($this->_headers($headers)) {
-                exit();
-            }
-        }
-    }
-    
-    /**
-     * Sends 404 header
-     * 
-     * @return boolean
-     */
-    function _send_headers_404()
-    {
-        $headers = array(
-            'Status' => 'HTTP/1.1 404 Not Found'
-        );
+        /**
+         * Add custom headers
+         */
+        $headers = array_merge($headers, $custom_headers);
         
-        return $this->_headers($headers);
+        /**
+         * Send headers to client
+         */
+        $result = $this->_headers($headers);
+        
+        if ($exit) {
+            exit();
+        }
+        
+        return $result;
     }
     
     /**
@@ -948,7 +952,7 @@ class W3_PgCache
      */
     function _check_modified_since($time)
     {
-        if (! empty($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
+        if (!empty($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
             $if_modified_since = $_SERVER['HTTP_IF_MODIFIED_SINCE'];
             
             // IE has tacked on extra data to this header, strip it
@@ -969,7 +973,7 @@ class W3_PgCache
      */
     function _check_match($etag)
     {
-        if (! empty($_SERVER['HTTP_IF_NONE_MATCH'])) {
+        if (!empty($_SERVER['HTTP_IF_NONE_MATCH'])) {
             $if_none_match = (get_magic_quotes_gpc() ? stripslashes($_SERVER['HTTP_IF_NONE_MATCH']) : $_SERVER['HTTP_IF_NONE_MATCH']);
             $client_etags = explode(',', $if_none_match);
             
@@ -993,5 +997,24 @@ class W3_PgCache
     function _gmdate($time)
     {
         return gmdate('D, d M Y H:i:s \G\M\T', $time);
+    }
+    
+    /**
+     * Bad Behavior support
+     * @return void
+     */
+    function _bad_behavior()
+    {
+        if (file_exists(WP_CONTENT_DIR . '/plugins/bad-behavior/bad-behavior-generic.php')) {
+            $bb_file = WP_CONTENT_DIR . '/plugins/bad-behavior/bad-behavior-generic.php';
+        } elseif (file_exists(WP_CONTENT_DIR . '/plugins/Bad-Behavior/bad-behavior-generic.php')) {
+            $bb_file = WP_CONTENT_DIR . '/plugins/Bad-Behavior/bad-behavior-generic.php';
+        } else {
+            $bb_file = false;
+        }
+        
+        if ($bb_file) {
+            require_once $bb_file;
+        }
     }
 }

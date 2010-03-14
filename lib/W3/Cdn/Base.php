@@ -30,7 +30,7 @@ class W3_Cdn_Base
     
     /**
      * PHP5 Constructor
-	 *
+     *
      * @param array $config
      */
     function __construct($config)
@@ -40,7 +40,7 @@ class W3_Cdn_Base
     
     /**
      * PHP4 Constructor
-	 *
+     *
      * @param array $config
      */
     function W3_Cdn_Base($config)
@@ -53,9 +53,10 @@ class W3_Cdn_Base
      *
      * @param array $files
      * @param array $results
+     * @param boolean $force_rewrite
      * @return boolean
      */
-    function upload($files, &$results)
+    function upload($files, &$results, $force_rewrite = false)
     {
         $results = $this->get_results($files, W3_CDN_RESULT_HALT, 'Not implemented.');
         return false;
@@ -88,7 +89,7 @@ class W3_Cdn_Base
     
     /**
      * Returns CDN domain
-	 *
+     *
      * @return string
      */
     function get_domain()
@@ -98,7 +99,7 @@ class W3_Cdn_Base
     
     /**
      * Returns via string
-	 *
+     *
      * @return string
      */
     function get_via()
@@ -108,7 +109,7 @@ class W3_Cdn_Base
     
     /**
      * Formats object URL
-	 *
+     *
      * @param string $path
      * @return string
      */

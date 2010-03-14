@@ -150,7 +150,7 @@ class HTTP_ConditionalGet {
         } elseif (isset($spec['contentHash'])) { // Use the hash as the ETag
             $this->_setEtag($spec['contentHash'] . $etagAppend, $scope);
         }
-        $this->_headers['Cache-Control'] = "max-age={$maxAge}, {$scope}, must-revalidate";
+        $this->_headers['Cache-Control'] = "max-age={$maxAge}, {$scope}, must-revalidate, proxy-revalidate";
         // invalidate cache if disabled, otherwise check
         $this->cacheIsValid = (isset($spec['invalidate']) && $spec['invalidate'])
             ? false

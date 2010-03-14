@@ -15,9 +15,10 @@ class W3_Cdn_Mirror extends W3_Cdn_Base
      *
      * @param array $files
      * @param array $results
+     * @param boolean $force_rewrite
      * @return boolean
      */
-    function upload($files, &$results)
+    function upload($files, &$results, $force_rewrite = false)
     {
         $results = $this->get_results($files, W3_CDN_RESULT_OK, 'OK');
         

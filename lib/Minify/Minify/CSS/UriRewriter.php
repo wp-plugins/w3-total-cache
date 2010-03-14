@@ -252,6 +252,7 @@ class Minify_CSS_UriRewriter {
                 break;
             }
         }
+
         // strip doc root
         $path = substr($path, strlen($realDocRoot));
         
@@ -269,6 +270,8 @@ class Minify_CSS_UriRewriter {
         } while ($changed);
       
         self::$debugText .= "traversals removed : {$uri}\n\n";
+
+        $uri = str_replace(w3_get_site_path(), w3_get_blog_path(), $uri);
         
         return $uri;
     }

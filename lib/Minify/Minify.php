@@ -207,7 +207,7 @@ class Minify {
         }
         
         // determine encoding
-        if (self::$_options['encodeOutput']) {
+        if (self::$_options['encodeOutput'] != '') {
             if (self::$_options['encodeMethod'] !== null) {
                 // controller specifically requested this
                 $contentEncoding = self::$_options['encodeMethod'];
@@ -217,7 +217,7 @@ class Minify {
                 // depending on what the client accepts, $contentEncoding may be 
                 // 'x-gzip' while our internal encodeMethod is 'gzip'. Calling
                 // getAcceptedEncoding(false, false) leaves out compress and deflate as options.
-                list(self::$_options['encodeMethod'], $contentEncoding) = HTTP_Encoder::getAcceptedEncoding(false, false);
+                list(self::$_options['encodeMethod'], $contentEncoding) = HTTP_Encoder::getAcceptedEncoding(self::$_options['encodeOutput']);
             }
         } else {
             self::$_options['encodeMethod'] = ''; // identity (no encoding)
@@ -274,7 +274,7 @@ class Minify {
             // memory.
             $cacheId = self::_getCacheId();
             $fullCacheId = (self::$_options['encodeMethod'])
-                ? $cacheId . '.gz'
+                ? $cacheId . self::$_options['encodeMethod']
                 : $cacheId;
             // check cache for valid entry
             $cacheIsReady = self::$_cache->isValid($fullCacheId, self::$_options['lastModifiedTime']); 
@@ -284,8 +284,13 @@ class Minify {
                 // generate & cache content
                 $content = self::_combineMinify();
                 self::$_cache->store($cacheId, $content);
-                if (function_exists('gzencode')) {
-                    self::$_cache->store($cacheId . '.gz', gzencode($content, self::$_options['encodeLevel']));
+                
+                if (stristr(self::$_options['encodeOutput'], 'gzip') && function_exists('gzencode')) {
+                    self::$_cache->store($cacheId . '.gzip', gzencode($content, self::$_options['encodeLevel']));
+                }
+                
+                if (stristr(self::$_options['encodeOutput'], 'deflate') && function_exists('gzdeflate')) {
+                    self::$_cache->store($cacheId . '.deflate', gzdeflate($content, self::$_options['encodeLevel']));
                 }
             }
         } else {
@@ -293,9 +298,17 @@ class Minify {
             $cacheIsReady = false;
             $content = self::_combineMinify();
         }
-        if (! $cacheIsReady && self::$_options['encodeMethod']) {
+        if (! $cacheIsReady) {
+            switch (self::$_options['encodeMethod']) {
+                case 'gzip':
+                    $content = gzencode($content, self::$_options['encodeLevel']);
+                    break;
+                    
+                case 'deflate':
+                    $content = gzdeflate($content, self::$_options['encodeLevel']);
+                    break;
+            }
             // still need to encode
-            $content = gzencode($content, self::$_options['encodeLevel']);
         }
         
         // add headers

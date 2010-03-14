@@ -265,9 +265,17 @@ class Minify_HTML {
 
     protected function _removeCdata($str)
     {
-        return (false !== strpos($str, '<![CDATA['))
-            ? str_replace(array('<![CDATA[', ']]>'), '', $str)
-            : $str;
+        if (false !== strpos($str, '<![CDATA[')) {
+            $str = str_replace('//<![CDATA[', '', $str);
+            $str = str_replace('/*<![CDATA[*/', '', $str);
+            $str = str_replace('<![CDATA[', '', $str);
+            
+            $str = str_replace('//]]>', '', $str);
+            $str = str_replace('/*]]>*/', '', $str);
+            $str = str_replace(']]>', '', $str);
+        }
+        
+        return $str;
     }
     
     protected function _needsCdata($str)

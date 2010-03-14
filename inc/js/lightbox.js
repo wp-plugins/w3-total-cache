@@ -176,14 +176,18 @@ var Overlay = {
 
 function w3tc_lightbox_support_us() {
     Lightbox.open( {
-        width: 500,
+        width: 590,
         height: 200,
         url: 'options-general.php?page=w3-total-cache/w3-total-cache.php&w3tc_action=support_us',
         callback: function(lightbox) {
-            jQuery('.link-tweet', lightbox.container).click(function(event) {
+            jQuery('.button-tweet', lightbox.container).click(function(event) {
                 lightbox.close();
                 w3tc_lightbox_tweet();
                 return false;
+            });
+
+            jQuery('.button-rating', lightbox.container).click(function() {
+                window.open('http://wordpress.org/extend/plugins/w3-total-cache/', '_blank');
             });
 
             jQuery('form').submit(function() {
@@ -240,7 +244,7 @@ function w3tc_lightbox_tweet() {
 }
 
 jQuery(function($) {
-    $('.link-tweet').click(function() {
+    $('.button-tweet').click(function() {
         w3tc_lightbox_tweet();
         return false;
     });

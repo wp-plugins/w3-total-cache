@@ -31,8 +31,8 @@ class W3_Config
         'dbcache.debug' => 'boolean', 
         'dbcache.engine' => 'string', 
         'dbcache.file.gc' => 'integer', 
-        'dbcache.memcached.engine' => 'string', 
         'dbcache.memcached.servers' => 'array', 
+        'dbcache.memcached.persistant' => 'boolean', 
         'dbcache.reject.logged' => 'boolean', 
         'dbcache.reject.uri' => 'array', 
         'dbcache.reject.cookie' => 'array', 
@@ -43,8 +43,8 @@ class W3_Config
         'pgcache.debug' => 'boolean', 
         'pgcache.engine' => 'string', 
         'pgcache.file.gc' => 'integer', 
-        'pgcache.memcached.engine' => 'string', 
         'pgcache.memcached.servers' => 'array', 
+        'pgcache.memcached.persistant' => 'boolean', 
         'pgcache.lifetime' => 'integer', 
         'pgcache.compression' => 'string', 
         'pgcache.cache.query' => 'boolean', 
@@ -66,12 +66,11 @@ class W3_Config
         'minify.engine' => 'string', 
         'minify.file.locking' => 'boolean', 
         'minify.file.gc' => 'integer', 
-        'minify.memcached.engine' => 'string', 
         'minify.memcached.servers' => 'array', 
+        'minify.memcached.persistant' => 'boolean', 
         'minify.rewrite' => 'boolean', 
         'minify.fixtime' => 'integer', 
-        'minify.compress' => 'boolean', 
-        'minify.compress.ie6' => 'boolean', 
+        'minify.compression' => 'string', 
         'minify.options' => 'array', 
         'minify.symlinks' => 'array', 
         'minify.maxage' => 'integer', 
@@ -79,10 +78,12 @@ class W3_Config
         'minify.upload' => 'boolean', 
         'minify.html.enable' => 'boolean', 
         'minify.html.reject.admin' => 'boolean', 
+        'minify.html.reject.feed' => 'boolean', 
         'minify.html.inline.css' => 'boolean', 
         'minify.html.inline.js' => 'boolean', 
         'minify.html.strip.crlf' => 'boolean', 
         'minify.css.enable' => 'boolean', 
+        'minify.css.combine' => 'boolean', 
         'minify.css.strip.comments' => 'boolean', 
         'minify.css.strip.crlf' => 'boolean', 
         'minify.css.groups' => 'array', 
@@ -107,7 +108,8 @@ class W3_Config
         'cdn.custom.files' => 'array', 
         'cdn.import.external' => 'boolean', 
         'cdn.import.files' => 'string', 
-        'cdn.limit.queue' => 'integer', 
+        'cdn.queue.limit' => 'integer', 
+        'cdn.force.rewrite' => 'boolean', 
         'cdn.mirror.domain' => 'string', 
         'cdn.ftp.host' => 'string', 
         'cdn.ftp.user' => 'string', 
@@ -130,11 +132,12 @@ class W3_Config
         'common.support' => 'string', 
         'common.install' => 'integer', 
         'common.tweeted' => 'integer', 
-        'common.widget.latest' => 'boolean', 
+        
+        'widget.latest.enabled' => 'boolean', 
+        'widget.latest.items' => 'integer', 
         
         'notes.defaults' => 'boolean', 
         'notes.wp_content_perms' => 'boolean', 
-        'notes.cdn_first_time' => 'boolean', 
         'notes.php_is_old' => 'boolean', 
         'notes.theme_changed' => 'boolean', 
         'notes.wp_upgraded' => 'boolean', 
@@ -152,14 +155,14 @@ class W3_Config
     );
     
     var $_defaults = array(
-        'dbcache.enabled' => true, 
+        'dbcache.enabled' => false, 
         'dbcache.debug' => false, 
         'dbcache.engine' => 'file', 
         'dbcache.file.gc' => 3600, 
-        'dbcache.memcached.engine' => 'auto', 
         'dbcache.memcached.servers' => array(
-            'localhost:11211'
+            '127.0.0.1:11211'
         ), 
+        'dbcache.memcached.persistant' => true, 
         'dbcache.reject.logged' => true, 
         'dbcache.reject.uri' => array(), 
         'dbcache.reject.cookie' => array(), 
@@ -170,12 +173,12 @@ class W3_Config
         
         'pgcache.enabled' => true, 
         'pgcache.debug' => false, 
-        'pgcache.engine' => 'file', 
+        'pgcache.engine' => 'file_pgcache', 
         'pgcache.file.gc' => 3600, 
-        'pgcache.memcached.engine' => 'auto', 
         'pgcache.memcached.servers' => array(
-            'localhost:11211'
+            '127.0.0.1:11211'
         ), 
+        'pgcache.memcached.persistant' => true, 
         'pgcache.lifetime' => 3600, 
         'pgcache.compression' => 'gzip', 
         'pgcache.cache.query' => true, 
@@ -273,7 +276,6 @@ class W3_Config
             'SEC', 
             'SGH', 
             'SHARP-TQ-GX10', 
-            'SIE', 
             'SPH', 
             'Sagem', 
             'Samsung', 
@@ -316,14 +318,13 @@ class W3_Config
         'minify.engine' => 'file', 
         'minify.file.locking' => true, 
         'minify.file.gc' => 86400, 
-        'minify.memcached.engine' => 'auto', 
         'minify.memcached.servers' => array(
-            'localhost:11211'
+            '127.0.0.1:11211'
         ), 
+        'minify.memcached.persistant' => true, 
         'minify.rewrite' => true, 
         'minify.fixtime' => 0, 
-        'minify.compress' => true, 
-        'minify.compress.ie6' => true, 
+        'minify.compression' => 'gzip', 
         'minify.options' => array(
             'bubbleCssImports' => false, 
             'minApp' => array(
@@ -335,12 +336,14 @@ class W3_Config
         'minify.maxage' => 86400, 
         'minify.lifetime' => 86400, 
         'minify.upload' => true, 
-        'minify.html.enable' => true, 
-        'minify.html.reject.admin' => true, 
+        'minify.html.enable' => false, 
+        'minify.html.reject.admin' => false, 
+        'minify.html.reject.feed' => false, 
         'minify.html.inline.css' => false, 
         'minify.html.inline.js' => false, 
         'minify.html.strip.crlf' => false, 
         'minify.css.enable' => true, 
+        'minify.css.combine' => false, 
         'minify.css.strip.comments' => false, 
         'minify.css.strip.crlf' => false, 
         'minify.css.groups' => array(), 
@@ -357,17 +360,19 @@ class W3_Config
         'cdn.debug' => false, 
         'cdn.engine' => 'ftp', 
         'cdn.includes.enable' => true, 
-        'cdn.includes.files' => 'wlwmanifest.xml;*.css;*.js;*.gif;*.png;*.jpg', 
+        'cdn.includes.files' => '*.css;*.js;*.gif;*.png;*.jpg', 
         'cdn.theme.enable' => true, 
         'cdn.theme.files' => '*.css;*.js;*.gif;*.png;*.jpg;*.ico', 
         'cdn.minify.enable' => true, 
         'cdn.custom.enable' => true, 
         'cdn.custom.files' => array(
-            'favicon.ico'
+            'favicon.ico', 
+            'wp-content/gallery/*'
         ), 
         'cdn.import.external' => false, 
         'cdn.import.files' => '*.jpg;*.png;*.gif;*.avi;*.wmv;*.mpg;*.wav;*.mp3;*.txt;*.rtf;*.doc;*.xls;*.rar;*.zip;*.tar;*.gz;*.exe', 
-        'cdn.limit.queue' => 25, 
+        'cdn.queue.limit' => 25, 
+        'cdn.force.rewrite' => false, 
         'cdn.mirror.domain' => '', 
         'cdn.ftp.host' => '', 
         'cdn.ftp.user' => '', 
@@ -392,11 +397,12 @@ class W3_Config
         'common.support' => '', 
         'common.install' => 0, 
         'common.tweeted' => 0, 
-        'common.widget.latest' => true, 
+        
+        'widget.latest.enabled' => true, 
+        'widget.latest.items' => 3, 
         
         'notes.defaults' => true, 
         'notes.wp_content_perms' => true, 
-        'notes.cdn_first_time' => true, 
         'notes.php_is_old' => true, 
         'notes.theme_changed' => false, 
         'notes.wp_upgraded' => false, 
@@ -457,8 +463,12 @@ class W3_Config
             case 'pgcache.engine':
             case 'dbcache.engine':
             case 'minify.engine':
-                if ($value == 'apc' && ! function_exists('apc_store')) {
-                    return 'file';
+                switch (true) {
+                    case ($value == 'apc' && !function_exists('apc_store')):
+                    case ($value == 'eaccelerator' && !function_exists('eaccelerator_put')):
+                    case ($value == 'xcache' && !function_exists('xcache_set')):
+                    case ($value == 'memcached' && !class_exists('Memcache')):
+                        return 'file';
                 }
                 break;
             
@@ -466,7 +476,8 @@ class W3_Config
              * Disable compression if compression functions don't exist
              */
             case 'pgcache.compression':
-                if ((stristr($value, 'gzip') && ! function_exists('gzencode')) || (stristr($value, 'deflate') && ! function_exists('gzdeflate'))) {
+            case 'minify.compression':
+                if ((stristr($value, 'gzip') && !function_exists('gzencode')) || (stristr($value, 'deflate') && !function_exists('gzdeflate'))) {
                     return '';
                 }
                 break;
@@ -484,7 +495,7 @@ class W3_Config
              * Don't support additional headers in some cases
              */
             case 'pgcache.cache.headers':
-                if (! W3TC_PHP5 || ($this->get_boolean('pgcache.enabled') && $this->get_string('pgcache.engine') == 'file_pgcache')) {
+                if (!W3TC_PHP5 || ($this->get_boolean('pgcache.enabled') && $this->get_string('pgcache.engine') == 'file_pgcache')) {
                     return array();
                 }
                 break;
@@ -493,17 +504,7 @@ class W3_Config
              * Disabled minify when PHP5 is not installed
              */
             case 'minify.enabled':
-                if (! W3TC_PHP5) {
-                    return false;
-                }
-                break;
-            
-            /**
-             * Disable minify compressions if zlib is not installed
-             */
-            case 'minify.compress':
-            case 'minify.compress.ie6':
-                if (! function_exists('gzencode')) {
+                if (!W3TC_PHP5) {
                     return false;
                 }
                 break;
@@ -512,7 +513,7 @@ class W3_Config
              * Disable CDN minify when PHP5 is not installed or minify is disabled
              */
             case 'cdn.minify.enable':
-                if (! W3TC_PHP5 || ! $this->get_boolean('minify.enabled')) {
+                if (!W3TC_PHP5 || !$this->get_boolean('minify.enabled')) {
                     return false;
                 }
                 break;
@@ -521,7 +522,7 @@ class W3_Config
              * Check CDN engines
              */
             case 'cdn.engine':
-                if (($value == 's3' || $value == 'cf') && (! W3TC_PHP5 || ! function_exists('curl_init'))) {
+                if (($value == 's3' || $value == 'cf') && (!W3TC_PHP5 || !function_exists('curl_init'))) {
                     return 'mirror';
                 }
                 break;
@@ -617,7 +618,7 @@ class W3_Config
         if (file_exists($file) && is_readable($file)) {
             $config = @include $file;
             
-            if (! is_array($config)) {
+            if (!is_array($config)) {
                 return false;
             }
             
@@ -643,7 +644,7 @@ class W3_Config
         foreach ($this->_keys as $key => $type) {
             $request_key = str_replace('.', '_', $key);
             
-            if (! isset($request[$request_key])) {
+            if (!isset($request[$request_key])) {
                 continue;
             }
             
@@ -713,7 +714,9 @@ class W3_Config
     {
         @fputs($fp, str_repeat("\t", $this->_tabs));
         
-        if (is_string($key)) {
+        if (is_numeric($key)) {
+            @fputs($fp, sprintf("%d => ", $key));
+        } else {
             @fputs($fp, sprintf("'%s' => ", addslashes($key)));
         }
         
@@ -721,11 +724,11 @@ class W3_Config
             case 'object':
             case 'array':
                 @fputs($fp, "array(\r\n");
-                ++ $this->_tabs;
+                ++$this->_tabs;
                 foreach ((array) $value as $k => $v) {
                     $this->_write($fp, $k, $v);
                 }
-                -- $this->_tabs;
+                --$this->_tabs;
                 @fputs($fp, sprintf("%s),\r\n", str_repeat("\t", $this->_tabs)));
                 return;
             
@@ -765,6 +768,14 @@ class W3_Config
     }
     
     /**
+     * Loads master config (for WPMU)
+     */
+    function load_master()
+    {
+        return $this->read(W3TC_CONFIG_MASTER_PATH);
+    }
+    
+    /**
      * Loads config dfefaults
      */
     function load_defaults()
@@ -794,7 +805,7 @@ class W3_Config
     {
         static $instances = array();
         
-        if (! isset($instances[0])) {
+        if (!isset($instances[0])) {
             $class = __CLASS__;
             $instances[0] = & new $class($check_config);
         }

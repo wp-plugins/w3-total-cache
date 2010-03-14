@@ -1,14 +1,14 @@
 <?php
 
 /**
- * APC class
+ * eAccelerator class
  */
 require_once W3TC_LIB_W3_DIR . '/Cache/Base.php';
 
 /**
- * Class W3_Cache_Apc
+ * Class W3_Cache_Eaccelerator
  */
-class W3_Cache_Apc extends W3_Cache_Base
+class W3_Cache_Eaccelerator extends W3_Cache_Base
 {
     /**
      * Adds data
@@ -37,7 +37,7 @@ class W3_Cache_Apc extends W3_Cache_Base
      */
     function set($key, $var, $expire = 0)
     {
-        return apc_store($key, serialize($var), $expire);
+        return eaccelerator_put($key, serialize($var), $expire);
     }
     
     /**
@@ -48,7 +48,7 @@ class W3_Cache_Apc extends W3_Cache_Base
      */
     function get($key)
     {
-        return @unserialize(apc_fetch($key));
+        return @unserialize(eaccelerator_get($key));
     }
     
     /**
@@ -76,7 +76,7 @@ class W3_Cache_Apc extends W3_Cache_Base
      */
     function delete($key)
     {
-        return apc_delete($key);
+        return eaccelerator_rm($key);
     }
     
     /**
@@ -86,6 +86,9 @@ class W3_Cache_Apc extends W3_Cache_Base
      */
     function flush()
     {
-        return apc_clear_cache('user');
+        @eaccelerator_clean();
+        @eaccelerator_clear();
+        
+        return true;
     }
 }

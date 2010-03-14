@@ -7,14 +7,14 @@ class W3_Cdn_S3 extends W3_Cdn_Base
 {
     /**
      * S3 object
-	 *
+     *
      * @var S3
      */
     var $_s3 = null;
     
     /**
      * Inits S3 object
-	 *
+     *
      * @param string $error
      * @return boolean
      */
@@ -48,9 +48,10 @@ class W3_Cdn_S3 extends W3_Cdn_Base
      *
      * @param array $files
      * @param array $results
+     * @param boolean $force_rewrite
      * @return boolean
      */
-    function upload($files, &$results)
+    function upload($files, &$results, $force_rewrite = false)
     {
         $count = 0;
         $error = null;
@@ -66,11 +67,18 @@ class W3_Cdn_S3 extends W3_Cdn_Base
                 continue;
             }
             
-            $info = @$this->_s3->getObjectInfo($this->_config['bucket'], $remote_path);
-            
-            if ($info && isset($info['size']) && $info['size'] == filesize($local_path)) {
-                $results[] = $this->get_result($local_path, $remote_path, W3_CDN_RESULT_ERROR, 'Object already exists');
-                continue;
+            if (! $force_rewrite) {
+                $info = @$this->_s3->getObjectInfo($this->_config['bucket'], $remote_path);
+                
+                if ($info) {
+                    $hash = @md5_file($local_path);
+                    $s3_hash = (isset($info['hash']) ? $info['hash'] : '');
+                    
+                    if ($hash === $s3_hash) {
+                        $results[] = $this->get_result($local_path, $remote_path, W3_CDN_RESULT_ERROR, 'Object already exists');
+                        continue;
+                    }
+                }
             }
             
             $result = @$this->_s3->putObjectFile($local_path, $this->_config['bucket'], $remote_path, S3::ACL_PUBLIC_READ);
@@ -185,7 +193,7 @@ class W3_Cdn_S3 extends W3_Cdn_Base
     
     /**
      * Returns CDN domain
-	 *
+     *
      * @return string
      */
     function get_domain()
@@ -201,7 +209,7 @@ class W3_Cdn_S3 extends W3_Cdn_Base
     
     /**
      * Returns via string
-	 *
+     *
      * @return string
      */
     function get_via()
@@ -213,7 +221,7 @@ class W3_Cdn_S3 extends W3_Cdn_Base
     
     /**
      * Creates bucket
-	 *
+     *
      * @param string $error
      * @return boolean
      */

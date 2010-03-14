@@ -1,4 +1,3 @@
-<table class="form-table">
 	<tr>
 		<th style="width:300px;"><label for="cdn_s3_key">Access key:</label></th>
 		<td>
@@ -20,7 +19,7 @@
 		</td>
 	</tr>
 	<tr>
-		<th>Replace default hostname with:</th>
+		<th>Replace site's hostname with:</th>
 		<td>
 			<?php if (($cdn_s3_bucket = $this->_config->get_string('cdn.s3.bucket')) != ''): ?>
 			    <?php echo htmlspecialchars($cdn_s3_bucket); ?>.s3.amazonaws.com
@@ -29,8 +28,6 @@
 			<?php endif; ?>
 		</td>
 	</tr>
-</table>
-<p>
-	<input id="test_s3" class="button" type="button" value="Test S3 upload" />
-	<span id="test_s3_status" class="w3tc-status w3tc-process"></span>
-</p>
+	<tr>
+		<th><input id="test_s3" class="button" type="button" value="Test S3 upload" /> <span id="test_s3_status" class="w3tc-status w3tc-process"></span></th>
+	</tr>

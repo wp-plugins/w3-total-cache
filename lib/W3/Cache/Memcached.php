@@ -1,66 +1,123 @@
 <?php
 
 /**
- * Memcached engine API
+ * PECL Memcached class
  */
-
-/**
- * W3 Cache memcached types
- */
-if (! defined('W3_CACHE_MEMCACHED_AUTO')) {
-    define('W3_CACHE_MEMCACHED_AUTO', 'auto');
-}
-
-if (! defined('W3_CACHE_MEMCACHED_NATIVE')) {
-    define('W3_CACHE_MEMCACHED_NATIVE', 'native');
-}
-
-if (! defined('W3_CACHE_MEMCACHED_CLIENT')) {
-    define('W3_CACHE_MEMCACHED_CLIENT', 'client');
-}
+require_once W3TC_LIB_W3_DIR . '/Cache/Base.php';
 
 /**
  * Class W3_Cache_Memcached
  */
-class W3_Cache_Memcached
+class W3_Cache_Memcached extends W3_Cache_Base
 {
     /**
-     * Returns memcached engine instance
+     * Memcache object
      *
-     * @return W3_Cache_Memcached_Base
+     * @var Memcache
      */
-    function &instance($engine = W3_CACHE_MEMCACHED_AUTO, $config = array())
+    var $_memcache = null;
+    
+    /**
+     * PHP5 constructor
+     */
+    function __construct($config)
     {
-        static $instances = array();
+        $this->_memcache = & new Memcache();
         
-        $instance_key = sprintf('%s_%s', $engine, md5(serialize($config)));
-        
-        if (! isset($instances[$instance_key])) {
-            if ($engine == W3_CACHE_MEMCACHED_AUTO) {
-                $engine = (class_exists('Memcache') ? W3_CACHE_MEMCACHED_NATIVE : W3_CACHE_MEMCACHED_CLIENT);
-            }
+        if (!empty($config['servers'])) {
+            $persistant = isset($config['persistant']) ? (boolean) $config['persistant'] : false;
             
-            switch ($engine) {
-                case W3_CACHE_MEMCACHED_NATIVE:
-                    require_once W3TC_LIB_W3_DIR . '/Cache/Memcached/Native.php';
-                    $instances[$instance_key] = & new W3_Cache_Memcached_Native($config);
-                    break;
-                
-                case W3_CACHE_MEMCACHED_CLIENT:
-                    require_once W3TC_LIB_W3_DIR . '/Cache/Memcached/Client.php';
-                    $instances[$instance_key] = & new W3_Cache_Memcached_Client($config);
-                    break;
-                
-                default:
-                    trigger_error('Incorrect memcached engine', E_USER_WARNING);
-                    require_once W3TC_LIB_W3_DIR . '/Cache/Memcached/Base.php';
-                    $instances[$instance_key] = & new W3_Cache_Memcached_Base();
-                    break;
+            foreach ((array) $config['servers'] as $server) {
+                list($ip, $port) = explode(':', $server);
+                $this->_memcache->addServer(trim($ip), (integer) trim($port), $persistant);
             }
-            
-            $instances[$instance_key]->connect();
+        } else {
+            return false;
         }
         
-        return $instances[$instance_key];
+        if (!empty($config['compress_threshold'])) {
+            $this->_memcache->setCompressThreshold((integer) $config['compress_threshold']);
+        }
+        
+        return true;
+    }
+    
+    /**
+     * PHP4 constructor
+     */
+    function W3_Cache_Memcached($config)
+    {
+        $this->__construct($config);
+    }
+    
+    /**
+     * Adds data
+     *
+     * @param string $key
+     * @param mixed $var
+     * @param integer $expire
+     * @return boolean
+     */
+    function add($key, $var, $expire = 0)
+    {
+        return @$this->_memcache->add($key, $var, false, $expire);
+    }
+    
+    /**
+     * Sets data
+     *
+     * @param string $key
+     * @param mixed $var
+     * @param integer $expire
+     * @return boolean
+     */
+    function set($key, $var, $expire = 0)
+    {
+        return @$this->_memcache->set($key, $var, false, $expire);
+    }
+    
+    /**
+     * Returns data
+     *
+     * @param string $key
+     * @return mixed
+     */
+    function get($key)
+    {
+        return @$this->_memcache->get($key);
+    }
+    
+    /**
+     * Replaces data
+     *
+     * @param string $key
+     * @param mixed $var
+     * @param integer $expire
+     * @return boolean
+     */
+    function replace($key, $var, $expire = 0)
+    {
+        return @$this->_memcache->replace($key, $var, false, $expire);
+    }
+    
+    /**
+     * Deletes data
+     *
+     * @param string $key
+     * @return boolean
+     */
+    function delete($key)
+    {
+        return @$this->_memcache->delete($key);
+    }
+    
+    /**
+     * Flushes all data
+     *
+     * @return boolean
+     */
+    function flush()
+    {
+        return @$this->_memcache->flush();
     }
 }

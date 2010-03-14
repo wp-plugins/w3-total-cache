@@ -53,16 +53,16 @@ function file_validate() {
     var js = [], css = [], invalid_js = [], invalid_css = [], duplicate = false, query_js = [], query_css = [];
 
     jQuery('#js_files :text').each(function() {
-        var v = jQuery(this).val();
+        var v = jQuery(this).val(), n = jQuery(this).attr('name'), c = v + n;
         if (v != '') {
             for ( var i = 0; i < js.length; i++) {
-                if (js[i] == v) {
+                if (js[i] == c) {
                     duplicate = true;
                     break;
                 }
             }
 
-            js.push(v);
+            js.push(c);
 
             var qindex = v.indexOf('?');
             if (qindex != -1) {
@@ -79,16 +79,16 @@ function file_validate() {
     });
 
     jQuery('#css_files :text').each(function() {
-        var v = jQuery(this).val();
+        var v = jQuery(this).val(), n = jQuery(this).attr('name'), c = v + n;
         if (v != '') {
             for ( var i = 0; i < css.length; i++) {
-                if (css[i] == v) {
+                if (css[i] == c) {
                     duplicate = true;
                     break;
                 }
             }
 
-            css.push(v);
+            css.push(c);
 
             var qindex = v.indexOf('?');
             if (qindex != -1) {
@@ -252,6 +252,10 @@ jQuery(function($) {
         });
     });
 
+    jQuery('.button-rating').click(function() {
+        window.open('http://wordpress.org/extend/plugins/w3-total-cache/', '_blank');
+    });
+
     // minify page
     input_enable('.html_enabled', $('#html_enabled:checked').size());
     input_enable('.js_enabled', $('#js_enabled:checked').size());
@@ -270,8 +274,8 @@ jQuery(function($) {
     js_file_delete();
     css_file_delete();
 
-    js_group('default');
-    css_group('default');
+    js_group($('#js_groups').val());
+    css_group($('#css_groups').val());
 
     $('#js_file_add').click(function() {
         js_file_add($('#js_groups').val(), 'include', '');
