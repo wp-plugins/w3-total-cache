@@ -23,7 +23,7 @@ Benefits:
 
 Features:
 
-* Compatible with shared hosting, virtual private/dedicated servers and dedicated servers / clusters
+* Compatible with shared hosting, virtual private / dedicated servers and dedicated servers / clusters
 * Transparent content delivery network (CDN) integration with Media Library, theme files and WordPress itself
 * Caching of (minified and compressed) pages and posts in memory or on disk
 * Caching of (minified and compressed) CSS and JavaScript in memory, on disk or on CDN
