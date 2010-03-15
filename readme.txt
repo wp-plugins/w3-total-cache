@@ -9,7 +9,7 @@ Improve the speed and user experience of your site. Add page caching, database c
 
 == Description ==
 
-The fastest and most complete WordPress performance optimization plugin. Trusted by many popular sites like: mashable.com, smashingmagazine.com, makeuseof.com, kiss925.com, lockergnome.com, tutsplus.com, ilovetypography.com, webdesignerdepot.com, pearsonified.com, css-tricks.com, freelanceswitch.com, yoast.com and others &mdash; W3 Total Cache improves the user experience of your blog by improving your server performance, caching every aspect of your site, reducing the download time of your theme and providing transparent content delivery network (CDN) integration.
+The fastest and most complete WordPress performance optimization plugin. Trusted by many popular sites like: mashable.com, smashingmagazine.com, makeuseof.com, kiss925.com, lockergnome.com, tutsplus.com, johnchow.com, ilovetypography.com, webdesignerdepot.com, pearsonified.com, css-tricks.com, yoast.com and others &mdash; W3 Total Cache improves the user experience of your blog by improving your server performance, caching every aspect of your site, reducing the download time of your theme and providing transparent content delivery network (CDN) integration.
 
 Benefits:
 
@@ -279,8 +279,8 @@ Please reach out to all of these people and support their projects if you're so 
 * Fixed bug with disk enhanced method of page cache in WordPress MU
 * Fixed false match of page cache files in disk enhanced method of page cache
 * Fixed a bug with cron anomalies caused by caching of wp_options table
-* Fixed trailing slash missing issue when using disk enhanced page caching
-* Fixed a bug that would auto-embed CSS and JS when already manually embedded
+* Fixed missing trailing slash issue when using disk enhanced page caching
+* Fixed auto-embed bug CSS and JS when already manually embedded
 
 = 0.8.5.1 =
 * Added option to CDN Settings to skip specified directories

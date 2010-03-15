@@ -425,17 +425,18 @@ class W3_Db extends wpdb
     function _check_sql($sql)
     {
         $auto_reject_strings = array(
-            '^\s*insert', 
-            '^\s*delete', 
-            '^\s*update', 
-            '^\s*replace', 
-            '^\s*create', 
-            '^\s*alter', 
-            '^\s*show', 
-            '^\s*set', 
+            '^\s*insert\b', 
+            '^\s*delete\b', 
+            '^\s*update\b', 
+            '^\s*replace\b', 
+            '^\s*create\b', 
+            '^\s*alter\b', 
+            '^\s*show\b', 
+            '^\s*set\b', 
             '\bsql_calc_found_rows\b', 
-            '\bfound_rows\(\)\b', 
-            sprintf('\b%soptions\b', $this->prefix)
+            '\bfound_rows\(\)', 
+            '\bautoload\s+=\s+\'yes\'', 
+            '\bw3tc_request_data\b'
         );
         
         if (preg_match('@' . implode('|', $auto_reject_strings) . '@is', $sql)) {
