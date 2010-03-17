@@ -548,6 +548,8 @@ class W3_Plugin_Cdn extends W3_Plugin
         
         $cdn = & $this->get_cdn();
         
+        set_time_limit(120);
+        
         if (!$cdn->upload($upload, $results, $force_rewrite)) {
             if ($queue_failed) {
                 foreach ($results as $result) {
@@ -582,6 +584,9 @@ class W3_Plugin_Cdn extends W3_Plugin
         }
         
         $cdn = & $this->get_cdn();
+        
+        set_time_limit(120);
+        
         if (!$cdn->delete($delete, $results)) {
             if ($queue_failed) {
                 foreach ($results as $result) {
@@ -647,19 +652,26 @@ class W3_Plugin_Cdn extends W3_Plugin
                 $files = array();
                 
                 foreach ($posts as $post) {
-                    if (!empty($post->metadata)) {
-                        $metadata = @unserialize($post->metadata);
-                    } else {
-                        $metadata = array();
-                    }
-                    if (isset($metadata['file'])) {
-                        $files = array_merge($files, $this->get_metadata_files($metadata));
-                    } elseif (!empty($post->file)) {
+                    $post_files = array();
+                    
+                    if ($post->file) {
                         $file = $this->normalize_attachment_file($post->file);
+                        
                         $local_file = $upload_info['upload_dir'] . '/' . $file;
                         $remote_file = $upload_info['upload_url'] . '/' . $file;
-                        $files[$local_file] = $remote_file;
+                        
+                        $post_files[$local_file] = $remote_file;
                     }
+                    
+                    if ($post->metadata) {
+                        $metadata = @unserialize($post->metadata);
+                        
+                        $post_files = array_merge($post_files, $this->get_metadata_files($metadata));
+                    }
+                    
+                    $post_files = apply_filters('w3tc_cdn_add_attachment', $post_files);
+                    
+                    $files = array_merge($files, $post_files);
                 }
                 
                 return $this->upload($files, false, $results);
@@ -689,6 +701,8 @@ class W3_Plugin_Cdn extends W3_Plugin
         
         $site_url = w3_get_site_url();
         $upload_info = w3_upload_info();
+        
+        set_time_limit(300);
         
         if ($upload_info) {
             /**
@@ -922,6 +936,8 @@ class W3_Plugin_Cdn extends W3_Plugin
     function rename_domain($names, $limit, $offset, &$count, &$total, &$results)
     {
         global $wpdb;
+        
+        set_time_limit(300);
         
         $count = 0;
         $total = 0;

@@ -1771,7 +1771,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
             
             update_option('w3tc_request_data', $request_data);
             
-            $request_data_url = sprintf('%sw3tc_request_data/%s', w3_get_site_url(), $hash);
+            $request_data_url = sprintf('%s/w3tc_request_data/%s', w3_get_site_url(), $hash);
         } else {
             $request_data_url = null;
         }
@@ -1802,7 +1802,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
             'phpmailer_init'
         ));
         
-        set_time_limit(600);
+        set_time_limit(120);
         
         $result = @wp_mail(W3TC_EMAIL, $subject, $body, implode("\n", $headers), $attachments);
         
@@ -1966,8 +1966,6 @@ class W3_Plugin_TotalCache extends W3_Plugin
      */
     function cdn_export_library_process()
     {
-        set_time_limit(1000);
-        
         require_once W3TC_LIB_W3_DIR . '/Request.php';
         require_once W3TC_LIB_W3_DIR . '/Plugin/Cdn.php';
         
@@ -2019,8 +2017,6 @@ class W3_Plugin_TotalCache extends W3_Plugin
      */
     function cdn_import_library_process()
     {
-        set_time_limit(1000);
-        
         require_once W3TC_LIB_W3_DIR . '/Request.php';
         require_once W3TC_LIB_W3_DIR . '/Plugin/Cdn.php';
         
@@ -2070,8 +2066,6 @@ class W3_Plugin_TotalCache extends W3_Plugin
      */
     function cdn_rename_domain_process()
     {
-        set_time_limit(1000);
-        
         require_once W3TC_LIB_W3_DIR . '/Request.php';
         require_once W3TC_LIB_W3_DIR . '/Plugin/Cdn.php';
         
@@ -2144,8 +2138,6 @@ class W3_Plugin_TotalCache extends W3_Plugin
      */
     function cdn_export_process()
     {
-        set_time_limit(1000);
-        
         require_once W3TC_LIB_W3_DIR . '/Request.php';
         require_once W3TC_LIB_W3_DIR . '/Plugin/Cdn.php';
         
@@ -2218,6 +2210,8 @@ class W3_Plugin_TotalCache extends W3_Plugin
         
         $error = null;
         
+        set_time_limit(120);
+        
         if ($w3_cdn_ftp->test($error)) {
             $result = true;
             $error = 'Test passed';
@@ -2248,6 +2242,8 @@ class W3_Plugin_TotalCache extends W3_Plugin
         ));
         
         $error = null;
+        
+        set_time_limit(120);
         
         if ($w3_cdn_s3->test($error)) {
             $result = true;
@@ -2283,6 +2279,8 @@ class W3_Plugin_TotalCache extends W3_Plugin
         ));
         
         $error = null;
+        
+        set_time_limit(120);
         
         if ($w3_cdn_s3->test($error)) {
             $result = true;

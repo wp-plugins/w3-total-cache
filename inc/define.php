@@ -118,7 +118,7 @@ function w3_writable_error($path)
  */
 function w3_microtime()
 {
-    list ($usec, $sec) = explode(" ", microtime());
+    list($usec, $sec) = explode(" ", microtime());
     return ((float) $usec + (float) $sec);
 }
 
@@ -193,7 +193,7 @@ function w3_mkdir($path, $mask = 0755, $curr_path = '')
         
         $curr_path .= ($curr_path == '' ? '' : '/') . $dir;
         
-        if (! is_dir($curr_path)) {
+        if (!is_dir($curr_path)) {
             if (@mkdir($curr_path, $mask)) {
                 @chmod($curr_path, $mask);
             } else {
@@ -220,7 +220,7 @@ function w3_rmdir($path, $exclude = array(), $remove = true)
         while (($entry = @readdir($dir))) {
             $full_path = $path . '/' . $entry;
             
-            if ($entry != '.' && $entry != '..' && ! in_array($full_path, $exclude)) {
+            if ($entry != '.' && $entry != '..' && !in_array($full_path, $exclude)) {
                 if (is_dir($full_path)) {
                     w3_rmdir($full_path, $exclude);
                 } else {
@@ -410,7 +410,7 @@ function w3_get_site_path()
     $path = str_replace($document_root, '', w3_path(ABSPATH));
     $path = '/' . ltrim($path, '/');
     
-    if (substr($path, - 1) != '/') {
+    if (substr($path, -1) != '/') {
         $path .= '/';
     }
     
@@ -430,7 +430,7 @@ function w3_get_blog_path()
     $path = str_replace($domain_url, '', $site_url);
     $path = '/' . ltrim($path, '/');
     
-    if (substr($path, - 1) != '/') {
+    if (substr($path, -1) != '/') {
         $path .= '/';
     }
     
@@ -449,13 +449,14 @@ function w3_get_document_root()
         if (isset($_SERVER['DOCUMENT_ROOT'])) {
             $document_root = $_SERVER['DOCUMENT_ROOT'];
         } elseif (isset($_SERVER['SCRIPT_FILENAME'])) {
-            $document_root = substr($_SERVER['SCRIPT_FILENAME'], 0, - strlen($_SERVER['PHP_SELF']));
+            $document_root = substr($_SERVER['SCRIPT_FILENAME'], 0, -strlen($_SERVER['PHP_SELF']));
         } elseif (isset($_SERVER['PATH_TRANSLATED'])) {
-            $document_root = substr($_SERVER['PATH_TRANSLATED'], 0, - strlen($_SERVER['PHP_SELF']));
+            $document_root = substr($_SERVER['PATH_TRANSLATED'], 0, -strlen($_SERVER['PHP_SELF']));
         } else {
             $document_root = ABSPATH;
         }
         
+        $document_root = realpath($document_root);
         $document_root = w3_path($document_root);
     }
     
@@ -558,36 +559,36 @@ function w3_redirect($url = '', $params = array())
     if ($url != '' && ($parse_url = @parse_url($url))) {
         $url = '';
         
-        if (! empty($parse_url['scheme'])) {
+        if (!empty($parse_url['scheme'])) {
             $url .= $parse_url['scheme'] . '://';
         }
         
-        if (! empty($parse_url['user'])) {
+        if (!empty($parse_url['user'])) {
             $url .= $parse_url['user'];
             
-            if (! empty($parse_url['pass'])) {
+            if (!empty($parse_url['pass'])) {
                 $url .= ':' . $parse_url['pass'];
             }
         }
         
-        if (! empty($parse_url['host'])) {
+        if (!empty($parse_url['host'])) {
             $url .= $parse_url['host'];
         }
         
-        if (! empty($parse_url['port']) && $parse_url['port'] != 80) {
+        if (!empty($parse_url['port']) && $parse_url['port'] != 80) {
             $url .= ':' . (int) $parse_url['port'];
         }
         
-        $url .= (! empty($parse_url['path']) ? $parse_url['path'] : '/');
+        $url .= (!empty($parse_url['path']) ? $parse_url['path'] : '/');
         
-        if (! empty($parse_url['query'])) {
+        if (!empty($parse_url['query'])) {
             $old_params = array();
             parse_str($parse_url['query'], $old_params);
             
             $params = array_merge($old_params, $params);
         }
         
-        if (! empty($parse_url['fragment'])) {
+        if (!empty($parse_url['fragment'])) {
             $fragment = '#' . $parse_url['fragment'];
         }
     } else {
@@ -599,7 +600,7 @@ function w3_redirect($url = '', $params = array())
         
         foreach ($params as $param => $value) {
             $count--;
-            $query .= urlencode($param) . (! empty($value) ? '=' . urlencode($value) : '') . ($count ? '&' : '');
+            $query .= urlencode($param) . (!empty($value) ? '=' . urlencode($value) : '') . ($count ? '&' : '');
         }
         
         $url .= (strpos($url, '?') === false ? '?' : '&') . $query;
@@ -701,7 +702,7 @@ function w3_url_request($method, $url, $data = '', $auth = '')
     $status = 0;
     $method = strtoupper($method);
     
-    if (! function_exists('curl_init')) {
+    if (!function_exists('curl_init')) {
         $ch = curl_init();
         
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -715,7 +716,7 @@ function w3_url_request($method, $url, $data = '', $auth = '')
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
         }
         
-        if (! empty($auth)) {
+        if (!empty($auth)) {
             curl_setopt($ch, CURLOPT_USERPWD, $auth);
         }
         
@@ -730,7 +731,7 @@ function w3_url_request($method, $url, $data = '', $auth = '')
         if ($parse_url && isset($parse_url['host'])) {
             $host = $parse_url['host'];
             $port = (isset($parse_url['port']) ? (int) $parse_url['port'] : 80);
-            $path = (! empty($parse_url['path']) ? $parse_url['path'] : '/');
+            $path = (!empty($parse_url['path']) ? $parse_url['path'] : '/');
             $query = (isset($parse_url['query']) ? $parse_url['query'] : '');
             $request_uri = $path . ($query != '' ? '?' . $query : '');
             
@@ -741,11 +742,11 @@ function w3_url_request($method, $url, $data = '', $auth = '')
                 'Connection: close'
             );
             
-            if (! empty($data)) {
+            if (!empty($data)) {
                 $request_headers_array[] = sprintf('Content-Length: %d', strlen($data));
             }
             
-            if (! empty($auth)) {
+            if (!empty($auth)) {
                 $request_headers_array[] = sprintf('Authorization: Basic %s', base64_encode($auth));
             }
             
@@ -754,20 +755,20 @@ function w3_url_request($method, $url, $data = '', $auth = '')
             
             $fp = @fsockopen($host, $port);
             
-            if (! $fp) {
+            if (!$fp) {
                 return false;
             }
             
             $response = '';
             @fputs($fp, $request);
             
-            while (! @feof($fp)) {
+            while (!@feof($fp)) {
                 $response .= @fgets($fp, 4096);
             }
             
             @fclose($fp);
             
-            list ($response_headers, $contents) = explode("\r\n\r\n", $response, 2);
+            list($response_headers, $contents) = explode("\r\n\r\n", $response, 2);
             
             $matches = null;
             
@@ -931,7 +932,7 @@ function w3_check_open_basedir($path)
     $path = w3_realpath($path);
     $open_basedirs = w3_get_open_basedirs();
     
-    if (! count($open_basedirs)) {
+    if (!count($open_basedirs)) {
         return true;
     }
     
@@ -1051,7 +1052,7 @@ function w3_normalize_file($file)
  */
 function w3_translate_file($url)
 {
-    if (! w3_is_url($url)) {
+    if (!w3_is_url($url)) {
         $url = w3_get_domain_url() . '/' . ltrim($url, '/\\');
     }
     
@@ -1094,8 +1095,8 @@ function w3_stripslashes($var)
     return $var;
 }
 
-if (! function_exists('file_put_contents')) {
-    if (! defined('FILE_APPEND')) {
+if (!function_exists('file_put_contents')) {
+    if (!defined('FILE_APPEND')) {
         define('FILE_APPEND', 8);
     }
     
