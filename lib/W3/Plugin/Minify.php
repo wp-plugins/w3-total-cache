@@ -188,7 +188,7 @@ class W3_Plugin_Minify extends W3_Plugin
      */
     function ob_callback($buffer)
     {
-        if ($buffer != '' && w3_is_xml($buffer) && $this->can_minify2()) {
+        if ($buffer != '' && w3_is_xml($buffer)) {
             $head_prepend = '';
             $body_append = '';
             
@@ -240,7 +240,7 @@ class W3_Plugin_Minify extends W3_Plugin
      */
     function clean($content)
     {
-        if (!is_feed()) {
+        if (function_exists('is_feed') && !is_feed()) {
             if ($this->_config->get_boolean('minify.css.enable')) {
                 $content = $this->clean_styles($content);
                 $content = preg_replace('~<style[^<>]*>\s*</style>~', '', $content);
@@ -754,16 +754,9 @@ class W3_Plugin_Minify extends W3_Plugin
             return false;
         }
         
-        return true;
-    }
-    
-    /**
-     * Check if we can do minify logic
-     *
-     * @return boolean
-     */
-    function can_minify2()
-    {
+        /**
+         * Check feed
+         */
         if ($this->_config->get_boolean('minify.html.reject.feed') && function_exists('is_feed') && is_feed()) {
             $this->minify_reject_reason = 'feed is rejected';
             

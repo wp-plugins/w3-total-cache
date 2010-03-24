@@ -1596,6 +1596,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
         $request_type = W3_Request::get_string('request_type');
         $description = W3_Request::get_string('description');
         $templates = W3_Request::get_array('templates');
+        $forum_url = W3_Request::get_string('forum_url');
         $wp_login = W3_Request::get_string('wp_login');
         $wp_password = W3_Request::get_string('wp_password');
         $ftp_host = W3_Request::get_string('ftp_host');
@@ -1608,6 +1609,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
             'email' => $email, 
             'request_type' => $request_type, 
             'description' => $description, 
+            'forum_url' => $forum_url, 
             'wp_login' => $wp_login, 
             'wp_password' => $wp_password, 
             'ftp_host' => $ftp_host, 
@@ -2724,12 +2726,11 @@ class W3_Plugin_TotalCache extends W3_Plugin
             $mysql_variables[$mysql_variables_row[0]] = $mysql_variables_row[1];
         }
         
-        return array(
+        $server_info = array(
             'wp' => array(
                 'version' => $wp_version, 
                 'db_version' => $wp_db_version, 
-                'w3tc_version' => W3TC_VERSION, 
-                'url' => w3_get_domain_url(), 
+                'url' => w3_get_site_url(), 
                 'path' => ABSPATH, 
                 'email' => get_option('admin_email'), 
                 'upload_info' => (array) w3_upload_info(), 
@@ -2737,11 +2738,22 @@ class W3_Plugin_TotalCache extends W3_Plugin
                 'plugins' => $wordpress_plugins_active, 
                 'wp_cache' => (defined('WP_CACHE') ? 'true' : 'false')
             ), 
+            'w3tc' => array(
+                'version' => W3TC_VERSION, 
+                'dir' => W3TC_DIR, 
+                'content_dir' => W3TC_CONTENT_DIR, 
+                'blogname' => W3TC_BLOGNAME, 
+                'doc_root' => w3_get_document_root(), 
+                'site_path' => w3_get_site_path(), 
+                'blog_path' => w3_get_blog_path()
+            ), 
             'mysql' => array(
                 'version' => $mysql_version, 
                 'variables' => $mysql_variables
             )
         );
+        
+        return $server_info;
     }
     
     /**

@@ -183,8 +183,8 @@ class W3_PgCache
      */
     function ob_callback($buffer)
     {
-        if ($buffer != '') {
-            if (w3_is_xml($buffer) && $this->_can_cache2()) {
+        if ($buffer != '' && w3_is_xml($buffer)) {
+            if ($this->_can_cache2()) {
                 $compression = $this->_get_compression();
                 $compressions = $this->_get_compressions();
                 
@@ -348,6 +348,7 @@ class W3_PgCache
          */
         if (!$this->_config->get_boolean('pgcache.enabled')) {
             $this->cache_reject_reason = 'page caching is disabled';
+            
             return false;
         }
         
@@ -356,6 +357,7 @@ class W3_PgCache
          */
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $this->cache_reject_reason = 'request method is POST';
+            
             return false;
         }
         
@@ -364,6 +366,7 @@ class W3_PgCache
          */
         if (defined('SID') && SID != '') {
             $this->cache_reject_reason = 'session is started';
+            
             return false;
         }
         
@@ -372,6 +375,7 @@ class W3_PgCache
          */
         if (!$this->_config->get_boolean('pgcache.cache.query') && strstr($_SERVER['REQUEST_URI'], '?') !== false) {
             $this->cache_reject_reason = 'request URI contains query';
+            
             return false;
         }
         
@@ -380,6 +384,7 @@ class W3_PgCache
          */
         if (!in_array($_SERVER['PHP_SELF'], $this->_config->get_array('pgcache.accept.files')) && !$this->_check_request_uri()) {
             $this->cache_reject_reason = 'request URI is rejected';
+            
             return false;
         }
         
@@ -388,6 +393,7 @@ class W3_PgCache
          */
         if (!$this->_check_ua()) {
             $this->cache_reject_reason = 'user agent is rejected';
+            
             return false;
         }
         
@@ -396,6 +402,7 @@ class W3_PgCache
          */
         if (!$this->_check_cookies()) {
             $this->cache_reject_reason = 'cookie is rejected';
+            
             return false;
         }
         
@@ -423,6 +430,8 @@ class W3_PgCache
          * Skip if caching is disabled
          */
         if (!$this->_caching) {
+            $this->cache_reject_reason = 'page caching is disabled';
+            
             return false;
         }
         

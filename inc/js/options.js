@@ -11,12 +11,18 @@ function w3tc_popup(url, name, width, height) {
 
 function input_enable(input, enabled) {
     jQuery(input).each(function() {
-        this.disabled = !enabled;
+        var me = jQuery(this);
         if (enabled) {
-            jQuery(this).next('[type=hidden]').remove();
+            me.removeAttr('disabled');
         } else {
-            var me = jQuery(this), t = me.attr('type');
-            if ((t != 'radio' && t != 'checkbox') || this.checked) {
+            me.attr('disabled', 'disabled');
+        }
+
+        if (enabled) {
+            me.next('[type=hidden]').remove();
+        } else {
+            var t = me.attr('type');
+            if ((t != 'radio' && t != 'checkbox') || me.is(':checked')) {
                 me.after(jQuery('<input />').attr( {
                     type: 'hidden',
                     name: me.attr('name')
@@ -26,116 +32,8 @@ function input_enable(input, enabled) {
     });
 }
 
-function js_file_location_change() {
-    jQuery('.js_file_location').change(function() {
-        jQuery(this).parent().find(':text').attr('name', 'js_files[' + jQuery('#js_groups').val() + '][' + jQuery(this).val() + '][]');
-    });
-}
-
-function file_verify() {
-    jQuery('.js_file_verify,.css_file_verify').click(function() {
-        var file = jQuery(this).parent().find(':text').val();
-        if (file == '') {
-            alert('Empty file');
-        } else {
-            var url = '';
-            if (/^https?:\/\//.test(file)) {
-                url = file;
-            } else {
-                url = '/' + file;
-            }
-            w3tc_popup(url, 'file_verify');
-        }
-    });
-}
-
-function file_validate() {
-    var js = [], css = [], invalid_js = [], invalid_css = [], duplicate = false, query_js = [], query_css = [];
-
-    jQuery('#js_files :text').each(function() {
-        var v = jQuery(this).val(), n = jQuery(this).attr('name'), c = v + n;
-        if (v != '') {
-            for ( var i = 0; i < js.length; i++) {
-                if (js[i] == c) {
-                    duplicate = true;
-                    break;
-                }
-            }
-
-            js.push(c);
-
-            var qindex = v.indexOf('?');
-            if (qindex != -1) {
-                if (!/^https?:\/\//.test(v)) {
-                    query_js.push(v);
-                }
-                v = v.substr(0, qindex);
-            }
-
-            if (!/\.js$/.test(v)) {
-                invalid_js.push(v);
-            }
-        }
-    });
-
-    jQuery('#css_files :text').each(function() {
-        var v = jQuery(this).val(), n = jQuery(this).attr('name'), c = v + n;
-        if (v != '') {
-            for ( var i = 0; i < css.length; i++) {
-                if (css[i] == c) {
-                    duplicate = true;
-                    break;
-                }
-            }
-
-            css.push(c);
-
-            var qindex = v.indexOf('?');
-            if (qindex != -1) {
-                if (!/^https?:\/\//.test(v)) {
-                    query_css.push(v);
-                }
-                v = v.substr(0, qindex);
-            }
-
-            if (!/\.css$/.test(v)) {
-                invalid_css.push(v);
-            }
-        }
-    });
-
-    if (jQuery('#js_enabled:checked').size()) {
-        if (invalid_js.length && !confirm('The following files have invalid JS file extension:\r\n\r\n' + invalid_js.join('\r\n') + '\r\n\r\nAre you confident these files contain valid JS code?')) {
-            return false;
-        }
-
-        if (query_js.length) {
-            alert('We recommend using the entire URI for files with query string (GET) variables. You entered:\r\n\r\n' + query_js.join('\r\n'));
-            return false;
-        }
-    }
-
-    if (jQuery('#css_enabled:checked').size()) {
-        if (invalid_css.length && !confirm('The following files have invalid CSS file extension:\r\n\r\n' + invalid_css.join('\r\n') + '\r\n\r\nAre you confident these files contain valid CSS code?')) {
-            return false;
-        }
-
-        if (query_css.length) {
-            alert('We recommend using the entire URI for files with query string (GET) variables. You entered:\r\n\r\n' + query_css.join('\r\n'));
-            return false;
-        }
-    }
-
-    if (duplicate) {
-        alert('Duplicate files have been found in your minify settings, please check your settings and re-save.');
-        return false;
-    }
-
-    return true;
-}
-
 function js_file_clear() {
-    if (!jQuery('#js_files :visible').length) {
+    if (!jQuery('#js_files :visible').size()) {
         jQuery('#js_files_empty').show();
     } else {
         jQuery('#js_files_empty').hide();
@@ -143,66 +41,21 @@ function js_file_clear() {
 }
 
 function css_file_clear() {
-    if (!jQuery('#css_files :visible').length) {
+    if (!jQuery('#css_files :visible').size()) {
         jQuery('#css_files_empty').show();
     } else {
         jQuery('#css_files_empty').hide();
     }
 }
 
-function js_enabled() {
-    jQuery('#js_enabled').click(function() {
-        input_enable('.js_enabled', this.checked);
-    });
-}
-
-function css_enabled() {
-    jQuery('#css_enabled').click(function() {
-        input_enable('.css_enabled', this.checked);
-    });
-}
-
-function js_file_delete() {
-    jQuery('.js_file_delete').click(function() {
-        if (confirm('Are you sure you want to delete JS file?')) {
-            jQuery(this).parent().remove();
-            if (!jQuery('#js_files li').size()) {
-                js_file_clear();
-            }
-        }
-
-        return false;
-    });
-};
-
-function css_file_delete() {
-    jQuery('.css_file_delete').click(function() {
-        if (confirm('Are you sure you want to delete CSS file?')) {
-            jQuery(this).parent().remove();
-            if (!jQuery('#css_files li').size()) {
-                css_file_clear();
-            }
-        }
-
-        return false;
-    });
-}
-
 function js_file_add(group, location, file) {
     jQuery('#js_files').append('<li><input class="js_enabled" type="text" name="js_files[' + group + '][' + location + '][]" value="' + file + '" size="100" \/>&nbsp;<select class="js_file_location js_enabled"><option value="include"' + (location == 'include' ? ' selected="selected"' : '') + '>Embed in: Header</option><option value="include-nb"' + (location == 'include-nb' ? ' selected="selected"' : '') + '>Embed in: Header (non-blocking)</option><option value="include-footer"' + (location == 'include-footer' ? ' selected="selected"' : '') + '>Embed in: Footer</option><option value="include-footer-nb"' + (location == 'include-footer-nb' ? ' selected="selected"' : '') + '>Embed in: Footer (non-blocking)</option></select>&nbsp;<input class="js_file_delete js_enabled button" type="button" value="Delete" />&nbsp;<input class="js_file_verify js_enabled button" type="button" value="Verify URI" /><\/li>');
     js_file_clear();
-    js_file_delete();
-    file_verify();
-    js_enabled();
-    js_file_location_change();
 }
 
 function css_file_add(group, file) {
     jQuery('#css_files').append('<li><input class="css_enabled" type="text" name="css_files[' + group + '][include][]" value="' + file + '" size="100" \/>&nbsp;<input class="css_file_delete css_enabled button" type="button" value="Delete" />&nbsp;<input class="css_file_verify css_enabled button" type="button" value="Verify URI" /><\/li>');
     css_file_clear();
-    css_file_delete();
-    file_verify();
-    css_enabled();
 }
 
 function js_group(group) {
@@ -261,21 +114,63 @@ jQuery(function($) {
     input_enable('.js_enabled', $('#js_enabled:checked').size());
     input_enable('.css_enabled', $('#css_enabled:checked').size());
 
+    js_group($('#js_groups').val());
+    css_group($('#css_groups').val());
+
     $('#html_enabled').click(function() {
         input_enable('.html_enabled', this.checked);
     });
 
-    file_verify();
-    js_file_location_change();
+    jQuery('#js_enabled').click(function() {
+        input_enable('.js_enabled', jQuery(this).is(':checked'));
+    });
 
-    js_enabled();
-    css_enabled();
+    jQuery('#css_enabled').click(function() {
+        input_enable('.css_enabled', jQuery(this).is(':checked'));
+    });
 
-    js_file_delete();
-    css_file_delete();
+    jQuery('.js_file_verify,.css_file_verify').live('click', function() {
+        var file = jQuery(this).parent().find(':text').val();
+        if (file == '') {
+            alert('Empty URI');
+        } else {
+            var url = '';
+            if (/^https?:\/\//.test(file)) {
+                url = file;
+            } else {
+                url = '/' + file;
+            }
+            w3tc_popup(url, 'file_verify');
+        }
+    });
 
-    js_group($('#js_groups').val());
-    css_group($('#css_groups').val());
+    jQuery('.js_file_location').live('change', function() {
+        jQuery(this).parent().find(':text').attr('name', 'js_files[' + jQuery('#js_groups').val() + '][' + jQuery(this).val() + '][]');
+    });
+
+    jQuery('.js_file_delete').live('click', function() {
+        var parent = jQuery(this).parent();
+        if (parent.find('input[type=text]').val() == '' || confirm('Are you sure you want to delete JS file?')) {
+            parent.remove();
+            if (!jQuery('#js_files li').size()) {
+                js_file_clear();
+            }
+        }
+
+        return false;
+    });
+
+    jQuery('.css_file_delete').live('click', function() {
+        var parent = jQuery(this).parent();
+        if (parent.find('input[type=text]').val() == '' || confirm('Are you sure you want to delete CSS file?')) {
+            parent.remove();
+            if (!jQuery('#css_files li').size()) {
+                css_file_clear();
+            }
+        }
+
+        return false;
+    });
 
     $('#js_file_add').click(function() {
         js_file_add($('#js_groups').val(), 'include', '');
@@ -293,7 +188,90 @@ jQuery(function($) {
         css_group($(this).val());
     });
 
-    $('#minify_form').submit(file_validate);
+    $('#minify_form').submit(function() {
+        var js = [], css = [], invalid_js = [], invalid_css = [], duplicate = false, query_js = [], query_css = [];
+
+        jQuery('#js_files :text').each(function() {
+            var v = jQuery(this).val(), n = jQuery(this).attr('name'), c = v + n;
+            if (v != '') {
+                for ( var i = 0; i < js.length; i++) {
+                    if (js[i] == c) {
+                        duplicate = true;
+                        break;
+                    }
+                }
+
+                js.push(c);
+
+                var qindex = v.indexOf('?');
+                if (qindex != -1) {
+                    if (!/^https?:\/\//.test(v)) {
+                        query_js.push(v);
+                    }
+                    v = v.substr(0, qindex);
+                }
+
+                if (!/\.js$/.test(v)) {
+                    invalid_js.push(v);
+                }
+            }
+        });
+
+        jQuery('#css_files :text').each(function() {
+            var v = jQuery(this).val(), n = jQuery(this).attr('name'), c = v + n;
+            if (v != '') {
+                for ( var i = 0; i < css.length; i++) {
+                    if (css[i] == c) {
+                        duplicate = true;
+                        break;
+                    }
+                }
+
+                css.push(c);
+
+                var qindex = v.indexOf('?');
+                if (qindex != -1) {
+                    if (!/^https?:\/\//.test(v)) {
+                        query_css.push(v);
+                    }
+                    v = v.substr(0, qindex);
+                }
+
+                if (!/\.css$/.test(v)) {
+                    invalid_css.push(v);
+                }
+            }
+        });
+
+        if (jQuery('#js_enabled:checked').size()) {
+            if (invalid_js.length && !confirm('The following files have invalid JS file extension:\r\n\r\n' + invalid_js.join('\r\n') + '\r\n\r\nAre you confident these files contain valid JS code?')) {
+                return false;
+            }
+
+            if (query_js.length) {
+                alert('We recommend using the entire URI for files with query string (GET) variables. You entered:\r\n\r\n' + query_js.join('\r\n'));
+                return false;
+            }
+        }
+
+        if (jQuery('#css_enabled:checked').size()) {
+            if (invalid_css.length && !confirm('The following files have invalid CSS file extension:\r\n\r\n' + invalid_css.join('\r\n') + '\r\n\r\nAre you confident these files contain valid CSS code?')) {
+                return false;
+            }
+
+            if (query_css.length) {
+                alert('We recommend using the entire URI for files with query string (GET) variables. You entered:\r\n\r\n' + query_css.join('\r\n'));
+                return false;
+            }
+        }
+
+        if (duplicate) {
+            alert('Duplicate files have been found in your minify settings, please check your settings and re-save.');
+            return false;
+        }
+
+        return true;
+    });
 
     // CDN
     $('.w3tc-tab').click(function() {

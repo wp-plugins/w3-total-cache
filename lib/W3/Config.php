@@ -167,7 +167,8 @@ class W3_Config
         'dbcache.reject.uri' => array(), 
         'dbcache.reject.cookie' => array(), 
         'dbcache.reject.sql' => array(
-            'gdsr_'
+            'gdsr_', 
+            'wp_rg_'
         ), 
         'dbcache.lifetime' => 180, 
         

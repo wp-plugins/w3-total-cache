@@ -132,7 +132,7 @@ That depends on how you use your blog and where most of your readers read your b
 
 = I don't understand what a CDN has to do with caching, that's completely different, no? =
 
-Technically no, a CDN is a high performance cache that stores static assets (your theme files, media library etc) in various locations throughout the world in order to provide low latency access to them by readers in those regions. So indeed a CDN is a high performance cache, many of which actually store your frequently requested assets in memory for fastest possible response.
+Technically no, a CDN is a high performance cache that stores static assets (your theme files, media library etc) in various locations throughout the world in order to provide low latency access to them by readers in those regions.
 
 = What if I don't want to work with a CDN right now, is there any other use for this feature? =
 
@@ -140,7 +140,7 @@ Yes! You can take advantage of the [pipelining](http://www.mozilla.org/projects/
 
 = How do I configure Amazon Simple Storage Service (Amazon S3) or Amazon CloudFront as my CDN? =
 
-First [create an S3 account](http://aws.amazon.com/). Next, you need to obtain your "Access key" and "Secret key" from the "Access Credentials" section of the "[Security Credentials](http://aws-portal.amazon.com/gp/aws/developer/account/index.html?action=access-key)" page of "My Account." Make sure the status is "active." Next, make sure that "Amazon Simple Storage Service (Amazon S3)" is the selected type of CDN on the General Settings tab (if not change the setting and save the changes). Now on the CDN Settings tab enter your "Access key," "Secret key" and create a bucket. Click the "Test S3 Upload" button and make sure that the test is successful, if not check your settings and try again.
+First [create an S3 account](http://aws.amazon.com/); it may take several hours for your account credentials to be functional. Next, you need to obtain your "Access key" and "Secret key" from the "Access Credentials" section of the "[Security Credentials](http://aws-portal.amazon.com/gp/aws/developer/account/index.html?action=access-key)" page of "My Account." Make sure the status is "active." Next, make sure that "Amazon Simple Storage Service (Amazon S3)" is the selected type of CDN on the General Settings tab (if not change the setting and save the changes). Now on the CDN Settings tab enter your "Access key," "Secret key" and create a bucket. Click the "Test S3 Upload" button and make sure that the test is successful, if not check your settings and try again.
 
 Save your settings. Make sure that you export your media library, upload your wp-includes (WordPress core files) theme files, and custom files if you wish to host each of those with AWS. Unless you wish to use CloudFront, you're almost done, skip to the next paragraph if you're using CloudFront. Just go to the General Settings tab and click the checkbox and save the settings to enable CDN functionality and empty the cache for the changes to take effect.
 

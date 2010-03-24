@@ -34,7 +34,7 @@
         	</tr>
         	<tr>
         		<th valign="top"><label for="support_description">Issue description:</label></th>
-        		<td><textarea id="support_description" name="description" cols="80" rows="8"><?php echo htmlspecialchars($description); ?></textarea></td>
+        		<td><textarea id="support_description" name="description" cols="70" rows="8"><?php echo htmlspecialchars($description); ?></textarea></td>
         	</tr>
         	<tr>
         		<th><label for="support_template">Attach template:</label></th>
@@ -59,24 +59,28 @@
 
         <table class="form-table">
         	<tr>
+        		<th><label for="support_forum_url">Forum Topic URL:</label></th>
+        		<td><input id="support_forum_url" type="text" name="forum_url" value="<?php echo htmlspecialchars($forum_url); ?>" size="80" /></td>
+        	</tr>
+        	<tr>
         		<th><label for="support_wp_login"><acronym title="WordPress">WP</acronym> Admin login:</label></th>
-        		<td><input id="support_wp_login" type="text" name="wp_login" value="<?php echo htmlspecialchars($wp_login); ?>" size="40" /></td>
+        		<td><input id="support_wp_login" type="text" name="wp_login" value="<?php echo htmlspecialchars($wp_login); ?>" size="80" /></td>
         	</tr>
         	<tr>
         		<th><label for="support_wp_password"><acronym title="WordPress">WP</acronym> Admin password:</label></th>
-        		<td><input id="support_wp_password" type="text" name="wp_password" value="<?php echo htmlspecialchars($wp_password); ?>" size="40" /></td>
+        		<td><input id="support_wp_password" type="text" name="wp_password" value="<?php echo htmlspecialchars($wp_password); ?>" size="80" /></td>
         	</tr>
         	<tr>
         		<th><label for="support_ftp_host"><acronym title="Secure Shell">SSH</acronym> / <acronym title="File Transfer Protocol">FTP</acronym> host:</label></th>
-        		<td><input id="support_ftp_host" type="text" name="ftp_host" value="<?php echo htmlspecialchars($ftp_host); ?>" size="40" /></td>
+        		<td><input id="support_ftp_host" type="text" name="ftp_host" value="<?php echo htmlspecialchars($ftp_host); ?>" size="80" /></td>
         	</tr>
         	<tr>
         		<th><label for="support_ftp_login"><acronym title="Secure Shell">SSH</acronym> / <acronym title="File Transfer Protocol">FTP</acronym> login:</label></th>
-        		<td><input id="support_ftp_login" type="text" name="ftp_login" value="<?php echo htmlspecialchars($ftp_login); ?>" size="40" /></td>
+        		<td><input id="support_ftp_login" type="text" name="ftp_login" value="<?php echo htmlspecialchars($ftp_login); ?>" size="80" /></td>
         	</tr>
         	<tr>
         		<th><label for="support_ftp_password"><acronym title="Secure Shell">SSH</acronym> / <acronym title="File Transfer Protocol">FTP</acronym> password:</label></th>
-        		<td><input id="support_ftp_password" type="text" name="ftp_password" value="<?php echo htmlspecialchars($ftp_password); ?>" size="40" /></td>
+        		<td><input id="support_ftp_password" type="text" name="ftp_password" value="<?php echo htmlspecialchars($ftp_password); ?>" size="80" /></td>
         	</tr>
         </table>
     </fieldset>
