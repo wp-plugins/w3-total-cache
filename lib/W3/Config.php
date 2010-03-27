@@ -47,6 +47,7 @@ class W3_Config
         'pgcache.memcached.persistant' => 'boolean', 
         'pgcache.lifetime' => 'integer', 
         'pgcache.compression' => 'string', 
+        'pgcache.headers' => 'boolean', 
         'pgcache.cache.query' => 'boolean', 
         'pgcache.cache.home' => 'boolean', 
         'pgcache.cache.feed' => 'boolean', 
@@ -71,6 +72,7 @@ class W3_Config
         'minify.rewrite' => 'boolean', 
         'minify.fixtime' => 'integer', 
         'minify.compression' => 'string', 
+        'minify.headers' => 'boolean', 
         'minify.options' => 'array', 
         'minify.symlinks' => 'array', 
         'minify.maxage' => 'integer', 
@@ -182,6 +184,7 @@ class W3_Config
         'pgcache.memcached.persistant' => true, 
         'pgcache.lifetime' => 3600, 
         'pgcache.compression' => 'gzip', 
+        'pgcache.headers' => true, 
         'pgcache.cache.query' => true, 
         'pgcache.cache.home' => true, 
         'pgcache.cache.feed' => true, 
@@ -326,6 +329,7 @@ class W3_Config
         'minify.rewrite' => true, 
         'minify.fixtime' => 0, 
         'minify.compression' => 'gzip', 
+        'minify.headers' => true, 
         'minify.options' => array(
             'bubbleCssImports' => false, 
             'minApp' => array(

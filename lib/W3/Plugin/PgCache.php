@@ -537,12 +537,19 @@ class W3_Plugin_PgCache extends W3_Plugin
     function generate_rules_cache()
     {
         $charset = get_option('blog_charset');
+        $compression = $this->_config->get_string('pgcache.compression');
+        $headers = $this->_config->get_boolean('pgcache.headers');
         
         $rules = '';
         $rules .= "# BEGIN W3 Total Cache\n";
-        $rules .= "AddDefaultCharset " . ($charset ? $charset : 'UTF-8') . "\n";
         
-        $compression = $this->_config->get_string('pgcache.compression');
+        if ($headers) {
+            $rules .= "FileETag All\n";
+        } else {
+            $rules .= "FileETag None\n";
+        }
+        
+        $rules .= "AddDefaultCharset " . ($charset ? $charset : 'UTF-8') . "\n";
         
         if ($compression != '') {
             $compressions = array();
@@ -571,10 +578,12 @@ class W3_Plugin_PgCache extends W3_Plugin
             }
         }
         
-        $rules .= "<IfModule mod_expires.c>\n";
-        $rules .= "    ExpiresActive On\n";
-        $rules .= "    ExpiresByType text/html M" . $this->_config->get_integer('pgcache.lifetime') . "\n";
-        $rules .= "</IfModule>\n";
+        if ($headers) {
+            $rules .= "<IfModule mod_expires.c>\n";
+            $rules .= "    ExpiresActive On\n";
+            $rules .= "    ExpiresByType text/html M" . $this->_config->get_integer('pgcache.lifetime') . "\n";
+            $rules .= "</IfModule>\n";
+        }
         
         $rules .= "<IfModule mod_headers.c>\n";
         $rules .= "    Header set X-Pingback \"" . get_bloginfo('pingback_url') . "\"\n";
@@ -586,8 +595,11 @@ class W3_Plugin_PgCache extends W3_Plugin
             $rules .= "    Header set Vary \"Cookie\"\n";
         }
         
-        $rules .= "    Header set Pragma public\n";
-        $rules .= "    Header append Cache-Control \"public, must-revalidate, proxy-revalidate\"\n";
+        if ($headers) {
+            $rules .= "    Header set Pragma public\n";
+            $rules .= "    Header append Cache-Control \"public, must-revalidate, proxy-revalidate\"\n";
+        }
+        
         $rules .= "</IfModule>\n";
         
         $rules .= "# END W3 Total Cache\n\n";

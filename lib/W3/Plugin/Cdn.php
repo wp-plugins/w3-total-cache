@@ -1237,13 +1237,21 @@ class W3_Plugin_Cdn extends W3_Plugin
     function search_files($search_dir, $base_dir, $mask = '*.*', $recursive = true)
     {
         static $stack = array();
-        
         $files = array();
+        $ignore = array(
+            '.svn', 
+            '.git', 
+            '.DS_Store', 
+            'CVS', 
+            'Thumbs.db', 
+            'desktop.ini'
+        );
+        
         $dir = @opendir($search_dir);
         
         if ($dir) {
             while (($entry = @readdir($dir))) {
-                if ($entry != '.' && $entry != '..') {
+                if ($entry != '.' && $entry != '..' && !in_array($entry, $ignore)) {
                     $path = $search_dir . '/' . $entry;
                     if (is_dir($path) && $recursive) {
                         array_push($stack, $entry);
@@ -1257,6 +1265,7 @@ class W3_Plugin_Cdn extends W3_Plugin
                     }
                 }
             }
+            
             @closedir($dir);
         }
         

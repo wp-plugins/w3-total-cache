@@ -901,13 +901,18 @@ class W3_PgCache
          * Add default headers
          */
         $headers = array_merge($headers, array(
-            'Pragma' => 'public', 
-            'Expires' => $this->_gmdate($expires), 
             'Last-Modified' => $this->_gmdate($time), 
-            'Cache-Control' => sprintf('max-age=%d, public, must-revalidate, proxy-revalidate', $max_age), 
-            'Vary' => 'Cookie', 
-            'Etag' => $etag
+            'Vary' => 'Cookie'
         ));
+        
+        if ($this->_config->get_boolean('pgcache.headers')) {
+            $headers = array_merge($headers, array(
+                'Pragma' => 'public', 
+                'Expires' => $this->_gmdate($expires), 
+                'Cache-Control' => sprintf('max-age=%d, public, must-revalidate, proxy-revalidate', $max_age), 
+                'Etag' => $etag
+            ));
+        }
         
         if ($compression) {
             /**

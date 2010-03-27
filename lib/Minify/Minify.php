@@ -226,7 +226,8 @@ class Minify {
         // check client cache
         require_once W3TC_LIB_MINIFY_DIR . '/HTTP/ConditionalGet.php';
         $cgOptions = array(
-            'lastModifiedTime' => self::$_options['lastModifiedTime']
+            'cacheHeaders' => self::$_options['cacheHeaders']
+            ,'lastModifiedTime' => self::$_options['lastModifiedTime']
             ,'isPublic' => self::$_options['isPublic']
             ,'encoding' => self::$_options['encodeMethod']
         );

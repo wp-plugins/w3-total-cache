@@ -58,6 +58,7 @@ class W3_Minify
         $serve_options = $this->_config->get_array('minify.options');
         $serve_options['maxAge'] = $this->_config->get_integer('minify.maxage');
         $serve_options['encodeOutput'] = $this->_config->get_string('minify.compression');
+        $serve_options['cacheHeaders'] = $this->_config->get_boolean('minify.headers');
         
         if (stripos(PHP_OS, 'win') === 0) {
             Minify::setDocRoot();
@@ -91,15 +92,15 @@ class W3_Minify
                     case ($_GET['t'] == 'js' && $_GET['g'] == 'include-footer') && $this->_config->get_boolean('minify.js.combine.footer'):
                     case ($_GET['t'] == 'js' && $_GET['g'] == 'include-footer-nb') && $this->_config->get_boolean('minify.js.combine.footer'):
                         $serve_options['minifiers']['application/x-javascript'] = array(
-                            $this, 
-                            'minify_stub'
+                            'Minify_CombineOnly', 
+                            'minify'
                         );
                         break;
                     
                     case ($_GET['t'] == 'css' && $_GET['g'] == 'include') && $this->_config->get_boolean('minify.css.combine'):
                         $serve_options['minifiers']['text/css'] = array(
-                            $this, 
-                            'minify_stub'
+                            'Minify_CombineOnly', 
+                            'minify'
                         );
                         break;
                     
@@ -119,8 +120,6 @@ class W3_Minify
                     Minify::setCacheId($cacheId);
                 }
             }
-            
-            @header('Pragma: public');
             
             try {
                 Minify::serve('MinApp', $serve_options);
@@ -213,16 +212,6 @@ class W3_Minify
         }
         
         return $instances[0];
-    }
-    
-    /**
-     * Minify stub function
-     *
-     * @param string $source
-     */
-    function minify_stub($source)
-    {
-        return $source;
     }
     
     /**

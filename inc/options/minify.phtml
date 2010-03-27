@@ -31,6 +31,13 @@
         		</th>
         	</tr>
         	<tr>
+        		<th colspan="2">
+        			<input type="hidden" name="minify.headers" value="0" />
+        			<label><input type="checkbox" name="minify.headers" value="1"<?php checked($this->_config->get_boolean('minify.headers'), true); ?> /> Send cache control headers</label><br />
+    				<span class="description">Send Pragma, Expires, Cache-control and Etag <acronym title="Hypertext Transfer Protocol">HTTP</acronym> headers.</span>
+        		</th>
+        	</tr>
+        	<tr>
         		<th><label for="minify_compression"><acronym title="Hypertext Transfer Protocol">HTTP</acronym> compression:</label></th>
         		<td>
         			<select id="minify_compression" name="minify.compression">
@@ -90,8 +97,8 @@
         			<input type="hidden" name="minify.js.strip.comments" value="0" />
         			<input type="hidden" name="minify.js.strip.crlf" value="0" />
         			<label><input id="js_enabled" type="checkbox" name="minify.js.enable" value="1"<?php checked($this->_config->get_boolean('minify.js.enable'), true); ?> /> Enable</label><br />
-        			<label><input class="js_enabled" type="checkbox" name="minify.js.combine.header" value="1"<?php checked($this->_config->get_boolean('minify.js.combine.header'), true); ?> /> Only combine (Head)</label><br />
-        			<label><input class="js_enabled" type="checkbox" name="minify.js.combine.footer" value="1"<?php checked($this->_config->get_boolean('minify.js.combine.footer'), true); ?> /> Only combine (Footer)</label><br />
+        			<label><input class="js_enabled" type="checkbox" name="minify.js.combine.header" value="1"<?php checked($this->_config->get_boolean('minify.js.combine.header'), true); ?> /> Combine only (Head)</label><br />
+        			<label><input class="js_enabled" type="checkbox" name="minify.js.combine.footer" value="1"<?php checked($this->_config->get_boolean('minify.js.combine.footer'), true); ?> /> Combine only (Footer)</label><br />
         			<label><input class="js_enabled" type="checkbox" name="minify.js.strip.comments" value="1"<?php checked($this->_config->get_boolean('minify.js.strip.comments'), true); ?> /> Comment removal</label><br />
         			<label><input class="js_enabled" type="checkbox" name="minify.js.strip.crlf" value="1"<?php checked($this->_config->get_boolean('minify.js.strip.crlf'), true); ?> /> Line break removal</label><br />
         		</td>

@@ -817,14 +817,15 @@ class W3_Plugin_Minify extends W3_Plugin
      */
     function generate_rules()
     {
-        $compressions = array();
         $engine = $this->_config->get_string('minify.engine');
         $lifetime = $this->_config->get_integer('minify.lifetime');
+        $headers = $this->_config->get_boolean('minify.headers');
         
         $rules = '';
         $rules .= "# BEGIN W3TC Minify\n";
         
         if ($engine == 'file') {
+            $compressions = array();
             $compression = $this->_config->get_string('minify.compression');
             
             if ($compression != '') {
@@ -835,6 +836,12 @@ class W3_Plugin_Minify extends W3_Plugin
                 if (stristr($compression, 'deflate') !== false) {
                     $compressions[] = 'deflate';
                 }
+            }
+            
+            if ($headers) {
+                $rules .= "FileETag All\n";
+            } else {
+                $rules .= "FileETag None\n";
             }
             
             if (count($compressions)) {
@@ -860,17 +867,23 @@ class W3_Plugin_Minify extends W3_Plugin
                 $rules .= "</IfModule>\n";
             }
             
-            $rules .= "<IfModule mod_expires.c>\n";
-            $rules .= "    ExpiresActive On\n";
-            $rules .= "    ExpiresByType text/css M" . $lifetime . "\n";
-            $rules .= "    ExpiresByType application/x-javascript M" . $lifetime . "\n";
-            $rules .= "</IfModule>\n";
+            if ($headers) {
+                $rules .= "<IfModule mod_expires.c>\n";
+                $rules .= "    ExpiresActive On\n";
+                $rules .= "    ExpiresByType text/css M" . $lifetime . "\n";
+                $rules .= "    ExpiresByType application/x-javascript M" . $lifetime . "\n";
+                $rules .= "</IfModule>\n";
+            }
             
             $rules .= "<IfModule mod_headers.c>\n";
-            $rules .= "    Header set Pragma public\n";
             $rules .= "    Header set X-Powered-By \"" . W3TC_POWERED_BY . "\"\n";
             $rules .= "    Header set Vary \"Accept-Encoding\"\n";
-            $rules .= "    Header append Cache-Control \"public, must-revalidate, proxy-revalidate\"\n";
+            
+            if ($headers) {
+                $rules .= "    Header set Pragma public\n";
+                $rules .= "    Header append Cache-Control \"public, must-revalidate, proxy-revalidate\"\n";
+            }
+            
             $rules .= "</IfModule>\n";
         }
         

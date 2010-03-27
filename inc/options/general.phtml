@@ -32,7 +32,7 @@
     </fieldset>
     
     <fieldset>
-    	<legend>Page Caching</legend>
+    	<legend><a href="?page=<?php echo W3TC_FILE; ?>&amp;tab=pgcache">Page Caching</a></legend>
     
     	<p>Enable page caching to decrease the response time of your blog.</p>
     	
@@ -65,14 +65,20 @@
         		</td>
             </tr>
         </table>
-
+        
         <p class="submit">
         	<input type="submit" name="Submit" class="button-primary" value="Save changes" />
         </p>
     </fieldset>
          
     <fieldset>
-    	<legend>Minify</legend>
+    	<legend>
+        	<?php if (W3TC_PHP5): ?>
+        	<a href="?page=<?php echo W3TC_FILE; ?>&amp;tab=minify">Minify</a>
+        	<?php else: ?>
+        	Minify
+        	<?php endif; ?>
+    	</legend>
 
     	<p>Reduce load time by decreasing the size and number of <acronym title="Cascading Style Sheet">CSS</acronym> and <acronym title="JavaScript">JS</acronym> files. Automatically remove unncessary data from <acronym title="Cascading Style Sheet">CSS</acronym>, <acronym title="JavaScript">JS</acronym>, feed, page and post <acronym title="Hypertext Markup Language">HTML</acronym>.</p>
     
@@ -111,7 +117,7 @@
     </fieldset>
     
     <fieldset>
-    	<legend>Database Caching</legend>
+    	<legend><a href="?page=<?php echo W3TC_FILE; ?>&amp;tab=dbcache">Database Caching</a></legend>
     
         <p>Enable database caching to reduce post, page and feed creation time.</p>
         
@@ -150,7 +156,7 @@
 	</fieldset>
 	
     <fieldset>
-    	<legend>Content Delivery Network</legend>
+    	<legend><a href="?page=<?php echo W3TC_FILE; ?>&amp;tab=cdn">Content Delivery Network</a></legend>
 	    
         <p>Host static files with your <acronym title="Content Delivery Network">CDN</acronym> provider to reduce load time.</p>
         

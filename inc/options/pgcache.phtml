@@ -45,6 +45,13 @@
         		</th>
         	</tr>
         	<tr>
+        		<th colspan="2">
+        			<input type="hidden" name="pgcache.headers" value="0" />
+        			<label><input type="checkbox" name="pgcache.headers" value="1"<?php checked($this->_config->get_boolean('pgcache.headers'), true); ?> /> Send cache control headers</label><br />
+    				<span class="description">Send Pragma, Expires, Cache-control and Etag <acronym title="Hypertext Transfer Protocol">HTTP</acronym> headers.</span>
+        		</th>
+        	</tr>
+        	<tr>
         		<th><label for="pgcache_compression"><acronym title="Hypertext Transfer Protocol">HTTP</acronym> compression:</label></th>
         		<td>
         			<select id="pgcache_compression" name="pgcache.compression">
