@@ -51,6 +51,12 @@ class W3_PgCache
     var $_debug = false;
     
     /**
+     * Request URI
+     * @var string
+     */
+    var $_request_uri = '';
+    
+    /**
      * Cache reject reason
      *
      * @var string
@@ -66,6 +72,7 @@ class W3_PgCache
         
         $this->_config = & W3_Config::instance();
         $this->_debug = $this->_config->get_boolean('pgcache.debug');
+        $this->_request_uri = $_SERVER['REQUEST_URI'];
         $this->_lifetime = $this->_config->get_integer('pgcache.lifetime');
         $this->_enhanced_mode = ($this->_config->get_string('pgcache.engine') == 'file_pgcache');
     }
@@ -115,7 +122,7 @@ class W3_PgCache
         $this->_caching = $this->_can_cache();
         
         $compression = $this->_get_compression();
-        $page_key = $this->_get_page_key($_SERVER['REQUEST_URI'], $compression);
+        $page_key = $this->_get_page_key($this->_request_uri, $compression);
         
         if ($this->_caching) {
             /**
@@ -200,7 +207,7 @@ class W3_PgCache
                 $cache = & $this->_get_cache();
                 
                 foreach ($compressions as $_compression) {
-                    $_page_key = $this->_get_page_key($_SERVER['REQUEST_URI'], $_compression);
+                    $_page_key = $this->_get_page_key($this->_request_uri, $_compression);
                     
                     /**
                      * Encode content
@@ -263,7 +270,7 @@ class W3_PgCache
                 /**
                  * Append debug info
                  */
-                $page_key = $this->_get_page_key($_SERVER['REQUEST_URI'], false);
+                $page_key = $this->_get_page_key($this->_request_uri, false);
                 $time_total = w3_microtime() - $this->_time_start;
                 $debug_info = $this->_get_debug_info($page_key, false, $this->cache_reject_reason, false, $time_total);
                 $this->_append_content($buffer, "\r\n\r\n" . $debug_info, false);
@@ -298,22 +305,39 @@ class W3_PgCache
         }
         
         if ($post_id) {
-            $home = get_option('home');
+            $blog_path = w3_get_blog_path();
+            $domain_url = w3_get_domain_url();
+            $post_uri = str_replace($domain_url, '', post_permalink($post_id));
             
-            $page_keys = array(
-                $this->_get_page_key(str_replace($home, '', post_permalink($post_id)), false), 
-                $this->_get_page_key(str_replace($home, '', post_permalink($post_id)), 'gzip'), 
-                $this->_get_page_key(str_replace($home, '', post_permalink($post_id)), 'deflate'), 
-                $this->_get_page_key('/', false), 
-                $this->_get_page_key('/', 'gzip'), 
-                $this->_get_page_key('/', 'deflate')
+            $uris = array(
+                $blog_path, 
+                $post_uri
             );
             
-            $cache = & $this->_get_cache();
+            $comments_number = get_comments_number($post_id);
+            $comments_per_page = get_option('comments_per_page');
+            $comments_pages_number = ceil($comments_number / $comments_per_page);
             
-            foreach ($page_keys as $page_key) {
-                $cache->delete($page_key);
+            if (function_exists('get_comments_pagenum_link')) {
+                for ($pagenum = 1; $pagenum <= $comments_pages_number; $pagenum++) {
+                    $comment_uri = str_replace($domain_url, '', $this->_get_comments_pagenum_link($post_id, $pagenum));
+                    
+                    $uris[] = $comment_uri;
+                }
             }
+            
+            $cache = & $this->_get_cache();
+            $compressions = $this->_get_compressions();
+            
+            foreach ($uris as $uri) {
+                foreach ($compressions as $compression) {
+                    $page_key = $this->_get_page_key($uri, $compression);
+                    
+                    $cache->delete($page_key);
+                }
+            }
+            
+            return true;
         }
         
         return false;
@@ -373,7 +397,7 @@ class W3_PgCache
         /**
          * Skip if there is query in the request uri
          */
-        if (!$this->_config->get_boolean('pgcache.cache.query') && strstr($_SERVER['REQUEST_URI'], '?') !== false) {
+        if (!$this->_config->get_boolean('pgcache.cache.query') && strstr($this->_request_uri, '?') !== false) {
             $this->cache_reject_reason = 'request URI contains query';
             
             return false;
@@ -431,6 +455,15 @@ class W3_PgCache
          */
         if (!$this->_caching) {
             $this->cache_reject_reason = 'page caching is disabled';
+            
+            return false;
+        }
+        
+        /**
+         * Check for DONOTCACHEPAGE constant
+         */
+        if (defined('DONOTCACHEPAGE')) {
+            $this->cache_reject_reason = 'DONOTCACHEPAGE constant is defined';
             
             return false;
         }
@@ -522,14 +555,14 @@ class W3_PgCache
         );
         
         foreach ($auto_reject_uri as $uri) {
-            if (strstr($_SERVER['REQUEST_URI'], $uri) !== false) {
+            if (strstr($this->_request_uri, $uri) !== false) {
                 return false;
             }
         }
         
         foreach ($this->_config->get_array('pgcache.reject.uri') as $expr) {
             $expr = trim($expr);
-            if ($expr != '' && preg_match('@' . $expr . '@i', $_SERVER['REQUEST_URI'])) {
+            if ($expr != '' && preg_match('~' . $expr . '~i', $this->_request_uri)) {
                 return false;
             }
         }
@@ -715,9 +748,11 @@ class W3_PgCache
      */
     function _get_page_key($request_uri, $compression)
     {
+        $key = preg_replace('~#.*$~', '', $request_uri);
+        
         if ($this->_config->get_string('pgcache.engine') == 'file_pgcache') {
             $key = preg_replace('~[/\\\]+~', '/', $key);
-            $key = preg_replace('~\?.*$~', '', $request_uri);
+            $key = preg_replace('~\?.*$~', '', $key);
             $key = str_replace(w3_get_site_path(), '/', $key);
             $key = str_replace('/index.php', '/', $key);
             
@@ -741,7 +776,7 @@ class W3_PgCache
                 $blogname = $_SERVER['HTTP_HOST'];
             }
             
-            $key = sprintf('w3tc_%s_page_%s', md5($blogname), md5($request_uri));
+            $key = sprintf('w3tc_%s_page_%s', md5($blogname), md5($key));
             
             if (!empty($compression)) {
                 $key .= '_' . $compression;
@@ -1030,5 +1065,33 @@ class W3_PgCache
         if ($bb_file) {
             require_once $bb_file;
         }
+    }
+    
+    /**
+     * Workaround for get_comments_pagenum_link function
+     * @param integer $post_id
+     * @return string
+     */
+    function _get_comments_pagenum_link($post_id, $pagenum = 1, $max_page = 0)
+    {
+        if (function_exists('get_comments_pagenum_link')) {
+            if (isset($GLOBALS['post'])) {
+                $old_post = &$GLOBALS['post'];
+            } else {
+                $old_post = null;
+            }
+            
+            $GLOBALS['post']->ID = $post_id;
+            
+            $link = get_comments_pagenum_link($pagenum, $max_page);
+            
+            if ($old_post) {
+                $GLOBALS['post'] = &$old_post;
+            }
+            
+            return $link;
+        }
+        
+        return false;
     }
 }

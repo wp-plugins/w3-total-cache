@@ -253,4 +253,28 @@
 	</fieldset>
 </form>
 
+<form action="?page=<?php echo urldecode(W3TC_FILE); ?>&amp;tab=<?php echo $this->_tab; ?>" method="post" enctype="multipart/form-data">
+    <fieldset>
+    	<legend>Import/Export settings</legend>
+
+        <table class="form-table">
+            <tr>
+    			<th>Import config:</th>
+            	<td>
+				    <input type="hidden" name="page" value="<?php echo W3TC_FILE; ?>" />
+				    <input type="hidden" name="tab" value="<?php echo $this->_tab; ?>" />
+            		<input type="file" name="config_file" />
+		        	<input type="submit" name="config_import" class="button-primary" value="Upload" />
+            	</td>
+            </tr>
+            <tr>
+    			<th>Export config:</th>
+            	<td>
+		        	<input type="submit" name="config_export" class="button-primary" value="Download" />
+            	</td>
+            </tr>
+		</table>
+	</fieldset>
+</form>
+
 <?php include W3TC_DIR . '/inc/options/common/footer.phtml'; ?>

@@ -421,7 +421,7 @@ jQuery(function($) {
         var ftp_password = $('#support_ftp_password');
 
         if (url.val() == '') {
-            alert('Please enter the address of your blog in the Blog URL field.');
+            alert('Please enter the address of your site in the Site URL field.');
             url.focus();
             return false;
         }

@@ -108,12 +108,11 @@
         		<td>
         			<p>
         				<label>
-                			<select id="js_groups" class="js_enabled" name="js_group">
+                			Group: <select id="js_groups" class="js_enabled" name="js_group">
                 			<?php foreach ($groups as $group_key => $group_text): ?>
                 				<option value="<?php echo $group_key; ?>"<?php selected($group_key, $js_group); ?>><?php echo htmlspecialchars($group_text); ?></option>
                 			<?php endforeach; ?>
                 			</select> 
-    						Group:
             			</label><br />
     					<span class="description">Add scripts used in all templates to the default group. Use the menu above to manage scripts unique to a specific template.</span>
         			</p>
@@ -161,12 +160,11 @@
         		<td>
         			<p>
         				<label>
-                			<select id="css_groups" class="css_enabled" name="css_group">
+                			Group: <select id="css_groups" class="css_enabled" name="css_group">
                 			<?php foreach ($groups as $group_key => $group_text): ?>
                 				<option value="<?php echo $group_key; ?>"<?php selected($group_key, $css_group); ?>><?php echo htmlspecialchars($group_text); ?></option>
                 			<?php endforeach; ?>
                 			</select> 
-    						Group:
             			</label><br />
     					<span class="description">Add style sheets used in all templates to the default group. Use the menu above to manage style sheets unique to a specific template.</span>
         			</p>

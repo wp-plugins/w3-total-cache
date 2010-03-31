@@ -627,7 +627,15 @@ class W3_Plugin_PgCache extends W3_Plugin
             $data = '';
         }
         
-        $data = trim($this->generate_rules_core() . $data);
+        $w3tc_rules = $this->generate_rules_core();
+        
+        $wp_rules_pos = strpos($data, '# BEGIN WordPress');
+        
+        if ($wp_rules_pos !== false) {
+            $data = trim(substr_replace($data, $w3tc_rules, $wp_rules_pos, 0));
+        } else {
+            $data = trim($w3tc_rules . $data);
+        }
         
         return @file_put_contents($path, $data);
     }

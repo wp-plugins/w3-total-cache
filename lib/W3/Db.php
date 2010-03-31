@@ -257,6 +257,16 @@ class W3_Db extends wpdb
          */
         if (!$this->_config->get_boolean('dbcache.enabled')) {
             $cache_reject_reason = 'database caching is disabled';
+            
+            return false;
+        }
+        
+        /**
+         * Check for DONOTCACHEDB constant
+         */
+        if (defined('DONOTCACHEDB')) {
+            $cache_reject_reason = 'DONOTCACHEDB constant is defined';
+            
             return false;
         }
         
@@ -265,6 +275,7 @@ class W3_Db extends wpdb
          */
         if (defined('DOING_AJAX')) {
             $cache_reject_reason = 'doing AJAX';
+            
             return false;
         }
         
@@ -273,6 +284,7 @@ class W3_Db extends wpdb
          */
         if (defined('DOING_CRON')) {
             $cache_reject_reason = 'doing cron';
+            
             return false;
         }
         
@@ -281,6 +293,7 @@ class W3_Db extends wpdb
          */
         if (defined('APP_REQUEST')) {
             $cache_reject_reason = 'application request';
+            
             return false;
         }
         
@@ -289,6 +302,7 @@ class W3_Db extends wpdb
          */
         if (defined('XMLRPC_REQUEST')) {
             $cache_reject_reason = 'XMLRPC request';
+            
             return false;
         }
         
@@ -297,6 +311,7 @@ class W3_Db extends wpdb
          */
         if (defined('WP_ADMIN')) {
             $cache_reject_reason = 'wp-admin';
+            
             return false;
         }
         
@@ -305,6 +320,7 @@ class W3_Db extends wpdb
          */
         if (!$this->_check_sql($sql)) {
             $cache_reject_reason = 'query is rejected';
+            
             return false;
         }
         
@@ -313,6 +329,7 @@ class W3_Db extends wpdb
          */
         if (!$this->_check_request_uri()) {
             $cache_reject_reason = 'request URI is rejected';
+            
             return false;
         }
         
@@ -321,6 +338,7 @@ class W3_Db extends wpdb
          */
         if (!$this->_check_cookies()) {
             $cache_reject_reason = 'cookie is rejected';
+            
             return false;
         }
         
@@ -329,6 +347,7 @@ class W3_Db extends wpdb
          */
         if ($this->_config->get_boolean('dbcache.reject.logged') && !$this->_check_logged_in()) {
             $cache_reject_reason = 'user is logged in';
+            
             return false;
         }
         

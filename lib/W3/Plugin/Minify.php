@@ -692,6 +692,15 @@ class W3_Plugin_Minify extends W3_Plugin
         }
         
         /**
+         * Check for DONOTMINIFY constant
+         */
+        if (defined('DONOTMINIFY')) {
+            $this->minify_reject_reason = 'DONOTMINIFY constant is defined';
+            
+            return false;
+        }
+        
+        /**
          * Skip if Admin
          */
         if (defined('WP_ADMIN')) {

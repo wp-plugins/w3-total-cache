@@ -9,7 +9,7 @@ Improve the speed and user experience of your site. Add page caching, database c
 
 == Description ==
 
-The fastest and most complete WordPress performance optimization plugin. Trusted by many popular sites like: mashable.com, smashingmagazine.com, makeuseof.com, kiss925.com, lockergnome.com, tutsplus.com, johnchow.com, ilovetypography.com, webdesignerdepot.com, pearsonified.com, css-tricks.com, yoast.com and others &mdash; W3 Total Cache improves the user experience of your blog by improving your server performance, caching every aspect of your site, reducing the download time of your theme and providing transparent content delivery network (CDN) integration.
+The fastest and most complete WordPress performance optimization plugin. Trusted by many popular sites like: mashable.com, smashingmagazine.com, makeuseof.com, kiss925.com, lockergnome.com, tutsplus.com, johnchow.com, ilovetypography.com, webdesignerdepot.com, pearsonified.com, css-tricks.com, yoast.com and others &mdash; W3 Total Cache improves the user experience of your site by improving your server performance, caching every aspect of your site, reducing the download time of your theme and providing transparent content delivery network (CDN) integration.
 
 Benefits:
 
@@ -44,7 +44,7 @@ Improve the user experience for your readers without having to change WordPress,
 
 = Why does speed matter? =
 
-Speed is among the most significant success factors web sites face. In fact, your blog's speed directly affects your income (revenue) &mdash; it's a fact. Some high traffic sites conducted research and uncovered the following:
+Speed is among the most significant success factors web sites face. In fact, your site's speed directly affects your income (revenue) &mdash; it's a fact. Some high traffic sites conducted research and uncovered the following:
 
 * Google.com: **+500 ms** (speed decrease) -> **-20% traffic loss** [[1](http://home.blarg.net/~glinden/StanfordDataMining.2006-11-29.ppt)]
 * Yahoo.com: **+400 ms** (speed decrease) -> **-5-9% full-page traffic loss** (visitor left before the page finished loading) [[2](http://www.slideshare.net/stoyan/yslow-20-presentation)]
@@ -58,11 +58,11 @@ In the near future, search engines will weigh the performance of web sites as fa
 
 **It's complete.** Most of the popular cache plugins available do a great job and serve their purpose very well. Our plugin remedies numerous performance reducing aspects of any web site going far beyond merely reducing CPU usage (load) and bandwidth consumption for HTML pages alone. Equally important, the plugin requires no theme modifications, modifications to your .htaccess (mod_rewrite rules) or programming compromises to reap the benefits. Most importantly, it's the only plugin designed to optimize all practical hosting environments. The options are many and setup is easy.
 
-= I've never heard of any of this stuff; my blog is fine, no one complains about the speed. Why should I install this? =
+= I've never heard of any of this stuff; my site is fine, no one complains about the speed. Why should I install this? =
 
 Rarely do readers take the time to complain. They typically just stop browsing earlier than you'd prefer and may not return altogether. This is the only plugin specifically designed to make sure that all aspects of your site are as fast as possible. Google is placing more emphasis on the [speed of a site as a factor in rankings](http://searchengineland.com/site-speed-googles-next-ranking-factor-29793); this plugin helps with that too.
 
-It's in every web site owner's best interest is to make sure that the performance of your blog is not hindering its success.
+It's in every web site owner's best interest is to make sure that the performance of your site is not hindering its success.
 
 = And how many years of university do I need to use this thing? =
 
@@ -116,9 +116,13 @@ View your page source in your browser and search for any `<style>`, `<link>` or 
 
 The plugin will combine, minify, HTTP compress and check for updates to these files automatically from now on. If you have any CSS or JS that are inline consider making them external files so that you can use them with minify.
 
+= I don't understand what a CDN has to do with caching, that's completely different, no? =
+
+Technically no, a CDN is a high performance cache that stores static assets (your theme files, media library etc) in various locations throughout the world in order to provide low latency access to them by readers in those regions.
+
 = Who do you recommend as a CDN (Content Delivery Network) provider? =
 
-That depends on how you use your blog and where most of your readers read your blog (regionally). Here's a short list:
+That depends on how you use your site and where most of your readers read your site (regionally). Here's a short list:
 
 * [MaxCDN](http://bit.ly/acaXXt)
 * [Rackspace Cloud Files](http://bit.ly/9hpX8T)
@@ -129,10 +133,6 @@ That depends on how you use your blog and where most of your readers read your b
 * [Akamai](http://bit.ly/a5GBLV)
 * [Limelight Networks](http://bit.ly/aCW04j)
 * [SimpleCDN](http://bit.ly/93EAKK)
-
-= I don't understand what a CDN has to do with caching, that's completely different, no? =
-
-Technically no, a CDN is a high performance cache that stores static assets (your theme files, media library etc) in various locations throughout the world in order to provide low latency access to them by readers in those regions.
 
 = What if I don't want to work with a CDN right now, is there any other use for this feature? =
 
@@ -149,7 +149,7 @@ To use CloudFront, perform all of the steps above, except select the "Amazon Clo
 Now go to the General Settings tab and click the checkbox and save the settings to enable CDN functionality and empty the cache for the changes to take effect.
 
 = How do I use an Origin Pull (Mirror) CDN? =
-Login to your CDN providers control panel or account management area. Following any set up steps they provide, create a new "pull zone" or "bucket" for your site's domain name. If there's a set up wizard or any troubleshooting tips your provider offers, be sure to review them. In the CDN Settings tab of the plugin, enter the hostname your CDN provider provided in the "replace site's hostname with" field. You should always do a quick check by opening a test file from the CDN hostname, e.g. http://cdn.domain.com/favicon.ico. Troubleshoot with yoru CDN provider until this test is successful.
+Login to your CDN providers control panel or account management area. Following any set up steps they provide, create a new "pull zone" or "bucket" for your site's domain name. If there's a set up wizard or any troubleshooting tips your provider offers, be sure to review them. In the CDN Settings tab of the plugin, enter the hostname your CDN provider provided in the "replace site's hostname with" field. You should always do a quick check by opening a test file from the CDN hostname, e.g. http://cdn.domain.com/favicon.ico. Troubleshoot with your CDN provider until this test is successful.
 
 Now go to the General Settings tab and click the checkbox and save the settings to enable CDN functionality and empty the cache for the changes to take effect.
 
@@ -205,7 +205,7 @@ You will be able to see it instantly on each page load, but for tangible metrics
 * [Gomez Instant Test Pro](http://www.gomez.com/instant-test-pro/)
 * [Resource Expert Droid](http://redbot.org/)
 * [Web Caching Tests](http://www.procata.com/cachetest/)
-* [Port80 Compression Check (minify requires MSIE6 support to be enabled)](http://www.port80software.com/tools/compresscheck.asp)
+* [Port80 Compression Check](http://www.port80software.com/tools/compresscheck.asp)
 * [A simple online web page compression / deflate / gzip test tool](http://www.gidnetwork.com/tools/gzip-test.php)
 
 = I don't have time to deal with this, but I know I need it. Will you help me? =
@@ -250,7 +250,7 @@ Please reach out to all of these people and support their projects if you're so 
 
 = 0.8.5.2 =
 * Added support for Bad Behavior plugin
-* Added support for eAccelerator and XCache opcode caches
+* Added support for eAccelerator 0.9.5.3 and XCache opcode caches
 * Added support for rewriting href attribute of anchors for images that use the CDN
 * Added deflate http compression support to minify
 * Added setting of file modification time after FTP upload

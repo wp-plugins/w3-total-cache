@@ -7,7 +7,7 @@ define('W3TC_LINK_URL', 'http://www.w3-edge.com/wordpress-plugins/');
 define('W3TC_LINK_NAME', 'WordPress Plugins');
 define('W3TC_FEED_URL', 'http://feeds.feedburner.com/W3TOTALCACHE');
 define('W3TC_README_URL', 'http://plugins.trac.wordpress.org/browser/w3-total-cache/trunk/readme.txt?format=txt');
-define('W3TC_TWITTER_STATUS', 'I just optimized my #wordpress blog\'s #performance using the W3 Total Cache #plugin by @w3edge. Check it out! http://j.mp/A69xX');
+define('W3TC_TWITTER_STATUS', 'I just optimized my #wordpress site\'s #performance using the W3 Total Cache #plugin by @w3edge. Check it out! http://j.mp/A69xX');
 define('W3TC_SUPPORT_US_TIMEOUT', 2592000);
 
 define('W3TC_PHP5', PHP_VERSION >= 5);

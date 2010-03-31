@@ -500,6 +500,20 @@ class W3_Plugin_TotalCache extends W3_Plugin
         }
         
         /**
+         * Import config action
+         */
+        if (isset($_REQUEST['config_import'])) {
+            $this->config_import();
+        }
+        
+        /**
+         * Export config action
+         */
+        if (isset($_REQUEST['config_export'])) {
+            $this->config_export();
+        }
+        
+        /**
          * Run plugin action
          */
         if (isset($_REQUEST['w3tc_action'])) {
@@ -672,7 +686,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
                     unset($request_data[$hash]);
                     update_option('w3tc_request_data', $request_data);
                 } else {
-                    echo 'Hash is expired or invalid';
+                    echo 'Requested hash expired or invalid';
                 }
                 
                 exit();
@@ -691,7 +705,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
             'pgcache_write_rules_core' => sprintf('Either your .htaccess file does not exist or cannot be modified (%s.htaccess). Please run <strong>chmod 777 %s.htaccess</strong> to resolve this issue.', ABSPATH, ABSPATH), 
             'pgcache_write_rules_cache' => sprintf('The page cache rules (%s/.htaccess) could not be modified. Please run <strong>chmod 777 %s/.htaccess</strong> to resolve this issue.', W3TC_CACHE_FILE_PGCACHE_DIR, W3TC_CACHE_FILE_PGCACHE_DIR), 
             'minify_write_rules' => sprintf('The minify cache rules (%s/.htaccess) could not be modified. Please run <strong>chmod 777 %s/.htaccess</strong> to resolve this issue.', W3TC_CACHE_FILE_MINIFY_DIR, W3TC_CACHE_FILE_MINIFY_DIR), 
-            'support_request_url' => 'Please enter the address of your blog in the Blog <acronym title="Uniform Resource Locator">URL</acronym> field.', 
+            'support_request_url' => 'Please enter the address of your site in the site <acronym title="Uniform Resource Locator">URL</acronym> field.', 
             'support_request_name' => 'Please enter your name in the Name field', 
             'support_request_email' => 'Please enter valid email address in the E-Mail field.', 
             'support_request_type' => 'Please select request type.', 
@@ -701,7 +715,10 @@ class W3_Plugin_TotalCache extends W3_Plugin
             'support_request_ftp_host' => 'Please enter <acronym title="Secure Shell">SSH</acronym> or <acronym title="File Transfer Protocol">FTP</acronym> host for your site.', 
             'support_request_ftp_login' => 'Please enter <acronym title="Secure Shell">SSH</acronym> or <acronym title="File Transfer Protocol">FTP</acronym> login for your server. Remember you can create a temporary one just for this support case.', 
             'support_request_ftp_password' => 'Please enter <acronym title="Secure Shell">SSH</acronym> or <acronym title="File Transfer Protocol">FTP</acronym> password for your <acronym title="File Transfer Protocol">FTP</acronym> account.', 
-            'support_request' => 'Unable to send your support request.'
+            'support_request' => 'Unable to send your support request.', 
+            'config_import_no_file' => 'Please select config file.', 
+            'config_import_upload' => 'Unable to upload config file.', 
+            'config_import_import' => 'Unable to import config file.'
         );
         
         $note_messages = array(
@@ -716,7 +733,8 @@ class W3_Plugin_TotalCache extends W3_Plugin
             'pgcache_write_rules_core' => 'Page cache rewrite rules have been successfully written.', 
             'pgcache_write_rules_cache' => 'Page cache rewrite rules have been successfully written.', 
             'minify_write_rules' => 'Minify rewrite rules have been successfully written.', 
-            'support_request' => 'Your support request has been successfully sent.'
+            'support_request' => 'Your support request has been successfully sent.', 
+            'config_import' => 'Settings successfully imported.'
         );
         
         $errors = array();
@@ -1257,6 +1275,30 @@ class W3_Plugin_TotalCache extends W3_Plugin
      */
     function options_install()
     {
+        $pgcache_rules_core = '';
+        $pgcache_rules_cache = '';
+        $pgcache_htaccess_core = ABSPATH . '.htaccess';
+        $pgcache_htaccess_cache = W3TC_CACHE_FILE_PGCACHE_DIR . '/.htaccess';
+        
+        $minify_rules = '';
+        $minify_htaccess = W3TC_CONTENT_MINIFY_DIR . '/.htaccess';
+        
+        if ($this->_config->get_boolean('pgcache.enabled')) {
+            require_once W3TC_LIB_W3_DIR . '/Plugin/PgCache.php';
+            $w3_plugin_pgcache = & W3_Plugin_PgCache::instance();
+            
+            $pgcache_rules_core = $w3_plugin_pgcache->generate_rules_core();
+            $pgcache_rules_cache = $w3_plugin_pgcache->generate_rules_cache();
+        
+        }
+        
+        if ($this->_config->get_boolean('minify.enabled')) {
+            require_once W3TC_LIB_W3_DIR . '/Plugin/Minify.php';
+            $w3_plugin_minify = & W3_Plugin_Minify::instance();
+            
+            $minify_rules = $w3_plugin_minify->generate_rules();
+        }
+        
         include W3TC_DIR . '/inc/options/install.phtml';
     }
     
@@ -2881,5 +2923,45 @@ class W3_Plugin_TotalCache extends W3_Plugin
         }
         
         w3_redirect($url, $params);
+    }
+    
+    /**
+     * Import config action
+     * @return void
+     */
+    function config_import()
+    {
+        $error = '';
+        
+        if (!isset($_FILES['config_file']['error']) || $_FILES['config_file']['error'] == UPLOAD_ERR_NO_FILE) {
+            $error = 'config_import_no_file';
+        } elseif ($_FILES['config_file']['error'] != UPLOAD_ERR_OK) {
+            $error = 'config_import_upload';
+        } elseif (!$this->_config->read($_FILES['config_file']['tmp_name'])) {
+            $error = 'config_import_import';
+        } elseif (!$this->_config->save()) {
+            $error = 'config_save';
+        }
+        
+        if ($error) {
+            $this->redirect(array(
+                'error' => $error
+            ), true);
+        } else {
+            $this->redirect(array(
+                'note' => 'config_import'
+            ), true);
+        }
+    }
+    
+    /**
+     * Export config action
+     * @return void
+     */
+    function config_export()
+    {
+        @header(sprintf('Content-Disposition: attachment; filename=%s', basename(W3TC_CONFIG_PATH)));
+        @readfile(W3TC_CONFIG_PATH);
+        die();
     }
 }
