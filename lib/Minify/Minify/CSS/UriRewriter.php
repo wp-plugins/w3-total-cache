@@ -175,7 +175,7 @@ class Minify_CSS_UriRewriter {
                         $dir = (ltrim((strpos($dir_obj, '/') === 0 ?  w3_realpath($dir_obj) : w3_realpath($dir_css . $dir_obj)), '/'));
                         $file = basename($uri);
                         
-                        $uri = sprintf('%s://%s%s/%s%s', $scheme, $host, $port, $dir, $file);
+                        $uri = sprintf('%s://%s%s/%s/%s', $scheme, $host, $port, $dir, $file);
                     }
                 } else {
                    $uri =  self::$_prependPath . $uri;
@@ -271,7 +271,7 @@ class Minify_CSS_UriRewriter {
       
         self::$debugText .= "traversals removed : {$uri}\n\n";
 
-        $uri = str_replace(w3_get_site_path(), w3_get_blog_path(), $uri);
+        $uri = str_replace(w3_get_base_path(), w3_get_site_path(), $uri);
         
         return $uri;
     }

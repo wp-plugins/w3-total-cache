@@ -112,14 +112,14 @@ class HTTP_ConditionalGet
      */
     public function __construct($spec)
     {
-        $this->_cacheHeaders = (isset($spec['cacheHeaders']) ? (boolean) $spec['cacheHeaders'] : true);
+        if (isset($spec['cacheHeaders']) && is_array($spec['cacheHeaders'])) {
+            $this->_cacheHeaders = $spec['cacheHeaders'];
+        }
         
-        $scope = (isset($spec['isPublic']) && $spec['isPublic']) ? 'public' : 'private';
+        $scope = ($this->_cacheHeaders['cacheheaders_enabled'] && $this->_cacheHeaders['cacheheaders'] != 'no_cache') ? 'public' : 'private';
         $maxAge = 0;
         
-        if ($this->_cacheHeaders) {
-            $this->_headers['Pragma'] = $scope;
-        }
+        $this->_headers['Pragma'] = $scope;
         
         // backwards compatibility (can be removed later)
         if (isset($spec['setExpires']) && is_numeric($spec['setExpires']) && !isset($spec['maxAge'])) {
@@ -129,8 +129,8 @@ class HTTP_ConditionalGet
         if (isset($spec['maxAge'])) {
             $maxAge = $spec['maxAge'];
             
-            if ($this->_cacheHeaders) {
-                $this->_headers['Expires'] = self::gmtDate($_SERVER['REQUEST_TIME'] + $spec['maxAge']);
+            if ($this->_cacheHeaders['expires_enabled'] && $maxAge) {
+                $this->_headers['Expires'] = self::gmtDate($_SERVER['REQUEST_TIME'] + $maxAge);
             }
         }
         
@@ -160,9 +160,40 @@ class HTTP_ConditionalGet
             $this->_setEtag($spec['contentHash'] . $etagAppend, $scope);
         }
         
-        if ($this->_cacheHeaders) {
-            $this->_headers['Cache-Control'] = "max-age={$maxAge}, {$scope}, must-revalidate, proxy-revalidate";
+        if ($this->_cacheHeaders['cacheheaders_enabled']) {
+            switch ($this->_cacheHeaders['cacheheaders']) {
+                case 'cache':
+                    $this->_headers['Cache-Control'] = 'public';
+                    break;
+                
+                case 'cache_validation':
+                    $this->_headers['Cache-Control'] = 'public, must-revalidate, proxy-revalidate';
+                    break;
+                
+                case 'cache_noproxy':
+                    $this->_headers['Cache-Control'] = 'public, must-revalidate';
+                    break;
+                
+                case 'cache_maxage':
+                    $this->_headers['Cache-Control'] = "max-age={$maxAge}, {$scope}, must-revalidate, proxy-revalidate";
+                    break;
+                
+                case 'no_cache':
+                    $this->_headers['Cache-Control'] = 'max-age=0, private, no-store, no-cache, must-revalidate';
+                    break;
+            }
         }
+        
+        /**
+         * Disable caching for preview mode
+         */
+        if (w3_is_preview_mode()) {
+            $this->_headers = array_merge($this->_headers, array(
+                'Pragma' => 'private', 
+                'Cache-Control' => 'private'
+            ));
+        }
+        
         // invalidate cache if disabled, otherwise check
         $this->cacheIsValid = (isset($spec['invalidate']) && $spec['invalidate']) ? false : $this->_isCacheValid();
     }
@@ -276,13 +307,18 @@ class HTTP_ConditionalGet
     protected $_lmTime = null;
     protected $_etag = null;
     protected $_stripEtag = false;
-    protected $_cacheHeaders = true;
+    protected $_cacheHeaders = array(
+        'use_etag' => true, 
+        'expires_enabled' => true, 
+        'cacheheaders_enabled' => true, 
+        'cacheheaders' => 'cache_validation'
+    );
     
     protected function _setEtag($hash, $scope)
     {
         $this->_etag = '"' . substr($scope, 0, 3) . $hash . '"';
         
-        if ($this->_cacheHeaders) {
+        if ($this->_cacheHeaders['use_etag']) {
             $this->_headers['ETag'] = $this->_etag;
         }
     }
@@ -324,7 +360,7 @@ class HTTP_ConditionalGet
             if ($this->normalizeEtag($clientEtag) === $compareTo) {
                 // respond with the client's matched ETag, even if it's not what
                 // we would've sent by default
-                if ($this->_cacheHeaders) {
+                if ($this->_cacheHeaders['use_etag']) {
                     $this->_headers['ETag'] = trim($clientEtag);
                 }
                 return true;
@@ -352,7 +388,7 @@ class HTTP_ConditionalGet
         if ($ifModifiedSince == self::gmtDate($this->_lmTime)) {
             // Apache 2.2's behavior. If there was no ETag match, send the 
             // non-encoded version of the ETag value.
-            if ($this->_cacheHeaders) {
+            if ($this->_cacheHeaders['use_etag']) {
                 $this->_headers['ETag'] = $this->normalizeEtag($this->_etag);
             }
             return true;

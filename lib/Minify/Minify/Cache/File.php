@@ -33,12 +33,19 @@ class Minify_Cache_File {
         if (is_file($this->_path . '/' . $id)) {
             @unlink($this->_path . '/' . $id);
         }
+        
+        $dir = dirname($id);
+        
+        if ($dir) {
+            w3_mkdir($dir, 0755, $this->_path);
+        }
+        
         if (! @file_put_contents($this->_path . '/' . $id, $data, $flag)) {
             return false;
         }
         // write control
-        if ($data !== $this->fetch($id)) {
-            @unlink($file);
+        if ($data != $this->fetch($id)) {
+            @unlink($this->_path . '/' . $id);
             return false;
         }
         return true;

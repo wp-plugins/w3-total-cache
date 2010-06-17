@@ -5,14 +5,15 @@
     
     <ol> 
         <li>
-        	Set the permissions of wp-content back to 755, e.g.:
+        	Set the permissions of wp-content/ back to 755, e.g.:
          	<pre class="console"># chmod 755 /var/www/vhosts/domain.com/httpdocs/wp-content/</pre>
          </li>
-        <li>On the "<a href="options-general.php?page=w3-total-cache/w3-total-cache.php&amp;tab=general">General Settings</a>" tab and select your caching methods for page, database and minify. In most cases, "disk enhanced" mode for page cache, "disk" mode for minify and "disk" mode for database caching are "good" settings.</li>
-        <li><em>Optional:</em> If you already have a content delivery network (<acronym title="Content Delivery Network">CDN</acronym>) provider, proceed to the "<a href="options-general.php?page=w3-total-cache/w3-total-cache.php&amp;tab=cdn"><acronym title="Content Delivery Network">CDN</acronym> Settings</a>" tab and populate the fields and set your preferences. If you do not use the Media Library, you will need to import your images etc into the default locations. Use the Media Library Import Tool on the <acronym title="Content Delivery Network">CDN</acronym> Setting tab to perform this task. If you do not have a <acronym title="Content Delivery Network">CDN</acronym> provider, you can still improve your site's performance using the "Self-hosted" method. On your own server, create a subdomain and matching <acronym title="Domain Name System">DNS</acronym> Zone record; e.g. static.domain.com and configure <acronym title="File Transfer Protocol">FTP</acronym> options on the <acronym title="Content Delivery Network">CDN</acronym> tab accordingly. Be sure to <acronym title="File Transfer Protocol">FTP</acronym> upload the appropriate files, using the available upload buttons.</li>
-        <li><em>Optional:</em> On the "<a href="options-general.php?page=w3-total-cache/w3-total-cache.php&amp;tab=minify">Minify Settings</a>" tab all of the recommended settings are preset. View your site's <acronym title="Hypertext Markup Language">HTML</acronym> source and search for .css and .js files and then specify any <acronym title="Cascading Style Sheet">CSS</acronym> and <acronym title="JavaScript">JS</acronym> files in the respective section. In the case of <acronym title="JavaScript">JS</acronym> files you can (optionally) specify the type and location of the embedding using the drop down menu. See the plugin's <a href="options-general.php?page=w3-total-cache/w3-total-cache.php&amp;tab=faq">FAQ</a> for more information on usage.</li>
-        <li><em>Optional:</em> On the "<a href="options-general.php?page=w3-total-cache/w3-total-cache.php&amp;tab=dbcache">Database Cache Settings</a>" tab the recommended settings are preset. If you're using a shared hosting account use the "disk" method with caution; in either of these cases the response time of the disk may not be fast enough, so this option is disabled by default.</li>
-        <li>You're done! Get back to blogging!</li>
+        <li>On the "<a href="options-general.php?page=w3-total-cache/w3-total-cache.php&amp;tab=general">General</a>" tab and select your caching methods for page, database and minify. In most cases, "disk enhanced" mode for page cache, "disk" mode for minify and "disk" mode for database caching are "good" settings.</li>
+        <li><em>Recommended:</em> On the "<a href="options-general.php?page=w3-total-cache/w3-total-cache.php&amp;tab=minify">Minify</a>" tab all of the recommended settings are preset. Use the help button to simplify discovery of your <acronym title="Cascading Style Sheet">CSS</acronym> and <acronym title="JavaScript">JS</acronym> files and groups. Pay close attention to the method and location of your <acronym title="JavaScript">JS</acronym> group embeddings. See the plugin's <a href="options-general.php?page=w3-total-cache/w3-total-cache.php&amp;tab=faq">FAQ</a> for more information on usage.</li>
+        <li><em>Recommended:</em> If you already have a content delivery network (<acronym title="Content Delivery Network">CDN</acronym>) provider, proceed to the "<a href="options-general.php?page=w3-total-cache/w3-total-cache.php&amp;tab=cdn">Content Delivery Network</a>" tab and populate the fields and set your preferences. If you do not use the Media Library, you will need to import your images etc into the default locations. Use the Media Library Import Tool on the "Content Delivery Network" tab to perform this task. If you do not have a <acronym title="Content Delivery Network">CDN</acronym> provider, you can still improve your site's performance using the "Self-hosted" method. On your own server, create a subdomain and matching <acronym title="Domain Name System">DNS</acronym> Zone record; e.g. static.domain.com and configure <acronym title="File Transfer Protocol">FTP</acronym> options on the "Content Delivery Network" tab accordingly. Be sure to <acronym title="File Transfer Protocol">FTP</acronym> upload the appropriate files, using the available upload buttons.</li>
+        <li><em>Optional:</em> On the "<a href="options-general.php?page=w3-total-cache/w3-total-cache.php&amp;tab=dbcache">Database Cache</a>" tab the recommended settings are preset. If using a shared hosting account use the "disk" method with caution; in either of these cases the response time of the disk may not be fast enough, so this option is disabled by default.</li>
+        <li><em>Optional:</em> On the "<a href="options-general.php?page=w3-total-cache/w3-total-cache.php&amp;tab=objectcache">Object Cache</a>" tab the recommended settings are preset. If using a shared hosting account use the "disk" method with caution, the response time of the disk may not be fast enough, so this option is disabled by default. Test this option with and without database cache to ensure that it provides a performance increase.</li>
+        <li><em>Optional:</em> On the "<a href="options-general.php?page=w3-total-cache/w3-total-cache.php&amp;tab=mobile">User Agent Groups</a>" tab, specify any user agents, like mobile phones if a mobile theme is used.</li>
     </ol>
     
     <p>
@@ -21,22 +22,32 @@
 	
 	<hr />
 	
-	<?php if ($pgcache_rules_core || $pgcache_rules_cache || $minify_rules): ?>
+	<?php if ($document_root_rules || $home_root_rules || $pgcache_rules || $minify_rules || $cdn_rules): ?>
 	<h3>Rewrite rules</h3>
-		<?php if ($pgcache_rules_core): ?>
-		<p><strong><?php echo htmlspecialchars($pgcache_htaccess_core); ?>:</strong></p>
-		<pre class="code"><?php echo (htmlspecialchars($pgcache_rules_core)); ?></pre>
-		<?php endif; ?>
-	
-		<?php if ($pgcache_rules_cache): ?>
-		<p><strong><?php echo htmlspecialchars($pgcache_htaccess_cache); ?>:</strong></p>
-		<pre class="code"><?php echo (htmlspecialchars($pgcache_rules_cache)); ?></pre>
-		<?php endif; ?>
-	
-		<?php if ($minify_rules): ?>
-		<p><strong><?php echo htmlspecialchars($minify_htaccess); ?>:</strong></p>
-		<pre class="code"><?php echo (htmlspecialchars($minify_rules)); ?></pre>
-		<?php endif; ?>
+	<?php if ($document_root_rules): ?>
+	<p><strong><?php echo htmlspecialchars($document_root_htaccess); ?>:</strong></p>
+	<pre class="code"><?php echo htmlspecialchars($document_root_rules); ?></pre>
+	<?php endif; ?>
+    
+	<?php if ($home_root_rules): ?>
+	<p><strong><?php echo htmlspecialchars($home_root_htaccess); ?>:</strong></p>
+	<pre class="code"><?php echo htmlspecialchars($home_root_rules); ?></pre>
+	<?php endif; ?>
+
+	<?php if ($pgcache_rules): ?>
+	<p><strong><?php echo htmlspecialchars($pgcache_htaccess); ?>:</strong></p>
+	<pre class="code"><?php echo htmlspecialchars($pgcache_rules); ?></pre>
+	<?php endif; ?>
+
+	<?php if ($minify_rules): ?>
+	<p><strong><?php echo htmlspecialchars($minify_htaccess); ?>:</strong></p>
+	<pre class="code"><?php echo htmlspecialchars($minify_rules); ?></pre>
+	<?php endif; ?>
+    
+	<?php if ($cdn_rules): ?>
+	<p><strong><?php echo htmlspecialchars($cdn_htaccess); ?>:</strong></p>
+	<pre class="code"><?php echo htmlspecialchars($cdn_rules); ?></pre>
+	<?php endif; ?>
 	<hr />
 	<?php endif; ?>
         
@@ -170,12 +181,13 @@
 			<pre class="console"># cd /usr/local/src &amp;&amp; wget <a href="http://pecl.php.net/get/APC-3.0.19.tgz" target="_blank">http://pecl.php.net/get/APC-3.0.19.tgz</a> &amp;&amp; tar -xzf APC-3.0.19.tgz &amp;&amp; cd APC-3.0.19</pre>
 		</li>
 		<li>
-			Note the path returned for the following command:
-			<pre class="console"># whereis php-config</pre>
+			Note the paths returned for the following commands:
+			<pre class="console"># whereis php-config
+# whereis apxs</pre>
 		</li>
 		<li>
 			Use the output from #2 to modify the --with-apxs and --with-php-config flags in the following compile command:
-			<pre class="console"># phpize &amp;&amp; ./configure --enable-apc --enable-apc-mmap --with-apxs=/usr/bin/phpize --with-php-config=/usr/bin/php-config &amp;&amp; make &amp;&amp; make install</pre>
+			<pre class="console"># phpize &amp;&amp; ./configure --enable-apc --enable-apc-mmap --with-apxs=/usr/sbin/apxs --with-php-config=/usr/bin/php-config &amp;&amp; make &amp;&amp; make install</pre>
 			The result should be similar to:
 			<pre class="console">Installing shared extensions: /usr/lib/php/modules/</pre>
 		</li>
@@ -205,7 +217,7 @@
 	
     <ol> 
         <li>
-        	If using <acronym title="Hypertext Preprocessor">PHP</acronym> v5+, download the <a href="http://eaccelerator.net/" target="_blank">last compatible version</a> and extract:
+        	If using <acronym title="Hypertext Preprocessor">PHP</acronym> v5+, download the <a href="http://eaccelerator.net/" target="_blank">lastest compatible version</a> and extract. Remember v0.9.5.3 is the last version that supports user objects, later versions only support opcode caching.
 			<pre class="console"># cd /usr/local/src &amp;&amp; wget <a href="http://bart.eaccelerator.net/source/0.9.5.3/eaccelerator-0.9.5.3.tar.bz2" target="_blank">http://bart.eaccelerator.net/source/0.9.5.3/eaccelerator-0.9.5.3.tar.bz2</a> &amp;&amp; tar -xjf eaccelerator-0.9.5.3.tar.bz2 &amp;&amp; cd eaccelerator-0.9.5.3</pre>
 		</li>
 		<li>

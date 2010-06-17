@@ -264,7 +264,7 @@ class W3_Db extends wpdb
         /**
          * Check for DONOTCACHEDB constant
          */
-        if (defined('DONOTCACHEDB')) {
+        if (defined('DONOTCACHEDB') && DONOTCACHEDB) {
             $cache_reject_reason = 'DONOTCACHEDB constant is defined';
             
             return false;
@@ -311,6 +311,15 @@ class W3_Db extends wpdb
          */
         if (defined('WP_ADMIN')) {
             $cache_reject_reason = 'wp-admin';
+            
+            return false;
+        }
+        
+        /**
+         * Check for WPMU's and WP's 3.0 short init
+         */
+        if (defined('SHORTINIT') && SHORTINIT) {
+            $cache_reject_reason = 'Short init';
             
             return false;
         }
@@ -458,7 +467,7 @@ class W3_Db extends wpdb
             '\bw3tc_request_data\b'
         );
         
-        if (preg_match('@' . implode('|', $auto_reject_strings) . '@is', $sql)) {
+        if (preg_match('~' . implode('|', $auto_reject_strings) . '~is', $sql)) {
             return false;
         }
         
@@ -467,7 +476,7 @@ class W3_Db extends wpdb
         foreach ($reject_sql as $expr) {
             $expr = trim($expr);
             $expr = str_replace('{prefix}', $this->prefix, $expr);
-            if ($expr != '' && preg_match('@' . $expr . '@i', $sql)) {
+            if ($expr != '' && preg_match('~' . $expr . '~i', $sql)) {
                 return false;
             }
         }
@@ -497,7 +506,7 @@ class W3_Db extends wpdb
         
         foreach ($reject_uri as $expr) {
             $expr = trim($expr);
-            if ($expr != '' && preg_match('@' . $expr . '@i', $_SERVER['REQUEST_URI'])) {
+            if ($expr != '' && preg_match('~' . $expr . '~i', $_SERVER['REQUEST_URI'])) {
                 return false;
             }
         }
@@ -562,7 +571,7 @@ class W3_Db extends wpdb
         $blogname = w3_get_blogname();
         
         if ($blogname == '') {
-            $blogname = $_SERVER['HTTP_HOST'];
+            $blogname = w3_get_host();
         }
         
         return sprintf('w3tc_%s_sql_%s', md5($blogname), md5($sql));
@@ -585,7 +594,7 @@ class W3_Db extends wpdb
             $debug_info .= "SQL info:\r\n";
             $debug_info .= sprintf("%s | %s | %s | % s | %s\r\n", str_pad('#', 5, ' ', STR_PAD_LEFT), str_pad('Time (s)', 8, ' ', STR_PAD_LEFT), str_pad('Caching (Reject reason)', 30, ' ', STR_PAD_BOTH), str_pad('Status', 10, ' ', STR_PAD_BOTH), 'Query');
             foreach ($this->query_stats as $index => $query) {
-                $debug_info .= sprintf("%s | %s | %s | %s | %s\r\n", str_pad($index + 1, 5, ' ', STR_PAD_LEFT), str_pad(round($query['time_total'], 3), 8, ' ', STR_PAD_LEFT), str_pad(($query['caching'] ? 'enabled' : sprintf('disabled (%s)', $query['reason'])), 30, ' ', STR_PAD_BOTH), str_pad(($query['cached'] ? 'Cached' : 'Not cached'), 10, ' ', STR_PAD_BOTH), str_replace('-->', '-- >', trim($query['query'])));
+                $debug_info .= sprintf("%s | %s | %s | %s | %s\r\n", str_pad($index + 1, 5, ' ', STR_PAD_LEFT), str_pad(round($query['time_total'], 3), 8, ' ', STR_PAD_LEFT), str_pad(($query['caching'] ? 'enabled' : sprintf('disabled (%s)', $query['reason'])), 30, ' ', STR_PAD_BOTH), str_pad(($query['cached'] ? 'cached' : 'not cached'), 10, ' ', STR_PAD_BOTH), str_replace('-->', '-- >', trim($query['query'])));
             }
         }
         

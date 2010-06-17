@@ -30,7 +30,7 @@ class W3_Cache_File_Manager
                 if ($entry != '.' && $entry != '..') {
                     $full_path = $path . '/' . $entry;
                     
-                    if (is_dir($full_path)) {
+                    if (@is_dir($full_path)) {
                         $this->_clean($full_path);
                     } elseif (! $this->is_valid($full_path)) {
                         @unlink($full_path);

@@ -1046,11 +1046,7 @@ class S3 {
 	public static function __getMimeType(&$file) {
 		$type = w3_get_mime_type($file);
 		
-		if (! $type && function_exists('mime_content_type')) {
-		    $type = trim(mime_content_type($file));
-		}
-		 
-		return (! empty($type) ? $type : 'application/octet-stream');
+		return $type;
 	}
 
 
@@ -1224,6 +1220,7 @@ final class S3Request {
 		curl_setopt($curl, CURLOPT_WRITEFUNCTION, array(&$this, '__responseWriteCallback'));
 		curl_setopt($curl, CURLOPT_HEADERFUNCTION, array(&$this, '__responseHeaderCallback'));
 		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+		curl_setopt($curl, CURLOPT_TIMEOUT, 120);
 
 		// Request types
 		switch ($this->verb) {

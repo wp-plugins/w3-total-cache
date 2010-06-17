@@ -36,6 +36,22 @@
 	padding: 5px
 }
 
+.w3tc-test-ok,.w3tc-test-warn,.w3tc-test-error {
+	font-weight: bold;
+}
+
+.w3tc-test-ok {
+	color: #090;
+}
+
+.w3tc-test-warn {
+	color: #f90;
+}
+
+.w3tc-test-error {
+	color: #f00;
+}
+
 #w3tc acronym {
 	border-bottom: 1px dotted #666
 }
@@ -149,4 +165,104 @@
 
 #cdn-general th {
 	width: 400px;
+}
+
+#cdn_cnames li {
+	padding: 5px;
+	cursor: ns-resize;
+}
+
+#cdn_cnames li:hover {
+	background: #f9f9f9;
+}
+
+#cdn_cnames li span {
+	color: #999;
+}
+
+#mobile_groups li {
+	cursor: ns-resize;
+	list-style: none;
+	background: #f9f9f9;
+	margin-bottom: 1em;
+	border-radius: 8px;
+	-webkit-border-radius: 8px;
+	-moz-border-radius: 8px;
+}
+
+#mobile_groups li:hover {
+	background: #f3f3f3;
+}
+
+#mobile_groups li table {
+	margin: 0;
+}
+
+.mobile_group {
+	font-weight: bold;
+}
+
+#recom_container {
+	overflow: auto;
+	height: 550px;
+}
+
+#self_test_container {
+	overflow: auto;
+	height: 550px;
+}
+
+#self_test_container fieldset {
+	width: 70%;
+}
+
+.monospace {
+	font-family: monospace;
+}
+
+.minify-files li {
+	padding: 2px;
+	cursor: ns-resize;
+	list-style: none;
+}
+
+.minify-files li:hover {
+	background: #f9f9f9;
+}
+
+.minify-files th,.minify-files td {
+	line-height: normal;
+	border: 0;
+	padding: 0;
+	margin: 0;
+}
+
+.minify-files th {
+	width: auto;
+	color: #aaa !important;
+	font-size: 10px;
+	font-weight: normal;
+	text-align: left;
+}
+
+.minify-files td {
+	font-size: 13px;
+}
+
+th.minify-files-add,td.minify-files-add {
+	width: 40px;
+	text-align: center;
+}
+
+.minify-files-exists input,.minify-files-exists select {
+	color: red;
+}
+
+#support_loading {
+	height: 32px;
+	background: url(../images/loader.gif) left center no-repeat;
+	padding-left: 38px;
+	line-height: 32px;
+	margin: 1em 0;
+	font-weight: bold;
 }

@@ -63,7 +63,7 @@ class Minify_Controller_MinApp extends Minify_Controller_Base {
                     ));    
                 } else {
                     $this->log("The path \"{$file}\" could not be found (or was not a file)");
-                    return $options;
+                    continue;
                 }
             }
         } elseif (! $cOptions['groupsOnly'] && isset($_GET['f'])) {

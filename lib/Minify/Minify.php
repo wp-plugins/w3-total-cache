@@ -207,7 +207,7 @@ class Minify {
         }
         
         // determine encoding
-        if (self::$_options['encodeOutput'] != '') {
+        if (self::$_options['encodeOutput']) {
             if (self::$_options['encodeMethod'] !== null) {
                 // controller specifically requested this
                 $contentEncoding = self::$_options['encodeMethod'];
@@ -286,12 +286,8 @@ class Minify {
                 $content = self::_combineMinify();
                 self::$_cache->store($cacheId, $content);
                 
-                if (stristr(self::$_options['encodeOutput'], 'gzip') && function_exists('gzencode')) {
+                if (self::$_options['encodeOutput'] && function_exists('gzencode')) {
                     self::$_cache->store($cacheId . '.gzip', gzencode($content, self::$_options['encodeLevel']));
-                }
-                
-                if (stristr(self::$_options['encodeOutput'], 'deflate') && function_exists('gzdeflate')) {
-                    self::$_cache->store($cacheId . '.deflate', gzdeflate($content, self::$_options['encodeLevel']));
                 }
             }
         } else {
@@ -388,6 +384,8 @@ class Minify {
         if (isset($_SERVER['SERVER_SOFTWARE'])
             && 0 === strpos($_SERVER['SERVER_SOFTWARE'], 'Microsoft-IIS/')
         ) {
+            $_SERVER['PATH_TRANSLATED']= preg_replace('~[/\\\]+~', '/', $_SERVER['PATH_TRANSLATED']); 
+                        
             $_SERVER['DOCUMENT_ROOT'] = rtrim(substr(
                 $_SERVER['PATH_TRANSLATED']
                 ,0

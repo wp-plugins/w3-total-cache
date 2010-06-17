@@ -109,7 +109,7 @@ class W3_Plugin_DbCache extends W3_Plugin
     {
         static $instances = array();
         
-        if (! isset($instances[0])) {
+        if (!isset($instances[0])) {
             $class = __CLASS__;
             $instances[0] = & new $class();
         }
@@ -122,7 +122,7 @@ class W3_Plugin_DbCache extends W3_Plugin
      */
     function activate()
     {
-        if (! $this->locked()) {
+        if (!$this->locked()) {
             $file_db = WP_CONTENT_DIR . '/db.php';
             
             if (@copy(W3TC_INSTALL_DIR . '/db.php', $file_db)) {
@@ -142,7 +142,7 @@ class W3_Plugin_DbCache extends W3_Plugin
     {
         $this->unschedule();
         
-        if (! $this->locked()) {
+        if (!$this->locked()) {
             @unlink(WP_CONTENT_DIR . '/db.php');
         }
     }
@@ -153,7 +153,7 @@ class W3_Plugin_DbCache extends W3_Plugin
     function schedule()
     {
         if ($this->_config->get_boolean('dbcache.enabled') && $this->_config->get_string('dbcache.engine') == 'file') {
-            if (! wp_next_scheduled('w3_dbcache_cleanup')) {
+            if (!wp_next_scheduled('w3_dbcache_cleanup')) {
                 wp_schedule_event(time(), 'w3_dbcache_cleanup', 'w3_dbcache_cleanup');
             }
         } else {
@@ -200,7 +200,7 @@ class W3_Plugin_DbCache extends W3_Plugin
         return array_merge($schedules, array(
             'w3_dbcache_cleanup' => array(
                 'interval' => $gc, 
-                'display' => sprintf('Every %d seconds', $gc)
+                'display' => sprintf('[W3TC] Database Cache file GC (every %d seconds)', $gc)
             )
         ));
     }
@@ -212,7 +212,7 @@ class W3_Plugin_DbCache extends W3_Plugin
     {
         static $flushed = false;
         
-        if (! $flushed) {
+        if (!$flushed) {
             require_once W3TC_LIB_W3_DIR . '/Db.php';
             
             $w3_db = & W3_Db::instance();

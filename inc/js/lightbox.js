@@ -1,4 +1,4 @@
-var Lightbox = {
+var W3tc_Lightbox = {
     window: jQuery(window),
     container: null,
     options: null,
@@ -58,23 +58,26 @@ var Lightbox = {
             this.load(this.options.url, this.options.callback);
         }
 
-        Overlay.show(this);
+        W3tc_Overlay.show(this);
 
         this.resize();
         this.container.show();
-        currentLightbox = this;
     },
 
     close: function() {
         this.container.hide();
-        Overlay.hide();
-        currentLightbox = null;
+        W3tc_Overlay.hide();
     },
 
     resize: function() {
         this.container.css( {
             top: this.window.scrollTop() + this.options.offsetTop,
             left: this.window.scrollLeft() + this.window.width() / 2 - this.container.width() / 2
+        });
+
+        jQuery('.lightbox-content', this.container).css( {
+            width: this.width(),
+            height: this.height()
         });
     },
 
@@ -99,10 +102,8 @@ var Lightbox = {
         if (width === undefined) {
             return this.container.width();
         } else {
-            return this.container.css( {
-                width: width,
-                left: this.window.scrollLeft() + this.window.width() / 2 - width / 2
-            });
+            this.container.css('width', width);
+            return this.resize();
         }
     },
 
@@ -110,10 +111,8 @@ var Lightbox = {
         if (height === undefined) {
             return this.container.height();
         } else {
-            return this.container.css( {
-                height: height,
-                top: this.window.scrollTop() + this.options.offsetTop
-            });
+            this.container.css('height', height);
+            return this.resize();
         }
     },
 
@@ -122,7 +121,7 @@ var Lightbox = {
     }
 };
 
-var Overlay = {
+var W3tc_Overlay = {
     window: jQuery(window),
     container: null,
 
@@ -175,7 +174,7 @@ var Overlay = {
 };
 
 function w3tc_lightbox_support_us() {
-    Lightbox.open( {
+    W3tc_Lightbox.open( {
         width: 590,
         height: 200,
         url: 'options-general.php?page=w3-total-cache/w3-total-cache.php&w3tc_action=support_us',
@@ -202,7 +201,7 @@ function w3tc_lightbox_support_us() {
 }
 
 function w3tc_lightbox_tweet() {
-    Lightbox.open( {
+    W3tc_Lightbox.open( {
         width: 550,
         height: 340,
         url: 'options-general.php?page=w3-total-cache/w3-total-cache.php&w3tc_action=tweet',
@@ -243,9 +242,139 @@ function w3tc_lightbox_tweet() {
     });
 }
 
-jQuery(function($) {
-    $('.button-tweet').click(function() {
+var w3tc_minify_recommendations_checked = {};
+
+function w3tc_lightbox_minify_recommendations() {
+    W3tc_Lightbox.open( {
+        width: 1000,
+        height: 600,
+        url: 'options-general.php?page=w3-total-cache/w3-total-cache.php&w3tc_action=minify_recommendations',
+        callback: function(lightbox) {
+            var theme = jQuery('#recom_theme').val();
+
+            if (jQuery.ui && jQuery.ui.sortable) {
+                jQuery("#recom_js_files,#recom_css_files").sortable( {
+                    axis: 'y',
+                    stop: function() {
+                        jQuery(this).find('li').each(function(index) {
+                            jQuery(this).find('td:eq(1)').html((index + 1) + '.');
+                        });
+                    }
+                });
+            }
+
+            if (w3tc_minify_recommendations_checked[theme] !== undefined) {
+                jQuery('#recom_js_files :text,#recom_css_files :text').each(function() {
+                    var hash = jQuery(this).parents('li').find('[name=recom_js_template]').val() + ':' + jQuery(this).val();
+
+                    if (w3tc_minify_recommendations_checked[theme][hash] !== undefined) {
+                        var checkbox = jQuery(this).parents('li').find(':checkbox');
+
+                        if (w3tc_minify_recommendations_checked[theme][hash]) {
+                            checkbox.attr('checked', 'checked');
+                        } else {
+                            checkbox.removeAttr('checked');
+                        }
+                    }
+                });
+            }
+
+            jQuery('#recom_theme').change(function() {
+                jQuery('#recom_js_files :checkbox,#recom_css_files :checkbox').each(function() {
+                    var li = jQuery(this).parents('li');
+                    var hash = li.find('[name=recom_js_template]').val() + ':' + li.find(':text').val();
+
+                    if (w3tc_minify_recommendations_checked[theme] === undefined) {
+                        w3tc_minify_recommendations_checked[theme] = {};
+                    }
+
+                    w3tc_minify_recommendations_checked[theme][hash] = jQuery(this).is(':checked');
+                });
+
+                lightbox.load('options-general.php?page=w3-total-cache/w3-total-cache.php&w3tc_action=minify_recommendations&theme_key=' + jQuery(this).val(), lightbox.options.callback);
+            });
+
+            jQuery('#recom_js_check').click(function() {
+                if (jQuery('#recom_js_files :checkbox:checked').size()) {
+                    jQuery('#recom_js_files :checkbox').removeAttr('checked');
+                } else {
+                    jQuery('#recom_js_files :checkbox').attr('checked', 'checked');
+                }
+            });
+
+            jQuery('#recom_css_check').click(function() {
+                if (jQuery('#recom_css_files :checkbox:checked').size()) {
+                    jQuery('#recom_css_files :checkbox').removeAttr('checked');
+                } else {
+                    jQuery('#recom_css_files :checkbox').attr('checked', 'checked');
+                }
+            });
+
+            jQuery('.recom_apply', lightbox.container).click(function() {
+                var theme = jQuery('#recom_theme').val();
+
+                jQuery('#js_files li').each(function() {
+                    if (jQuery(this).find(':text').attr('name').indexOf('js_files[' + theme + ']') != -1) {
+                        jQuery(this).remove();
+                    }
+                });
+
+                jQuery('#css_files li').each(function() {
+                    if (jQuery(this).find(':text').attr('name').indexOf('css_files[' + theme + ']') != -1) {
+                        jQuery(this).remove();
+                    }
+                });
+
+                jQuery('#recom_js_files li').each(function() {
+                    if (jQuery(this).find(':checkbox:checked').size()) {
+                        w3tc_minify_js_file_add(theme, jQuery(this).find('[name=recom_js_template]').val(), jQuery(this).find('[name=recom_js_location]').val(), jQuery(this).find('[name=recom_js_file]').val());
+                    }
+                });
+
+                jQuery('#recom_css_files li').each(function() {
+                    if (jQuery(this).find(':checkbox:checked').size()) {
+                        w3tc_minify_css_file_add(theme, jQuery(this).find('[name=recom_css_template]').val(), jQuery(this).find('[name=recom_css_file]').val());
+                    }
+                });
+
+                w3tc_minify_js_theme(theme);
+                w3tc_minify_css_theme(theme);
+
+                w3tc_input_enable('.js_enabled', jQuery('#js_enabled:checked').size());
+                w3tc_input_enable('.css_enabled', jQuery('#css_enabled:checked').size());
+
+                lightbox.close();
+            });
+        }
+    });
+}
+
+function w3tc_lightbox_self_test() {
+    W3tc_Lightbox.open( {
+        width: 600,
+        height: 600,
+        url: 'options-general.php?page=w3-total-cache/w3-total-cache.php&w3tc_action=self_test',
+        callback: function(lightbox) {
+            jQuery('.button-primary', lightbox.container).click(function() {
+                lightbox.close();
+            });
+        }
+    });
+}
+
+jQuery(function() {
+    jQuery('.button-tweet').click(function() {
         w3tc_lightbox_tweet();
+        return false;
+    });
+
+    jQuery('.button-minify-recommendations').click(function() {
+        w3tc_lightbox_minify_recommendations();
+        return false;
+    });
+
+    jQuery('.button-self-test').click(function() {
+        w3tc_lightbox_self_test();
         return false;
     });
 });

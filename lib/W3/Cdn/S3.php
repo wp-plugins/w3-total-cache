@@ -1,8 +1,17 @@
 <?php
 
+/**
+ * Amazon S3 CDN engine
+ */
 require_once W3TC_LIB_W3_DIR . '/Cdn/Base.php';
-require_once W3TC_LIB_DIR . '/S3.php';
 
+if (!class_exists('S3')) {
+    require_once W3TC_LIB_DIR . '/S3.php';
+}
+
+/**
+ * Class W3_Cdn_S3
+ */
 class W3_Cdn_S3 extends W3_Cdn_Base
 {
     /**
@@ -44,7 +53,7 @@ class W3_Cdn_S3 extends W3_Cdn_Base
     }
     
     /**
-     * Uploads files to FTP
+     * Uploads files to S3
      *
      * @param array $files
      * @param array $results
@@ -56,40 +65,114 @@ class W3_Cdn_S3 extends W3_Cdn_Base
         $count = 0;
         $error = null;
         
-        if (! $this->_init($error)) {
-            $results = $this->get_results($files, W3_CDN_RESULT_HALT, $error);
+        if (!$this->_init($error)) {
+            $results = $this->get_results($files, W3TC_CDN_RESULT_HALT, $error);
             return false;
         }
         
         foreach ($files as $local_path => $remote_path) {
-            if (! file_exists($local_path)) {
-                $results[] = $this->get_result($local_path, $remote_path, W3_CDN_RESULT_ERROR, 'Source file not found');
-                continue;
-            }
+            $result = $this->_upload($local_path, $remote_path, $force_rewrite);
+            $results[] = $result;
             
-            if (! $force_rewrite) {
-                $info = @$this->_s3->getObjectInfo($this->_config['bucket'], $remote_path);
-                
-                if ($info) {
-                    $hash = @md5_file($local_path);
-                    $s3_hash = (isset($info['hash']) ? $info['hash'] : '');
-                    
-                    if ($hash === $s3_hash) {
-                        $results[] = $this->get_result($local_path, $remote_path, W3_CDN_RESULT_ERROR, 'Object already exists');
-                        continue;
-                    }
-                }
-            }
-            
-            $result = @$this->_s3->putObjectFile($local_path, $this->_config['bucket'], $remote_path, S3::ACL_PUBLIC_READ);
-            $results[] = $this->get_result($local_path, $remote_path, ($result ? W3_CDN_RESULT_OK : W3_CDN_RESULT_ERROR), ($result ? 'OK' : 'Unable to put object'));
-            
-            if ($result) {
+            if ($result['result'] == W3TC_CDN_RESULT_OK) {
                 $count++;
+            }
+            
+            if ($this->_config['compression'] && $this->may_gzip($remote_path)) {
+                $remote_path_gzip = $remote_path . '.gz';
+                $result = $this->_upload_gzip($local_path, $remote_path_gzip, $force_rewrite);
+                $results[] = $result;
+                
+                if ($result['result'] == W3TC_CDN_RESULT_OK) {
+                    $count++;
+                }
             }
         }
         
         return $count;
+    }
+    
+    /**
+     * Uploads single file to S3
+     * 
+     * @param string $local_path
+     * @param string $remote_path
+     * @param boolean $force_rewrite
+     * @return array
+     */
+    function _upload($local_path, $remote_path, $force_rewrite = false)
+    {
+        if (!file_exists($local_path)) {
+            return $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Source file not found');
+        }
+        
+        if (!$force_rewrite) {
+            $info = @$this->_s3->getObjectInfo($this->_config['bucket'], $remote_path);
+            
+            if ($info) {
+                $hash = @md5_file($local_path);
+                $s3_hash = (isset($info['hash']) ? $info['hash'] : '');
+                
+                if ($hash === $s3_hash) {
+                    return $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Object already exists');
+                }
+            }
+        }
+        
+        $headers = $this->get_headers($local_path);
+        $result = @$this->_s3->putObjectFile($local_path, $this->_config['bucket'], $remote_path, S3::ACL_PUBLIC_READ, array(), $headers);
+        
+        return $this->get_result($local_path, $remote_path, ($result ? W3TC_CDN_RESULT_OK : W3TC_CDN_RESULT_ERROR), ($result ? 'OK' : 'Unable to put object'));
+    }
+    
+    /**
+     * Uploads gzip version of file
+     * 
+     * @param string $local_path
+     * @param string $remote_path
+     * @param boolean $force_rewrite
+     * @return array
+     */
+    function _upload_gzip($local_path, $remote_path, $force_rewrite = false)
+    {
+        if (!function_exists('gzencode')) {
+            return $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, "GZIP library doesn't exists");
+        }
+        
+        if (!file_exists($local_path)) {
+            return $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Source file not found');
+        }
+        
+        $contents = @file_get_contents($local_path);
+        
+        if ($contents === false) {
+            return $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Unable to read file');
+        }
+        
+        $data = gzencode($contents);
+        
+        if (!$force_rewrite) {
+            $info = @$this->_s3->getObjectInfo($this->_config['bucket'], $remote_path);
+            
+            if ($info) {
+                $hash = md5($data);
+                $s3_hash = (isset($info['hash']) ? $info['hash'] : '');
+                
+                if ($hash === $s3_hash) {
+                    return $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Object already exists');
+                }
+            }
+        }
+        
+        $headers = $this->get_headers($local_path);
+        $headers = array_merge($headers, array(
+            'Vary' => 'Accept-Encoding', 
+            'Content-Encoding' => 'gzip'
+        ));
+        
+        $result = @$this->_s3->putObjectString($data, $this->_config['bucket'], $remote_path, S3::ACL_PUBLIC_READ, array(), $headers);
+        
+        return $this->get_result($local_path, $remote_path, ($result ? W3TC_CDN_RESULT_OK : W3TC_CDN_RESULT_ERROR), ($result ? 'OK' : 'Unable to put object'));
     }
     
     /**
@@ -104,17 +187,27 @@ class W3_Cdn_S3 extends W3_Cdn_Base
         $error = null;
         $count = 0;
         
-        if (! $this->_init($error)) {
-            $results = $this->get_results($files, W3_CDN_RESULT_HALT, $error);
+        if (!$this->_init($error)) {
+            $results = $this->get_results($files, W3TC_CDN_RESULT_HALT, $error);
             return false;
         }
         
         foreach ($files as $local_path => $remote_path) {
             $result = @$this->_s3->deleteObject($this->_config['bucket'], $remote_path);
-            $results[] = $this->get_result($local_path, $remote_path, ($result ? W3_CDN_RESULT_OK : W3_CDN_RESULT_ERROR), ($result ? 'OK' : 'Unable to delete object'));
+            $results[] = $this->get_result($local_path, $remote_path, ($result ? W3TC_CDN_RESULT_OK : W3TC_CDN_RESULT_ERROR), ($result ? 'OK' : 'Unable to delete object'));
             
             if ($result) {
                 $count++;
+            }
+            
+            if ($this->_config['compression']) {
+                $remote_path_gzip = $remote_path . '.gz';
+                $result = @$this->_s3->deleteObject($this->_config['bucket'], $remote_path_gzip);
+                $results[] = $this->get_result($local_path, $remote_path_gzip, ($result ? W3TC_CDN_RESULT_OK : W3TC_CDN_RESULT_ERROR), ($result ? 'OK' : 'Unable to delete object'));
+                
+                if ($result) {
+                    $count++;
+                }
             }
         }
         
@@ -129,47 +222,37 @@ class W3_Cdn_S3 extends W3_Cdn_Base
      */
     function test(&$error)
     {
+        if (!parent::test($error)) {
+            return false;
+        }
+        
         $string = 'test_s3_' . md5(time());
         
-        if (! $this->_init($error)) {
-            return false;
-        }
-        
-        $domain = $this->get_domain();
-        
-        if (! $domain) {
-            $error = 'Empty domain.';
-            
-            return false;
-        }
-        
-        if (gethostbyname($domain) == $domain) {
-            $error = sprintf('Unable to resolve domain: %s.', $domain);
-            
+        if (!$this->_init($error)) {
             return false;
         }
         
         $buckets = @$this->_s3->listBuckets();
         
-        if (! $buckets) {
+        if (!$buckets) {
             $error = 'Unable to list buckets (check your credentials).';
             
             return false;
         }
         
-        if (! in_array($this->_config['bucket'], (array) $buckets)) {
+        if (!in_array($this->_config['bucket'], (array) $buckets)) {
             $error = sprintf('Bucket doesn\'t exist: %s', $this->_config['bucket']);
             
             return false;
         }
         
-        if (! @$this->_s3->putObjectString($string, $this->_config['bucket'], $string, S3::ACL_PUBLIC_READ)) {
+        if (!@$this->_s3->putObjectString($string, $this->_config['bucket'], $string, S3::ACL_PUBLIC_READ)) {
             $error = 'Unable to put object.';
             
             return false;
         }
         
-        if (! ($object = @$this->_s3->getObject($this->_config['bucket'], $string))) {
+        if (!($object = @$this->_s3->getObject($this->_config['bucket'], $string))) {
             $error = 'Unable to get object.';
             
             return false;
@@ -182,7 +265,7 @@ class W3_Cdn_S3 extends W3_Cdn_Base
             return false;
         }
         
-        if (! @$this->_s3->deleteObject($this->_config['bucket'], $string)) {
+        if (!@$this->_s3->deleteObject($this->_config['bucket'], $string)) {
             $error = 'Unable to delete object.';
             
             return false;
@@ -196,15 +279,19 @@ class W3_Cdn_S3 extends W3_Cdn_Base
      *
      * @return string
      */
-    function get_domain()
+    function get_domains()
     {
-        if (! empty($this->_config['bucket'])) {
+        if (!empty($this->_config['cname'])) {
+            return (array) $this->_config['cname'];
+        } elseif (!empty($this->_config['bucket'])) {
             $domain = sprintf('%s.s3.amazonaws.com', $this->_config['bucket']);
             
-            return $domain;
+            return array(
+                $domain
+            );
         }
         
-        return false;
+        return array();
     }
     
     /**
@@ -214,9 +301,7 @@ class W3_Cdn_S3 extends W3_Cdn_Base
      */
     function get_via()
     {
-        $domain = $this->get_domain();
-        
-        return sprintf('Amazon Web Services: S3: %s', ($domain ? $domain : 'N/A'));
+        return sprintf('Amazon Web Services: S3: %s', parent::get_via());
     }
     
     /**
@@ -225,15 +310,15 @@ class W3_Cdn_S3 extends W3_Cdn_Base
      * @param string $error
      * @return boolean
      */
-    function create_bucket(&$error)
+    function create_container(&$error)
     {
-        if (! $this->_init($error)) {
+        if (!$this->_init($error)) {
             return false;
         }
         
         $buckets = @$this->_s3->listBuckets();
         
-        if (! $buckets) {
+        if (!$buckets) {
             $error = 'Unable to list buckets (check your credentials).';
             
             return false;
@@ -245,12 +330,28 @@ class W3_Cdn_S3 extends W3_Cdn_Base
             return false;
         }
         
-        if (! @$this->_s3->putBucket($this->_config['bucket'], S3::ACL_PUBLIC_READ)) {
+        if (!@$this->_s3->putBucket($this->_config['bucket'], S3::ACL_PUBLIC_READ)) {
             $error = sprintf('Unable to create bucket: %s.', $this->_config['bucket']);
             
             return false;
         }
         
         return true;
+    }
+    
+    /**
+     * Formats URL for object
+     * @param string $path
+     * @return string
+     */
+    function format_url($path)
+    {
+        $url = parent::format_url($path);
+        
+        if ($this->_config['compression'] && stristr($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false && $this->may_gzip($path)) {
+            return $url . '.gz';
+        }
+        
+        return $url;
     }
 }

@@ -1,0 +1,33 @@
+<?php if (! $ajax): include W3TC_DIR . '/inc/options/common/header.phtml'; ?>
+<h3>Support</h3>
+
+<p>
+    Request professional services, suggest a feature or submit a bug using the form below:
+</p>
+<?php endif; ?>
+
+<div id="support_container">
+    <form id="support_select_form" action="options-general.php?page=<?php echo urldecode(W3TC_FILE); ?>&amp;tab=<?php echo $this->_tab; ?>" method="post">
+        <fieldset>
+        	<legend>Choose request type</legend>
+    
+            <table class="form-table">
+            	<tr>
+            		<th valign="top"><label for="support_request_type">Request type:</label></th>
+            		<td><select id="support_request_type" name="request_type">
+    					<option value="">-- Choose Type --</option>
+    					<?php foreach ($this->_request_groups as $_request_group => $_request_types): ?>
+    					<optgroup label="<?php echo htmlspecialchars($_request_group); ?>:">
+    						<?php foreach ($_request_types as $_request_type): ?>
+    							<option value="<?php echo $_request_type; ?>"<?php if ($request_type == $_request_type): ?><?php endif; ?>><?php echo htmlspecialchars($this->_request_types[$_request_type]); ?></option>
+    						<?php endforeach; ?>
+    					</optgroup>
+    					<?php endforeach; ?>
+    				</select></td>
+            	</tr>
+            </table>
+    	</fieldset>
+    </form>
+</div>
+
+<?php if (! $ajax) include W3TC_DIR . '/inc/options/common/footer.phtml'; ?>

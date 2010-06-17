@@ -38,6 +38,11 @@ class W3_Plugin_PgCache extends W3_Plugin
                 ));
             }
             
+            add_action('w3_pgcache_prime', array(
+                &$this, 
+                'prime'
+            ));
+            
             add_action('publish_phone', array(
                 &$this, 
                 'on_post_edit'
@@ -123,7 +128,9 @@ class W3_Plugin_PgCache extends W3_Plugin
     function activate()
     {
         if (!$this->update_wp_config()) {
-            $error = sprintf('<strong>%swp-config.php</strong> could not be written, please edit config and add:<br /><strong style="color:#f00;">define(\'WP_CACHE\', true);</strong> before <strong style="color:#f00;">require_once(ABSPATH . \'wp-settings.php\');</strong><br />then re-activate plugin.', ABSPATH);
+            $activate_url = wp_nonce_url('plugins.php?action=activate&plugin=' . W3TC_FILE, 'activate-plugin_' . W3TC_FILE);
+            $reactivate_button = sprintf('<input type="button" value="re-activate plugin" onclick="top.location.href = \'%s\'" />', addslashes($activate_url));
+            $error = sprintf('<strong>%swp-config.php</strong> could not be written, please edit config and add:<br /><strong style="color:#f00;">define(\'WP_CACHE\', true);</strong> before <strong style="color:#f00;">require_once(ABSPATH . \'wp-settings.php\');</strong><br />then %s.', ABSPATH, $reactivate_button);
             
             w3_activate_error($error);
         }
@@ -138,8 +145,8 @@ class W3_Plugin_PgCache extends W3_Plugin
                 $this->_config->set('pgcache.engine', 'file');
                 $this->_config->save();
             } else {
-                if (!w3_is_wpmu() && !$this->write_rules_core()) {
-                    w3_writable_error(ABSPATH . '.htaccess');
+                if (!w3_is_multisite() && !$this->write_rules_core()) {
+                    w3_writable_error(w3_get_home_root() . '/.htaccess');
                 }
                 
                 if (!$this->write_rules_cache()) {
@@ -157,6 +164,7 @@ class W3_Plugin_PgCache extends W3_Plugin
         }
         
         $this->schedule();
+        $this->schedule_prime();
     }
     
     /**
@@ -164,6 +172,7 @@ class W3_Plugin_PgCache extends W3_Plugin
      */
     function deactivate()
     {
+        $this->unschedule_prime();
         $this->unschedule();
         
         if (!$this->locked()) {
@@ -172,7 +181,7 @@ class W3_Plugin_PgCache extends W3_Plugin
         
         $this->remove_rules_cache();
         
-        if (!w3_is_wpmu()) {
+        if (!w3_is_multisite()) {
             $this->remove_rules_core();
         }
     }
@@ -192,12 +201,36 @@ class W3_Plugin_PgCache extends W3_Plugin
     }
     
     /**
+     * Schedule prime event
+     */
+    function schedule_prime()
+    {
+        if ($this->_config->get_boolean('pgcache.enabled') && $this->_config->get_boolean('pgcache.prime.enabled')) {
+            if (!wp_next_scheduled('w3_pgcache_prime')) {
+                wp_schedule_event(time(), 'w3_pgcache_prime', 'w3_pgcache_prime');
+            }
+        } else {
+            $this->unschedule_prime();
+        }
+    }
+    
+    /**
      * Unschedules events
      */
     function unschedule()
     {
         if (wp_next_scheduled('w3_pgcache_cleanup')) {
             wp_clear_scheduled_hook('w3_pgcache_cleanup');
+        }
+    }
+    
+    /**
+     * Unschedules prime
+     */
+    function unschedule_prime()
+    {
+        if (wp_next_scheduled('w3_pgcache_prime')) {
+            wp_clear_scheduled_hook('w3_pgcache_prime');
         }
     }
     
@@ -210,7 +243,8 @@ class W3_Plugin_PgCache extends W3_Plugin
     {
         static $updated = false;
         
-        if (defined('WP_CACHE') || $updated) {
+        // added checking WP_CACHE value for WP3.0 compatibility
+        if ((defined('WP_CACHE') && WP_CACHE) || $updated) {
             return true;
         }
         
@@ -257,11 +291,80 @@ class W3_Plugin_PgCache extends W3_Plugin
                 
                 $w3_cache_file_pgcache_manager = & new W3_Cache_File_PgCache_Manager(array(
                     'cache_dir' => W3TC_CACHE_FILE_PGCACHE_DIR, 
-                    'expire' => $this->_config->get_integer('pgcache.lifetime')
+                    'expire' => $this->_config->get_integer('browsercache.html.lifetime')
                 ));
                 
                 $w3_cache_file_pgcache_manager->clean();
                 break;
+        }
+    }
+    
+    /**
+     * Prime cache
+     * 
+     * @param integer $start
+     * @return void
+     */
+    function prime($start = 0)
+    {
+        //return;
+        $limit = $this->_config->get_integer('pgcache.prime.limit');
+        $sitemap_url = $this->_config->get_string('pgcache.prime.sitemap');
+        $sitemap_xml = w3_http_get($sitemap_url);
+        
+        $queue = array();
+        
+        /**
+         * Parse XML sitemap
+         */
+        if ($sitemap_xml) {
+            $url_matches = null;
+            
+            if (preg_match_all('~<url>(.*)</url>~Uis', $sitemap_xml, $url_matches)) {
+                $loc_matches = null;
+                $priority_matches = null;
+                
+                $locs = array();
+                
+                foreach ($url_matches[1] as $url_match) {
+                    $loc = '';
+                    $priority = 0;
+                    
+                    if (preg_match('~<loc>(.*)</loc>~is', $url_match, $loc_matches)) {
+                        $loc = trim($loc_matches[1]);
+                    }
+                    
+                    if (preg_match('~<priority>(.*)</priority>~is', $url_match, $priority_matches)) {
+                        $priority = (double) trim($priority_matches[1]);
+                    }
+                    
+                    if ($loc && $priority) {
+                        $locs[$loc] = $priority;
+                    }
+                }
+                
+                arsort($locs);
+                
+                $queue = array_keys($locs);
+            }
+        }
+        
+        /**
+         * Queue URLs
+         */
+        $urls = array_slice($queue, $start, $limit);
+        
+        if (count($queue) > ($start + $limit)) {
+            wp_schedule_single_event(time() + 600, 'w3_pgcache_prime', array(
+                $start + $limit
+            ));
+        }
+        
+        /**
+         * Make HTTP requests and prime cache
+         */
+        foreach ($urls as $url) {
+            w3_http_get($url);
         }
     }
     
@@ -273,12 +376,17 @@ class W3_Plugin_PgCache extends W3_Plugin
      */
     function cron_schedules($schedules)
     {
-        $gc = $this->_config->get_integer('pgcache.file.gc');
+        $gc_interval = $this->_config->get_integer('pgcache.file.gc');
+        $prime_interval = $this->_config->get_integer('pgcache.prime.interval');
         
         return array_merge($schedules, array(
             'w3_pgcache_cleanup' => array(
-                'interval' => $gc, 
-                'display' => sprintf('Every %d seconds', $gc)
+                'interval' => $gc_interval, 
+                'display' => sprintf('[W3TC] Page Cache file GC (every %d seconds)', $gc_interval)
+            ), 
+            'w3_pgcache_prime' => array(
+                'interval' => $prime_interval, 
+                'display' => sprintf('[W3TC] Page Cache prime (every %d seconds)', $prime_interval)
             )
         ));
     }
@@ -368,8 +476,6 @@ class W3_Plugin_PgCache extends W3_Plugin
      */
     function generate_rules_core()
     {
-        global $w3_reserved_blognames;
-        
         /**
          * Auto reject cookies
          */
@@ -384,7 +490,7 @@ class W3_Plugin_PgCache extends W3_Plugin
         $reject_uris = array(
             '\/wp-admin\/', 
             '\/xmlrpc.php', 
-            '\/wp-(app|cron|login|register).php'
+            '\/wp-(app|cron|login|register|mail)\.php'
         );
         
         /**
@@ -408,7 +514,7 @@ class W3_Plugin_PgCache extends W3_Plugin
          * Reject cache for feeds
          */
         if (!$this->_config->get_boolean('pgcache.cache.feed')) {
-            $reject_uris[] = 'feed';
+            $reject_uris[] = '\/feed\/';
         }
         
         /**
@@ -422,109 +528,154 @@ class W3_Plugin_PgCache extends W3_Plugin
         /**
          * WPMU support
          */
-        $is_wpmu = w3_is_wpmu();
+        $is_multisite = w3_is_multisite();
         $is_vhost = w3_is_vhost();
         
         /**
          * Generate directives
          */
+        $home_path = w3_get_home_path();
+        $base_path = w3_get_base_path();
+        $cache_dir = w3_path(W3TC_CACHE_FILE_PGCACHE_DIR);
+        
         $rules = '';
-        $rules .= "# BEGIN W3 Total Cache\n";
-        
-        $setenvif_rules = '';
-        
-        if ($is_wpmu) {
-            $setenvif_rules .= "    SetEnvIfNoCase Host ^(www\\.)?([a-z0-9\\-\\.]+\\.[a-z]+)\\.?(:[0-9]+)?$ DOMAIN=$2\n";
-            
-            if (!$is_vhost) {
-                $setenvif_rules .= "    SetEnvIfNoCase Request_URI ^" . w3_get_site_path() . "([a-z0-9\\-]+)/ BLOGNAME=$1\n";
-            }
-        }
-        
-        $compression = $this->_config->get_string('pgcache.compression');
-        
-        if ($compression != '') {
-            $compressions = array();
-            
-            if (stristr($compression, 'gzip') !== false) {
-                $compressions[] = 'gzip';
-            }
-            
-            if (stristr($compression, 'deflate') !== false) {
-                $compressions[] = 'deflate';
-            }
-            
-            if (count($compressions)) {
-                $setenvif_rules .= "    SetEnvIfNoCase Accept-Encoding (" . implode('|', $compressions) . ") APPEND_EXT=.$1\n";
-            }
-        }
-        
-        if ($setenvif_rules != '') {
-            $rules .= "<IfModule mod_setenvif.c>\n" . $setenvif_rules .= "</IfModule>\n";
-        }
-        
+        $rules .= "# BEGIN W3TC Page Cache\n";
         $rules .= "<IfModule mod_rewrite.c>\n";
-        
         $rules .= "    RewriteEngine On\n";
+        $rules .= "    RewriteBase " . $home_path . "\n";
         
-        $mobile_redirect = $this->_config->get_string('pgcache.mobile.redirect');
-        
-        if ($mobile_redirect != '') {
-            $mobile_agents = $this->_config->get_array('pgcache.mobile.agents');
+        /**
+         * Check for mobile redirect
+         */
+        if ($this->_config->get_boolean('mobile.enabled')) {
+            $mobile_groups = $this->_config->get_array('mobile.groups');
             
-            $rules .= "    RewriteCond %{HTTP_USER_AGENT} (" . implode('|', array_map('w3_preg_quote', $mobile_agents)) . ") [NC]\n";
-            $rules .= "    RewriteRule .* " . $mobile_redirect . " [R,L]\n";
+            foreach ($mobile_groups as $mobile_group => $mobile_config) {
+                $mobile_agents = (isset($mobile_config['agents']) ? (array) $mobile_config['agents'] : '');
+                $mobile_redirect = (isset($mobile_config['redirect']) ? $mobile_config['redirect'] : '');
+                
+                if (count($mobile_agents) && $mobile_redirect) {
+                    $rules .= "    RewriteCond %{HTTP_USER_AGENT} (" . implode('|', array_map('w3_preg_quote', $mobile_agents)) . ") [NC]\n";
+                    $rules .= "    RewriteRule .* " . $mobile_redirect . " [R,L]\n";
+                }
+            }
         }
         
+        /**
+         * Don't accept POSTs
+         */
+        $rules .= "    RewriteCond %{REQUEST_METHOD} !=POST\n";
+        
+        /**
+         * Query string should be empty
+         */
+        $rules .= "    RewriteCond %{QUERY_STRING} =\"\"\n";
+        
+        /**
+         * Accept only URIs with trailing slash
+         */
         $rules .= "    RewriteCond %{REQUEST_URI} \\/$\n";
+        
+        /**
+         * Don't accept rejected URIs
+         */
         $rules .= "    RewriteCond %{REQUEST_URI} !(" . implode('|', $reject_uris) . ")";
         
+        /**
+         * Exclude files from rejected URIs list
+         */
         if (count($accept_files)) {
-            $rules .= " [OR]\n    RewriteCond %{REQUEST_URI} (" . implode('|', array_map('w3_preg_quote', $accept_files)) . ") [NC]\n";
+            $rules .= " [NC,OR]\n    RewriteCond %{REQUEST_URI} (" . implode('|', array_map('w3_preg_quote', $accept_files)) . ") [NC]\n";
         } else {
             $rules .= "\n";
         }
         
-        $rules .= "    RewriteCond %{REQUEST_METHOD} !=POST\n";
-        $rules .= "    RewriteCond %{QUERY_STRING} =\"\"\n";
+        /**
+         * Check for rejected cookies
+         */
         $rules .= "    RewriteCond %{HTTP_COOKIE} !(" . implode('|', array_map('w3_preg_quote', $reject_cookies)) . ") [NC]\n";
         
+        /**
+         * Check for rejected user agents
+         */
         if (count($reject_user_agents)) {
             $rules .= "    RewriteCond %{HTTP_USER_AGENT} !(" . implode('|', array_map('w3_preg_quote', $reject_user_agents)) . ") [NC]\n";
         }
         
-        if ($is_wpmu) {
-            if ($is_vhost) {
-                $replacement = '/w3tc-%{ENV:DOMAIN}/';
-            } else {
-                $rules .= "    RewriteCond %{ENV:BLOGNAME} !^(" . implode('|', $w3_reserved_blognames) . ")$\n";
-                $rules .= "    RewriteCond %{ENV:BLOGNAME} !-f\n";
-                $rules .= "    RewriteCond %{ENV:BLOGNAME} !-d\n";
+        /**
+         * Network mode rules
+         */
+        if ($is_multisite) {
+            /**
+             * Detect domain
+             */
+            $rules .= "    RewriteCond %{HTTP_HOST} ^(www\\.)?([a-z0-9\\-\\.]+\\.[a-z]+)\\.?(:[0-9]+)?$\n";
+            $rules .= "    RewriteRule .* - [E=W3TC_DOMAIN:%2]\n";
+            
+            $replacement = '/w3tc-%{ENV:W3TC_DOMAIN}/';
+            
+            /**
+             * If VHOST is off, detect blogname from URI
+             */
+            if (!$is_vhost) {
+                $blognames = w3_get_blognames();
                 
-                $replacement = '/w3tc-%{ENV:BLOGNAME}.%{ENV:DOMAIN}/';
+                if (count($blognames)) {
+                    $rules .= "    RewriteCond %{REQUEST_URI} ^" . $base_path . "(" . implode('|', array_map('w3_preg_quote', $blognames)) . ")/\n";
+                    $rules .= "    RewriteRule .* - [E=W3TC_BLOGNAME:%1.]\n";
+                    
+                    $replacement = '/w3tc-%{ENV:W3TC_BLOGNAME}%{ENV:W3TC_DOMAIN}/';
+                }
             }
             
-            $cache_dir = preg_replace('~/w3tc.*/~U', $replacement, W3TC_CACHE_FILE_PGCACHE_DIR, 1);
-        } else {
-            $cache_dir = W3TC_CACHE_FILE_PGCACHE_DIR;
+            $cache_dir = preg_replace('~/w3tc.*/~U', $replacement, $cache_dir, 1);
         }
         
-        $rules .= "    RewriteCond " . w3_path($cache_dir) . "/$1/_default_.html%{ENV:APPEND_EXT} -f\n";
-        $rules .= "    RewriteRule (.*) " . str_replace(ABSPATH, '', $cache_dir) . "/$1/_default_.html%{ENV:APPEND_EXT} [L]\n";
+        /**
+         * Check mobile groups
+         */
+        if ($this->_config->get_boolean('mobile.enabled')) {
+            $mobile_groups = $this->_config->get_array('mobile.groups');
+            
+            foreach ($mobile_groups as $mobile_group => $mobile_config) {
+                $mobile_agents = (isset($mobile_config['agents']) ? (array) $mobile_config['agents'] : '');
+                $mobile_redirect = (isset($mobile_config['redirect']) ? $mobile_config['redirect'] : '');
+                
+                if (count($mobile_agents) && !$mobile_redirect) {
+                    $rules .= "    RewriteCond %{HTTP_USER_AGENT} (" . implode('|', array_map('w3_preg_quote', $mobile_agents)) . ") [NC]\n";
+                    $rules .= "    RewriteRule .* - [E=W3TC_UA:_" . $mobile_group . "]\n";
+                }
+            }
+        }
+        
+        /**
+         * Check HTTPS
+         */
+        $rules .= "    RewriteCond %{HTTPS} =on\n";
+        $rules .= "    RewriteRule .* - [E=W3TC_SSL:_ssl]\n";
+        $rules .= "    RewriteCond %{SERVER_PORT} =443\n";
+        $rules .= "    RewriteRule .* - [E=W3TC_SSL:_ssl]\n";
+        
+        /**
+         * Check Accept-Encoding
+         */
+        if ($this->_config->get_boolean('browsercache.enabled') && $this->_config->get_boolean('browsercache.html.compression')) {
+            $rules .= "    RewriteCond %{HTTP:Accept-Encoding} gzip\n";
+            $rules .= "    RewriteRule .* - [E=W3TC_ENC:.gzip]\n";
+        }
+        
+        /**
+         * Check if cache file exists
+         */
+        $rules .= "    RewriteCond \"" . $cache_dir . $base_path . "$1/_index%{ENV:W3TC_UA}%{ENV:W3TC_SSL}.html%{ENV:W3TC_ENC}\" -f\n";
+        
+        /**
+         * Make final rewrite
+         */
+        $rules .= "    RewriteRule (.*) \"" . $base_path . ltrim(str_replace(w3_get_site_root(), '', $cache_dir), '/') . $base_path . "$1/_index%{ENV:W3TC_UA}%{ENV:W3TC_SSL}.html%{ENV:W3TC_ENC}\" [L]\n";
         $rules .= "</IfModule>\n";
         
-        $rules .= "# END W3 Total Cache\n\n";
-        
-        if (!$this->check_rules_wp()) {
-            $rules .= "# BEGIN WordPress\n";
-            $rules .= "<IfModule mod_rewrite.c>\n";
-            $rules .= "    RewriteEngine On\n";
-            $rules .= "    RewriteCond %{REQUEST_FILENAME} !-f\n";
-            $rules .= "    RewriteCond %{REQUEST_FILENAME} !-d\n";
-            $rules .= "    RewriteRule .* index.php [L]\n";
-            $rules .= "</IfModule>\n";
-            $rules .= "# END WordPress\n\n";
-        }
+        $rules .= "# END W3TC Page Cache\n\n";
         
         return $rules;
     }
@@ -537,72 +688,81 @@ class W3_Plugin_PgCache extends W3_Plugin
     function generate_rules_cache()
     {
         $charset = get_option('blog_charset');
-        $compression = $this->_config->get_string('pgcache.compression');
-        $headers = $this->_config->get_boolean('pgcache.headers');
+        $browsercache = $this->_config->get_integer('browsercache.enabled');
+        $compression = $this->_config->get_boolean('browsercache.html.compression');
+        $expires = $this->_config->get_boolean('browsercache.html.expires');
+        $lifetime = $this->_config->get_integer('browsercache.html.lifetime');
         
         $rules = '';
-        $rules .= "# BEGIN W3 Total Cache\n";
-        
-        if ($headers) {
-            $rules .= "FileETag All\n";
-        } else {
-            $rules .= "FileETag None\n";
-        }
-        
+        $rules .= "# BEGIN W3TC Page Cache\n";
         $rules .= "AddDefaultCharset " . ($charset ? $charset : 'UTF-8') . "\n";
         
-        if ($compression != '') {
-            $compressions = array();
-            
-            if (stristr($compression, 'gzip') !== false) {
-                $compressions[] = 'gzip';
-            }
-            
-            if (stristr($compression, 'deflate') !== false) {
-                $compressions[] = 'deflate';
-            }
-            
-            if (count($compressions)) {
-                $rules .= "<IfModule mod_mime.c>\n";
-                
-                foreach ($compressions as $_compression) {
-                    $rules .= "    AddType text/html ." . $_compression . "\n";
-                    $rules .= "    AddEncoding " . $_compression . " .$_compression\n";
-                }
-                
-                $rules .= "</IfModule>\n";
-                
-                $rules .= "<IfModule mod_deflate.c>\n";
-                $rules .= "    SetEnvIfNoCase Request_URI \\.(" . implode('|', $compressions) . ")$ no-gzip\n";
-                $rules .= "</IfModule>\n";
-            }
+        if ($browsercache && $compression) {
+            $rules .= "<IfModule mod_mime.c>\n";
+            $rules .= "    AddType text/html .gzip\n";
+            $rules .= "    AddEncoding gzip .gzip\n";
+            $rules .= "</IfModule>\n";
+            $rules .= "<IfModule mod_deflate.c>\n";
+            $rules .= "    SetEnvIfNoCase Request_URI \\.gzip$ no-gzip\n";
+            $rules .= "</IfModule>\n";
         }
         
-        if ($headers) {
+        if ($browsercache && $expires && $lifetime) {
             $rules .= "<IfModule mod_expires.c>\n";
             $rules .= "    ExpiresActive On\n";
-            $rules .= "    ExpiresByType text/html M" . $this->_config->get_integer('pgcache.lifetime') . "\n";
+            $rules .= "    ExpiresByType text/html M" . $lifetime . "\n";
             $rules .= "</IfModule>\n";
         }
         
         $rules .= "<IfModule mod_headers.c>\n";
         $rules .= "    Header set X-Pingback \"" . get_bloginfo('pingback_url') . "\"\n";
-        $rules .= "    Header set X-Powered-By \"" . W3TC_POWERED_BY . "\"\n";
         
-        if ($compression != '') {
+        if ($browsercache && $this->_config->get_integer('browsercache.html.w3tc')) {
+            $rules .= "    Header set X-Powered-By \"" . W3TC_POWERED_BY . "\"\n";
+        }
+        
+        if ($browsercache && $compression) {
             $rules .= "    Header set Vary \"Accept-Encoding, Cookie\"\n";
         } else {
             $rules .= "    Header set Vary \"Cookie\"\n";
         }
         
-        if ($headers) {
-            $rules .= "    Header set Pragma public\n";
-            $rules .= "    Header append Cache-Control \"public, must-revalidate, proxy-revalidate\"\n";
+        if ($this->_config->get_boolean('browsercache.html.cache.control')) {
+            switch ($this->_config->get_string('browsercache.html.cache.policy')) {
+                case 'cache':
+                    $rules .= "    Header set Pragma \"public\"\n";
+                    $rules .= "    Header set Cache-Control \"public\"\n";
+                    break;
+                
+                case 'cache_validation':
+                    $rules .= "    Header set Pragma \"public\"\n";
+                    $rules .= "    Header set Cache-Control \"public, must-revalidate, proxy-revalidate\"\n";
+                    break;
+                
+                case 'cache_noproxy':
+                    $rules .= "    Header set Pragma \"public\"\n";
+                    $rules .= "    Header set Cache-Control \"public, must-revalidate\"\n";
+                    break;
+                
+                case 'cache_maxage':
+                    $rules .= "    Header set Pragma \"public\"\n";
+                    
+                    if ($expires) {
+                        $rules .= "    Header append Cache-Control \"public, must-revalidate, proxy-revalidate\"\n";
+                    } else {
+                        $rules .= "    Header set Cache-Control \"max-age=" . $lifetime . ", public, must-revalidate, proxy-revalidate\"\n";
+                    }
+                    break;
+                
+                case 'no_cache':
+                    $rules .= "    Header set Pragma \"no-cache\"\n";
+                    $rules .= "    Header set Cache-Control \"max-age=0, private, no-store, no-cache, must-revalidate\"\n";
+                    break;
+            }
         }
         
         $rules .= "</IfModule>\n";
-        
-        $rules .= "# END W3 Total Cache\n\n";
+        $rules .= "# END W3TC Page Cache\n";
         
         return $rules;
     }
@@ -614,7 +774,7 @@ class W3_Plugin_PgCache extends W3_Plugin
      */
     function write_rules_core()
     {
-        $path = ABSPATH . '.htaccess';
+        $path = w3_get_home_root() . '/.htaccess';
         
         if (file_exists($path)) {
             if (($data = @file_get_contents($path)) !== false) {
@@ -672,8 +832,7 @@ class W3_Plugin_PgCache extends W3_Plugin
      */
     function erase_rules_w3tc($data)
     {
-        $data = preg_replace('~# BEGIN W3 Total Cache.*# END W3 Total Cache~Us', '', $data);
-        $data = trim($data);
+        $data = w3_erase_text($data, '# BEGIN W3TC Page Cache', '# END W3TC Page Cache');
         
         return $data;
     }
@@ -686,8 +845,7 @@ class W3_Plugin_PgCache extends W3_Plugin
      */
     function erase_rules_wpsc($data)
     {
-        $data = preg_replace('~# BEGIN WPSuperCache.*# END WPSuperCache~Us', '', $data);
-        $data = trim($data);
+        $data = w3_erase_text($data, '# BEGIN WPSuperCache', '# END WPSuperCache');
         
         return $data;
     }
@@ -699,7 +857,7 @@ class W3_Plugin_PgCache extends W3_Plugin
      */
     function remove_rules_core()
     {
-        $path = ABSPATH . '.htaccess';
+        $path = w3_get_home_root() . '/.htaccess';
         
         if (file_exists($path)) {
             if (($data = @file_get_contents($path)) !== false) {
@@ -733,10 +891,10 @@ class W3_Plugin_PgCache extends W3_Plugin
      */
     function check_rules_core()
     {
-        $path = ABSPATH . '.htaccess';
+        $path = w3_get_home_root() . '/.htaccess';
         $search = $this->generate_rules_core();
         
-        return (($data = @file_get_contents($path)) && strstr(w3_clean_rules($data), w3_clean_rules($search)) !== false && $this->check_rules_wp());
+        return (($data = @file_get_contents($path)) && strstr(w3_clean_rules($data), w3_clean_rules($search)) !== false);
     }
     
     /**
@@ -750,21 +908,5 @@ class W3_Plugin_PgCache extends W3_Plugin
         $search = $this->generate_rules_cache();
         
         return (($data = @file_get_contents($path)) && strstr(w3_clean_rules($data), w3_clean_rules($search)) !== false);
-    }
-    
-    /**
-     * Checks WP directives
-     *
-     * @return boolean
-     */
-    function check_rules_wp()
-    {
-        if (function_exists('is_site_admin')) {
-            return true;
-        }
-        
-        $path = ABSPATH . '/.htaccess';
-        
-        return (($data = @file_get_contents($path)) && preg_match('~# BEGIN WordPress.*# END WordPress~s', w3_clean_rules($data)));
     }
 }

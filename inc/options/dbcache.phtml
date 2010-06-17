@@ -5,31 +5,31 @@
 <form action="options-general.php">
     <p>
         Database caching is currently <span class="w3tc-<?php if ($dbcache_enabled): ?>enabled">enabled<?php else: ?>disabled">disabled<?php endif; ?></span>.
-        <input type="submit" name="flush_dbcache" value="Empty cache"<?php if (! $dbcache_enabled): ?> disabled="disabled"<?php endif; ?> class="button" />	
+        <input type="submit" name="flush_dbcache" value="Empty cache"<?php if (! $dbcache_enabled): ?> disabled="disabled"<?php endif; ?> class="button" />
         <input type="hidden" name="page" value="<?php echo W3TC_FILE; ?>" />
         <input type="hidden" name="tab" value="<?php echo $this->_tab; ?>" />
     </p>
 </form>
- 
+
 <form action="options-general.php?page=<?php echo urldecode(W3TC_FILE); ?>&amp;tab=<?php echo $this->_tab; ?>" method="post">
 	<fieldset>
 		<legend>General</legend>
 
         <table class="form-table">
         	<tr>
-        		<th colspan="2">
+        		<th>
         			<input type="hidden" name="dbcache.reject.logged" value="0" />
-        			<label><input type="checkbox" name="dbcache.reject.logged" value="1"<?php checked($this->_config->get_boolean('dbcache.reject.logged'), true); ?> /> Don't cache queries for logged in users</label>			
-    						<br /><span class="description">Enabling this option is recommended to allow default WordPress behavior.</span>
+        			<label><input type="checkbox" name="dbcache.reject.logged" value="1"<?php checked($this->_config->get_boolean('dbcache.reject.logged'), true); ?> /> Don't cache queries for logged in users</label>
+					<br /><span class="description">Enabling this option is recommended to maintain default WordPress behavior.</span>
         		</th>
         	</tr>
         </table>
-    
+
         <p class="submit">
-        	<input type="submit" name="Submit" class="button-primary" value="Save changes" />
+        	<input type="submit" name="options_save" class="button-primary" value="Save changes" />
         </p>
 	</fieldset>
-	
+
 	<fieldset>
 		<legend>Advanced</legend>
 
@@ -39,8 +39,8 @@
         		<th><label for="memcached_servers">Memcached hostname:port / <acronym title="Internet Protocol">IP</acronym>:port:</label></th>
         		<td>
         			<input id="memcached_servers" type="text" name="dbcache.memcached.servers" value="<?php echo htmlspecialchars(implode(',', $this->_config->get_array('dbcache.memcached.servers'))); ?>" size="100" />
-        			<input id="test_memcached" class="button" type="button" value="Test" />
-        			<span id="test_memcached_status" class="w3tc-status w3tc-process"></span>
+        			<input id="memcached_test" class="button" type="button" value="Test" />
+        			<span id="memcached_test_status" class="w3tc-status w3tc-process"></span>
         			<br /><span class="description">Multiple servers may be used and seperated by a comma; e.g. 192.168.1.100:11211, domain.com:22122</span>
         		</td>
         	</tr>
@@ -58,16 +58,23 @@
     			</td>
         	</tr>
         	<tr>
+        		<th valign="top"><label for="dbcache_reject_uri">Never cache the following pages:</label></th>
+        		<td>
+        			<textarea id="dbcache_reject_uri" name="dbcache.reject.uri" cols="40" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('dbcache.reject.uri'))); ?></textarea><br />
+        			<span class="description">Always ignore the specified pages / directories.</span>
+        		</td>
+        	</tr>
+        	<tr>
         		<th valign="top"><label for="dbcache_reject_sql">Ignored query stems:</label></th>
         		<td>
         			<textarea id="dbcache_reject_sql" name="dbcache.reject.sql" cols="40" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('dbcache.reject.sql'))); ?></textarea><br />
-        			<span class="description">Do not cache queries that contain these terms. Any entered prefix (set in wp-config.php) will be replaced with current database prefix (default: wp_).</span>
+        			<span class="description">Do not cache queries that contain these terms. Any entered prefix (set in wp-config.php) will be replaced with current database prefix (default: wp_). Query stems can be identified using debug mode.</span>
         		</td>
         	</tr>
         </table>
-    
+
         <p class="submit">
-        	<input type="submit" name="Submit" class="button-primary" value="Save changes" />
+        	<input type="submit" name="options_save" class="button-primary" value="Save changes" />
         </p>
 	</fieldset>
 </form>

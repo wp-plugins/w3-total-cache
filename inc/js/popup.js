@@ -1,4 +1,4 @@
-function seconds_to_string(seconds) {
+function w3tc_seconds_to_string(seconds) {
     var string = '', days = 0, hours = 0, minutes = 0;
     days = Math.floor(seconds / 86400);
     if (days) {
@@ -23,7 +23,7 @@ function seconds_to_string(seconds) {
     return string;
 }
 
-var Cdn_Export_File = {
+var W3tc_Popup_Cdn_Export_File = {
     paused: 0,
     limit: 25,
     offset: 0,
@@ -149,7 +149,7 @@ var Cdn_Export_File = {
 
     timer_callback: function() {
         this.seconds_elapsed++;
-        this.set_elapsed(seconds_to_string(this.seconds_elapsed));
+        this.set_elapsed(w3tc_seconds_to_string(this.seconds_elapsed));
     },
 
     init: function(files, cdn_url) {
@@ -186,7 +186,7 @@ var Cdn_Export_File = {
     }
 };
 
-var Cdn_Export_Library = {
+var W3tc_Popup_Cdn_Export_Library = {
     paused: 0,
     limit: 25,
     offset: 0,
@@ -309,7 +309,7 @@ var Cdn_Export_Library = {
 
     timer_callback: function() {
         this.seconds_elapsed++;
-        this.set_elapsed(seconds_to_string(this.seconds_elapsed));
+        this.set_elapsed(w3tc_seconds_to_string(this.seconds_elapsed));
     },
 
     init: function() {
@@ -340,7 +340,7 @@ var Cdn_Export_Library = {
     }
 };
 
-var Cdn_Import_Library = {
+var W3tc_Popup_Cdn_Import_Library = {
     paused: 0,
     limit: 5,
     offset: 0,
@@ -497,7 +497,7 @@ var Cdn_Import_Library = {
 
     timer_callback: function() {
         this.seconds_elapsed++;
-        this.set_elapsed(seconds_to_string(this.seconds_elapsed));
+        this.set_elapsed(w3tc_seconds_to_string(this.seconds_elapsed));
     },
 
     init: function(cdn_host) {
@@ -530,7 +530,7 @@ var Cdn_Import_Library = {
     }
 };
 
-var Cdn_Rename_Domain = {
+var W3tc_Popup_Cdn_Rename_Domain = {
     paused: 0,
     limit: 25,
     offset: 0,
@@ -658,7 +658,7 @@ var Cdn_Rename_Domain = {
 
     timer_callback: function() {
         this.seconds_elapsed++;
-        this.set_elapsed(seconds_to_string(this.seconds_elapsed));
+        this.set_elapsed(w3tc_seconds_to_string(this.seconds_elapsed));
     },
 
     init: function(cdn_host) {
@@ -694,19 +694,19 @@ var Cdn_Rename_Domain = {
     }
 };
 
-jQuery(function($) {
-    $('.tab').click(function() {
-        $('.tab').removeClass('tab-selected');
-        $('.tab-content').hide();
-        $(this).addClass('tab-selected');
-        $(this.rel).show();
+jQuery(function() {
+    jQuery('.tab').click(function() {
+        jQuery('.tab').removeClass('tab-selected');
+        jQuery('.tab-content').hide();
+        jQuery(this).addClass('tab-selected');
+        jQuery(this.rel).show();
     });
 
-    $('.cdn_queue_delete').click(function() {
+    jQuery('.cdn_queue_delete').click(function() {
         return confirm('Are you sure you want to remove this file from the queue?');
     });
 
-    $('.cdn_queue_empty').click(function() {
+    jQuery('.cdn_queue_empty').click(function() {
         return confirm('Are you sure you want to empty the queue?');
     });
 });

@@ -186,7 +186,7 @@ class HTTP_Encoder {
      * alias of that method to use in the Content-Encoding header (some browsers
      * call gzip "x-gzip" etc.)
      */
-    public static function getAcceptedEncoding($compressions = 'gzip')
+    public static function getAcceptedEncoding()
     {
         // @link http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html
         
@@ -198,14 +198,10 @@ class HTTP_Encoder {
             return array('', '');
         }
         
-        if (stristr($compressions, 'gzip') && stristr($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') && function_exists('gzencode')) {
+        if (stristr($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') && function_exists('gzencode')) {
             return array('gzip', 'gzip');
         }
 
-        if (stristr($compressions, 'deflate') && stristr($_SERVER['HTTP_ACCEPT_ENCODING'], 'deflate') && function_exists('gzdeflate')) {
-            return array('deflate', 'deflate');
-        }
-        
         return array('', '');
     }
     

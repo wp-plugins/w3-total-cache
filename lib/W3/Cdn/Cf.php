@@ -5,21 +5,23 @@ require_once W3TC_LIB_W3_DIR . '/Cdn/S3.php';
 class W3_Cdn_Cf extends W3_Cdn_S3
 {
     /**
-     * Returns CDN domain
-	 *
+     * Returns array of CDN domains
+     *
      * @return string
      */
-    function get_domain()
+    function get_domains()
     {
-        if (! empty($this->_config['cname'])) {
-            return $this->_config['cname'];
-        } elseif (! empty($this->_config['id'])) {
+        if (!empty($this->_config['cname'])) {
+            return (array) $this->_config['cname'];
+        } elseif (!empty($this->_config['id'])) {
             $domain = sprintf('%s.cloudfront.net', $this->_config['id']);
             
-            return $domain;
+            return array(
+                $domain
+            );
         }
         
-        return false;
+        return array();
     }
     /**
      * Tests CF
@@ -32,7 +34,7 @@ class W3_Cdn_Cf extends W3_Cdn_S3
         /**
          * Test S3 first
          */
-        if (! parent::test($error)) {
+        if (!parent::test($error)) {
             return false;
         }
         
@@ -41,7 +43,7 @@ class W3_Cdn_Cf extends W3_Cdn_S3
          */
         $dists = @$this->_s3->listDistributions();
         
-        if (! $dists) {
+        if (!$dists) {
             $error = 'Unable to list distributions.';
             
             return false;
@@ -59,28 +61,30 @@ class W3_Cdn_Cf extends W3_Cdn_S3
             }
         }
         
-        if (! $dist) {
+        if (!$dist) {
             $error = sprintf('Distribution for bucket "%s" not found.', $this->_config['bucket']);
             
             return false;
         }
         
-        if (! $dist['enabled']) {
+        if (!$dist['enabled']) {
             $error = sprintf('Distribution for bucket "%s" is disabled.', $this->_config['bucket']);
             
             return false;
         }
         
-        if ($this->_config['cname'] != '') {
+        if (!empty($this->_config['cname'])) {
+            $domains = (array) $this->_config['cname'];
             $cnames = (isset($dist['cnames']) ? (array) $dist['cnames'] : array());
             
-            if (! in_array($this->_config['cname'], $cnames)) {
-                $error = sprintf('Domain name %s is not in distribution CNAME list.', $this->_config['cname']);
-                
-                return false;
+            foreach ($domains as $domain) {
+                if (!in_array($domain, $cnames)) {
+                    $error = sprintf('Domain name %s is not in distribution CNAME list.', $domain);
+                    
+                    return false;
+                }
             }
-        
-        } elseif ($this->_config['id'] != '') {
+        } elseif (!empty($this->_config['id'])) {
             $domain = $this->get_domain();
             
             if ($domain != $dist['domain']) {
@@ -94,12 +98,35 @@ class W3_Cdn_Cf extends W3_Cdn_S3
     }
     
     /**
+     * Create bucket
+     * 
+     * @param string $error
+     * @return string
+     */
+    function create_container(&$error)
+    {
+        if (parent::create_container($error)) {
+            $cnames = (!empty($this->_config['cname']) ? (array) $this->_config['cname'] : array());
+            
+            if (!$this->_s3->createDistribution($this->_config['bucket'], true, $cnames)) {
+                $error = sprintf('Unable to create distribution for bucket %s.', $this->_config['bucket']);
+                
+                return false;
+            }
+            
+            return true;
+        }
+        
+        return false;
+    }
+    
+    /**
      * Returns via string
-	 *
+     *
      * @return string
      */
     function get_via()
     {
-        return sprintf('Amazon Web Services: CloudFront: %s', $this->get_domain());
+        return sprintf('Amazon Web Services: CloudFront: %s', parent::get_via());
     }
 }

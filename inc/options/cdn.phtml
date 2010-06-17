@@ -1,4 +1,5 @@
 <?php include W3TC_DIR . '/inc/options/common/header.phtml'; ?>
+<?php wp_print_scripts('jquery-ui-sortable') ?>
 
 <h3><acronym title="Content Delivery Network">CDN</acronym> Settings</h3>
 
@@ -38,8 +39,8 @@
         	<tr>
         		<th<?php if ($cdn_mirror): ?> colspan="2"<?php endif; ?>>
         			<input type="hidden" name="cdn.theme.enable" value="0" />
-        			<label><input type="checkbox" name="cdn.theme.enable" value="1"<?php checked($this->_config->get_boolean('cdn.theme.enable'), true); ?> /> Host active theme files</label><br />
-    				<span class="description">If checked, all active theme file types specified in the "theme file types to upload" field below will be hosted with the <acronym title="Content Delivery Network">CDN</acronym>.</span>
+        			<label><input type="checkbox" name="cdn.theme.enable" value="1"<?php checked($this->_config->get_boolean('cdn.theme.enable'), true); ?> /> Host theme files</label><br />
+    				<span class="description">If checked, all theme file types specified in the "theme file types to upload" field below will be hosted with the <acronym title="Content Delivery Network">CDN</acronym>.</span>
         		</th>
         		<?php if (! $cdn_mirror): ?>
         		<td>
@@ -88,38 +89,52 @@
         	</tr>
         	<?php endif; ?>
         </table>
-    
+
         <p class="submit">
-        	<input type="submit" name="Submit" class="button-primary" value="Save changes" />
+        	<input type="submit" name="options_save" class="button-primary" value="Save changes" />
         </p>
 	</fieldset>
-	
+
 	<fieldset>
 		<legend>Configuration</legend>
 
         <table class="form-table">
-    		<?php 
+    		<?php
     			switch ($cdn_engine) {
     				case 'mirror':
+    				case 'netdna':
     				case 'ftp':
     				case 's3':
     				case 'cf':
+    				case 'rscf':
     					include W3TC_DIR . '/inc/options/cdn/' . $cdn_engine . '.phtml';
     					break;
-    			} 
+    			}
     		?>
         </table>
-        
+
         <p class="submit">
-        	<input type="submit" name="Submit" class="button-primary" value="Save changes" />
+        	<input type="submit" name="options_save" class="button-primary" value="Save changes" />
         </p>
 	</fieldset>
-	
+
 	<fieldset>
 		<legend>Advanced</legend>
 
         <table class="form-table">
         	<?php if (! $cdn_mirror): ?>
+        	<tr>
+        		<th valign="top">
+        			<input type="hidden" name="cdn.autoupload.enabled" value="0" />
+        			<label><input type="checkbox" name="cdn.autoupload.enabled" value="1"<?php checked($this->_config->get_boolean('cdn.autoupload.enabled'), true); ?> /> Enable files auto upload</label><br />
+        		</th>
+        		<td>
+        			<label style="font-size:13px;">
+        				Auto upload interval:
+						<input id="cdn_autoupload_interval" type="text" name="cdn.autoupload.interval" value="<?php echo $this->_config->get_integer('cdn.autoupload.interval'); ?>" size="8" /> seconds
+					</label>        		
+				</td>
+        	</tr>
         	<tr>
         		<th><label for="cdn_limit_queue">Re-transfer cycle limit:</label></th>
         		<td>
@@ -171,9 +186,9 @@
         		</td>
         	</tr>
         </table>
-        
+
         <p class="submit">
-        	<input type="submit" name="Submit" class="button-primary" value="Save changes" />
+        	<input type="submit" name="options_save" class="button-primary" value="Save changes" />
         </p>
 	</fieldset>
 </form>
