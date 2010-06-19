@@ -2364,13 +2364,11 @@ class W3_Plugin_TotalCache extends W3_Plugin
                 $w3_plugin_browsercache->remove_rules_no404wp();
             }
             
-            if ($new_config->get_boolean('browsercache.enabled')) {
-                if (!w3_is_multisite()) {
-                    $w3_plugin_browsercache->write_rules_cache();
-                    
-                    if ($new_config->get_boolean('browsercache.no404wp')) {
-                        $w3_plugin_browsercache->write_rules_no404wp();
-                    }
+            if ($new_config->get_boolean('browsercache.enabled') && !w3_is_multisite()) {
+                $w3_plugin_browsercache->write_rules_cache();
+                
+                if ($new_config->get_boolean('browsercache.no404wp')) {
+                    $w3_plugin_browsercache->write_rules_no404wp();
                 }
             }
             

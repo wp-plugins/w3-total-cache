@@ -48,7 +48,7 @@ class W3_Plugin_BrowserCache extends W3_Plugin
      */
     function activate()
     {
-        if ($this->_config->get_boolean('browsercache.enabled')) {
+        if ($this->_config->get_boolean('browsercache.enabled') && !w3_is_multisite()) {
             if (!$this->write_rules_cache()) {
                 w3_writable_error(w3_get_document_root() . '/.htaccess');
             }
@@ -107,7 +107,7 @@ class W3_Plugin_BrowserCache extends W3_Plugin
      */
     function get_other_types()
     {
-        array(
+        return array(
             'jpg|jpeg|jpe' => 'image/jpeg', 
             'gif' => 'image/gif', 
             'png' => 'image/png', 
