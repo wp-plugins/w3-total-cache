@@ -424,7 +424,7 @@ class W3_Plugin_Cdn extends W3_Plugin
                 if ($this->_config->get_boolean('cdn.includes.enable')) {
                     $mask = $this->_config->get_string('cdn.includes.files');
                     if ($mask != '') {
-                        $regexps[] = '~(["\'])((' . $domain_url_regexp . ')?(' . w3_preg_quote($site_path . WPINC) . '/(' . $this->get_regexp_by_mask($mask) . ')))~';
+                        $regexps[] = '~(["\'])((' . $domain_url_regexp . ')?(' . w3_preg_quote($site_path . WPINC) . '/(' . $this->get_regexp_by_mask($mask) . ')))~U';
                     }
                 }
                 
