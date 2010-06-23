@@ -1,6 +1,6 @@
 <?php
 
-if (! defined('W3_CACHE_FILE_EXPIRE_MAX')) {
+if (!defined('W3_CACHE_FILE_EXPIRE_MAX')) {
     define('W3_CACHE_FILE_EXPIRE_MAX', 2592000);
 }
 
@@ -106,11 +106,11 @@ class W3_Cache_File extends W3_Cache_Base
                 if ($fp) {
                     $expires = @fread($fp, 4);
                     if ($expires !== false) {
-                        list (, $expire) = @unpack('L', $expires);
+                        list(, $expire) = @unpack('L', $expires);
                         $expire = ($expire && $expire <= W3_CACHE_FILE_EXPIRE_MAX ? $expire : W3_CACHE_FILE_EXPIRE_MAX);
                         if ($ftime > time() - $expire) {
                             $data = '';
-                            while (! @feof($fp)) {
+                            while (!@feof($fp)) {
                                 $data .= @fread($fp, 4096);
                             }
                             $var = @unserialize($data);
@@ -165,6 +165,8 @@ class W3_Cache_File extends W3_Cache_Base
      */
     function flush()
     {
+        @set_time_limit(180);
+        
         w3_emptydir($this->_cache_dir);
         
         return true;
@@ -172,7 +174,7 @@ class W3_Cache_File extends W3_Cache_Base
     
     /**
      * Returns modification time of cache file
-	 *
+     *
      * @param integer $key
      */
     function mtime($key)
@@ -195,7 +197,7 @@ class W3_Cache_File extends W3_Cache_Base
     function _get_path($key)
     {
         $hash = md5($key);
-        $path = sprintf('%s/%s/%s', substr($hash, 0, 2), substr($hash, 2, 2), $hash);
+        $path = sprintf('%s/%s/%s/%s', substr($hash, 0, 1), substr($hash, 1, 1), substr($hash, 2, 1), $hash);
         
         return $path;
     }

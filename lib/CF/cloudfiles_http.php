@@ -168,7 +168,7 @@ class CF_Http
         if ($path) {
             $this->cabundle_path = $path;
         } else {
-            $this->cabundle_path = W3TC_DIR . "/share/cacert.pem";
+            $this->cabundle_path = dirname(__FILE__) . "/cacert.pem";
         }
         if (!file_exists($this->cabundle_path)) {
             throw new IOException("Could not use CA bundle: "

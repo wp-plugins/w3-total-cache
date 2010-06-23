@@ -53,11 +53,11 @@ Speed is among the most significant success factors web sites face. In fact, you
 
 A thousandth of a second is not a long time, yet the impact is quite significant. Even if you're not a large company (or just hope to become one), a loss is still a loss. However, there is a solution to this problem, take advantage.
 
-In the near future, search engines will weigh the performance of web sites as factors in their ranking algorithms. Search engine's have the goal of providing users with the best user experience, so speed is definitely a concern.
+Search engines like Google, measure and factor in the speed of web sites in their ranking algorithm. When they recommend a site they want to make sure users find what they're looking for quickly. So in effect you and Google should have the same objective.
 
 = Why is W3 Total Cache better than other cache plugins? =
 
-**It's complete.** Most of the popular cache plugins available do a great job and serve their purpose very well. Our plugin remedies numerous performance reducing aspects of any web site going far beyond merely reducing CPU usage (load) and bandwidth consumption for HTML pages alone. Equally important, the plugin requires no theme modifications, modifications to your .htaccess (mod_rewrite rules) or programming compromises to reap the benefits. Most importantly, it's the only plugin designed to optimize all practical hosting environments. The options are many and setup is easy.
+**It's complete.** Most of the popular cache plugins available do a great job and serve their purpose very well. Our plugin remedies numerous performance reducing aspects of any web site going far beyond merely reducing CPU usage (load) and bandwidth consumption for HTML pages alone. Equally important, the plugin requires no theme modifications, modifications to your .htaccess (mod_rewrite rules) or programming compromises to get started. Most importantly, it's the only plugin designed to optimize all practical hosting environments small or large. The options are many and setup is easy.
 
 = I've never heard of any of this stuff; my site is fine, no one complains about the speed. Why should I install this? =
 
@@ -81,7 +81,7 @@ On the contrary, as with any other action a user can perform on a site, faster p
 
 No, on the contrary if you use the minify settings you will improve their performance by several times.
 
-= Does this plugin work with WordPress MU? =
+= Does this plugin work with WordPress in network mode? =
 
 Indeed it does.
 
@@ -111,11 +111,7 @@ You should backup your database before performing this operation.
 
 = How do I find the JS and CSS to optimize (minify) them with this plugin? =
 
-View your page source in your browser and search for any `<style>`, `<link>` or `<script>` tags that contain external CSS or JS files and one by one add them to the minify settings page. Do not include any CSS in conditional statements (unless you know what you are doing) like:
-
-`<!--[if lte IE 8]><link rel="stylesheet" type="text/css" href="/wp-content/themes/default/lte.css" media="screen,projection" /><![endif]-->`
-
-The plugin will combine, minify, HTTP compress and check for updates to these files automatically from now on. If you have any CSS or JS that are inline consider making them external files so that you can use them with minify.
+Use the "Help" button available on the Minify settings tab. Once open, the tool will look for and populate the CSS and JS files used in each template of the site for the active theme. To then add a file to the minify settings, click the checkbox next to that file. The embed location of JS files can also be specified to improve page render performance. Minify settings for all installed themes can be managed from the tool as well by selecting the theme from the drop down menu. Once done configuring minify settings, click the apply and close button, then save settings in the Minify settings tab.
 
 = I don't understand what a CDN has to do with caching, that's completely different, no? =
 
@@ -190,9 +186,9 @@ If a theme or it's files use the call `php_flush()` or function `flush()` that w
 
 Add `/.+` to page cache "Never cache the following pages" option on the page cache settings tab.
 
-= I'm getting blank pages or 500 error codes when trying to upgrade on WordPress MU =
+= I'm getting blank pages or 500 error codes when trying to upgrade on WordPress in network mode =
 
-First, make sure the plugin is not active (disabled) site-wide. Then make sure it's deactivated site-wide. Now you should be able to successful upgrade without breaking your site.
+First, make sure the plugin is not active (disabled) network-wide. Then make sure it's deactivated network-wide. Now you should be able to successful upgrade without breaking your site.
 
 = This is too good to be true, how can I test the results? =
 You will be able to see it instantly on each page load, but for tangible metrics, consider the following tools:
@@ -253,7 +249,10 @@ Please reach out to all of these people and support their projects if you're so 
 
 = Press: Mentions, Tutorials &amp; Reviews =
 
+* June 22, 2010: [12 Ways to Improve Wordpress Page Load Time](http://myblog2day.com/12-ways-to-improve-wordpress-page-load-time.php)
+* June 21, 2010: [Significantly Speed Up Your WordPress Blog in 9 Easy Steps](http://www.bloggingpro.com/archives/2010/06/21/significantly-speed-up-your-wordpress-blog-in-9-easy-steps/)
 * June 10, 2010: [Speed 'Em Up: Wordpress & W3 Total Cache](http://translate.google.com/translate?js=y&prev=_t&hl=en&ie=UTF-8&layout=1&eotf=1&u=http://www.andilicious.com/blog/1473/20100610/wordpress-beschleunigen-grundlagen-w3-total-cache-page-speed&sl=auto&tl=en)
+* May 24, 2010: [Make Your Blog 10x Faster With W3 Total Cache Plug-in](http://www.strictlyonlinebiz.com/blog/speed-up-wordpress-with-w3-total-cache/1231/)
 * May 23, 2010: [xCache v1.3.0 Now Available](http://resellr.net/xcache-now-available/)
 * May 10, 2010: [Maximize WordPress and BuddyPress Performance With W3 Total Cache](http://wpmu.org/maximize-wordpress-and-buddypress-performance-with-w3-total-cache/)
 * May 5, 2010: [Is Your Wordpress Blog Slow to Load?](http://homenotion.com/blog/blogs/is-your-wordpress-blog-slow-to-load/)
@@ -297,7 +296,7 @@ Read [testimonials](http://bit.ly/6Wbvpt) from W3TC users.
 * Added "never cache the following pages" to database and object cache
 * Added minify option to JavaScript embed after <body>
 * Added minify error notifications
-* Added drag and drop dependency resolution for minify CSS/ JavaScript groups
+* Added drag and drop dependency resolution for minify CSS / JavaScript groups
 * Added object caching
 * Added support for multiple CNAMEs
 * Added compatibility with WP Super Cache fragment caching method (disk basic mode only)
@@ -318,9 +317,10 @@ Read [testimonials](http://bit.ly/6Wbvpt) from W3TC users.
 * Install tab improvements
 * Resolved conflicts with disk enhanced .htaccess directives insertion
 * Improved browser caching support and management
+* Improved directory management for disk caching methods for increased performance
 * Improved handling of missing minify files
 * Improved Media Library import
-* Improved network support
+* Improved Multi Site support
 * Improved SSL interoperability
 
 = 0.8.5.2 =
@@ -438,7 +438,7 @@ Read [testimonials](http://bit.ly/6Wbvpt) from W3TC users.
 * Changed directory of minify working files to wp-content/w3tc-cache/
 * Fixed bug with parsing memcached server strings
 * Fixed bug with minify sometimes not creating files as it should
-* Addressed WordPress MU site-wide activation/deactivation issues
+* Addressed WordPress network activation/deactivation issues
 * Provided memcache.ini directives updated to improve network throughput
 
 = 0.7.5.1 =
@@ -464,12 +464,12 @@ Read [testimonials](http://bit.ly/6Wbvpt) from W3TC users.
 * Addressed privilege control issue
 * Resolved warnings thrown in various versions of WordPress
 * Memcached engine logic modified to better support clustering and multiple memcached instances
-* Eliminated false negatives in a number of gzip/deflate compression analysis tools
+* Eliminated false negatives in a number of gzip / deflate compression analysis tools
 * Total plugin file size reduced
 
 = 0.7 =
 * Added minify support for URIs starting with /
-* WordPress MU support bug fixes
+* WordPress network mode support bug fixes
 * Minor CDN uploader fixes
 * Minor error message improvements
 

@@ -62,6 +62,20 @@ class W3_ObjectCache
     var $_config = null;
     
     /**
+     * Caching flag
+     * 
+     * @var boolean
+     */
+    var $_caching = false;
+    
+    /**
+     * Cache reject reason
+     * 
+     * @var string
+     */
+    var $_cache_reject_reason = '';
+    
+    /**
      * Lifetime
      *
      * @var integer
@@ -88,6 +102,10 @@ class W3_ObjectCache
         
         $this->global_groups = $this->_config->get_array('objectcache.groups.global');
         $this->nonpersistent_groups = $this->_config->get_array('objectcache.groups.nonpersistent');
+        
+        $this->_caching = $this->_can_cache();
+        
+        $GLOBALS['_wp_using_ext_object_cache'] = $this->_caching;
         
         if ($this->_can_ob()) {
             ob_start(array(
@@ -140,7 +158,7 @@ class W3_ObjectCache
         if (isset($this->cache[$key])) {
             $value = $this->cache[$key];
         } else {
-            $caching = $this->_can_cache($id, $group, $reason);
+            $caching = $this->_can_cache2($id, $group, $reason);
             $internal = false;
             
             if ($caching) {
@@ -213,7 +231,7 @@ class W3_ObjectCache
         
         $reason = '';
         
-        if ($this->_can_cache($id, $group, $reason)) {
+        if ($this->_can_cache2($id, $group, $reason)) {
             $cache = & $this->_get_cache();
             $cache->set($key, $data, ($expire ? $expire : $this->_lifetime));
         }
@@ -236,7 +254,7 @@ class W3_ObjectCache
         
         $reason = '';
         
-        if ($this->_can_cache($id, $group, $reason)) {
+        if ($this->_can_cache2($id, $group, $reason)) {
             $cache = & $this->_get_cache();
             $cache->delete($key);
         }
@@ -405,19 +423,65 @@ class W3_ObjectCache
     }
     
     /**
-     * Check for caching exception cases
-     *
-     * @param string $id
-     * @param string $group
+     * Check if caching allowed on init
+     * 
      * @return boolean
      */
-    function _can_cache($id, $group, &$cache_reject_reason)
+    function _can_cache()
     {
         /**
          * Skip if disabled
          */
         if (!$this->_config->get_boolean('objectcache.enabled')) {
-            $cache_reject_reason = 'object caching is disabled';
+            $this->_cache_reject_reason = 'object caching is disabled';
+            
+            return false;
+        }
+        
+        /**
+         * Check for DONOTCACHCEOBJECT constant
+         */
+        if (defined('DONOTCACHCEOBJECT') && DONOTCACHCEOBJECT) {
+            $this->_cache_reject_reason = 'DONOTCACHCEOBJECT constant is defined';
+            
+            return false;
+        }
+        
+        /**
+         * Skip if admin
+         */
+        if ($this->_config->get_boolean('objectcache.reject.admin') && defined('WP_ADMIN')) {
+            $this->_cache_reject_reason = 'wp-admin';
+            
+            return false;
+        }
+        
+        /**
+         * Check request URI
+         */
+        if (!$this->_check_request_uri()) {
+            $this->_cache_reject_reason = 'request URI is rejected';
+            
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Check if caching allowed runtime
+     *
+     * @param string $id
+     * @param string $group
+     * @return boolean
+     */
+    function _can_cache2($id, $group, &$cache_reject_reason)
+    {
+        /**
+         * Skip if disabled
+         */
+        if (!$this->_caching) {
+            $cache_reject_reason = $this->_cache_reject_reason;
             
             return false;
         }
@@ -427,24 +491,6 @@ class W3_ObjectCache
          */
         if (defined('DONOTCACHCEOBJECT') && DONOTCACHCEOBJECT) {
             $cache_reject_reason = 'DONOTCACHCEOBJECT constant is defined';
-            
-            return false;
-        }
-        
-        /**
-         * Skip if admin
-         */
-        if ($this->_config->get_boolean('objectcache.reject.admin') && defined('WP_ADMIN')) {
-            $cache_reject_reason = 'wp-admin';
-            
-            return false;
-        }
-        
-        /**
-         * Check request URI
-         */
-        if (!$this->_check_request_uri()) {
-            $cache_reject_reason = 'request URI is rejected';
             
             return false;
         }

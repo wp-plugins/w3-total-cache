@@ -2531,8 +2531,6 @@ class W3_Plugin_TotalCache extends W3_Plugin
     function preview_deploy()
     {
         if ($this->_config->save(false)) {
-            @unlink(W3TC_CONFIG_PREVIEW_PATH);
-            
             $this->redirect(array(
                 'w3tc_note' => 'preview_deploy'
             ));

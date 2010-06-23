@@ -18,6 +18,8 @@ class W3_Cache_File_Manager
     
     function clean()
     {
+        @set_time_limit(180);
+        
         $this->_clean($this->_cache_dir, false);
     }
     
@@ -32,7 +34,7 @@ class W3_Cache_File_Manager
                     
                     if (@is_dir($full_path)) {
                         $this->_clean($full_path);
-                    } elseif (! $this->is_valid($full_path)) {
+                    } elseif (!$this->is_valid($full_path)) {
                         @unlink($full_path);
                     }
                 }
@@ -60,7 +62,7 @@ class W3_Cache_File_Manager
                     $expires = @fread($fp, 4);
                     
                     if ($expires !== false) {
-                        list (, $expire) = @unpack('L', $expires);
+                        list(, $expire) = @unpack('L', $expires);
                         $expire = ($expire && $expire <= W3_CACHE_FILE_EXPIRE_MAX ? $expire : W3_CACHE_FILE_EXPIRE_MAX);
                         if ($ftime > (time() - $expire)) {
                             $valid = true;

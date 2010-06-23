@@ -75,10 +75,9 @@ class W3_Plugin_BrowserCache extends W3_Plugin
      */
     function get_cssjs_types()
     {
-        return array(
-            'css' => 'text/css', 
-            'js' => 'application/x-javascript'
-        );
+        $mime_types = include W3TC_DIR . '/inc/mime/cssjs.php';
+        
+        return $mime_types;
     }
     
     /**
@@ -88,16 +87,9 @@ class W3_Plugin_BrowserCache extends W3_Plugin
      */
     function get_html_types()
     {
-        return array(
-            'htm' => 'text/htm', 
-            'html' => 'text/html', 
-            'svg|svgz' => 'image/svg+xml', 
-            'txt' => 'text/plain', 
-            'rtf|rtx' => 'text/richtext', 
-            'xsd' => 'text/xsd', 
-            'xsl' => 'text/xsl', 
-            'xml' => 'text/xml'
-        );
+        $mime_types = include W3TC_DIR . '/inc/mime/html.php';
+        
+        return $mime_types;
     }
     
     /**
@@ -107,46 +99,9 @@ class W3_Plugin_BrowserCache extends W3_Plugin
      */
     function get_other_types()
     {
-        return array(
-            'jpg|jpeg|jpe' => 'image/jpeg', 
-            'gif' => 'image/gif', 
-            'png' => 'image/png', 
-            'bmp' => 'image/bmp', 
-            'tif|tiff' => 'image/tiff', 
-            'ico' => 'image/x-icon', 
-            'asf|asx|wax|wmv|wmx' => 'video/asf', 
-            'avi' => 'video/avi', 
-            'divx' => 'video/divx', 
-            'mov|qt' => 'video/quicktime', 
-            'mpeg|mpg|mpe' => 'video/mpeg', 
-            'mp3|m4a' => 'audio/mpeg', 
-            'mp4|m4v' => 'video/mp4', 
-            'ra|ram' => 'audio/x-realaudio', 
-            'wav' => 'audio/wav', 
-            'ogg' => 'audio/ogg', 
-            'mid|midi' => 'audio/midi', 
-            'wma' => 'audio/wma', 
-            'pdf' => 'application/pdf', 
-            'doc|docx' => 'application/msword', 
-            'pot|pps|ppt|pptx' => 'application/vnd.ms-powerpoint', 
-            'wri' => 'application/vnd.ms-write', 
-            'xla|xls|xlsx|xlt|xlw' => 'application/vnd.ms-excel', 
-            'mdb' => 'application/vnd.ms-access', 
-            'mpp' => 'application/vnd.ms-project', 
-            'swf' => 'application/x-shockwave-flash', 
-            'class' => 'application/java', 
-            'tar' => 'application/x-tar', 
-            'zip' => 'application/zip', 
-            'gz|gzip' => 'application/x-gzip', 
-            'exe' => 'application/x-msdownload', 
-            'odt' => 'application/vnd.oasis.opendocument.text', 
-            'odp' => 'application/vnd.oasis.opendocument.presentation', 
-            'ods' => 'application/vnd.oasis.opendocument.spreadsheet', 
-            'odg' => 'application/vnd.oasis.opendocument.graphics', 
-            'odc' => 'application/vnd.oasis.opendocument.chart', 
-            'odb' => 'application/vnd.oasis.opendocument.database', 
-            'odf' => 'application/vnd.oasis.opendocument.formula'
-        );
+        $mime_types = include W3TC_DIR . '/inc/mime/other.php';
+        
+        return $mime_types;
     }
     
     /**

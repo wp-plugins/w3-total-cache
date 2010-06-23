@@ -18,7 +18,7 @@ class W3_Cache_File_PgCache extends W3_Cache_File
         
         $this->_expire = (isset($config['expire']) ? (int) $config['expire'] : 0);
         
-        if (! $this->_expire || $this->_expire > W3_CACHE_FILE_EXPIRE_MAX) {
+        if (!$this->_expire || $this->_expire > W3_CACHE_FILE_EXPIRE_MAX) {
             $this->_expire = W3_CACHE_FILE_EXPIRE_MAX;
         }
     }
@@ -30,7 +30,7 @@ class W3_Cache_File_PgCache extends W3_Cache_File
     
     /**
      * Sets data
-	 *
+     *
      * @param string $key
      * @param string $var
      * @return boolean
@@ -58,7 +58,7 @@ class W3_Cache_File_PgCache extends W3_Cache_File
     
     /**
      * Returns data
-	 *
+     *
      * @param string $key
      * @return string
      */
@@ -75,7 +75,7 @@ class W3_Cache_File_PgCache extends W3_Cache_File
                 
                 if ($fp) {
                     $var = '';
-                    while (! @feof($fp)) {
+                    while (!@feof($fp)) {
                         $var .= @fread($fp, 4096);
                     }
                     @fclose($fp);
@@ -93,6 +93,8 @@ class W3_Cache_File_PgCache extends W3_Cache_File
      */
     function flush()
     {
+        @set_time_limit(180);
+        
         w3_emptydir($this->_cache_dir, array(
             $this->_cache_dir . '/.htaccess'
         ));
@@ -102,7 +104,7 @@ class W3_Cache_File_PgCache extends W3_Cache_File
     
     /**
      * Returns cache file path by key
-	 *
+     *
      * @param string $key
      * @return string
      */
