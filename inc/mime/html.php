@@ -4,8 +4,7 @@
  * HTML mime types
  */
 return array(
-    'htm' => 'text/htm', 
-    'html' => 'text/html', 
+    'html|htm' => 'text/html', 
     'rtf|rtx' => 'text/richtext', 
     'svg|svgz' => 'image/svg+xml', 
     'txt' => 'text/plain', 

@@ -78,7 +78,7 @@ class W3_Cdn_Cf extends W3_Cdn_S3
             $cnames = (isset($dist['cnames']) ? (array) $dist['cnames'] : array());
             
             foreach ($domains as $domain) {
-                if (!in_array($domain, $cnames)) {
+                if ($domain && !in_array($domain, $cnames)) {
                     $error = sprintf('Domain name %s is not in distribution CNAME list.', $domain);
                     
                     return false;

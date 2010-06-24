@@ -371,7 +371,7 @@ class W3_Cdn_Base
         }
         
         foreach ($domains as $domain) {
-            if (gethostbyname($domain) === $domain) {
+            if ($domain && gethostbyname($domain) === $domain) {
                 $error = sprintf('Unable to resolve domain: %s.', $domain);
                 
                 return false;
