@@ -4041,9 +4041,13 @@ class W3_Plugin_TotalCache extends W3_Plugin
         $patterns = array(
             '404', 
             'search', 
+            'taxonomy(-.*)?', 
+            'front-page', 
             'home', 
             'index', 
+            '(image|video|text|audio|application).*', 
             'attachment', 
+            'single(-.*)?', 
             'page(-.*)?', 
             'category(-.*)?', 
             'tag(-.*)?', 
@@ -4129,6 +4133,18 @@ class W3_Plugin_TotalCache extends W3_Plugin
             $home_url = w3_get_home_url();
             $template_files = (array) $theme['Template Files'];
             
+            $mime_types = get_allowed_mime_types();
+            $custom_mime_types = array();
+            
+            foreach ($mime_types as $mime_type) {
+                list($type1, $type2) = explode('/', $mime_type);
+                $custom_mime_types = array_merge($custom_mime_types, array(
+                    $type1, 
+                    $type2, 
+                    $type1 . '_' . $type2
+                ));
+            }
+            
             foreach ($template_files as $template_file) {
                 $link = false;
                 $template = basename($template_file, '.php');
@@ -4138,9 +4154,11 @@ class W3_Plugin_TotalCache extends W3_Plugin
                  */
                 switch (true) {
                     /**
-                     * Handle home.php
+                     * Handle home.php or index.php or front-page.php
                      */
                     case ($template == 'home'):
+                    case ($template == 'index'):
+                    case ($template == 'front-page'):
                         $link = $home_url . '/';
                         break;
                     
@@ -4167,7 +4185,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
                             'numberposts' => 1, 
                             'orderby' => 'rand'
                         ));
-                        if (count($posts)) {
+                        if (is_array($posts) && count($posts)) {
                             $time = strtotime($posts[0]->post_date);
                             $link = get_day_link(date('Y', $time), date('m', $time), date('d', $time));
                         }
@@ -4178,7 +4196,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
                      */
                     case ($template == 'author'):
                         $author_ids = get_author_user_ids();
-                        if (count($author_ids)) {
+                        if (is_array($author_ids) && count($author_ids)) {
                             $link = get_author_posts_url($author_ids[0]);
                         }
                         break;
@@ -4188,7 +4206,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
                      */
                     case ($template == 'category'):
                         $category_ids = get_all_category_ids();
-                        if (count($category_ids)) {
+                        if (is_array($category_ids) && count($category_ids)) {
                             $link = get_category_link($category_ids[0]);
                         }
                         break;
@@ -4198,8 +4216,35 @@ class W3_Plugin_TotalCache extends W3_Plugin
                      */
                     case ($template == 'tag'):
                         $term_ids = get_terms('post_tag', 'fields=ids');
-                        if (count($term_ids)) {
+                        if (is_array($term_ids) && count($term_ids)) {
                             $link = get_term_link($term_ids[0], 'post_tag');
+                        }
+                        break;
+                    
+                    /**
+                     * Handle taxonomy.php
+                     */
+                    case ($template == 'taxonomy'):
+                        $taxonomy = '';
+                        if (isset($GLOBALS['wp_taxonomies']) && is_array($GLOBALS['wp_taxonomies'])) {
+                            foreach ($GLOBALS['wp_taxonomies'] as $wp_taxonomy) {
+                                if (!in_array($wp_taxonomy->name, array(
+                                    'category', 
+                                    'post_tag', 
+                                    'link_category'
+                                ))) {
+                                    $taxonomy = $wp_taxonomy->name;
+                                    break;
+                                }
+                            }
+                        }
+                        if ($taxonomy) {
+                            $terms = get_terms($taxonomy, array(
+                                'number' => 1
+                            ));
+                            if (is_array($terms) && count($terms)) {
+                                $link = get_term_link($terms[0], $taxonomy);
+                            }
                         }
                         break;
                     
@@ -4212,18 +4257,8 @@ class W3_Plugin_TotalCache extends W3_Plugin
                             'numberposts' => 1, 
                             'orderby' => 'rand'
                         ));
-                        if (count($attachments)) {
+                        if (is_array($attachments) && count($attachments)) {
                             $link = get_attachment_link($attachments[0]->ID);
-                        }
-                        break;
-                    
-                    /**
-                     * Handle page.php
-                     */
-                    case ($template == 'page'):
-                        $pages_ids = get_all_page_ids();
-                        if (count($pages_ids)) {
-                            $link = get_page_link($pages_ids[0]);
                         }
                         break;
                     
@@ -4235,16 +4270,19 @@ class W3_Plugin_TotalCache extends W3_Plugin
                             'numberposts' => 1, 
                             'orderby' => 'rand'
                         ));
-                        if (count($posts)) {
+                        if (is_array($posts) && count($posts)) {
                             $link = get_permalink($posts[0]->ID);
                         }
                         break;
                     
                     /**
-                     * Handle index.php
+                     * Handle page.php
                      */
-                    case ($template == 'index'):
-                        $link = $home_url . '/';
+                    case ($template == 'page'):
+                        $pages_ids = get_all_page_ids();
+                        if (is_array($pages_ids) && count($pages_ids)) {
+                            $link = get_page_link($pages_ids[0]);
+                        }
                         break;
                     
                     /**
@@ -4255,7 +4293,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
                             'numberposts' => 1, 
                             'orderby' => 'rand'
                         ));
-                        if (count($posts)) {
+                        if (is_array($posts) && count($posts)) {
                             $link = sprintf('%s/?comments_popup=%d', $home_url, $posts[0]->ID);
                         }
                         break;
@@ -4291,7 +4329,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
                             $link = get_category_link($matches[1]);
                         } else {
                             $term = get_term_by('slug', $matches[1], 'category');
-                            if ($term) {
+                            if (is_object($term)) {
                                 $link = get_category_link($term->term_id);
                             }
                         }
@@ -4305,9 +4343,58 @@ class W3_Plugin_TotalCache extends W3_Plugin
                             $link = get_tag_link($matches[1]);
                         } else {
                             $term = get_term_by('slug', $matches[1], 'post_tag');
-                            if ($term) {
+                            if (is_object($term)) {
                                 $link = get_tag_link($term->term_id);
                             }
+                        }
+                        break;
+                    
+                    /**
+                     * Handle taxonomy-taxonomy-term.php
+                     */
+                    case preg_match('~^taxonomy-(.+)-(.+)$~', $template, $matches):
+                        $link = get_term_link($matches[2], $matches[1]);
+                        break;
+                    
+                    /**
+                     * Handle taxonomy-taxonomy.php
+                     */
+                    case preg_match('~^taxonomy-(.+)$~', $template, $matches):
+                        $terms = get_terms($matches[1], array(
+                            'number' => 1
+                        ));
+                        if (is_array($terms) && count($terms)) {
+                            $link = get_term_link($terms[0], $matches[1]);
+                        }
+                        break;
+                    
+                    /**
+                     * Handle MIME_type.php
+                     */
+                    case in_array($template, $custom_mime_types):
+                        $posts = get_posts(array(
+                            'post_mime_type' => '%' . $template . '%', 
+                            'post_type' => 'attachment', 
+                            'numberposts' => 1, 
+                            'orderby' => 'rand'
+                        ));
+                        if (is_array($posts) && count($posts)) {
+                            $link = get_permalink($posts[0]->ID);
+                        }
+                        break;
+                    
+                    /**
+                     * Handle single-posttype.php
+                     */
+                    case preg_match('~^single-(.+)$~', $template, $matches):
+                        $posts = get_posts(array(
+                            'post_type' => $matches[1], 
+                            'numberposts' => 1, 
+                            'orderby' => 'rand'
+                        ));
+                        
+                        if (is_array($posts) && count($posts)) {
+                            $link = get_permalink($posts[0]->ID);
                         }
                         break;
                     
@@ -4320,10 +4407,11 @@ class W3_Plugin_TotalCache extends W3_Plugin
                         } else {
                             $posts = get_posts(array(
                                 'pagename' => $matches[1], 
-                                'post_type' => 'page'
+                                'post_type' => 'page', 
+                                'numberposts' => 1
                             ));
                             
-                            if (count($posts)) {
+                            if (is_array($posts) && count($posts)) {
                                 $link = get_permalink($posts[0]->ID);
                             }
                         }
@@ -4335,16 +4423,17 @@ class W3_Plugin_TotalCache extends W3_Plugin
                     default:
                         $posts = get_posts(array(
                             'pagename' => $template, 
-                            'post_type' => 'page'
+                            'post_type' => 'page', 
+                            'numberposts' => 1
                         ));
                         
-                        if (count($posts)) {
+                        if (is_array($posts) && count($posts)) {
                             $link = get_permalink($posts[0]->ID);
                         }
                         break;
                 }
                 
-                if ($link) {
+                if ($link && !is_wp_error($link)) {
                     $urls[$template] = $link;
                 }
             }

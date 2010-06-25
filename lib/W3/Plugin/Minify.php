@@ -443,6 +443,7 @@ class W3_Plugin_Minify extends W3_Plugin
                 case (is_404() && ($template_file = get_404_template())):
                 case (is_search() && ($template_file = get_search_template())):
                 case (is_tax() && ($template_file = get_taxonomy_template())):
+                case (is_front_page() && function_exists('get_front_page_template') && $template = get_front_page_template()):
                 case (is_home() && ($template_file = get_home_template())):
                 case (is_attachment() && ($template_file = get_attachment_template())):
                 case (is_single() && ($template_file = get_single_template())):
@@ -454,13 +455,18 @@ class W3_Plugin_Minify extends W3_Plugin
                 case (is_archive() && ($template_file = get_archive_template())):
                 case (is_comments_popup() && ($template_file = get_comments_popup_template())):
                 case (is_paged() && ($template_file = get_paged_template())):
-                    $template = basename($template_file, '.php');
                     break;
                 
                 default:
-                    $template = 'default';
+                    if (function_exists('get_index_template')) {
+                        $template_file = get_index_template();
+                    } else {
+                        $template_file = 'index.php';
+                    }
                     break;
             }
+            
+            $template = basename($template_file, '.php');
         }
         
         return $template;
