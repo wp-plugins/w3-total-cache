@@ -663,13 +663,15 @@ class W3_PgCache
                 
                 case 'file':
                     $engineConfig = array(
-                        'cache_dir' => W3TC_CACHE_FILE_PGCACHE_DIR
+                        'cache_dir' => W3TC_CACHE_FILE_PGCACHE_DIR, 
+                        'locking' => $this->_config->get_boolean('pgcache.file.locking')
                     );
                     break;
                 
                 case 'file_pgcache':
                     $engineConfig = array(
                         'cache_dir' => W3TC_CACHE_FILE_PGCACHE_DIR, 
+                        'locking' => $this->_config->get_boolean('pgcache.file.locking'), 
                         'expire' => $this->_lifetime
                     );
                     break;

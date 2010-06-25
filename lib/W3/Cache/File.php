@@ -22,6 +22,13 @@ class W3_Cache_File extends W3_Cache_Base
     var $_cache_dir = '';
     
     /**
+     * File locking
+     * 
+     * @var boolean
+     */
+    var $_locking = false;
+    
+    /**
      * PHP5 constructor
      *
      * @param array $config
@@ -29,6 +36,7 @@ class W3_Cache_File extends W3_Cache_Base
     function __construct($config = array())
     {
         $this->_cache_dir = isset($config['cache_dir']) ? trim($config['cache_dir']) : 'cache';
+        $this->_locking = isset($config['locking']) ? (boolean) $config['locking'] : false;
     }
     
     /**
@@ -77,10 +85,20 @@ class W3_Cache_File extends W3_Cache_Base
         
         if ((@is_dir($dir) || w3_mkdir($sub_dir, 0755, $this->_cache_dir))) {
             $fp = @fopen($path, 'wb');
+            
             if ($fp) {
+                if ($this->_locking) {
+                    @flock($fp, LOCK_EX);
+                }
+                
                 @fputs($fp, pack('L', $expire));
                 @fputs($fp, @serialize($var));
                 @fclose($fp);
+                
+                if ($this->_locking) {
+                    @flock($fp, LOCK_UN);
+                }
+                
                 return true;
             }
         }
@@ -101,21 +119,36 @@ class W3_Cache_File extends W3_Cache_Base
         
         if (is_readable($path)) {
             $ftime = @filemtime($path);
+            
             if ($ftime) {
                 $fp = @fopen($path, 'rb');
+                
                 if ($fp) {
+                    if ($this->_locking) {
+                        @flock($fp, LOCK_SH);
+                    }
+                    
                     $expires = @fread($fp, 4);
+                    
                     if ($expires !== false) {
                         list(, $expire) = @unpack('L', $expires);
                         $expire = ($expire && $expire <= W3_CACHE_FILE_EXPIRE_MAX ? $expire : W3_CACHE_FILE_EXPIRE_MAX);
+                        
                         if ($ftime > time() - $expire) {
                             $data = '';
+                            
                             while (!@feof($fp)) {
                                 $data .= @fread($fp, 4096);
                             }
+                            
                             $var = @unserialize($data);
                         }
                     }
+                    
+                    if ($this->_locking) {
+                        @flock($fp, LOCK_UN);
+                    }
+                    
                     @fclose($fp);
                 }
             }

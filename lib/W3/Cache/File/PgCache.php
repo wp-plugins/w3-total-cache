@@ -10,8 +10,19 @@ require_once W3TC_LIB_W3_DIR . '/Cache/File.php';
  */
 class W3_Cache_File_PgCache extends W3_Cache_File
 {
+    /**
+     * Expire
+     * 
+     * @var integer
+     */
     var $_expire = 0;
     
+    /**
+     * PHP5 style constructor
+     * 
+     * @param array $config
+     * @return void
+     */
     function __construct($config = array())
     {
         parent::__construct($config);
@@ -23,6 +34,11 @@ class W3_Cache_File_PgCache extends W3_Cache_File
         }
     }
     
+    /**
+     * PHP4 style constructor
+     * @param array $config
+     * @return void
+     */
     function W3_Cache_File_PgCache($config = array())
     {
         $this->__construct($config);
@@ -45,9 +61,18 @@ class W3_Cache_File_PgCache extends W3_Cache_File
         
         if ((@is_dir($dir) || w3_mkdir($sub_dir, 0755, $this->_cache_dir))) {
             $fp = @fopen($path, 'w');
+            
             if ($fp) {
+                if ($this->_locking) {
+                    @flock($fp, LOCK_EX);
+                }
+                
                 @fputs($fp, $var);
                 @fclose($fp);
+                
+                if ($this->_locking) {
+                    @flock($fp, LOCK_UN);
+                }
                 
                 return true;
             }
@@ -74,11 +99,21 @@ class W3_Cache_File_PgCache extends W3_Cache_File
                 $fp = @fopen($path, 'r');
                 
                 if ($fp) {
+                    if ($this->_locking) {
+                        @flock($fp, LOCK_SH);
+                    }
+                    
                     $var = '';
+                    
                     while (!@feof($fp)) {
                         $var .= @fread($fp, 4096);
                     }
+                    
                     @fclose($fp);
+                    
+                    if ($this->_locking) {
+                        @flock($fp, LOCK_UN);
+                    }
                 }
             }
         }

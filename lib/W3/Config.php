@@ -31,6 +31,7 @@ class W3_Config
         'dbcache.debug' => 'boolean', 
         'dbcache.engine' => 'string', 
         'dbcache.file.gc' => 'integer', 
+        'dbcache.file.locking' => 'boolean', 
         'dbcache.memcached.servers' => 'array', 
         'dbcache.memcached.persistant' => 'boolean', 
         'dbcache.reject.logged' => 'boolean', 
@@ -43,6 +44,7 @@ class W3_Config
         'objectcache.debug' => 'boolean', 
         'objectcache.engine' => 'string', 
         'objectcache.file.gc' => 'integer', 
+        'objectcache.file.locking' => 'boolean', 
         'objectcache.memcached.servers' => 'array', 
         'objectcache.memcached.persistant' => 'boolean', 
         'objectcache.reject.admin' => 'boolean', 
@@ -55,6 +57,7 @@ class W3_Config
         'pgcache.debug' => 'boolean', 
         'pgcache.engine' => 'string', 
         'pgcache.file.gc' => 'integer', 
+        'pgcache.file.locking' => 'boolean', 
         'pgcache.memcached.servers' => 'array', 
         'pgcache.memcached.persistant' => 'boolean', 
         'pgcache.cache.query' => 'boolean', 
@@ -78,8 +81,8 @@ class W3_Config
         'minify.enabled' => 'boolean', 
         'minify.debug' => 'boolean', 
         'minify.engine' => 'string', 
-        'minify.file.locking' => 'boolean', 
         'minify.file.gc' => 'integer', 
+        'minify.file.locking' => 'boolean', 
         'minify.memcached.servers' => 'array', 
         'minify.memcached.persistant' => 'boolean', 
         'minify.rewrite' => 'boolean', 
@@ -215,6 +218,7 @@ class W3_Config
         'dbcache.debug' => false, 
         'dbcache.engine' => 'file', 
         'dbcache.file.gc' => 3600, 
+        'dbcache.file.locking' => false, 
         'dbcache.memcached.servers' => array(
             '127.0.0.1:11211'
         ), 
@@ -232,6 +236,7 @@ class W3_Config
         'objectcache.debug' => false, 
         'objectcache.engine' => 'file', 
         'objectcache.file.gc' => 3600, 
+        'objectcache.file.locking' => false, 
         'objectcache.memcached.servers' => array(
             '127.0.0.1:11211'
         ), 
@@ -258,6 +263,7 @@ class W3_Config
         'pgcache.debug' => false, 
         'pgcache.engine' => 'file_pgcache', 
         'pgcache.file.gc' => 3600, 
+        'pgcache.file.locking' => false, 
         'pgcache.memcached.servers' => array(
             '127.0.0.1:11211'
         ), 
@@ -294,8 +300,8 @@ class W3_Config
         'minify.enabled' => false, 
         'minify.debug' => false, 
         'minify.engine' => 'file', 
-        'minify.file.locking' => false, 
         'minify.file.gc' => 86400, 
+        'minify.file.locking' => false, 
         'minify.memcached.servers' => array(
             '127.0.0.1:11211'
         ), 

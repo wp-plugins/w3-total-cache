@@ -1593,6 +1593,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
         $can_empty_file = $can_empty_file || ($minify_enabled && in_array($minify_engine, $file_engines));
         
         $debug = ($this->_config->get_boolean('dbcache.debug') || $this->_config->get_boolean('objectcache.debug') || $this->_config->get_boolean('pgcache.debug') || $this->_config->get_boolean('minify.debug') || $this->_config->get_boolean('cdn.debug'));
+        $file_locking = ($this->_config->get_boolean('dbcache.file.locking') || $this->_config->get_boolean('objectcache.file.locking') || $this->_config->get_boolean('pgcache.file.locking') || $this->_config->get_boolean('minify.file.locking'));
         
         $support = $this->_config->get_string('common.support');
         $supports = $this->get_supports();
@@ -1880,12 +1881,18 @@ class W3_Plugin_TotalCache extends W3_Plugin
          */
         if ($this->_tab == 'general') {
             $debug = W3_Request::get_array('debug');
+            $file_locking = W3_Request::get_boolean('file_locking');
             
             $config->set('dbcache.debug', in_array('dbcache', $debug));
             $config->set('objectcache.debug', in_array('objectcache', $debug));
             $config->set('pgcache.debug', in_array('pgcache', $debug));
             $config->set('minify.debug', in_array('minify', $debug));
             $config->set('cdn.debug', in_array('cdn', $debug));
+            
+            $config->set('dbcache.file.locking', $file_locking);
+            $config->set('objectcache.file.locking', $file_locking);
+            $config->set('pgcache.file.locking', $file_locking);
+            $config->set('minify.file.locking', $file_locking);
             
             /**
              * Check permalinks for page cache
@@ -2704,9 +2711,19 @@ class W3_Plugin_TotalCache extends W3_Plugin
         /**
          * Add attachments
          */
-        $attachments = array(
-            W3TC_CONFIG_PATH
+        $attachments = array();
+        
+        $config_files = array(
+            W3TC_CONFIG_PATH, 
+            W3TC_CONFIG_PREVIEW_PATH, 
+            W3TC_CONFIG_MASTER_PATH
         );
+        
+        foreach ($config_files as $config_file) {
+            if (file_exists($config_file)) {
+                $attachments[] = $config_file;
+            }
+        }
         
         /**
          * Attach server info

@@ -407,7 +407,8 @@ class W3_ObjectCache
                 
                 case 'file':
                     $engineConfig = array(
-                        'cache_dir' => W3TC_CACHE_FILE_OBJECTCACHE_DIR
+                        'cache_dir' => W3TC_CACHE_FILE_OBJECTCACHE_DIR, 
+                        'locking' => $this->_config->get_boolean('objectcache.file.locking')
                     );
                     break;
                 
