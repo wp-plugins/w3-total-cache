@@ -145,13 +145,11 @@ class W3_Plugin_PgCache extends W3_Plugin
                 $this->_config->set('pgcache.engine', 'file');
                 $this->_config->save();
             } else {
-                if (!w3_is_multisite() && !$this->write_rules_core()) {
-                    w3_writable_error(w3_get_home_root() . '/.htaccess');
+                if (!w3_is_multisite()) {
+                    $this->write_rules_core();
                 }
                 
-                if (!$this->write_rules_cache()) {
-                    w3_writable_error(W3TC_CACHE_FILE_PGCACHE_DIR . '/.htaccess');
-                }
+                $this->write_rules_cache();
             }
         }
         
@@ -545,64 +543,6 @@ class W3_Plugin_PgCache extends W3_Plugin
         $rules .= "    RewriteBase " . $home_path . "\n";
         
         /**
-         * Check for mobile redirect
-         */
-        if ($this->_config->get_boolean('mobile.enabled')) {
-            $mobile_groups = $this->_config->get_array('mobile.groups');
-            
-            foreach ($mobile_groups as $mobile_group => $mobile_config) {
-                $mobile_agents = (isset($mobile_config['agents']) ? (array) $mobile_config['agents'] : '');
-                $mobile_redirect = (isset($mobile_config['redirect']) ? $mobile_config['redirect'] : '');
-                
-                if (count($mobile_agents) && $mobile_redirect) {
-                    $rules .= "    RewriteCond %{HTTP_USER_AGENT} (" . implode('|', array_map('w3_preg_quote', $mobile_agents)) . ") [NC]\n";
-                    $rules .= "    RewriteRule .* " . $mobile_redirect . " [R,L]\n";
-                }
-            }
-        }
-        
-        /**
-         * Don't accept POSTs
-         */
-        $rules .= "    RewriteCond %{REQUEST_METHOD} !=POST\n";
-        
-        /**
-         * Query string should be empty
-         */
-        $rules .= "    RewriteCond %{QUERY_STRING} =\"\"\n";
-        
-        /**
-         * Accept only URIs with trailing slash
-         */
-        $rules .= "    RewriteCond %{REQUEST_URI} \\/$\n";
-        
-        /**
-         * Don't accept rejected URIs
-         */
-        $rules .= "    RewriteCond %{REQUEST_URI} !(" . implode('|', $reject_uris) . ")";
-        
-        /**
-         * Exclude files from rejected URIs list
-         */
-        if (count($accept_files)) {
-            $rules .= " [NC,OR]\n    RewriteCond %{REQUEST_URI} (" . implode('|', array_map('w3_preg_quote', $accept_files)) . ") [NC]\n";
-        } else {
-            $rules .= "\n";
-        }
-        
-        /**
-         * Check for rejected cookies
-         */
-        $rules .= "    RewriteCond %{HTTP_COOKIE} !(" . implode('|', array_map('w3_preg_quote', $reject_cookies)) . ") [NC]\n";
-        
-        /**
-         * Check for rejected user agents
-         */
-        if (count($reject_user_agents)) {
-            $rules .= "    RewriteCond %{HTTP_USER_AGENT} !(" . implode('|', array_map('w3_preg_quote', $reject_user_agents)) . ") [NC]\n";
-        }
-        
-        /**
          * Network mode rules
          */
         if ($is_multisite) {
@@ -662,6 +602,64 @@ class W3_Plugin_PgCache extends W3_Plugin
         if ($this->_config->get_boolean('browsercache.enabled') && $this->_config->get_boolean('browsercache.html.compression')) {
             $rules .= "    RewriteCond %{HTTP:Accept-Encoding} gzip\n";
             $rules .= "    RewriteRule .* - [E=W3TC_ENC:.gzip]\n";
+        }
+        
+        /**
+         * Check for mobile redirect
+         */
+        if ($this->_config->get_boolean('mobile.enabled')) {
+            $mobile_groups = $this->_config->get_array('mobile.groups');
+            
+            foreach ($mobile_groups as $mobile_group => $mobile_config) {
+                $mobile_agents = (isset($mobile_config['agents']) ? (array) $mobile_config['agents'] : '');
+                $mobile_redirect = (isset($mobile_config['redirect']) ? $mobile_config['redirect'] : '');
+                
+                if (count($mobile_agents) && $mobile_redirect) {
+                    $rules .= "    RewriteCond %{HTTP_USER_AGENT} (" . implode('|', array_map('w3_preg_quote', $mobile_agents)) . ") [NC]\n";
+                    $rules .= "    RewriteRule .* " . $mobile_redirect . " [R,L]\n";
+                }
+            }
+        }
+        
+        /**
+         * Don't accept POSTs
+         */
+        $rules .= "    RewriteCond %{REQUEST_METHOD} !=POST\n";
+        
+        /**
+         * Query string should be empty
+         */
+        $rules .= "    RewriteCond %{QUERY_STRING} =\"\"\n";
+        
+        /**
+         * Accept only URIs with trailing slash
+         */
+        $rules .= "    RewriteCond %{REQUEST_URI} \\/$\n";
+        
+        /**
+         * Don't accept rejected URIs
+         */
+        $rules .= "    RewriteCond %{REQUEST_URI} !(" . implode('|', $reject_uris) . ")";
+        
+        /**
+         * Exclude files from rejected URIs list
+         */
+        if (count($accept_files)) {
+            $rules .= " [NC,OR]\n    RewriteCond %{REQUEST_URI} (" . implode('|', array_map('w3_preg_quote', $accept_files)) . ") [NC]\n";
+        } else {
+            $rules .= "\n";
+        }
+        
+        /**
+         * Check for rejected cookies
+         */
+        $rules .= "    RewriteCond %{HTTP_COOKIE} !(" . implode('|', array_map('w3_preg_quote', $reject_cookies)) . ") [NC]\n";
+        
+        /**
+         * Check for rejected user agents
+         */
+        if (count($reject_user_agents)) {
+            $rules .= "    RewriteCond %{HTTP_USER_AGENT} !(" . implode('|', array_map('w3_preg_quote', $reject_user_agents)) . ") [NC]\n";
         }
         
         /**

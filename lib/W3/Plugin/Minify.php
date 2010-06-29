@@ -108,8 +108,8 @@ class W3_Plugin_Minify extends W3_Plugin
             w3_writable_error($file_index);
         }
         
-        if ($this->_config->get_boolean('minify.rewrite') && !$this->write_rules()) {
-            w3_writable_error(W3TC_CONTENT_MINIFY_DIR . '/.htaccess');
+        if ($this->_config->get_boolean('minify.rewrite')) {
+            $this->write_rules();
         }
         
         $this->schedule();
@@ -122,9 +122,9 @@ class W3_Plugin_Minify extends W3_Plugin
     {
         $this->unschedule();
         
-        @unlink(W3TC_CONTENT_MINIFY_DIR . '/index.php');
-        
         $this->remove_rules();
+        
+        @unlink(W3TC_CONTENT_MINIFY_DIR . '/index.php');
     }
     
     /**

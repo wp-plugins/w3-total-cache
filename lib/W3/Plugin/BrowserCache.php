@@ -49,12 +49,10 @@ class W3_Plugin_BrowserCache extends W3_Plugin
     function activate()
     {
         if ($this->_config->get_boolean('browsercache.enabled') && !w3_is_multisite()) {
-            if (!$this->write_rules_cache()) {
-                w3_writable_error(w3_get_document_root() . '/.htaccess');
-            }
+            $this->write_rules_cache();
             
-            if ($this->_config->get_boolean('browsercache.no404wp') && !$this->write_rules_no404wp()) {
-                w3_writable_error(w3_get_home_root() . '/.htaccess');
+            if ($this->_config->get_boolean('browsercache.no404wp')) {
+                $this->write_rules_no404wp();
             }
         }
     }
@@ -64,8 +62,8 @@ class W3_Plugin_BrowserCache extends W3_Plugin
      */
     function deactivate()
     {
-        $this->remove_rules_cache();
         $this->remove_rules_no404wp();
+        $this->remove_rules_cache();
     }
     
     /**

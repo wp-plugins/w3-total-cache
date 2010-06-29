@@ -1291,14 +1291,14 @@ class W3_Plugin_TotalCache extends W3_Plugin
                         
                         if ($this->_config->get_boolean('notes.pgcache_rules_core') && !$w3_plugin_pgcache->check_rules_core()) {
                             if (w3_is_multisite()) {
-                                $this->_errors[] = sprintf('Enhanced mode page cache is not operational. Your .htaccess rules could not be modified. Please verify <strong>%s/.htaccess</strong> has the following rules: <pre>%s</pre> %s', w3_get_home_root(), htmlspecialchars($w3_plugin_pgcache->generate_rules_core()), $this->button_hide_note('Hide this message', 'pgcache_rules_core'));
+                                $this->_errors[] = sprintf('Enhanced mode page cache is not operational. Your .htaccess rules could not be modified. Please verify <strong>%s/.htaccess</strong> has the following rules: %s <span class="w3tc-rules">%s</span> %s', w3_get_home_root(), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_pgcache->generate_rules_core()), $this->button_hide_note('Hide this message', 'pgcache_rules_core'));
                             } else {
-                                $this->_errors[] = sprintf('You\'ve selected disk caching with enhanced mode however the .htaccess file is not properly configured. Please run <strong>chmod 777 %s/.htaccess</strong>, then %s. To manually modify your server configuration for enhanced mode append the following code: <pre>%s</pre> and %s.', w3_get_home_root(), $this->button_link('try again', sprintf('options-general.php?page=%s&tab=%s&pgcache_write_rules_core', W3TC_FILE, $this->_tab)), htmlspecialchars($w3_plugin_pgcache->generate_rules_core()), $this->button_hide_note('hide this message', 'pgcache_rules_core'));
+                                $this->_errors[] = sprintf('You\'ve selected disk caching with enhanced mode however the .htaccess file is not properly configured. Please run <strong>chmod 777 %s/.htaccess</strong>, then %s. To manually modify your server configuration for enhanced mode append the following code: %s <span class="w3tc-rules">%s</span> and %s.', w3_get_home_root(), $this->button_link('try again', sprintf('options-general.php?page=%s&tab=%s&pgcache_write_rules_core', W3TC_FILE, $this->_tab)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_pgcache->generate_rules_core()), $this->button_hide_note('hide this message', 'pgcache_rules_core'));
                             }
                         }
                         
                         if ($this->_config->get_boolean('notes.pgcache_rules_cache') && !$w3_plugin_pgcache->check_rules_cache()) {
-                            $this->_errors[] = sprintf('You\'ve selected disk caching with enhanced mode however the .htaccess file is not properly configured. Please run <strong>chmod 777 %s/.htaccess</strong>, then %s. To manually modify your server configuration for enhanced mode append the following code: <pre>%s</pre> and %s.', W3TC_CACHE_FILE_PGCACHE_DIR, $this->button_link('try again', sprintf('options-general.php?page=%s&tab=%s&pgcache_write_rules_cache', W3TC_FILE, $this->_tab)), htmlspecialchars($w3_plugin_pgcache->generate_rules_cache()), $this->button_hide_note('hide this message', 'pgcache_rules_cache'));
+                            $this->_errors[] = sprintf('You\'ve selected disk caching with enhanced mode however the .htaccess file is not properly configured. Please run <strong>chmod 777 %s/.htaccess</strong>, then %s. To manually modify your server configuration for enhanced mode append the following code: %s <span class="w3tc-rules">%s</span> and %s.', W3TC_CACHE_FILE_PGCACHE_DIR, $this->button_link('try again', sprintf('options-general.php?page=%s&tab=%s&pgcache_write_rules_cache', W3TC_FILE, $this->_tab)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_pgcache->generate_rules_cache()), $this->button_hide_note('hide this message', 'pgcache_rules_cache'));
                         }
                         break;
                     
@@ -1322,7 +1322,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
                 $w3_plugin_minify = & W3_Plugin_Minify::instance();
                 
                 if ($this->_config->get_boolean('notes.minify_rules') && !$w3_plugin_minify->check_rules()) {
-                    $this->_errors[] = sprintf('The "Rewrite URL Structure" feature, requires rewrite rules be present. Please run <strong>chmod 777 %s/.htaccess</strong>, then %s. To manually modify your server configuration for minify append the following code: <pre>%s</pre> and %s.', W3TC_CACHE_FILE_MINIFY_DIR, $this->button_link('try again', sprintf('options-general.php?page=%s&tab=%s&minify_write_rules', W3TC_FILE, $this->_tab)), htmlspecialchars($w3_plugin_minify->generate_rules()), $this->button_hide_note('hide this message', 'minify_rules'));
+                    $this->_errors[] = sprintf('The "Rewrite URL Structure" feature, requires rewrite rules be present. Please run <strong>chmod 777 %s/.htaccess</strong>, then %s. To manually modify your server configuration for minify append the following code: %s <span class="w3tc-rules">%s</span> and %s.', W3TC_CACHE_FILE_MINIFY_DIR, $this->button_link('try again', sprintf('options-general.php?page=%s&tab=%s&minify_write_rules', W3TC_FILE, $this->_tab)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_minify->generate_rules()), $this->button_hide_note('hide this message', 'minify_rules'));
                 }
             }
             
@@ -1374,17 +1374,17 @@ class W3_Plugin_TotalCache extends W3_Plugin
             
             if ($this->_config->get_boolean('notes.browsercache_rules_cache') && !$w3_plugin_browsercache->check_rules_cache()) {
                 if (w3_is_multisite()) {
-                    $this->_errors[] = sprintf('Browser Cache feature is not operational. Your .htaccess rules could not be modified. Please verify <strong>%s/.htaccess</strong> has the following rules: <pre>%s</pre> %s', w3_get_document_root(), htmlspecialchars($w3_plugin_browsercache->generate_rules_cache()), $this->button_hide_note('Hide this message', 'browsercache_rules_cache'));
+                    $this->_errors[] = sprintf('Browser Cache feature is not operational. Your .htaccess rules could not be modified. Please verify <strong>%s/.htaccess</strong> has the following rules: %s <span class="w3tc-rules">%s</span> %s', w3_get_document_root(), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_browsercache->generate_rules_cache()), $this->button_hide_note('Hide this message', 'browsercache_rules_cache'));
                 } else {
-                    $this->_errors[] = sprintf('You\'ve enabled Browser Cache feature however the .htaccess file is not properly configured. Please run <strong>chmod 777 %s/.htaccess</strong>, then %s. To manually modify these settings use the following code: <pre>%s</pre> and %s.', w3_get_document_root(), $this->button_link('try again', sprintf('options-general.php?page=%s&tab=%s&browsercache_write_rules_cache', W3TC_FILE, $this->_tab)), htmlspecialchars($w3_plugin_browsercache->generate_rules_cache()), $this->button_hide_note('hide this message', 'browsercache_rules_cache'));
+                    $this->_errors[] = sprintf('You\'ve enabled Browser Cache feature however the .htaccess file is not properly configured. Please run <strong>chmod 777 %s/.htaccess</strong>, then %s. To manually modify these settings use the following code: %s <span class="w3tc-rules">%s</span> and %s.', w3_get_document_root(), $this->button_link('try again', sprintf('options-general.php?page=%s&tab=%s&browsercache_write_rules_cache', W3TC_FILE, $this->_tab)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_browsercache->generate_rules_cache()), $this->button_hide_note('hide this message', 'browsercache_rules_cache'));
                 }
             }
             
             if ($this->_config->get_boolean('notes.browsercache_rules_no404wp') && $this->_config->get_boolean('browsercache.no404wp') && !$w3_plugin_browsercache->check_rules_no404wp()) {
                 if (w3_is_multisite()) {
-                    $this->_errors[] = sprintf('Browser Cache feature is not operational. Your .htaccess rules could not be modified. Please verify <strong>%s/.htaccess</strong> has the following rules: <pre>%s</pre> %s', w3_get_home_root(), htmlspecialchars($w3_plugin_browsercache->generate_rules_no404wp()), $this->button_hide_note('Hide this message', 'browsercache_rules_no404wp'));
+                    $this->_errors[] = sprintf('Browser Cache feature is not operational. Your .htaccess rules could not be modified. Please verify <strong>%s/.htaccess</strong> has the following rules: %s <span class="w3tc-rules">%s</span> %s', w3_get_home_root(), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_browsercache->generate_rules_no404wp()), $this->button_hide_note('Hide this message', 'browsercache_rules_no404wp'));
                 } else {
-                    $this->_errors[] = sprintf('You\'ve enabled Browser Cache feature however the .htaccess file is not properly configured. Please run <strong>chmod 777 %s/.htaccess</strong>, then %s. To manually modify these settings use the following code: <pre>%s</pre> and %s.', w3_get_home_root(), $this->button_link('try again', sprintf('options-general.php?page=%s&tab=%s&browsercache_write_rules_no404wp', W3TC_FILE, $this->_tab)), htmlspecialchars($w3_plugin_browsercache->generate_rules_no404wp()), $this->button_hide_note('hide this message', 'browsercache_rules_no404wp'));
+                    $this->_errors[] = sprintf('You\'ve enabled Browser Cache feature however the .htaccess file is not properly configured. Please run <strong>chmod 777 %s/.htaccess</strong>, then %s. To manually modify these settings use the following code: %s <span class="w3tc-rules">%s</span> and %s.', w3_get_home_root(), $this->button_link('try again', sprintf('options-general.php?page=%s&tab=%s&browsercache_write_rules_no404wp', W3TC_FILE, $this->_tab)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_browsercache->generate_rules_no404wp()), $this->button_hide_note('hide this message', 'browsercache_rules_no404wp'));
                 }
             }
         }
@@ -1433,7 +1433,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
          * Check permalinks
          */
         if ($this->_config->get_boolean('notes.no_permalink_rules') && (($this->_config->get_boolean('pgcache.enabled') && $this->_config->get_string('pgcache.engine') == 'file_pgcache') || $this->_config->get_boolean('browsercache.enabled')) && $this->_config->get_boolean('browsercache.no404wp') && !w3_is_permalink_rules()) {
-            $this->_errors[] = sprintf('The required directives for fancy permalinks could not be detected, please confirm they are available:<pre>%s</pre> %s', htmlspecialchars(w3_get_permalink_rules()), $this->button_hide_note('Hide this message', 'no_permalink_rules'));
+            $this->_errors[] = sprintf('The required directives for fancy permalinks could not be detected, please confirm they are available: %s <span class="w3tc-rules">%s</span> %s', $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars(w3_get_permalink_rules()), $this->button_hide_note('Hide this message', 'no_permalink_rules'));
         }
         
         /**
@@ -2878,11 +2878,12 @@ class W3_Plugin_TotalCache extends W3_Plugin
      *
      * @param string $text
      * @param string $onclick
+     * @param string $class
      * @return string
      */
-    function button($text, $onclick = '')
+    function button($text, $onclick = '', $class = '')
     {
-        return sprintf('<input type="button" class="button" value="%s" onclick="%s" />', htmlspecialchars($text), htmlspecialchars($onclick));
+        return sprintf('<input type="button" class="button %s" value="%s" onclick="%s" />', htmlspecialchars($class), htmlspecialchars($text), htmlspecialchars($onclick));
     }
     
     /**

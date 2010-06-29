@@ -163,7 +163,7 @@
 	border: 1px solid #ccc;
 }
 
-#cdn-general th {
+#w3tc-cdn-general th {
 	width: 400px;
 }
 
@@ -218,6 +218,13 @@
 
 .monospace {
 	font-family: monospace;
+}
+
+.w3tc-rules {
+	white-space: pre;
+	font-family: monospace;
+	display: none;
+	margin: 1em 0;
 }
 
 .minify-files li {

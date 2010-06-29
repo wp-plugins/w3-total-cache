@@ -67,7 +67,7 @@ class W3_Minify
             $browsercache = $this->_config->get_boolean('browsercache.enabled');
             
             $serve_options = $this->_config->get_array('minify.options');
-            $serve_options['maxAge'] = $this->_config->get_integer('browsercache.cssjs.lifetime');
+            $serve_options['maxAge'] = 0;$this->_config->get_integer('browsercache.cssjs.lifetime');
             $serve_options['encodeOutput'] = ($browsercache && $this->_config->get_boolean('browsercache.cssjs.compression'));
             $serve_options['cacheHeaders'] = array(
                 'use_etag' => ($browsercache && $this->_config->get_boolean('browsercache.cssjs.etag')), 

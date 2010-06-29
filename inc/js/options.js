@@ -816,4 +816,17 @@ jQuery(function() {
             }
         });
     }
+
+    // show hide rules
+    jQuery('.w3tc-show-rules').click(function() {
+        var btn = jQuery(this), rules = btn.parent().find('.w3tc-rules');
+
+        if (rules.is(':visible')) {
+            rules.css('display', 'none');
+            btn.val('view code');
+        } else {
+            rules.css('display', 'block');
+            btn.val('hide code');
+        }
+    });
 });
