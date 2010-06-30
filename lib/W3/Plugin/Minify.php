@@ -290,25 +290,34 @@ class W3_Plugin_Minify extends W3_Plugin
      */
     function clean_styles($content)
     {
-        $regexps = array();
+        $theme = $this->get_theme();
+        $template = $this->get_template();
         
         $groups = $this->_config->get_array('minify.css.groups');
+        
+        $locations = array();
+        
+        if (isset($groups[$theme]['default'])) {
+            $locations = (array) $groups[$theme]['default'];
+        }
+        
+        if ($template != 'default' && isset($groups[$theme][$template])) {
+            $locations = array_merge_recursive($locations, (array) $groups[$theme][$template]);
+        }
+        
+        $regexps = array();
         $domain_url_regexp = w3_get_domain_url_regexp();
         
-        foreach ($groups as $theme => $templates) {
-            foreach ((array) $templates as $template => $locations) {
-                foreach ((array) $locations as $location => $config) {
-                    if (!empty($config['files'])) {
-                        foreach ((array) $config['files'] as $file) {
-                            if (w3_is_url($file) && !preg_match('~' . $domain_url_regexp . '~i', $file)) {
-                                // external CSS files
-                                $regexps[] = w3_preg_quote($file);
-                            } else {
-                                // local CSS files
-                                $file = ltrim(preg_replace('~' . $domain_url_regexp . '~i', '', $file), '/\\');
-                                $regexps[] = '(' . $domain_url_regexp . ')?/?' . w3_preg_quote($file);
-                            }
-                        }
+        foreach ($locations as $location => $config) {
+            if (!empty($config['files'])) {
+                foreach ((array) $config['files'] as $file) {
+                    if (w3_is_url($file) && !preg_match('~' . $domain_url_regexp . '~i', $file)) {
+                        // external CSS files
+                        $regexps[] = w3_preg_quote($file);
+                    } else {
+                        // local CSS files
+                        $file = ltrim(preg_replace('~' . $domain_url_regexp . '~i', '', $file), '/\\');
+                        $regexps[] = '(' . $domain_url_regexp . ')?/?' . w3_preg_quote($file);
                     }
                 }
             }
@@ -330,25 +339,34 @@ class W3_Plugin_Minify extends W3_Plugin
      */
     function clean_scripts($content)
     {
-        $regexps = array();
+        $theme = $this->get_theme();
+        $template = $this->get_template();
         
         $groups = $this->_config->get_array('minify.js.groups');
+        
+        $locations = array();
+        
+        if (isset($groups[$theme]['default'])) {
+            $locations = (array) $groups[$theme]['default'];
+        }
+        
+        if ($template != 'default' && isset($groups[$theme][$template])) {
+            $locations = array_merge_recursive($locations, (array) $groups[$theme][$template]);
+        }
+        
+        $regexps = array();
         $domain_url_regexp = w3_get_domain_url_regexp();
         
-        foreach ($groups as $theme => $templates) {
-            foreach ((array) $templates as $template => $locations) {
-                foreach ((array) $locations as $location => $config) {
-                    if (!empty($config['files'])) {
-                        foreach ((array) $config['files'] as $file) {
-                            if (w3_is_url($file) && !preg_match('~' . $domain_url_regexp . '~i', $file)) {
-                                // external JS files
-                                $regexps[] = w3_preg_quote($file);
-                            } else {
-                                // local JS files
-                                $file = ltrim(preg_replace('~' . $domain_url_regexp . '~i', '', $file), '/\\');
-                                $regexps[] = '(' . $domain_url_regexp . ')?/?' . w3_preg_quote($file);
-                            }
-                        }
+        foreach ($locations as $location => $config) {
+            if (!empty($config['files'])) {
+                foreach ((array) $config['files'] as $file) {
+                    if (w3_is_url($file) && !preg_match('~' . $domain_url_regexp . '~i', $file)) {
+                        // external JS files
+                        $regexps[] = w3_preg_quote($file);
+                    } else {
+                        // local JS files
+                        $file = ltrim(preg_replace('~' . $domain_url_regexp . '~i', '', $file), '/\\');
+                        $regexps[] = '(' . $domain_url_regexp . ')?/?' . w3_preg_quote($file);
                     }
                 }
             }

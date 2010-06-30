@@ -354,7 +354,7 @@ class W3_PgCache
              * so we use shutdown function
              */
             if ($has_dynamic) {
-                $this->_shutdown_buffer = & $buffer;
+                $this->_shutdown_buffer = $buffer;
                 $this->_shutdown_compression = $compression;
                 
                 $buffer = '';

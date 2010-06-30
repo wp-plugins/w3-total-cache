@@ -148,7 +148,7 @@ function w3_mkdir($path, $mask = 0755, $curr_path = '')
     $dirs = explode('/', $path);
     
     foreach ($dirs as $dir) {
-        if (empty($dir)) {
+        if ($dir == '') {
             return false;
         }
         

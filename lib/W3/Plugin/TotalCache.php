@@ -3717,12 +3717,10 @@ class W3_Plugin_TotalCache extends W3_Plugin
                     }
                     
                     if ($this->_config->get_boolean('objectcache.enabled')) {
-                        $append = (is_user_logged_in() ? ' (user is logged in)' : '');
-                        
                         require_once W3TC_LIB_W3_DIR . '/ObjectCache.php';
                         $w3_objectcache = & W3_ObjectCache::instance();
                         
-                        $buffer .= sprintf("Object Caching used %d/%d cached requests%s\r\n", $w3_objectcache->cache_hits, $w3_objectcache->cache_total, $append);
+                        $buffer .= sprintf("Object Caching %d/%d objects using %s\r\n", $w3_objectcache->cache_hits, $w3_objectcache->cache_total, w3_get_engine_name($this->_config->get_string('objectcache.engine')));
                     }
                     
                     if ($this->_config->get_boolean('cdn.enabled')) {
@@ -3801,7 +3799,13 @@ class W3_Plugin_TotalCache extends W3_Plugin
         /**
          * Skip if debug mode is enabled
          */
-        if ($this->_config->get_boolean('pgcache.debug') || $this->_config->get_boolean('dbcache.debug') || $this->_config->get_boolean('objectcache.debug') || $this->_config->get_boolean('minify.debug') || $this->_config->get_boolean('cdn.debug')) {
+        $debug = ($this->_config->get_boolean('pgcache.enabled') && $this->_config->get_boolean('pgcache.debug'));
+        $debug = $debug || ($this->_config->get_boolean('dbcache.enabled') && $this->_config->get_boolean('dbcache.debug'));
+        $debug = $debug || ($this->_config->get_boolean('objectcache.enabled') && $this->_config->get_boolean('objectcache.debug'));
+        $debug = $debug || ($this->_config->get_boolean('minify.enabled') && $this->_config->get_boolean('minify.debug'));
+        $debug = $debug || ($this->_config->get_boolean('cdn.enabled') && $this->_config->get_boolean('cdn.debug'));
+        
+        if ($debug) {
             return false;
         }
         
@@ -4590,12 +4594,13 @@ class W3_Plugin_TotalCache extends W3_Plugin
         $matches = null;
         $files = array();
         
-        if (preg_match_all('~<script\s+[^<>]*src=["\']?([^"\']+)["\']?[^<>]*>\s*</script>~is', $content, $matches, PREG_PATTERN_ORDER)) {
+        if (preg_match_all('~<script\s+[^<>]*src=["\']?([^"\']+)["\']?[^<>]*>\s*</script>~is', $content, $matches)) {
             $files = $matches[1];
         }
         
         $files = array_filter($files, create_function('$el', 'return (strstr($el, W3TC_CONTENT_MINIFY_DIR_NAME) ? false : true);'));
         $files = array_map('w3_normalize_file_minify', $files);
+        $files = array_unique($files);
         
         return $files;
     }
@@ -4611,15 +4616,22 @@ class W3_Plugin_TotalCache extends W3_Plugin
         $matches = null;
         $files = array();
         
-        if (preg_match_all('~<link\s+[^<>]*href=["\']?([^"\']+\.css)["\']?[^<>]*/?>(.*</link>)?~is', $content, $matches, PREG_PATTERN_ORDER)) {
-            $files = $matches[1];
+        $content = preg_replace('~<!--\[if.*\]-->~sU', '', $content);
+        
+        if (preg_match_all('~<link\s+[^<>]*href=["\']?([^"\']+)["\']?[^<>]*/?>(.*</link>)?~is', $content, $matches, PREG_SET_ORDER)) {
+            foreach ($matches as $match) {
+                if (preg_match('~type=["\']?text/css["\']?~i', $match[0])) {
+                    $files[] = $match[1];
+                }
+            }
         }
-        if (preg_match_all('~@import\s+(url\s*)?\(?["\']?\s*([^"\']+\.css)\s*["\']?\)?[^;]*;?~is', $content, $matches, PREG_PATTERN_ORDER)) {
+        if (preg_match_all('~@import\s+(url\s*)?\(?["\']?\s*([^"\'\)\s]+)\s*["\']?\)?[^;]*;?~is', $content, $matches)) {
             $files = array_merge($files, $matches[2]);
         }
         
         $files = array_filter($files, create_function('$el', 'return (strstr($el, W3TC_CONTENT_MINIFY_DIR_NAME) ? false : true);'));
         $files = array_map('w3_normalize_file_minify', $files);
+        $files = array_unique($files);
         
         return $files;
     }
