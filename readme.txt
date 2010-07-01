@@ -121,13 +121,13 @@ Technically no, a CDN is a high performance cache that stores static assets (you
 
 That depends on how you use your site and where most of your readers read your site (regionally). Here's a short list:
 
-* [MaxCDN](http://bit.ly/acaXXt)
+* [Amazon Cloudfront](http://bit.ly/ao1sGt)
 * [Rackspace Cloud Files](http://bit.ly/9hpX8T)
+* [MaxCDN](http://bit.ly/acaXXt)
 * [Cotendo](http://bit.ly/bnVs0a)
 * [VPS NET](http://bit.ly/d5hfFt)
-* [Amazon Cloudfront](http://bit.ly/ao1sGt)
-* [EdgeCast](http://bit.ly/bIjSWC)
 * [Akamai](http://bit.ly/a5GBLV)
+* [EdgeCast](http://bit.ly/bIjSWC)
 * [Limelight Networks](http://bit.ly/aCW04j)
 * [SimpleCDN](http://bit.ly/93EAKK)
 
@@ -249,6 +249,7 @@ Please reach out to all of these people and support their projects if you're so 
 
 = Press: Mentions, Tutorials &amp; Reviews =
 
+* June 30, 2010: [How to Accelerate your Site to Warp Factor 9.9 without paying $99 a month](http://negbox.com/how-to-accelerate-your-site-to-warp-factor-9-9-without-paying-99-a-month)
 * June 22, 2010: [12 Ways to Improve Wordpress Page Load Time](http://myblog2day.com/12-ways-to-improve-wordpress-page-load-time.php)
 * June 21, 2010: [Significantly Speed Up Your WordPress Blog in 9 Easy Steps](http://www.bloggingpro.com/archives/2010/06/21/significantly-speed-up-your-wordpress-blog-in-9-easy-steps/)
 * June 10, 2010: [Speed 'Em Up: Wordpress & W3 Total Cache](http://translate.google.com/translate?js=y&prev=_t&hl=en&ie=UTF-8&layout=1&eotf=1&u=http://www.andilicious.com/blog/1473/20100610/wordpress-beschleunigen-grundlagen-w3-total-cache-page-speed&sl=auto&tl=en)
