@@ -943,7 +943,8 @@ function w3_translate_file($file)
 {
     if (!w3_is_url($file)) {
         $file = '/' . ltrim($file, '/');
-        $file = str_replace(w3_get_home_path(), w3_get_base_path(), $file);
+        $regexp = '~^' . w3_preg_quote(w3_get_site_path()) . '~';
+        $file = preg_replace($regexp, w3_get_base_path(), $file);
         $file = ltrim($file, '/');
     }
     

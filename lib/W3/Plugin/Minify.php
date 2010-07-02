@@ -197,6 +197,7 @@ class W3_Plugin_Minify extends W3_Plugin
         if ($buffer != '' && w3_is_xml($buffer)) {
             if ($this->can_minify2($buffer)) {
                 $head_prepend = '';
+                $body_prepend = '';
                 $body_append = '';
                 
                 if ($this->_config->get_boolean('minify.css.enable') && !in_array('include', $this->printed_styles)) {
@@ -263,7 +264,6 @@ class W3_Plugin_Minify extends W3_Plugin
         if (function_exists('is_feed') && !is_feed()) {
             if ($this->_config->get_boolean('minify.css.enable')) {
                 $content = $this->clean_styles($content);
-                $content = preg_replace('~<style[^<>]*>\s*</style>~', '', $content);
             }
             
             if ($this->_config->get_boolean('minify.js.enable')) {
@@ -327,6 +327,8 @@ class W3_Plugin_Minify extends W3_Plugin
             $content = preg_replace('~<link\s+[^<>]*href=["\']?' . $regexp . '["\']?[^<>]*/?>(.*</link>)?~is', '', $content);
             $content = preg_replace('~@import\s+(url\s*)?\(?["\']?\s*' . $regexp . '\s*["\']?\)?[^;]*;?~is', '', $content);
         }
+        
+        $content = preg_replace('~<style[^<>]*>\s*</style>~', '', $content);
         
         return $content;
     }

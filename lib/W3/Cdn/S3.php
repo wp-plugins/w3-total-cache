@@ -22,6 +22,13 @@ class W3_Cdn_S3 extends W3_Cdn_Base
     var $_s3 = null;
     
     /**
+     * gzip extension
+     * 
+     * @var string 
+     */
+    var $_gzip_extension = '.gzip';
+    
+    /**
      * Inits S3 object
      *
      * @param string $error
@@ -79,7 +86,7 @@ class W3_Cdn_S3 extends W3_Cdn_Base
             }
             
             if ($this->_config['compression'] && $this->may_gzip($remote_path)) {
-                $remote_path_gzip = $remote_path . '.gz';
+                $remote_path_gzip = $remote_path . $this->_gzip_extension;
                 $result = $this->_upload_gzip($local_path, $remote_path_gzip, $force_rewrite);
                 $results[] = $result;
                 
@@ -201,7 +208,7 @@ class W3_Cdn_S3 extends W3_Cdn_Base
             }
             
             if ($this->_config['compression']) {
-                $remote_path_gzip = $remote_path . '.gz';
+                $remote_path_gzip = $remote_path . $this->_gzip_extension;
                 $result = @$this->_s3->deleteObject($this->_config['bucket'], $remote_path_gzip);
                 $results[] = $this->get_result($local_path, $remote_path_gzip, ($result ? W3TC_CDN_RESULT_OK : W3TC_CDN_RESULT_ERROR), ($result ? 'OK' : 'Unable to delete object'));
                 
@@ -350,9 +357,9 @@ class W3_Cdn_S3 extends W3_Cdn_Base
         
         if ($this->_config['compression'] && stristr($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false && $this->may_gzip($path)) {
             if (($qpos = strpos($url, '?')) !== false) {
-                $url = substr_replace($url, '.gz', $qpos, 0);
+                $url = substr_replace($url, $this->_gzip_extension, $qpos, 0);
             } else {
-                $url .= '.gz';
+                $url .= $this->_gzip_extension;
             }
             
             return $url;

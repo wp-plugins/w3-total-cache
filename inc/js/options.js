@@ -296,7 +296,7 @@ jQuery(function() {
 
         jQuery('#js_files :text').each(function() {
             var v = jQuery(this).val(), n = jQuery(this).attr('name'), c = v + n, g = '';
-            var match = /js_files\[([a-z0-9_:]+)\]/.exec(n);
+            var match = /js_files\[([a-z0-9_\/]+)\]/.exec(n);
             if (match) {
                 g = '[' + jQuery('#js_themes option[value=' + match[1] + ']').text() + '] ' + v;
             }
@@ -324,7 +324,7 @@ jQuery(function() {
 
         jQuery('#css_files :text').each(function() {
             var v = jQuery(this).val(), n = jQuery(this).attr('name'), c = v + n, g = '';
-            var match = /css_files\[([a-z0-9_:]+)\]/.exec(n);
+            var match = /css_files\[([a-z0-9_\/]+)\]/.exec(n);
             if (match) {
                 g = '[' + jQuery('#css_themes option[value=' + match[1] + ']').text() + '] ' + v;
             }

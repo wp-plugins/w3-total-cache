@@ -426,9 +426,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
          * Flush all caches
          */
         if (isset($_REQUEST['flush_all'])) {
-            $this->flush_memcached();
-            $this->flush_opcode();
-            $this->flush_file();
+            $this->flush_all();
             
             $this->redirect(array(
                 'w3tc_note' => 'flush_all'
@@ -1067,7 +1065,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
         /**
          * Show notification when page cache needs to be emptied
          */
-        if ($this->_config->get_boolean('pgcache.enabled') && $this->_config->get('notes.need_empty_pgcache')) {
+        if ($this->_config->get_boolean('pgcache.enabled') && $this->_config->get('notes.need_empty_pgcache') && !w3_is_preview_config()) {
             $notes[] = sprintf('The setting change(s) made either invalidate your cached data or modify the behavior of your site. %s now to provide a consistent user experience.', $this->button_link('Empty the page cache', sprintf('options-general.php?page=%s&tab=%s&flush_pgcache', W3TC_FILE, $this->_tab)));
         }
         
@@ -1085,7 +1083,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
             /**
              * Show notification when minify needs to be emptied
              */
-            if ($this->_config->get('notes.need_empty_minify')) {
+            if ($this->_config->get('notes.need_empty_minify') && !w3_is_preview_config()) {
                 $notes[] = sprintf('The setting change(s) made either invalidate your cached data or modify the behavior of your site. %s now to provide a consistent user experience.', $this->button_link('Empty the minify cache', sprintf('options-general.php?page=%s&tab=%s&flush_minify', W3TC_FILE, $this->_tab)));
             }
         }
@@ -2538,6 +2536,8 @@ class W3_Plugin_TotalCache extends W3_Plugin
     function preview_deploy()
     {
         if ($this->_config->save(false)) {
+            $this->flush_all();
+            
             $this->redirect(array(
                 'w3tc_note' => 'preview_deploy'
             ));
@@ -3584,6 +3584,18 @@ class W3_Plugin_TotalCache extends W3_Plugin
     }
     
     /**
+     * Flush all cache
+     * 
+     * @return void
+     */
+    function flush_all()
+    {
+        $this->flush_memcached();
+        $this->flush_opcode();
+        $this->flush_file();
+    }
+    
+    /**
      * Flush page cache
      */
     function flush_pgcache()
@@ -4519,6 +4531,25 @@ class W3_Plugin_TotalCache extends W3_Plugin
      */
     function _get_theme_recommendations($groups)
     {
+        /**
+         * Replace CDN hosts to local host
+         */
+        if ($this->_config->get_boolean('cdn.enabled')) {
+            require_once W3TC_DIR . '/lib/W3/Plugin/Cdn.php';
+            
+            $w3_plugin_cdn = & W3_Plugin_Cdn::instance();
+            $cdn = & $w3_plugin_cdn->get_cdn();
+            
+            $domains = $cdn->get_domains();
+            $domain = w3_get_domain(w3_get_host());
+            
+            foreach ($groups as $template => $files) {
+                foreach ($files as $index => $file) {
+                    $groups[$template][$index] = str_replace($domains, $domain, $file);
+                }
+            }
+        }
+        
         /**
          * First calculate file usage count
          */
