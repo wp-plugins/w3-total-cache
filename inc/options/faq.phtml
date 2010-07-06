@@ -103,6 +103,9 @@
         <li><a href="#q101">Is this plugin comptatible with TDO Mini Forms?</a></li>
         <li><a href="#q102">My YSlow score is low because doesn't recognize my <acronym title="Content Delivery Network">CDN</acronym>, what can I do?</a></li>
         <li><a href="#q103">What is the purpose of the "modify attachment <acronym title="Uniform Resource Indicator">URL</acronym>s" button?</a></li>
+        <li><a href="#q104">How do I implement fragment caching?</li>
+        <li><a href="#q105">How can I prevent caching directly in my templates etc?</li>
+        <li><a href="#q106">How can I flush the cache without using the WP Admin interface?</li>
       </ul>
     </li>
     <li class="col">
@@ -517,6 +520,41 @@ No, you can drag and drop them into the desired order on the minify settings pag
   <p id="q103"><strong>What is the purpose of the "modify attachment <acronym title="Uniform Resource Indicator">URL</acronym>s" button?</strong><br />
 	If the domain name of your site has changed, this tool is useful in updating your posts and pages to use the current addresses. For example, if your site used to be www.domain.com, and you decided to change it to domain.com, the result would either be many "broken" images or many unncessary redirects (which slow down the visitor's browsing experience). You can use this tool to correct this and similar cases. Correcting the <acronym title="Uniform Resource Indicator">URL</acronym>s of your images also allows the plugin to do a better job of determining which images are actually hosted with the <acronym title="Content Delivery Network">CDN</acronym></p>
   <p>As always, it never hurts to back up your database first.</p>
+  <p align="right"><a href="#toc">back to top</a></p>
+  <p id="q104"><strong>How do I implement fragment caching?</strong><br />
+	Edit your templates to with the following syntax to ensure that dynamic features remain so:
+	<ul>
+		<li>Example 1:<br /><!-- mfunc any PHP code --><!-- /mfunc --></li>
+		<li>Example 2:<br /><!-- mfunc -->any PHP code<!-- /mfunc --></li>
+		<li>Example 3:<br /><!--MFUNC&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--><br />        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;echo rand();<br />
+		<!--/mfunc --></li>
+		<li>Example 4:<br /><!-- mclude path/to/file.php --><!-- /mclude --></li>
+		<li>Example 5:<br /><!-- mclude -->path/to/file.php<!-- /mclude --></li>
+	</ul>
+	</p>
+  <p align="right"><a href="#toc">back to top</a></p>
+  <p id="q105"><strong>How can I prevent caching directly in my templates etc?</strong><br />
+  	Several constants are available for these purposes:
+	<ul>
+		<li>define('DONOTCACHEPAGE', true);<br />Disables page caching for a given page.</li>
+		<li>define('DONOTCACHEDB', true);<br />Disables database caching for given page.</li>
+		<li>define('DONOTMINIFY', true);<br />Disables minify for a given page.</li>
+		<li>define('DONOTCDN', true);<br />Disables content delivery network for a given page.</li>
+		<li>define('DONOTCACHCEOBJECT', true);<br />Disables object cache for a given page.</li>
+	</ul>
+  <p align="right"><a href="#toc">back to top</a></p>
+  <p id="q106"><strong>How can I flush the cache without using the WP Admin interface?</strong><br />
+  	It's possible to empty the entire cache or simply purge the cache of a single post / page:
+	<ul>
+		<li>Purge the entire page cache:<br />
+		if (function_exists('w3tc_pgcache_flush')) {<br />
+		    w3tc_pgcache_flush();<br />
+		}</li>
+		<li>Purge a single post / page by passing it's ID:<br />
+		if (function_exists('w3tc_pgcache_flush_post')) {<br />
+			w3tc_pgcache_flush_post($post_id);<br />
+		}</li>
+	</ul>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q78"><strong>Which web servers do you support?</strong><br />
     We are aware of no incompatibilities with <a href="http://httpd.apache.org/" target="_blank">apache</a> 1.3+, <a href="http://www.iis.net/" target="_blank">IIS</a> 5+ or <a href="http://litespeedtech.com/products/webserver/overview/" target="_blank">litespeed</a> 4.0.2+. If there's a web server you feel we should be actively testing (e.g. <a href="http://www.lighttpd.net/" target="_blank">lighttpd</a>), we're <a href="mailto:wordpressexperts@w3-edge.com">interested in hearing</a>.</p>

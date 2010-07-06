@@ -28,7 +28,7 @@ class W3_Cache_File_Manager
         $dir = @opendir($path);
         
         if ($dir) {
-            while (($entry = @readdir($dir))) {
+            while (($entry = @readdir($dir)) !== false) {
                 if ($entry != '.' && $entry != '..') {
                     $full_path = $path . '/' . $entry;
                     

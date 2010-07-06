@@ -43,9 +43,7 @@ var W3tc_Lightbox = {
             callback: null
         }, options);
 
-        if (!this.container) {
-            this.create();
-        }
+        this.create();
 
         this.container.css( {
             width: this.options.width,
@@ -65,7 +63,7 @@ var W3tc_Lightbox = {
     },
 
     close: function() {
-        this.container.hide();
+        this.container.remove();
         W3tc_Overlay.hide();
     },
 
@@ -151,16 +149,13 @@ var W3tc_Overlay = {
     },
 
     show: function() {
-        if (!this.container) {
-            this.create();
-        }
-
+        this.create();
         this.resize();
         this.container.show();
     },
 
     hide: function() {
-        this.container.hide();
+        this.container.remove();
     },
 
     resize: function() {

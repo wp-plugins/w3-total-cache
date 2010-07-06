@@ -424,7 +424,7 @@ class W3_Plugin_Cdn extends W3_Plugin
                 if ($this->_config->get_boolean('cdn.includes.enable')) {
                     $mask = $this->_config->get_string('cdn.includes.files');
                     if ($mask != '') {
-                        $regexps[] = '~(["\'])((' . $domain_url_regexp . ')?(' . w3_preg_quote($site_path . WPINC) . '/(' . $this->get_regexp_by_mask($mask) . ')))~U';
+                        $regexps[] = '~(["\'])((' . $domain_url_regexp . ')?(' . w3_preg_quote($site_path . WPINC) . '/(' . $this->get_regexp_by_mask($mask) . ')))~';
                     }
                 }
                 
@@ -439,7 +439,7 @@ class W3_Plugin_Cdn extends W3_Plugin
                 }
                 
                 if ($this->_config->get_boolean('cdn.minify.enable')) {
-                    $regexps[] = '~(["\'])((' . $domain_url_regexp . ')?(' . w3_preg_quote($site_path . W3TC_CONTENT_MINIFY_DIR_NAME) . '/.+/.+/.+\.include(-(footer|body))?(-nb)?\.[0-9]+\.(css|js)))~';
+                    $regexps[] = '~(["\'])((' . $domain_url_regexp . ')?(' . w3_preg_quote($site_path . W3TC_CONTENT_MINIFY_DIR_NAME) . '/.+/.+/.+\.include(-(footer|body))?(-nb)?\.[0-9]+\.(css|js)))~U';
                 }
                 
                 if ($this->_config->get_boolean('cdn.custom.enable')) {
@@ -1419,7 +1419,7 @@ class W3_Plugin_Cdn extends W3_Plugin
         $dir = @opendir($search_dir);
         
         if ($dir) {
-            while (($entry = @readdir($dir))) {
+            while (($entry = @readdir($dir)) !== false) {
                 if ($entry != '.' && $entry != '..' && !in_array($entry, $ignore)) {
                     $path = $search_dir . '/' . $entry;
                     

@@ -178,7 +178,7 @@ function w3_rmdir($path, $exclude = array(), $remove = true)
     $dir = @opendir($path);
     
     if ($dir) {
-        while (($entry = @readdir($dir))) {
+        while (($entry = @readdir($dir)) !== false) {
             $full_path = $path . '/' . $entry;
             
             if ($entry != '.' && $entry != '..' && !in_array($full_path, $exclude)) {
@@ -1412,7 +1412,7 @@ function w3_load_plugins()
     $dir = @opendir(W3TC_PLUGINS_DIR);
     
     if ($dir) {
-        while (($entry = @readdir($dir))) {
+        while (($entry = @readdir($dir)) !== false) {
             if (strrchr($entry, '.') === '.php') {
                 require_once W3TC_PLUGINS_DIR . '/' . $entry;
             }

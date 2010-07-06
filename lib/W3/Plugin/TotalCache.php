@@ -1441,15 +1441,15 @@ class W3_Plugin_TotalCache extends W3_Plugin
             $cdn_engine = $this->_config->get_string('cdn.engine');
             
             switch (true) {
-                case ($cdn_engine == 'mirror' && !$this->_config->get_array('cdn.mirror.domain')):
+                case ($cdn_engine == 'mirror' && !count($this->_config->get_array('cdn.mirror.domain'))):
                     $this->_errors[] = 'Content Delivery Network Error: The <strong>"Replace default hostname with"</strong> field must be populated.';
                     break;
                 
-                case ($cdn_engine == 'netdna' && !$this->_config->get_array('cdn.netdna.domain')):
+                case ($cdn_engine == 'netdna' && !count($this->_config->get_array('cdn.netdna.domain'))):
                     $this->_errors[] = 'Content Delivery Network Error: The <strong>"Replace default hostname with"</strong> field must be populated.';
                     break;
                 
-                case ($cdn_engine == 'ftp' && !$this->_config->get_array('cdn.ftp.domain')):
+                case ($cdn_engine == 'ftp' && !count($this->_config->get_array('cdn.ftp.domain'))):
                     $this->_errors[] = 'Content Delivery Network Error: The <strong>"Replace default hostname with"</strong> field must be populated. Enter the hostname of your <acronym title="Content Delivery Network">CDN</acronym> provider. <em>This is the hostname you would enter into your address bar in order to view objects in your browser.</em>';
                     break;
                 
@@ -1457,11 +1457,11 @@ class W3_Plugin_TotalCache extends W3_Plugin
                     $this->_errors[] = 'Content Delivery Network Error: The <strong>"Access key", "Secret key" and "Bucket"</strong> fields must be populated.';
                     break;
                 
-                case ($cdn_engine == 'cf' && ($this->_config->get_string('cdn.cf.key') == '' || $this->_config->get_string('cdn.cf.secret') == '' || $this->_config->get_string('cdn.cf.bucket') == '' || $this->_config->get_string('cdn.cf.id') == '')):
+                case ($cdn_engine == 'cf' && ($this->_config->get_string('cdn.cf.key') == '' || $this->_config->get_string('cdn.cf.secret') == '' || $this->_config->get_string('cdn.cf.bucket') == '' || ($this->_config->get_string('cdn.cf.id') == '' && !count($this->_config->get_array('cdn.cf.cname'))))):
                     $this->_errors[] = 'Content Delivery Network Error: The <strong>"Access key", "Secret key", "Bucket" and "Replace default hostname with"</strong> fields must be populated.';
                     break;
                 
-                case ($cdn_engine == 'rscf' && ($this->_config->get_string('cdn.rscf.user') == '' || $this->_config->get_string('cdn.rscf.key') == '' || $this->_config->get_string('cdn.rscf.container') == '' || $this->_config->get_string('cdn.rscf.id') == '')):
+                case ($cdn_engine == 'rscf' && ($this->_config->get_string('cdn.rscf.user') == '' || $this->_config->get_string('cdn.rscf.key') == '' || $this->_config->get_string('cdn.rscf.container') == '' || ($this->_config->get_string('cdn.rscf.id') == '' && !count($this->_config->get_array('cdn.rscf.cname'))))):
                     $this->_errors[] = 'Content Delivery Network Error: The <strong>"Username", "API key", "Container" and "Replace default hostname with"</strong> fields must be populated.';
                     break;
             }
@@ -1470,6 +1470,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
         /**
          * Preview mode
          */
+        
         if (w3_is_preview_config()) {
             $this->_notes[] = sprintf('Preview mode is active. %s your settings now. If you are satisfied with your changes %s now.', $this->button_link('Preview', w3_get_site_url() . '/?w3tc_preview=1', true), $this->button_link('deploy', sprintf('options-general.php?page=%s&tab=%s&preview_deploy', W3TC_FILE, $this->_tab)));
         }
@@ -2720,7 +2721,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
         );
         
         foreach ($config_files as $config_file) {
-            if (file_exists($config_file)) {
+            if (file_exists($config_file) && !in_array($config_file, $attachments)) {
                 $attachments[] = $config_file;
             }
         }
@@ -4649,13 +4650,23 @@ class W3_Plugin_TotalCache extends W3_Plugin
         
         $content = preg_replace('~<!--\[if.*\]-->~sU', '', $content);
         
-        if (preg_match_all('~<link\s+[^<>]*href=["\']?([^"\']+)["\']?[^<>]*/?>(.*</link>)?~is', $content, $matches, PREG_SET_ORDER)) {
+        if (preg_match_all('~<link\s+([^>]+)/?>(.*</link>)?~is', $content, $matches, PREG_SET_ORDER)) {
             foreach ($matches as $match) {
-                if (preg_match('~type=["\']?text/css["\']?~i', $match[0])) {
-                    $files[] = $match[1];
+                $attrs = array();
+                $attr_matches = null;
+                
+                if (preg_match_all('~(\w+)=["\']([^"\']*)["\']~', $match[1], $attr_matches, PREG_SET_ORDER)) {
+                    foreach ($attr_matches as $attr_match) {
+                        $attrs[$attr_match[1]] = trim($attr_match[2]);
+                    }
+                }
+                
+                if (isset($attrs['href']) && isset($attrs['rel']) && $attrs['rel'] == 'stylesheet' && isset($attrs['type']) && $attrs['type'] == 'text/css' && (!isset($attrs['media']) || stristr($attrs['media'], 'print') === false)) {
+                    $files[] = $attrs['href'];
                 }
             }
         }
+        
         if (preg_match_all('~@import\s+(url\s*)?\(?["\']?\s*([^"\'\)\s]+)\s*["\']?\)?[^;]*;?~is', $content, $matches)) {
             $files = array_merge($files, $matches[2]);
         }
