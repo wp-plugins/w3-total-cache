@@ -223,7 +223,7 @@ class W3_ObjectCache
             $data = wp_clone($data);
         }
         
-        if (isset($this->cache[$key]) && $key === $data) {
+        if (isset($this->cache[$key]) && $this->cache[$key] === $data) {
             return true;
         }
         

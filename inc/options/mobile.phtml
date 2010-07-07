@@ -48,7 +48,7 @@ mobile_themes['<?php echo addslashes($theme_key); ?>'] = '<?php echo addslashes(
                 		</th>
                 		<td>
                 			<select id="mobile_groups_<?php echo htmlspecialchars($group); ?>_theme" name="mobile_groups[<?php echo htmlspecialchars($group); ?>][theme]">
-                				<option value="">-- Active Theme --</option>
+                				<option value="">-- Pass-through --</option>
 	                			<?php foreach ($themes as $theme_key => $theme_name): ?>
                 				<option value="<?php echo htmlspecialchars($theme_key); ?>"<?php selected($theme_key, $group_config['theme']); ?>><?php echo htmlspecialchars($theme_name); ?></option>
     	            			<?php endforeach; ?>

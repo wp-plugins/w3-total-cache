@@ -11,14 +11,28 @@
         <span class="w3tc-test-warn"><?php echo PHP_VERSION; ?> (Minify disabled)</span>;
         <?php endif; ?>
         <br />
+        
+    	PHP Timezone: 
+        <?php if (ini_get('date.timezone')): ?>
+        <span class="w3tc-test-ok">OK</span>
+        <?php else: ?> 
+        <span class="w3tc-test-error">Not set</span>;
+        <?php endif; ?>
+        <br />
     
-    	Installed as: 
-        <?php if (function_exists('apache_get_version')): ?>
-        <span class="w3tc-test-ok">Apache module</span>
-        <?php elseif (stristr(PHP_SAPI, 'cgi') === false): ?> 
-        <span class="w3tc-test-warn">SAPI (<?php echo PHP_SAPI; ?>)</span>
+    	Web Server: 
+        <?php if (stristr($_SERVER['SERVER_SOFTWARE'], 'apache') !== false): ?>
+        <span class="w3tc-test-ok">Apache</span>
+        <?php elseif (stristr($_SERVER['SERVER_SOFTWARE'], 'LiteSpeed') !== false): ?> 
+        <span class="w3tc-test-warn">Lite Speed</span>
+        <?php elseif (stristr($_SERVER['SERVER_SOFTWARE'], 'nginx') !== false): ?> 
+        <span class="w3tc-test-warn">nginx</span>
+        <?php elseif (stristr($_SERVER['SERVER_SOFTWARE'], 'lighttpd') !== false): ?> 
+        <span class="w3tc-test-warn">lighttpd</span>
+        <?php elseif (stristr($_SERVER['SERVER_SOFTWARE'], 'iis') !== false): ?> 
+        <span class="w3tc-test-warn">Microsoft IIS</span>
         <?php else: ?>
-        <span class="w3tc-test-warn">CGI</span>
+        <span class="w3tc-test-error">Not detected</span>
         <?php endif; ?>
         <br />
 
@@ -112,61 +126,94 @@
     	<?php endif; ?>
         <br />
         
-        <?php if (function_exists('apache_get_modules')): $apache_modules = apache_get_modules(); ?>
-        	mod_mime:
-        	<?php if (in_array('mod_mime', $apache_modules)): ?>
-        	<span class="w3tc-test-ok">OK</span>
-        	<?php else: ?>
-        	<span class="w3tc-test-error">Not installed</span>
-        	<?php endif; ?>
-            <br />
-    		          
-        	mod_expires:
-        	<?php if (in_array('mod_expires', $apache_modules)): ?>
-        	<span class="w3tc-test-ok">OK</span>
-        	<?php else: ?>
-        	<span class="w3tc-test-error">Not installed</span>
-        	<?php endif; ?>
-            <br />
+        <?php 
+        if (function_exists('apache_get_modules')): 
+            $apache_modules = apache_get_modules(); 
+        else: 
+            $apache_modules = false; 
+        endif; 
+        ?>
+    	mod_mime:
+    	<?php if ($apache_modules): ?>
+    	<?php if (in_array('mod_mime', $apache_modules)): ?>
+    	<span class="w3tc-test-ok">OK</span>
+    	<?php else: ?>
+    	<span class="w3tc-test-error">Not installed</span>
+    	<?php endif; ?>
+        <?php else: ?>
+    	<span class="w3tc-test-warn">Not detected</span>
+        <?php endif; ?>
+        <br />
+		          
+    	mod_expires:
+    	<?php if ($apache_modules): ?>
+    	<?php if (in_array('mod_expires', $apache_modules)): ?>
+    	<span class="w3tc-test-ok">OK</span>
+    	<?php else: ?>
+    	<span class="w3tc-test-error">Not installed</span>
+    	<?php endif; ?>
+        <?php else: ?>
+    	<span class="w3tc-test-warn">Not detected</span>
+        <?php endif; ?>
+        <br />
+
+    	mod_deflate / mod_gzip:
+    	<?php if ($apache_modules): ?>
+    	<?php if (in_array('mod_deflate', $apache_modules)): ?>
+    	<span class="w3tc-test-ok">OK</span>
+    	<?php else: ?>
+    	<span class="w3tc-test-error">Not installed</span>
+    	<?php endif; ?>
+        <?php else: ?>
+    	<span class="w3tc-test-warn">Not detected</span>
+        <?php endif; ?>
+        <br />
     
-        	mod_deflate / mod_gzip:
-        	<?php if (in_array('mod_deflate', $apache_modules)): ?>
-        	<span class="w3tc-test-ok">OK</span>
-        	<?php else: ?>
-        	<span class="w3tc-test-error">Not installed</span>
-        	<?php endif; ?>
-            <br />
-        
-        	mod_headers:
-        	<?php if (in_array('mod_headers', $apache_modules)): ?>
-        	<span class="w3tc-test-ok">OK</span>
-        	<?php else: ?>
-        	<span class="w3tc-test-error">Not installed</span>
-        	<?php endif; ?>
-            <br />
-        
-        	mod_env:
-        	<?php if (in_array('mod_env', $apache_modules)): ?>
-        	<span class="w3tc-test-ok">OK</span>
-        	<?php else: ?>
-        	<span class="w3tc-test-error">Not installed</span>
-        	<?php endif; ?>
-            <br />
-        
-        	mod_setenvif:
-        	<?php if (in_array('mod_setenvif', $apache_modules)): ?>
-        	<span class="w3tc-test-ok">OK</span>
-        	<?php else: ?>
-        	<span class="w3tc-test-error">Not installed</span>
-        	<?php endif; ?>
-            <br />
-        
-        	mod_rewrite:
-        	<?php if (in_array('mod_rewrite', $apache_modules)): ?>
-        	<span class="w3tc-test-ok">OK</span>
-        	<?php else: ?>
-        	<span class="w3tc-test-error">Not installed</span>
-        	<?php endif; ?>
+    	mod_headers:
+    	<?php if ($apache_modules): ?>
+    	<?php if (in_array('mod_headers', $apache_modules)): ?>
+    	<span class="w3tc-test-ok">OK</span>
+    	<?php else: ?>
+    	<span class="w3tc-test-error">Not installed</span>
+    	<?php endif; ?>
+        <?php else: ?>
+    	<span class="w3tc-test-warn">Not detected</span>
+        <?php endif; ?>
+        <br />
+    
+    	mod_env:
+    	<?php if ($apache_modules): ?>
+    	<?php if (in_array('mod_env', $apache_modules)): ?>
+    	<span class="w3tc-test-ok">OK</span>
+    	<?php else: ?>
+    	<span class="w3tc-test-error">Not installed</span>
+    	<?php endif; ?>
+        <?php else: ?>
+    	<span class="w3tc-test-warn">Not detected</span>
+        <?php endif; ?>
+        <br />
+    
+    	mod_setenvif:
+    	<?php if ($apache_modules): ?>
+    	<?php if (in_array('mod_setenvif', $apache_modules)): ?>
+    	<span class="w3tc-test-ok">OK</span>
+    	<?php else: ?>
+    	<span class="w3tc-test-error">Not installed</span>
+    	<?php endif; ?>
+        <?php else: ?>
+    	<span class="w3tc-test-warn">Not detected</span>
+        <?php endif; ?>
+        <br />
+    
+    	mod_rewrite:
+    	<?php if ($apache_modules): ?>
+    	<?php if (in_array('mod_rewrite', $apache_modules)): ?>
+    	<span class="w3tc-test-ok">OK</span>
+    	<?php else: ?>
+    	<span class="w3tc-test-error">Not installed</span>
+    	<?php endif; ?>
+        <?php else: ?>
+    	<span class="w3tc-test-warn">Not detected</span>
         <?php endif; ?>
 	</div>
 	    
