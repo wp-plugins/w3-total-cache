@@ -146,4 +146,22 @@ class W3_Mobile
         
         return false;
     }
+    
+    /**
+     * Return array of themes
+     * 
+     * @return array
+     */
+    function get_themes()
+    {
+        $themes = array();
+        $wp_themes = get_themes();
+        
+        foreach ($wp_themes as $wp_theme) {
+            $theme_key = sprintf('%s/%s', $wp_theme['Template'], $wp_theme['Stylesheet']);
+            $themes[$theme_key] = $wp_theme['Name'];
+        }
+        
+        return $themes;
+    }
 }

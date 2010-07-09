@@ -1472,7 +1472,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
          */
         
         if (w3_is_preview_config()) {
-            $this->_notes[] = sprintf('Preview mode is active. %s your settings now. If you are satisfied with your changes %s now.', $this->button_link('Preview', w3_get_site_url() . '/?w3tc_preview=1', true), $this->button_link('deploy', sprintf('options-general.php?page=%s&tab=%s&preview_deploy', W3TC_FILE, $this->_tab)));
+            $this->_notes[] = sprintf('Preview mode is active: Changed settings will not take effect until you %s or %s preview mode. %s any changed settings (without deploying), or make additional changes.', $this->button_link('deploy', sprintf('options-general.php?page=%s&tab=%s&preview_deploy', W3TC_FILE, $this->_tab)), $this->button_link('disable', sprintf('options-general.php?page=%s&tab=%s&preview_save&preview=0', W3TC_FILE, $this->_tab)), $this->button_link('Preview', w3_get_site_url() . '/?w3tc_preview=1', true));
         }
         
         /**
@@ -1683,7 +1683,10 @@ class W3_Plugin_TotalCache extends W3_Plugin
         $mobile_enabled = $this->_config->get_boolean('mobile.enabled');
         $groups = $this->_config->get_array('mobile.groups');
         
-        $themes = $this->get_themes();
+        require_once W3TC_LIB_W3_DIR . '/Mobile.php';
+        $w3_mobile = & W3_Mobile::instance();
+        
+        $themes = $w3_mobile->get_themes();
         
         include W3TC_DIR . '/inc/options/mobile.phtml';
     }
@@ -4695,9 +4698,10 @@ class W3_Plugin_TotalCache extends W3_Plugin
     {
         $themes = array();
         $wp_themes = get_themes();
+        $theme_root = get_theme_root_uri();
         
         foreach ($wp_themes as $wp_theme) {
-            $theme_key = sprintf('%s/%s', $wp_theme['Template'], $wp_theme['Stylesheet']);
+            $theme_key = substr(md5($theme_root . $wp_theme['Template'] . $wp_theme['Stylesheet']), 0, 6);
             $themes[$theme_key] = $wp_theme['Name'];
         }
         

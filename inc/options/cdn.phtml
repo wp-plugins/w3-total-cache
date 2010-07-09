@@ -50,13 +50,13 @@
         	</tr>
         	<tr>
         		<th<?php if ($cdn_mirror): ?> colspan="2"<?php endif; ?>>
-        			<input type="hidden" name="cdn.minify.enable" value="0"<?php if (! W3TC_PHP5 || ! $minify_enabled): ?> disabled="disabled"<?php endif; ?> />
-        			<label><input type="checkbox" name="cdn.minify.enable" value="1"<?php checked($this->_config->get_boolean('cdn.minify.enable'), true); ?><?php if (! W3TC_PHP5 || ! $minify_enabled): ?> disabled="disabled"<?php endif; ?> /> Host minified <acronym title="Cascading Style Sheet">CSS</acronym> and <acronym title="JavaScript">JS</acronym> files</label><br />
+        			<input type="hidden" name="cdn.minify.enable" value="0"<?php if (! W3TC_PHP5 || ! $minify_enabled || ! $this->_config->get_boolean('minify.rewrite')): ?> disabled="disabled"<?php endif; ?> />
+        			<label><input type="checkbox" name="cdn.minify.enable" value="1"<?php checked($this->_config->get_boolean('cdn.minify.enable'), true); ?><?php if (! W3TC_PHP5 || ! $minify_enabled || ! $this->_config->get_boolean('minify.rewrite')): ?> disabled="disabled"<?php endif; ?> /> Host minified <acronym title="Cascading Style Sheet">CSS</acronym> and <acronym title="JavaScript">JS</acronym> files</label><br />
     				<span class="description">If checked, minified <acronym>CSS</acronym> and <acronym>JS</acronym> files will be hosted with the <acronym title="Content Delivery Network">CDN</acronym>.</span>
         		</th>
         		<?php if (! $cdn_mirror): ?>
         		<td>
-    				<input class="button cdn_export" type="button" name="minify" value="Upload minify files"<?php if (! W3TC_PHP5 || ! $minify_enabled): ?> disabled="disabled"<?php endif; ?> />
+    				<input class="button cdn_export" type="button" name="minify" value="Upload minify files"<?php if (! W3TC_PHP5 || ! $minify_enabled || ! $this->_config->get_boolean('minify.rewrite')): ?> disabled="disabled"<?php endif; ?> />
         		</td>
         		<?php endif; ?>
         	</tr>

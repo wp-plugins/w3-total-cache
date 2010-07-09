@@ -439,7 +439,7 @@ class W3_Plugin_Cdn extends W3_Plugin
                 }
                 
                 if ($this->_config->get_boolean('cdn.minify.enable')) {
-                    $regexps[] = '~(["\'])((' . $domain_url_regexp . ')?(' . w3_preg_quote($site_path . W3TC_CONTENT_MINIFY_DIR_NAME) . '/.+/.+/.+\.include(-(footer|body))?(-nb)?\.[0-9]+\.(css|js)))~U';
+                    $regexps[] = '~(["\'])((' . $domain_url_regexp . ')?(' . w3_preg_quote($site_path . W3TC_CONTENT_MINIFY_DIR_NAME) . '/[a-f0-9]+/.+\.include(-(footer|body))?(-nb)?\.[0-9]+\.(css|js)))~U';
                 }
                 
                 if ($this->_config->get_boolean('cdn.custom.enable')) {
@@ -1269,7 +1269,7 @@ class W3_Plugin_Cdn extends W3_Plugin
     {
         $files = array();
         
-        if (W3TC_PHP5) {
+        if (W3TC_PHP5 && $this->_config->get_boolean('minify.rewrite')) {
             require_once W3TC_LIB_W3_DIR . '/Plugin/Minify.php';
             $minify = & W3_Plugin_Minify::instance();
             $urls = $minify->get_urls();
@@ -1284,16 +1284,19 @@ class W3_Plugin_Cdn extends W3_Plugin
                 foreach ($urls as $url) {
                     $file = w3_normalize_file($url);
                     $file = w3_translate_file($file);
-                    $file = ltrim(str_replace(W3TC_CONTENT_MINIFY_DIR_NAME, '', $file), '/');
                     
-                    $dir = dirname($file);
-                    
-                    if ($dir) {
-                        w3_mkdir($dir, 0755, W3TC_CACHE_FILE_MINIFY_DIR);
-                    }
-                    
-                    if (w3_download($url, W3TC_CACHE_FILE_MINIFY_DIR . '/' . $file) !== false) {
-                        $files[] = W3TC_CONTENT_MINIFY_DIR_NAME . '/' . $file;
+                    if (!w3_is_url($file)) {
+                        $file = ltrim(str_replace(W3TC_CONTENT_MINIFY_DIR_NAME, '', $file), '/');
+                        
+                        $dir = dirname($file);
+                        
+                        if ($dir) {
+                            w3_mkdir($dir, 0755, W3TC_CACHE_FILE_MINIFY_DIR);
+                        }
+                        
+                        if (w3_download($url, W3TC_CACHE_FILE_MINIFY_DIR . '/' . $file) !== false) {
+                            $files[] = W3TC_CONTENT_MINIFY_DIR_NAME . '/' . $file;
+                        }
                     }
                 }
             }

@@ -430,20 +430,7 @@ class W3_Plugin_Minify extends W3_Plugin
         static $theme = null;
         
         if ($theme === null) {
-            if ($this->_config->get_boolean('mobile.enabled')) {
-                require_once W3TC_LIB_W3_DIR . '/Mobile.php';
-                $w3_mobile = & W3_Mobile::instance();
-                
-                $mobile_theme = $w3_mobile->get_theme();
-                
-                if ($mobile_theme) {
-                    $theme = $mobile_theme;
-                }
-            }
-            
-            if (!$theme) {
-                $theme = sprintf('%s/%s', get_template(), get_stylesheet());
-            }
+            $theme = substr(md5(get_theme_root_uri() . get_template() . get_stylesheet()), 0, 6);
         }
         
         return $theme;
@@ -1016,7 +1003,7 @@ class W3_Plugin_Minify extends W3_Plugin
             $rules .= "    RewriteRule (.*) $1%{ENV:APPEND_EXT} [L]\n";
         }
         
-        $rules .= "    RewriteRule ^(.+\\/.+)\\/(.+)\\.(include(\\-(footer|body))?(-nb)?)\\.[0-9]+\\.(css|js)$ index.php?tt=$1&gg=$2&g=$3&t=$7 [L]\n";
+        $rules .= "    RewriteRule ^([a-f0-9]+)\\/(.+)\\.(include(\\-(footer|body))?(-nb)?)\\.[0-9]+\\.(css|js)$ index.php?tt=$1&gg=$2&g=$3&t=$7 [L]\n";
         $rules .= "</IfModule>\n";
         $rules .= "# END W3TC Minify\n";
         

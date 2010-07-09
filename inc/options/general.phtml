@@ -333,7 +333,7 @@
     	</p>
     	
     	<p>
-    		<input type="hidden" name="file_locking" value="0" />
+    		<input type="hidden" name="file_locking" value="0"<?php if (! $can_empty_file): ?> disabled="disabled"<?php endif; ?> />
     		<label><input type="checkbox" name="file_locking" value="1"<?php checked($file_locking, true); ?><?php if (! $can_empty_file): ?> disabled="disabled"<?php endif; ?> /> Enable file locking</label>
     		<br /><span class="description">Not recommended on NFS file system.</span>
     	</p>
