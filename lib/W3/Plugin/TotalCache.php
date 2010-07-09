@@ -1666,11 +1666,11 @@ class W3_Plugin_TotalCache extends W3_Plugin
     function options_browsercache()
     {
         $browsercache_enabled = $this->_config->get_boolean('browsercache.enabled');
-        $browsercache_expires = ($this->_config->get_boolean('browsercache.cssjs.expires') && $this->_config->get_boolean('browsercache.html.expires') && $this->_config->get_boolean('browsercache.other.expires'));
-        $browsercache_cache_control = ($this->_config->get_boolean('browsercache.cssjs.cache.control') && $this->_config->get_boolean('browsercache.html.cache.control') && $this->_config->get_boolean('browsercache.other.cache.control'));
-        $browsercache_etag = ($this->_config->get_boolean('browsercache.cssjs.etag') && $this->_config->get_boolean('browsercache.html.etag') && $this->_config->get_boolean('browsercache.other.etag'));
-        $browsercache_w3tc = ($this->_config->get_boolean('browsercache.cssjs.w3tc') && $this->_config->get_boolean('browsercache.html.w3tc') && $this->_config->get_boolean('browsercache.other.w3tc'));
-        $browsercache_compression = ($this->_config->get_boolean('browsercache.cssjs.compression') && $this->_config->get_boolean('browsercache.html.compression') && $this->_config->get_boolean('browsercache.other.compression'));
+        $browsercache_expires = ($this->_config->get_boolean('browsercache.cssjs.expires') || $this->_config->get_boolean('browsercache.html.expires') || $this->_config->get_boolean('browsercache.other.expires'));
+        $browsercache_cache_control = ($this->_config->get_boolean('browsercache.cssjs.cache.control') || $this->_config->get_boolean('browsercache.html.cache.control') || $this->_config->get_boolean('browsercache.other.cache.control'));
+        $browsercache_etag = ($this->_config->get_boolean('browsercache.cssjs.etag') || $this->_config->get_boolean('browsercache.html.etag') || $this->_config->get_boolean('browsercache.other.etag'));
+        $browsercache_w3tc = ($this->_config->get_boolean('browsercache.cssjs.w3tc') || $this->_config->get_boolean('browsercache.html.w3tc') || $this->_config->get_boolean('browsercache.other.w3tc'));
+        $browsercache_compression = ($this->_config->get_boolean('browsercache.cssjs.compression') || $this->_config->get_boolean('browsercache.html.compression') || $this->_config->get_boolean('browsercache.other.compression'));
         
         include W3TC_DIR . '/inc/options/browsercache.phtml';
     }

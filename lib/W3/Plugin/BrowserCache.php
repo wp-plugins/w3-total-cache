@@ -308,6 +308,15 @@ class W3_Plugin_BrowserCache extends W3_Plugin
         
         $extenions = array_merge(array_keys($cssjs_types), array_keys($html_types), array_keys($other_types));
         
+        $permalink_structure = get_option('permalink_structure');
+        $permalink_structure_ext = ltrim(strrchr($permalink_structure, '.'), '.');
+        
+        foreach ($extenions as $index => $extenion) {
+            if (strstr($extenion, $permalink_structure_ext) !== false) {
+                $extenions[$index] = preg_replace('~\|?' . w3_preg_quote($permalink_structure_ext) . '\|?~', '', $extenion);
+            }
+        }
+        
         $rules = '';
         $rules .= "# BEGIN W3TC Skip 404 error handling by WordPress for static files\n";
         $rules .= "<IfModule mod_rewrite.c>\n";
