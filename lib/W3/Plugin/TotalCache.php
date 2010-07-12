@@ -155,7 +155,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
             ), null, 2);
         }
         
-        if (isset($_REQUEST['w3tc_theme']) && $_SERVER['HTTP_USER_AGENT'] == W3TC_POWERED_BY) {
+        if (isset($_REQUEST['w3tc_theme']) && isset($_SERVER['HTTP_USER_AGENT']) && $_SERVER['HTTP_USER_AGENT'] == W3TC_POWERED_BY) {
             add_filter('template', array(
                 &$this, 
                 'template_preview'
@@ -3677,7 +3677,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
      * @param string $buffer
      * @return string
      */
-    function ob_callback($buffer)
+    function ob_callback(&$buffer)
     {
         global $wpdb;
         

@@ -58,7 +58,7 @@ class W3_Cache_File extends W3_Cache_Base
      * @param integer $expire
      * @return boolean
      */
-    function add($key, $var, $expire = 0)
+    function add($key, &$var, $expire = 0)
     {
         if ($this->get($key) === false) {
             return $this->set($key, $var, $expire);
@@ -75,7 +75,7 @@ class W3_Cache_File extends W3_Cache_Base
      * @param integer $expire
      * @return boolean
      */
-    function set($key, $var, $expire = 0)
+    function set($key, &$var, $expire = 0)
     {
         $sub_path = $this->_get_path($key);
         $path = $this->_cache_dir . '/' . $sub_path;
@@ -165,7 +165,7 @@ class W3_Cache_File extends W3_Cache_Base
      * @param integer $expire
      * @return boolean
      */
-    function replace($key, $var, $expire = 0)
+    function replace($key, &$var, $expire = 0)
     {
         if ($this->get($key) !== false) {
             return $this->set($key, $var, $expire);

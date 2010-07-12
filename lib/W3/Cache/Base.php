@@ -18,7 +18,7 @@ class W3_Cache_Base
      * @param integer $expire
      * @return boolean
      */
-    function add($key, $data, $expire = 0)
+    function add($key, &$data, $expire = 0)
     {
         return false;
     }
@@ -32,7 +32,7 @@ class W3_Cache_Base
      * @param integer $expire
      * @return boolean
      */
-    function set($key, $data, $expire = 0)
+    function set($key, &$data, $expire = 0)
     {
         return false;
     }
@@ -69,7 +69,7 @@ class W3_Cache_Base
      * @param integer $expire
      * @return boolean
      */
-    function replace($key, $data, $expire = 0)
+    function replace($key, &$data, $expire = 0)
     {
         return false;
     }

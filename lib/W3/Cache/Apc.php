@@ -18,7 +18,7 @@ class W3_Cache_Apc extends W3_Cache_Base
      * @param integer $expire
      * @return boolean
      */
-    function add($key, $var, $expire = 0)
+    function add($key, &$var, $expire = 0)
     {
         if ($this->get($key) === false) {
             return $this->set($key, $var, $expire);
@@ -35,7 +35,7 @@ class W3_Cache_Apc extends W3_Cache_Base
      * @param integer $expire
      * @return boolean
      */
-    function set($key, $var, $expire = 0)
+    function set($key, &$var, $expire = 0)
     {
         return apc_store($key, serialize($var), $expire);
     }
@@ -59,7 +59,7 @@ class W3_Cache_Apc extends W3_Cache_Base
      * @param integer $expire
      * @return boolean
      */
-    function replace($key, $var, $expire = 0)
+    function replace($key, &$var, $expire = 0)
     {
         if ($this->get($key) !== false) {
             return $this->set($key, $var, $expire);

@@ -306,15 +306,15 @@ class W3_Plugin_BrowserCache extends W3_Plugin
         $html_types = $this->get_html_types();
         $other_types = $this->get_other_types();
         
-        $extenions = array_merge(array_keys($cssjs_types), array_keys($html_types), array_keys($other_types));
+        $extensions = array_merge(array_keys($cssjs_types), array_keys($html_types), array_keys($other_types));
         
         $permalink_structure = get_option('permalink_structure');
         $permalink_structure_ext = ltrim(strrchr($permalink_structure, '.'), '.');
         
         if ($permalink_structure_ext != '') {
-            foreach ($extenions as $index => $extenion) {
-                if (strstr($extenion, $permalink_structure_ext) !== false) {
-                    $extenions[$index] = preg_replace('~\|?' . w3_preg_quote($permalink_structure_ext) . '\|?~', '', $extenion);
+            foreach ($extensions as $index => $extension) {
+                if (strstr($extension, $permalink_structure_ext) !== false) {
+                    $extensions[$index] = preg_replace('~\|?' . w3_preg_quote($permalink_structure_ext) . '\|?~', '', $extension);
                 }
             }
         }
@@ -325,7 +325,7 @@ class W3_Plugin_BrowserCache extends W3_Plugin
         $rules .= "    RewriteEngine On\n";
         $rules .= "    RewriteCond %{REQUEST_FILENAME} !-f\n";
         $rules .= "    RewriteCond %{REQUEST_FILENAME} !-d\n";
-        $rules .= "    RewriteCond %{REQUEST_FILENAME} \\.(" . implode('|', $extenions) . ")$ [NC]\n";
+        $rules .= "    RewriteCond %{REQUEST_FILENAME} \\.(" . implode('|', $extensions) . ")$ [NC]\n";
         $rules .= "    RewriteRule .* - [L]\n";
         $rules .= "</IfModule>\n";
         $rules .= "# END W3TC Skip 404 error handling by WordPress for static files\n\n";

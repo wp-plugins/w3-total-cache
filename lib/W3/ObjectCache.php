@@ -177,7 +177,7 @@ class W3_ObjectCache
         
         $this->cache_total++;
         
-        if ($value) {
+        if ($value !== false) {
             $cached = true;
             $this->cache_hits++;
         } else {
@@ -233,7 +233,8 @@ class W3_ObjectCache
         
         if ($this->_can_cache2($id, $group, $reason)) {
             $cache = & $this->_get_cache();
-            $cache->set($key, $data, ($expire ? $expire : $this->_lifetime));
+            
+            return $cache->set($key, $data, ($expire ? $expire : $this->_lifetime));
         }
         
         return true;
@@ -256,7 +257,8 @@ class W3_ObjectCache
         
         if ($this->_can_cache2($id, $group, $reason)) {
             $cache = & $this->_get_cache();
-            $cache->delete($key);
+            
+            return $cache->delete($key);
         }
         
         return true;
@@ -350,7 +352,7 @@ class W3_ObjectCache
      * @param string $buffer
      * @return string
      */
-    function ob_callback($buffer)
+    function ob_callback(&$buffer)
     {
         if ($buffer != '' && w3_is_xml($buffer)) {
             $buffer .= "\r\n\r\n" . $this->_get_debug_info();
@@ -374,7 +376,7 @@ class W3_ObjectCache
         
         $host = w3_get_host();
         
-        if (in_array($group, $this->global_groups)) {
+        if (!in_array($group, $this->global_groups)) {
             $prefix = w3_get_blogname();
         } else {
             $prefix = '';

@@ -192,7 +192,7 @@ class W3_Plugin_Minify extends W3_Plugin
      * @param string $buffer
      * @return string
      */
-    function ob_callback($buffer)
+    function ob_callback(&$buffer)
     {
         if ($buffer != '' && w3_is_xml($buffer)) {
             if ($this->can_minify2($buffer)) {
@@ -242,7 +242,7 @@ class W3_Plugin_Minify extends W3_Plugin
                     $buffer = preg_replace('~<\\/body>~', $body_append . '\\0', $buffer, 1);
                 }
                 
-                $buffer = $this->clean($buffer);
+                $this->clean($buffer);
             }
             
             if ($this->_config->get_boolean('minify.debug')) {
@@ -259,27 +259,25 @@ class W3_Plugin_Minify extends W3_Plugin
      * @param string $content
      * @return string
      */
-    function clean($content)
+    function clean(&$content)
     {
         if (function_exists('is_feed') && !is_feed()) {
             if ($this->_config->get_boolean('minify.css.enable')) {
-                $content = $this->clean_styles($content);
+                $this->clean_styles($content);
             }
             
             if ($this->_config->get_boolean('minify.js.enable')) {
-                $content = $this->clean_scripts($content);
+                $this->clean_scripts($content);
             }
         }
         
         if ($this->_config->get_boolean('minify.html.enable')) {
             try {
-                $content = $this->minify_html($content);
+                $this->minify_html($content);
             } catch (Exception $exception) {
                 $this->error = $exception->getMessage();
             }
         }
-        
-        return $content;
     }
     
     /**
@@ -288,7 +286,7 @@ class W3_Plugin_Minify extends W3_Plugin
      * @param string $content
      * @return string
      */
-    function clean_styles($content)
+    function clean_styles(&$content)
     {
         $theme = $this->get_theme();
         $template = $this->get_template();
@@ -329,8 +327,6 @@ class W3_Plugin_Minify extends W3_Plugin
         }
         
         $content = preg_replace('~<style[^<>]*>\s*</style>~', '', $content);
-        
-        return $content;
     }
     
     /**
@@ -339,7 +335,7 @@ class W3_Plugin_Minify extends W3_Plugin
      * @param string $content
      * @return string
      */
-    function clean_scripts($content)
+    function clean_scripts(&$content)
     {
         $theme = $this->get_theme();
         $template = $this->get_template();
@@ -377,8 +373,6 @@ class W3_Plugin_Minify extends W3_Plugin
         foreach ($regexps as $regexp) {
             $content = preg_replace('~<script\s+[^<>]*src=["\']?' . $regexp . '["\']?[^<>]*>\s*</script>~is', '', $content);
         }
-        
-        return $content;
     }
     
     /**
@@ -387,7 +381,7 @@ class W3_Plugin_Minify extends W3_Plugin
      * @param string $content
      * @return string
      */
-    function minify_html($content)
+    function minify_html(&$content)
     {
         require_once W3TC_LIB_MINIFY_DIR . '/Minify/HTML.php';
         require_once W3TC_LIB_MINIFY_DIR . '/Minify/CSS.php';
@@ -418,8 +412,6 @@ class W3_Plugin_Minify extends W3_Plugin
         }
         
         $content = Minify_HTML::minify($content, $options);
-        
-        return $content;
     }
     
     /**
@@ -858,7 +850,7 @@ class W3_Plugin_Minify extends W3_Plugin
     function check_ua()
     {
         foreach ($this->_config->get_array('minify.reject.ua') as $ua) {
-            if (stristr($_SERVER['HTTP_USER_AGENT'], $ua) !== false) {
+            if (isset($_SERVER['HTTP_USER_AGENT']) && stristr($_SERVER['HTTP_USER_AGENT'], $ua) !== false) {
                 return false;
             }
         }

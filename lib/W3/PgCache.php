@@ -113,20 +113,20 @@ class W3_PgCache
      */
     function process()
     {
-        /**
-         * Skip caching for some pages
-         */
-        switch (true) {
-            case defined('DOING_AJAX'):
-            case defined('DOING_CRON'):
-            case defined('APP_REQUEST'):
-            case defined('XMLRPC_REQUEST'):
-            case defined('WP_ADMIN'):
-            case (defined('SHORTINIT') && SHORTINIT):
-                return;
-        }
-        
         if ($this->_config->get_boolean('pgcache.enabled')) {
+            /**
+             * Skip caching for some pages
+             */
+            switch (true) {
+                case defined('DOING_AJAX'):
+                case defined('DOING_CRON'):
+                case defined('APP_REQUEST'):
+                case defined('XMLRPC_REQUEST'):
+                case defined('WP_ADMIN'):
+                case (defined('SHORTINIT') && SHORTINIT):
+                    return;
+            }
+            
             /**
              * Handle mobile redirects
              */
@@ -183,12 +183,12 @@ class W3_PgCache
                         $is_404 = false;
                         $headers = array();
                         $time = $cache->mtime($page_key);
-                        $content = $data;
+                        $content = & $data;
                     } else {
                         $is_404 = $data['404'];
                         $headers = $data['headers'];
                         $time = $data['time'];
-                        $content = $data['content'];
+                        $content = & $data['content'];
                     }
                     
                     /**
@@ -217,12 +217,12 @@ class W3_PgCache
                         /**
                          * Parse dynamic tags
                          */
-                        $content = $this->_parse_dynamic($content);
+                        $this->_parse_dynamic($content);
                         
                         /**
                          * Compress content
                          */
-                        $content = $this->_compress($content, $compression);
+                        $this->_compress($content, $compression);
                     }
                     
                     echo $content;
@@ -246,7 +246,7 @@ class W3_PgCache
      * @param string $buffer
      * @return string
      */
-    function ob_callback($buffer)
+    function ob_callback(&$buffer)
     {
         if ($buffer != '' && w3_is_xml($buffer)) {
             $compression = false;
@@ -290,7 +290,9 @@ class W3_PgCache
                     /**
                      * Compress content
                      */
-                    $_content = $this->_compress($buffer, $_compression);
+                    $_content = $buffer;
+                    
+                    $this->_compress($_content, $_compression);
                     
                     /**
                      * Store cache data
@@ -309,7 +311,7 @@ class W3_PgCache
                     }
                     
                     if ($compression == $_compression) {
-                        $buffer = $_content;
+                        $buffer = & $_content;
                     }
                 }
                 
@@ -337,7 +339,7 @@ class W3_PgCache
                      * Don't use shutdown function below
                      */
                     if (!$has_dynamic) {
-                        $buffer = $this->_compress($buffer, $compression);
+                        $this->_compress($buffer, $compression);
                     }
                 }
             } elseif ($this->_debug) {
@@ -378,14 +380,14 @@ class W3_PgCache
         /**
          * Parse dynamic content
          */
-        $buffer = $this->_parse_dynamic($this->_shutdown_buffer);
+        $this->_parse_dynamic($this->_shutdown_buffer);
         
         /**
          * Compress page
          */
-        $buffer = $this->_compress($buffer, $this->_shutdown_compression);
+        $this->_compress($this->_shutdown_buffer, $this->_shutdown_compression);
         
-        echo $buffer;
+        echo $this->_shutdown_buffer;
     }
     
     /**
@@ -723,7 +725,7 @@ class W3_PgCache
     function _check_ua()
     {
         foreach ($this->_config->get_array('pgcache.reject.ua') as $ua) {
-            if (stristr($_SERVER['HTTP_USER_AGENT'], $ua) !== false) {
+            if (isset($_SERVER['HTTP_USER_AGENT']) && stristr($_SERVER['HTTP_USER_AGENT'], $ua) !== false) {
                 return false;
             }
         }
@@ -787,20 +789,14 @@ class W3_PgCache
     function _compress(&$data, $compression)
     {
         switch ($compression) {
-            case false:
-                $compressed = $data;
-                break;
-            
             case 'gzip':
-                $compressed = gzencode($data);
+                $data = gzencode($data);
                 break;
             
             case 'deflate':
-                $compressed = gzdeflate($data);
+                $data = gzdeflate($data);
                 break;
         }
-        
-        return $compressed;
     }
     
     /**
@@ -814,7 +810,7 @@ class W3_PgCache
             $compressions = $this->_get_compressions();
             
             foreach ($compressions as $compression) {
-                if (stristr($_SERVER['HTTP_ACCEPT_ENCODING'], $compression) !== false) {
+                if (isset($_SERVER['HTTP_ACCEPT_ENCODING']) && stristr($_SERVER['HTTP_ACCEPT_ENCODING'], $compression) !== false) {
                     return $compression;
                 }
             }
@@ -870,12 +866,14 @@ class W3_PgCache
      */
     function _is_buggy_ie()
     {
-        $ua = $_SERVER['HTTP_USER_AGENT'];
-        
-        if (strpos($ua, 'Mozilla/4.0 (compatible; MSIE ') === 0 && strpos($ua, 'Opera') === false) {
-            $version = (float) substr($ua, 30);
+        if (isset($_SERVER['HTTP_USER_AGENT'])) {
+            $ua = $_SERVER['HTTP_USER_AGENT'];
             
-            return ($version < 6 || ($version == 6 && strpos($ua, 'SV1') === false));
+            if (strpos($ua, 'Mozilla/4.0 (compatible; MSIE ') === 0 && strpos($ua, 'Opera') === false) {
+                $version = (float) substr($ua, 30);
+                
+                return ($version < 6 || ($version == 6 && strpos($ua, 'SV1') === false));
+            }
         }
         
         return false;
@@ -1305,17 +1303,15 @@ class W3_PgCache
      */
     function _parse_dynamic(&$buffer)
     {
-        $data = preg_replace_callback('~<!--\s*mfunc(.*)-->(.*)<!--\s*/mfunc\s*-->~Uis', array(
+        $buffer = preg_replace_callback('~<!--\s*mfunc(.*)-->(.*)<!--\s*/mfunc\s*-->~Uis', array(
             &$this, 
             '_parse_dynamic_mfunc'
         ), $buffer);
         
-        $data = preg_replace_callback('~<!--\s*mclude(.*)-->(.*)<!--\s*/mclude\s*-->~Uis', array(
+        $buffer = preg_replace_callback('~<!--\s*mclude(.*)-->(.*)<!--\s*/mclude\s*-->~Uis', array(
             &$this, 
             '_parse_dynamic_mclude'
-        ), $data);
-        
-        return $data;
+        ), $buffer);
     }
     
     /**

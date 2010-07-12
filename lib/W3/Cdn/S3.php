@@ -355,7 +355,7 @@ class W3_Cdn_S3 extends W3_Cdn_Base
     {
         $url = parent::format_url($path);
         
-        if ($this->_config['compression'] && stristr($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false && $this->may_gzip($path)) {
+        if ($this->_config['compression'] && isset($_SERVER['HTTP_ACCEPT_ENCODING']) && stristr($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false && $this->may_gzip($path)) {
             if (($qpos = strpos($url, '?')) !== false) {
                 $url = substr_replace($url, $this->_gzip_extension, $qpos, 0);
             } else {

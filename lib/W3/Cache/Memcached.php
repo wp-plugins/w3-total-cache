@@ -58,7 +58,7 @@ class W3_Cache_Memcached extends W3_Cache_Base
      * @param integer $expire
      * @return boolean
      */
-    function add($key, $var, $expire = 0)
+    function add($key, &$var, $expire = 0)
     {
         return @$this->_memcache->add($key, $var, false, $expire);
     }
@@ -71,7 +71,7 @@ class W3_Cache_Memcached extends W3_Cache_Base
      * @param integer $expire
      * @return boolean
      */
-    function set($key, $var, $expire = 0)
+    function set($key, &$var, $expire = 0)
     {
         return @$this->_memcache->set($key, $var, false, $expire);
     }
@@ -95,7 +95,7 @@ class W3_Cache_Memcached extends W3_Cache_Base
      * @param integer $expire
      * @return boolean
      */
-    function replace($key, $var, $expire = 0)
+    function replace($key, &$var, $expire = 0)
     {
         return @$this->_memcache->replace($key, $var, false, $expire);
     }

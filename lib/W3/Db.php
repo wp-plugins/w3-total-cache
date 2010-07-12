@@ -398,7 +398,7 @@ class W3_Db extends wpdb
      * @param string $buffer
      * @return string
      */
-    function ob_callback($buffer)
+    function ob_callback(&$buffer)
     {
         if ($buffer != '' && w3_is_xml($buffer)) {
             $buffer .= "\r\n\r\n" . $this->_get_debug_info();
