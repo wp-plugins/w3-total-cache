@@ -704,7 +704,7 @@ jQuery(function() {
         jQuery('#mobile_groups li').each(function() {
             if (jQuery(this).find(':checked').size()) {
                 var group = jQuery(this).find('.mobile_group').text();
-                var theme = jQuery(this).find(':selected').text();
+                var theme = jQuery(this).find(':selected').val();
                 var redirect = jQuery(this).find('input[type=text]').val();
                 var agents = jQuery.trim(jQuery(this).find('textarea').val()).split("\n");
 
@@ -712,7 +712,7 @@ jQuery(function() {
                     if (jQuery(this).find(':checked').size()) {
                         var compare_group = jQuery(this).find('.mobile_group').text();
                         if (compare_group != group) {
-                            var compare_theme = jQuery(this).find(':selected').text();
+                            var compare_theme = jQuery(this).find(':selected').val();
                             var compare_redirect = jQuery(this).find('input[type=text]').val();
                             var compare_agents = jQuery.trim(jQuery(this).find('textarea').val()).split("\n");
 

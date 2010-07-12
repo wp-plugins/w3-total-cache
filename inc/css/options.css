@@ -202,14 +202,8 @@
 	font-weight: bold;
 }
 
-#recom_container {
+#recom_container,#self_test_container {
 	overflow: auto;
-	height: 550px;
-}
-
-#self_test_container {
-	overflow: auto;
-	height: 550px;
 }
 
 #self_test_container fieldset {
@@ -221,10 +215,10 @@
 }
 
 .w3tc-rules {
-	white-space: pre;
-	font-family: monospace;
 	display: none;
 	margin: 1em 0;
+	padding: 0;
+	background: none;
 }
 
 .minify-files li {

@@ -311,9 +311,11 @@ class W3_Plugin_BrowserCache extends W3_Plugin
         $permalink_structure = get_option('permalink_structure');
         $permalink_structure_ext = ltrim(strrchr($permalink_structure, '.'), '.');
         
-        foreach ($extenions as $index => $extenion) {
-            if (strstr($extenion, $permalink_structure_ext) !== false) {
-                $extenions[$index] = preg_replace('~\|?' . w3_preg_quote($permalink_structure_ext) . '\|?~', '', $extenion);
+        if ($permalink_structure_ext != '') {
+            foreach ($extenions as $index => $extenion) {
+                if (strstr($extenion, $permalink_structure_ext) !== false) {
+                    $extenions[$index] = preg_replace('~\|?' . w3_preg_quote($permalink_structure_ext) . '\|?~', '', $extenion);
+                }
             }
         }
         

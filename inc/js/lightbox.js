@@ -240,11 +240,24 @@ function w3tc_lightbox_tweet() {
 var w3tc_minify_recommendations_checked = {};
 
 function w3tc_lightbox_minify_recommendations() {
+    var min_height = 200;
+    var max_height = 1200;
+
+    var height = jQuery(window).height() - 220;
+
+    if (height < min_height) {
+        height = min_height;
+    } else if (height > max_height) {
+        height = max_height;
+    }
+
     W3tc_Lightbox.open( {
         width: 1000,
-        height: 600,
+        height: height,
         url: 'options-general.php?page=w3-total-cache/w3-total-cache.php&w3tc_action=minify_recommendations',
         callback: function(lightbox) {
+            jQuery('#recom_container').css('height', height - 50);
+
             var theme = jQuery('#recom_theme').val();
 
             if (jQuery.ui && jQuery.ui.sortable) {
@@ -295,6 +308,8 @@ function w3tc_lightbox_minify_recommendations() {
                 } else {
                     jQuery('#recom_js_files :checkbox').attr('checked', 'checked');
                 }
+
+                return false;
             });
 
             jQuery('#recom_css_check').click(function() {
@@ -303,6 +318,8 @@ function w3tc_lightbox_minify_recommendations() {
                 } else {
                     jQuery('#recom_css_files :checkbox').attr('checked', 'checked');
                 }
+
+                return false;
             });
 
             jQuery('.recom_apply', lightbox.container).click(function() {
@@ -345,11 +362,24 @@ function w3tc_lightbox_minify_recommendations() {
 }
 
 function w3tc_lightbox_self_test() {
+    var min_height = 200;
+    var max_height = 800;
+
+    var height = jQuery(window).height() - 220;
+
+    if (height < min_height) {
+        height = min_height;
+    } else if (height > max_height) {
+        height = max_height;
+    }
+
     W3tc_Lightbox.open( {
         width: 600,
-        height: 600,
+        height: height,
         url: 'options-general.php?page=w3-total-cache/w3-total-cache.php&w3tc_action=self_test',
         callback: function(lightbox) {
+            jQuery('#self_test_container').css('height', height - 50);
+
             jQuery('.button-primary', lightbox.container).click(function() {
                 lightbox.close();
             });
