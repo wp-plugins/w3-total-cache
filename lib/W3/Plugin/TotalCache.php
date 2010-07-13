@@ -47,10 +47,9 @@ class W3_Plugin_TotalCache extends W3_Plugin
     var $_request_types = array(
         'bug_report' => 'Submit a Bug Report', 
         'new_feature' => 'Suggest a New Feature', 
-        'quick_tips' => 'Quick Tips in <24 hours: $25', 
         'email_support' => '<15 Minute Email Support Response (M-F 9AM - 5PM EDT): $75 USD', 
         'phone_support' => '<15 Minute Phone Support Response (M-F 9AM - 5PM EDT): $150 USD', 
-        'plugin_config' => 'Professional Plugin Configuration: Starting @ $50 USD', 
+        'plugin_config' => 'Professional Plugin Configuration: Starting @ $100 USD', 
         'theme_config' => 'Theme Performance Optimization & Plugin Configuration: Starting @ $150 USD', 
         'linux_config' => 'Linux Server Optimization & Plugin Configuration: Starting @ $200 USD'
     );
@@ -65,7 +64,6 @@ class W3_Plugin_TotalCache extends W3_Plugin
             'new_feature'
         ), 
         'Professional Services (per site pricing)' => array(
-            'quick_tips', 
             'email_support', 
             'phone_support', 
             'plugin_config', 
@@ -79,10 +77,9 @@ class W3_Plugin_TotalCache extends W3_Plugin
      * @var array
      */
     var $_request_prices = array(
-        'quick_tips' => 25, 
         'email_support' => 75, 
         'phone_support' => 150, 
-        'plugin_config' => 50, 
+        'plugin_config' => 100, 
         'theme_config' => 150, 
         'linux_config' => 200
     );
@@ -2605,7 +2602,6 @@ class W3_Plugin_TotalCache extends W3_Plugin
         $required = array(
             'bug_report' => 'url,name,email,subject,description', 
             'new_feature' => 'url,name,email,subject,description', 
-            'quick_tips' => 'url,name,email,subject,description', 
             'email_support' => 'url,name,email,subject,description', 
             'phone_support' => 'url,name,email,subject,description,phone', 
             'plugin_config' => 'url,name,email,subject,description,wp_login,wp_password', 

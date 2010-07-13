@@ -674,7 +674,6 @@ jQuery(function() {
                 action = 'options_support';
                 break;
 
-            case 'quick_tips':
             case 'email_support':
             case 'phone_support':
             case 'plugin_config':
