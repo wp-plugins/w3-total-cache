@@ -730,7 +730,7 @@ jQuery(function() {
 
                             jQuery.each(compare_agents, function(index, value) {
                                 if (jQuery.inArray(value, agents) != -1) {
-                                    alert('Duplicate stem "' + value + '" found in the group "' + group + '".');
+                                    alert('Duplicate stem "' + value + '" found in the group "' + compare_group + '".');
                                     error = true;
                                     return false;
                                 }

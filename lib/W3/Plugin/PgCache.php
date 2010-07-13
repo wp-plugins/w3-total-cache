@@ -582,7 +582,7 @@ class W3_Plugin_PgCache extends W3_Plugin
                 $mobile_redirect = (isset($mobile_config['redirect']) ? $mobile_config['redirect'] : '');
                 
                 if (count($mobile_agents) && !$mobile_redirect) {
-                    $rules .= "    RewriteCond %{HTTP_USER_AGENT} (" . implode('|', array_map('w3_preg_quote', $mobile_agents)) . ") [NC]\n";
+                    $rules .= "    RewriteCond %{HTTP_USER_AGENT} (" . implode('|', $mobile_agents) . ") [NC]\n";
                     $rules .= "    RewriteRule .* - [E=W3TC_UA:_" . $mobile_group . "]\n";
                 }
             }

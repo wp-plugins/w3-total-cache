@@ -1361,6 +1361,30 @@ function w3_get_engine_name($engine)
             $engine_name = 'disk (enhanced)';
             break;
         
+        case 'mirror':
+            $engine_name = 'mirror';
+            break;
+        
+        case 'netdna':
+            $engine_name = 'mirror: NetDNA / MaxCDN';
+            break;
+        
+        case 'ftp':
+            $engine_name = 'self-hosted / File Transfer Protocol Upload';
+            break;
+        
+        case 's3':
+            $engine_name = 'Amazon Simple Storage Service (S3)';
+            break;
+        
+        case 'cf':
+            $engine_name = 'Amazon CloudFront';
+            break;
+        
+        case 'rscf':
+            $engine_name = 'Rackspace Cloud Files';
+            break;
+        
         default:
             $engine_name = 'N/A';
             break;

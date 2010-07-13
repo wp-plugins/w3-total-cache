@@ -4,7 +4,9 @@
 
 <form action="options-general.php">
     <p>
-        Object caching is currently <span class="w3tc-<?php if ($objectcache_enabled): ?>enabled">enabled<?php else: ?>disabled">disabled<?php endif; ?></span>.
+        Object caching via
+        <strong><?php echo w3_get_engine_name($this->_config->get_string('objectcache.engine')); ?></strong>
+        is currently <span class="w3tc-<?php if ($objectcache_enabled): ?>enabled">enabled<?php else: ?>disabled">disabled<?php endif; ?></span>.
         <input type="submit" name="flush_objectcache" value="Empty cache"<?php if (! $objectcache_enabled): ?> disabled="disabled"<?php endif; ?> class="button" />
         <input type="hidden" name="page" value="<?php echo W3TC_FILE; ?>" />
         <input type="hidden" name="tab" value="<?php echo $this->_tab; ?>" />

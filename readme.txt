@@ -2,7 +2,7 @@
 Contributors: fredericktownes
 Tags: user experience, cache, caching, page cache, css cache, js cache, db cache, disk cache, disk caching, database cache, http compression, gzip, deflate, minify, CDN, content delivery network, media library, performance, speed, multiple hosts, CSS, merge, combine, unobtrusive javascript, compress, optimize, optimizer, JavaScript, JS, cascading style sheet, plugin, yslow, YUI, google, google rank, google page speed, S3, CloudFront, AWS, Amazon Web Services, cloudfiles, rackspace, batcache, wp cache, wp super cache, w3 total cache, buddypress
 Requires at least: 2.6
-Tested up to: 3.0
+Tested up to: 3.1
 Stable tag: 0.8.5.2
 
 Dramatically improve the speed and user experience of your site. Add browser, page, object and database caching as well as minify and content delivery network (CDN) to WordPress.
@@ -249,7 +249,9 @@ Please reach out to all of these people and support their projects if you're so 
 
 = Press: Mentions, Tutorials &amp; Reviews =
 
-* June 30, 2010: [How to Accelerate your Site to Warp Factor 9.9 without paying $99 a month](http://negbox.com/how-to-accelerate-your-site-to-warp-factor-9-9-without-paying-99-a-month)
+* July 12th, 2010: [Install and Configure W3 Total Cache in 7 Easy Steps](http://zemalf.com/1443/w3-total-cache/)
+* July 9th, 2010: [How to Reduce the Loading Time of Your Blog](http://www.admixweb.com/2010/07/09/how-to-reduce-the-loading-time-of-your-blog/)
+* July 6th, 2010: [5 Wordpress Plugins You Need To Know About](http://thenextweb.com/apps/2010/07/06/5-wordpress-plugins-you-need-to-know-about/)
 * June 22, 2010: [12 Ways to Improve Wordpress Page Load Time](http://myblog2day.com/12-ways-to-improve-wordpress-page-load-time.php)
 * June 21, 2010: [Significantly Speed Up Your WordPress Blog in 9 Easy Steps](http://www.bloggingpro.com/archives/2010/06/21/significantly-speed-up-your-wordpress-blog-in-9-easy-steps/)
 * June 10, 2010: [Speed 'Em Up: Wordpress & W3 Total Cache](http://translate.google.com/translate?js=y&prev=_t&hl=en&ie=UTF-8&layout=1&eotf=1&u=http://www.andilicious.com/blog/1473/20100610/wordpress-beschleunigen-grundlagen-w3-total-cache-page-speed&sl=auto&tl=en)

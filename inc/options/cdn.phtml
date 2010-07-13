@@ -1,9 +1,13 @@
 <?php include W3TC_DIR . '/inc/options/common/header.phtml'; ?>
 <?php wp_print_scripts('jquery-ui-sortable') ?>
 
-<h3><acronym title="Content Delivery Network">CDN</acronym> Settings</h3>
+<h3>Content Delivery Network Settings</h3>
 
-<p><acronym title="Content Delivery Network">CDN</acronym> support is currently <span class="w3tc-<?php if ($cdn_enabled): ?>enabled">enabled<?php else: ?>disabled">disabled<?php endif; ?></span>.</p>
+<p>
+	Content Delivery Network support via
+	<strong><?php echo w3_get_engine_name($this->_config->get_string('cdn.engine')); ?></strong>
+	is currently <span class="w3tc-<?php if ($cdn_enabled): ?>enabled">enabled<?php else: ?>disabled">disabled<?php endif; ?></span>.
+</p>
 
 <?php if ($cdn_mirror): ?>
 <p>

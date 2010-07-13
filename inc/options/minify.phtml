@@ -15,7 +15,9 @@ minify_templates['<?php echo addslashes($theme_key); ?>']['<?php echo addslashes
 
 <form action="options-general.php">
     <p>
-        Minify is currently <span class="w3tc-<?php if ($minify_enabled): ?>enabled">enabled<?php else: ?>disabled">disabled<?php endif; ?></span>.
+        Minify via
+        <strong><?php echo w3_get_engine_name($this->_config->get_string('minify.engine')); ?></strong>
+        is currently <span class="w3tc-<?php if ($minify_enabled): ?>enabled">enabled<?php else: ?>disabled">disabled<?php endif; ?></span>.
         <input type="submit" name="flush_minify" value="Empty cache"<?php if (! $minify_enabled): ?> disabled="disabled"<?php endif; ?> class="button" />
         <input type="button" class="button button-minify-recommendations"<?php if (! $minify_enabled): ?> disabled="disabled"<?php endif; ?> value="Help" /> 
         <input type="hidden" name="page" value="<?php echo W3TC_FILE; ?>" />

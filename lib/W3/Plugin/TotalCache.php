@@ -2055,6 +2055,22 @@ class W3_Plugin_TotalCache extends W3_Plugin
              */
             $mobile_groups = apply_filters('w3tc_mobile_groups', $mobile_groups);
             
+            /**
+             * Sanitize mobile groups
+             */
+            foreach ($mobile_groups as $group => $group_config) {
+                $mobile_groups[$group] = array_merge(array(
+                    'theme' => '', 
+                    'enabled' => true, 
+                    'redirect' => '', 
+                    'agents' => array()
+                ), $group_config);
+                
+                $mobile_groups[$group]['agents'] = array_unique($mobile_groups[$group]['agents']);
+                $mobile_groups[$group]['agents'] = array_map('strtolower', $mobile_groups[$group]['agents']);
+                sort($mobile_groups[$group]['agents']);
+            }
+            
             $config->set('mobile.groups', $mobile_groups);
         }
         

@@ -64,7 +64,7 @@ class W3_Mobile
             foreach ($this->groups as $group => $config) {
                 if (isset($config['enabled']) && $config['enabled'] && isset($config['agents'])) {
                     foreach ((array) $config['agents'] as $agent) {
-                        if ($agent && isset($_SERVER['HTTP_USER_AGENT']) && stristr($_SERVER['HTTP_USER_AGENT'], $agent) !== false) {
+                        if ($agent && isset($_SERVER['HTTP_USER_AGENT']) && preg_match('~' . $agent . '~i', $_SERVER['HTTP_USER_AGENT'])) {
                             $mobile_group = $group;
                             
                             return $mobile_group;
