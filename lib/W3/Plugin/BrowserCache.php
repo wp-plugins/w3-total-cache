@@ -24,6 +24,13 @@ class W3_Plugin_BrowserCache extends W3_Plugin
             &$this, 
             'deactivate'
         ));
+        
+        if ($this->_config->get_boolean('browsercache.enabled') && $this->_config->get_boolean('browsercache.html.w3tc')) {
+            add_action('send_headers', array(
+                &$this, 
+                'send_headers'
+            ));
+        }
     }
     
     /**
@@ -64,6 +71,14 @@ class W3_Plugin_BrowserCache extends W3_Plugin
     {
         $this->remove_rules_no404wp();
         $this->remove_rules_cache();
+    }
+    
+    /**
+     * Send headers
+     */
+    function send_headers()
+    {
+        @header('X-Powered-By: ' . W3TC_POWERED_BY);
     }
     
     /**
@@ -231,6 +246,8 @@ class W3_Plugin_BrowserCache extends W3_Plugin
     {
         $cache_control = $this->_config->get_boolean('browsercache.' . $section . '.cache.control');
         $cache_policy = $this->_config->get_string('browsercache.' . $section . '.cache.policy');
+        $etag = $this->_config->get_boolean('browsercache.' . $section . '.etag');
+        $w3tc = $this->_config->get_boolean('browsercache.' . $section . '.w3tc');
         
         $rules .= "<FilesMatch \"\\.(" . implode('|', array_keys($mime_types)) . ")$\">\n";
         
@@ -282,12 +299,16 @@ class W3_Plugin_BrowserCache extends W3_Plugin
             }
         }
         
-        $etag = $this->_config->get_boolean('browsercache.' . $section . '.etag');
-        
         if ($etag) {
             $rules .= "    FileETag MTime Size\n";
         } else {
             $rules .= "    FileETag None\n";
+        }
+        
+        if ($w3tc) {
+            $rules .= "    <IfModule mod_headers.c>\n";
+            $rules .= "         Header set X-Powered-By \"" . W3TC_POWERED_BY . "\"\n";
+            $rules .= "    </IfModule>\n";
         }
         
         $rules .= "</FilesMatch>\n";

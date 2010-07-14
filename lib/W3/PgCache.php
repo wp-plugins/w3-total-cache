@@ -284,35 +284,40 @@ class W3_PgCache
                 /**
                  * Store different versions of cache
                  */
+                $buffers = array();
+                
                 foreach ($compressions as $_compression) {
                     $_page_key = $this->_get_page_key($this->_request_uri, $_compression);
                     
                     /**
                      * Compress content
                      */
-                    $_content = $buffer;
+                    $buffers[$_compression] = $buffer;
                     
-                    $this->_compress($_content, $_compression);
+                    $this->_compress($buffers[$_compression], $_compression);
                     
                     /**
                      * Store cache data
                      */
                     if ($this->_enhanced_mode) {
-                        $cache->set($_page_key, $_content);
+                        $cache->set($_page_key, $buffers[$_compression]);
                     } else {
                         $_data = array(
                             '404' => $is_404, 
                             'headers' => $headers, 
                             'time' => $time, 
-                            'content' => $_content
+                            'content' => &$buffers[$_compression]
                         );
                         
                         $cache->set($_page_key, $_data, $this->_lifetime);
                     }
-                    
-                    if ($compression == $_compression) {
-                        $buffer = & $_content;
-                    }
+                }
+                
+                /**
+                 * Change buffer if using compression
+                 */
+                if ($compression) {
+                    $buffer = & $buffers[$compression];
                 }
                 
                 /**
@@ -1161,12 +1166,6 @@ class W3_PgCache
                     'Etag' => $etag
                 ));
             }
-            
-            if ($this->_config->get_boolean('browsercache.html.w3tc')) {
-                $headers = array_merge($headers, array(
-                    'X-Powered-By' => W3TC_POWERED_BY
-                ));
-            }
         }
         
         if ($compression) {
@@ -1277,9 +1276,10 @@ class W3_PgCache
     function _get_comments_pagenum_link($post_id, $pagenum = 1, $max_page = 0)
     {
         if (function_exists('get_comments_pagenum_link')) {
-            if (isset($GLOBALS['post'])) {
+            if (isset($GLOBALS['post']) && is_object($GLOBALS['post'])) {
                 $old_post = &$GLOBALS['post'];
             } else {
+                $GLOBALS['post'] = & new stdClass();
                 $old_post = null;
             }
             
@@ -1381,7 +1381,7 @@ class W3_PgCache
      */
     function _has_dynamic(&$buffer)
     {
-        return preg_match('~<!--\s*m(func|clude)(.*)-->(.*)<!--\s*/m(func|clude)\s*-->~is', $buffer);
+        return preg_match('~<!--\s*m(func|clude)(.*)-->(.*)<!--\s*/m(func|clude)\s*-->~Uis', $buffer);
     }
 }
 

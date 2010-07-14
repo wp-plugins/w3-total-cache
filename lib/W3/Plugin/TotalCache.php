@@ -3038,17 +3038,15 @@ class W3_Plugin_TotalCache extends W3_Plugin
         
         @$w3_plugin_cdn->export_library($limit, $offset, $count, $total, $results);
         
-        echo sprintf('{"limit": %d, "offset": %d, "count": %d, "total": %d, "results": [', $limit, $offset, $count, $total);
+        $response = array(
+            'limit' => $limit, 
+            'offset' => $offset, 
+            'count' => $count, 
+            'total' => $total, 
+            'results' => $results
+        );
         
-        $results_count = count($results);
-        foreach ($results as $index => $result) {
-            echo sprintf('{"local_path": "%s", "remote_path": "%s", "result": %d, "error": "%s"}', addslashes($result['local_path']), addslashes($result['remote_path']), addslashes($result['result']), addslashes($result['error']));
-            if ($index < $results_count - 1) {
-                echo ',';
-            }
-        }
-        
-        echo ']}';
+        echo json_encode($response);
     }
     
     /**
@@ -3088,17 +3086,15 @@ class W3_Plugin_TotalCache extends W3_Plugin
         
         @$w3_plugin_cdn->import_library($limit, $offset, $count, $total, $results);
         
-        echo sprintf('{"limit": %d, "offset": %d, "count": %d, "total": %d, "results": [', $limit, $offset, $count, $total);
+        $response = array(
+            'limit' => $limit, 
+            'offset' => $offset, 
+            'count' => $count, 
+            'total' => $total, 
+            'results' => $results
+        );
         
-        $results_count = count($results);
-        foreach ($results as $index => $result) {
-            echo sprintf('{"src": "%s", "dst": "%s", "result": %d, "error": "%s"}', addslashes($result['src']), addslashes($result['dst']), addslashes($result['result']), addslashes($result['error']));
-            if ($index < $results_count - 1) {
-                echo ',';
-            }
-        }
-        
-        echo ']}';
+        echo json_encode($response);
     }
     
     /**
@@ -3137,17 +3133,15 @@ class W3_Plugin_TotalCache extends W3_Plugin
         
         @$w3_plugin_cdn->rename_domain($names, $limit, $offset, $count, $total, $results);
         
-        echo sprintf('{"limit": %d, "offset": %d, "count": %d, "total": %d, "results": [', $limit, $offset, $count, $total);
+        $response = array(
+            'limit' => $limit, 
+            'offset' => $offset, 
+            'count' => $count, 
+            'total' => $total, 
+            'results' => $results
+        );
         
-        $results_count = count($results);
-        foreach ($results as $index => $result) {
-            echo sprintf('{"old": "%s", "new": "%s", "result": %d, "error": "%s"}', addslashes($result['old']), addslashes($result['new']), addslashes($result['result']), addslashes($result['error']));
-            if ($index < $results_count - 1) {
-                echo ',';
-            }
-        }
-        
-        echo ']}';
+        echo json_encode($response);
     }
     
     /**
@@ -3210,18 +3204,11 @@ class W3_Plugin_TotalCache extends W3_Plugin
         
         $w3_plugin_cdn->upload($upload, false, $results);
         
-        echo '{"results": [';
+        $response = array(
+            'results' => $results
+        );
         
-        $results_count = count($results);
-        foreach ($results as $index => $result) {
-            echo sprintf('{"local_path": "%s", "remote_path": "%s", "result": %d, "error": "%s"}', addslashes($result['local_path']), addslashes($result['remote_path']), addslashes($result['result']), addslashes($result['error']));
-            if ($index < $results_count - 1) {
-                echo ',';
-            }
-            echo "\r\n";
-        }
-        
-        echo ']}';
+        echo json_encode($response);
     }
     
     /**
@@ -3342,7 +3329,12 @@ class W3_Plugin_TotalCache extends W3_Plugin
             }
         }
         
-        echo sprintf('{"result": %d, "error": "%s"}', $result, addslashes($error));
+        $response = array(
+            'result' => $result, 
+            'error' => $error
+        );
+        
+        echo json_encode($response);
     }
     
     /**
@@ -3384,7 +3376,12 @@ class W3_Plugin_TotalCache extends W3_Plugin
         
         }
         
-        echo sprintf('{"result": %d, "error": "%s"}', $result, addslashes($error));
+        $response = array(
+            'result' => $result, 
+            'error' => $error
+        );
+        
+        echo json_encode($response);
     }
     
     /**
@@ -3468,7 +3465,9 @@ class W3_Plugin_TotalCache extends W3_Plugin
     function test_memcached()
     {
         require_once W3TC_LIB_W3_DIR . '/Request.php';
+        
         $servers = W3_Request::get_array('servers');
+        
         if ($this->is_memcache_available($servers)) {
             $result = true;
             $error = 'Test passed.';
@@ -3476,7 +3475,13 @@ class W3_Plugin_TotalCache extends W3_Plugin
             $result = false;
             $error = 'Test failed.';
         }
-        echo sprintf('{"result": %d, "error": "%s"}', $result, addslashes($error));
+        
+        $response = array(
+            'result' => $result, 
+            'error' => $error
+        );
+        
+        echo json_encode($response);
     }
     
     /**
@@ -3700,7 +3705,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
                 /**
                  * Replace links for preview mode
                  */
-                if (w3_is_preview_mode()) {
+                if (w3_is_preview_mode() && isset($_SERVER['HTTP_USER_AGENT']) && $_SERVER['HTTP_USER_AGENT'] != W3TC_POWERED_BY) {
                     $domain_url_regexp = w3_get_domain_url_regexp();
                     
                     $buffer = preg_replace_callback('~(href|src|action)=([\'"])(' . $domain_url_regexp . ')?(/[^\'"]*)~', array(
@@ -4021,7 +4026,12 @@ class W3_Plugin_TotalCache extends W3_Plugin
             $result = false;
         }
         
-        echo sprintf('{"result": %d, "error": "%s"}', $result, addslashes($error));
+        $response = array(
+            'result' => $result, 
+            'error' => $error
+        );
+        
+        echo json_encode($response);
     }
     
     /**
@@ -4672,7 +4682,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
         
         $content = preg_replace('~<!--\[if.*\]-->~sU', '', $content);
         
-        if (preg_match_all('~<link\s+([^>]+)/?>(.*</link>)?~is', $content, $matches, PREG_SET_ORDER)) {
+        if (preg_match_all('~<link\s+([^>]+)/?>(.*</link>)?~Uis', $content, $matches, PREG_SET_ORDER)) {
             foreach ($matches as $match) {
                 $attrs = array();
                 $attr_matches = null;
