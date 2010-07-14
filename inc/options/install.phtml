@@ -285,15 +285,24 @@
     
     <hr />
     
-    <p><strong>Note(s):</strong></p>
+	<fieldset>
+		<legend>Note(s):</legend>
+
+        <table class="form-table">
+        	<tr>
+        		<th valign="top" colspan="2">
+					<ul>
+						<li>The provided instructions are for 32-bit CentOS, however we can provide others based on <a href="mailto:wordpressexperts@w3-edge.com">your requests</a>.</li>
+						<li>In the case where Apache is not used, the .htaccess file located in the root directory of the WordPress installation, wp-content/w3tc/pgcache/.htaccess and wp-content/w3tc/min/.htaccess contain directives that must be re-created for your web server software.</li>
+						<li>Restarting the web server will empty the opcode cache, which means it will have to be rebuilt over time and your site's performance will suffer during this period. Still, an opcode cache should be installed in any case to maximize WordPress performance.</li>
+						<li>Consider using memcached for objects that must persist across web server restarts or that you wish to share amongst your pool of servers (or cluster), e.g.: database objects or page cache.</li>
+						<li>Some yum or mirrors may not have the necessary packages, in such cases you may have to do a manual installation.</li>
+					</ul>
+        		</th>
+        	</tr>
+        </table>
+	</fieldset>
     
-    <ul>
-		<li>The provided instructions are for 32-bit CentOS, however we can provide others based on <a href="mailto:wordpressexperts@w3-edge.com">your requests</a>.</li>
-		<li>In the case where Apache is not used, the .htaccess file located in the root directory of the WordPress installation, wp-content/w3tc/pgcache/.htaccess and wp-content/w3tc/min/.htaccess contain directives that must be re-created for your web server software.</li>
-		<li>Restarting the web server will empty the opcode cache, which means it will have to be rebuilt over time and your site's performance will suffer during this period. Still, an opcode cache should be installed in any case to maximize WordPress performance.</li>
-		<li>Consider using memcached for objects that must persist across web server restarts or that you wish to share amongst your pool of servers (or cluster), e.g.: database objects or page cache.</li>
-		<li>Some yum or mirrors may not have the necessary packages, in such cases you may have to do a manual installation.</li>
-    </ul>
 </div>
 
 <?php include W3TC_DIR . '/inc/options/common/footer.phtml'; ?>

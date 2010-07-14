@@ -18,7 +18,7 @@ mobile_themes['<?php echo addslashes($theme_key); ?>'] = '<?php echo addslashes(
 	<fieldset>
 		<legend>Manage User Agent Groups</legend>
 		<p>
-			<input id="mobile_add" type="button" class="button" value="Create a group" /> of user agents by specifying names in the user agents field. Assign a set of user agents to use a specific theme, redirect them to another domain or if an existing mobile plugin is active, create user agent groups to ensure that a unique cache is used for each user agent group. Drag and drop groups into order (if needed) to determine their priority.
+			<input id="mobile_add" type="button" class="button" value="Create a group" /> of user agents by specifying names in the user agents field. Assign a set of user agents to use a specific theme, redirect them to another domain or if an existing mobile plugin is active, create user agent groups to ensure that a unique cache is created for each user agent group. Drag and drop groups into order (if needed) to determine their priority.
 		</p>
 
 		<ul id="mobile_groups">
@@ -53,7 +53,7 @@ mobile_themes['<?php echo addslashes($theme_key); ?>'] = '<?php echo addslashes(
                 				<option value="<?php echo htmlspecialchars($theme_key); ?>"<?php selected($theme_key, $group_config['theme']); ?>><?php echo htmlspecialchars($theme_name); ?></option>
     	            			<?php endforeach; ?>
                 			</select>
-                			<br /><span class="description">Assign this group of user agents to a specific them. Leaving this option "Active Theme" allows any plugins you have (e.g. mobile plugins) to properly handle requests for these user agents. If the "redirect users to" field is not empty, this setting is ignored.</span>
+                			<br /><span class="description">Assign this group of user agents to a specific them. Leaving this option "Pass-through" allows any plugins you have (e.g. mobile plugins) to properly handle requests for these user agents. If the "redirect users to" field is not empty, this setting is ignored.</span>
                 		</td>
                 	</tr>
                 	<tr>
@@ -71,7 +71,7 @@ mobile_themes['<?php echo addslashes($theme_key); ?>'] = '<?php echo addslashes(
                 		</th>
                 		<td>
                 			<textarea id="mobile_groups_<?php echo htmlspecialchars($group); ?>_agents" name="mobile_groups[<?php echo htmlspecialchars($group); ?>][agents]" rows="10" cols="50"><?php echo htmlspecialchars(implode("\r\n", (array) $group_config['agents'])); ?></textarea>
-                			<br /><span class="description">Specify the user agents for this group.</span>
+                			<br /><span class="description">Specify the user agents for this group. Remember to escape spaces with a backslash!</span>
                 		</td>
                 	</tr>
                 </table>

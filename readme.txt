@@ -249,9 +249,10 @@ Please reach out to all of these people and support their projects if you're so 
 
 = Press: Mentions, Tutorials &amp; Reviews =
 
-* July 12th, 2010: [Install and Configure W3 Total Cache in 7 Easy Steps](http://zemalf.com/1443/w3-total-cache/), Antti Kokkonen
-* July 9th, 2010: [How to Reduce the Loading Time of Your Blog](http://www.admixweb.com/2010/07/09/how-to-reduce-the-loading-time-of-your-blog/), Rishabh Agarwal
-* July 6th, 2010: [5 Wordpress Plugins You Need To Know About](http://thenextweb.com/apps/2010/07/06/5-wordpress-plugins-you-need-to-know-about/), James Hicks
+* July 14, 2010: [Top 10 Wordpress Plugins which I use on DailyBlogging](http://www.dailyblogging.org/wordpress/top-10-wordpress-plugins-which-i-use-on-dailyblogging/), Mani Viswanathan
+* July 12, 2010: [Install and Configure W3 Total Cache in 7 Easy Steps](http://zemalf.com/1443/w3-total-cache/), Antti Kokkonen
+* July 9, 2010: [How to Reduce the Loading Time of Your Blog](http://www.admixweb.com/2010/07/09/how-to-reduce-the-loading-time-of-your-blog/), Rishabh Agarwal
+* July 6, 2010: [5 Wordpress Plugins You Need To Know About](http://thenextweb.com/apps/2010/07/06/5-wordpress-plugins-you-need-to-know-about/), James Hicks
 * June 22, 2010: [12 Ways to Improve Wordpress Page Load Time](http://myblog2day.com/12-ways-to-improve-wordpress-page-load-time.php), Lee Ka Hoong
 * June 21, 2010: [Significantly Speed Up Your WordPress Blog in 9 Easy Steps](http://www.bloggingpro.com/archives/2010/06/21/significantly-speed-up-your-wordpress-blog-in-9-easy-steps/), Robyn-Dale Samuda
 * June 10, 2010: [Speed 'Em Up: Wordpress &amp; W3 Total Cache](http://translate.google.com/translate?js=y&prev=_t&hl=en&ie=UTF-8&layout=1&eotf=1&u=http://www.andilicious.com/blog/1473/20100610/wordpress-beschleunigen-grundlagen-w3-total-cache-page-speed&sl=auto&tl=en),  Andi Licious
@@ -294,14 +295,18 @@ Read [testimonials](http://bit.ly/6Wbvpt) from W3TC users.
 == Changelog ==
 
 = 0.9.0 =
-* Added preview feature so all cache settings can be reviewed prior to deploy
+* Added preview feature so all cache settings can be reviewed prior to deployment
 * Added minify configuration wizard (help button on minify tab)
 * Added "never cache the following pages" to database and object cache
 * Added minify option to JavaScript embed after <body>
 * Added minify error notifications
 * Added drag and drop dependency resolution for minify CSS / JavaScript groups
 * Added object caching
-* Added support for multiple CNAMEs
+* Added option to automatically page cache prime (preload) with or without XML sitemap
+* Added support for multiple CNAMEs to CDN
+* Added support for minifcation of any respective theme installed a single site
+* Added support for page caching of multiple themes for various user agent groups
+* Added support for theme switching / redirection based on groups of user agents
 * Added compatibility with WP Super Cache fragment caching method (disk basic mode only)
 * Added http compression and headers for AWS S3
 * Added ignored comment stems field, with Google AdSense default value
@@ -313,12 +318,14 @@ Read [testimonials](http://bit.ly/6Wbvpt) from W3TC users.
 * Added option to handle 404 errors for static objects directly with the web server
 * Added support for gravity forms to database cache default settings
 * Added settings file import / export
-* Database connection errors now return internal server (500) error response and are not cached
+* Database connection errors now return internal server (500) error response and are thus not cached
 * Incomplete plugin installation /removal no longer generates public errors
 * Unterminated string errors no longer display publicly
 * Support tab improvements
 * Install tab improvements
 * Resolved conflicts with disk enhanced .htaccess directives insertion
+* Improved compatibility with all mobile plugins
+* Improved AWS reliability
 * Improved browser caching support and management
 * Improved directory management for disk caching methods for increased performance
 * Improved handling of missing minify files
@@ -412,7 +419,7 @@ Read [testimonials](http://bit.ly/6Wbvpt) from W3TC users.
 * Fixed various bugs with emptying cache under various obscure permutations
 * Fixed bug with installations deeper than document root
 
-= 0.8 =
+= 0.8.0 =
 * Added disk as method for page caching
 * Added support for mirror (origin pull) content delivery networks
 * Added options to specify minify group policies per template
@@ -470,13 +477,13 @@ Read [testimonials](http://bit.ly/6Wbvpt) from W3TC users.
 * Eliminated false negatives in a number of gzip / deflate compression analysis tools
 * Total plugin file size reduced
 
-= 0.7 =
+= 0.7.0 =
 * Added minify support for URIs starting with /
 * WordPress network mode support bug fixes
 * Minor CDN uploader fixes
 * Minor error message improvements
 
-= 0.6 =
+= 0.6.0 =
 * Added "Debug Mode" listing all settings and queries with statistics
 * Improved error message notifications
 * Improved cache stability for large objects
@@ -484,5 +491,5 @@ Read [testimonials](http://bit.ly/6Wbvpt) from W3TC users.
 * Support for multiple wordpress installations added
 * Resolved bug in minification of feeds
 
-= 0.5 =
+= 0.5.0 =
 * Initial release

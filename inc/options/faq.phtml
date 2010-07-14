@@ -106,6 +106,7 @@
         <li><a href="#q104">How do I implement fragment caching?</li>
         <li><a href="#q105">How can I prevent caching directly in my templates etc?</li>
         <li><a href="#q106">How can I flush the cache without using the WP Admin interface?</li>
+        <li><a href="#q107">How do I programmatically modify user agent groups?</li>
       </ul>
     </li>
     <li class="col">
@@ -524,12 +525,12 @@ No, you can drag and drop them into the desired order on the minify settings pag
   <p id="q104"><strong>How do I implement fragment caching?</strong><br />
 	Edit your templates to with the following syntax to ensure that dynamic features remain so:
 	<ul>
-		<li>Example 1:<br /><!-- mfunc any PHP code --><!-- /mfunc --></li>
-		<li>Example 2:<br /><!-- mfunc -->any PHP code<!-- /mfunc --></li>
-		<li>Example 3:<br /><!--MFUNC&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--><br />        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;echo rand();<br />
-		<!--/mfunc --></li>
-		<li>Example 4:<br /><!-- mclude path/to/file.php --><!-- /mclude --></li>
-		<li>Example 5:<br /><!-- mclude -->path/to/file.php<!-- /mclude --></li>
+		<li>Example 1:<br />&lt;!-- mfunc any PHP code --&gt;&lt;!-- /mfunc --&gt;</li>
+		<li>Example 2:<br />&lt;!-- mfunc --&gt;any PHP code&lt;!-- /mfunc --&gt;</li>
+		<li>Example 3:<br />&lt;!--MFUNC&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&gt;<br />        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;echo rand();<br />
+		&lt;!--/mfunc --&gt;</li>
+		<li>Example 4:<br />&lt;!-- mclude path/to/file.php --&gt;&lt;!-- /mclude --&gt;</li>
+		<li>Example 5:<br />&lt;!-- mclude --&gt;path/to/file.php&lt;!-- /mclude --&gt;</li>
 	</ul>
 	</p>
   <p align="right"><a href="#toc">back to top</a></p>
@@ -555,6 +556,51 @@ No, you can drag and drop them into the desired order on the minify settings pag
 			w3tc_pgcache_flush_post($post_id);<br />
 		}</li>
 	</ul>
+  <p align="right"><a href="#toc">back to top</a></p>
+  <p id="q107"><strong>How do I programmatically modify user agent groups?</strong><br />
+  	The following are commented examples of filters that can be used to manipulate user agent groups:
+	<p>function my_cached_mobile_groups($groups) {<br />
+	  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// any operations on array<br />
+	  <br />
+	  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// specify two groups example<br />
+	  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$groups = array_merge($groups, array(<br />
+	  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'favorite_browsers' =&gt; array('opera', 'chrome'),<br />
+	  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'default_browsers' =&gt; array('msie', 'firefox')<br />
+	  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;));<br />
+	  <br />
+	  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return $groups;<br />
+	  }<br />
+	  add_filter('cached_mobile_groups', 'my_cached_mobile_groups');<br />
+	</p>
+	<p>function my_w3tc_mobile_groups($w3tc_groups) {<br />
+	  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// any operations <br />
+	  <br />
+	  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// clear all groups example<br />
+	  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$w3tc_groups = array();<br />
+	  <br />
+	  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// delete all groups and add new example<br />
+	  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$w3tc_groups = array(....);<br />
+	  <br />
+	  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// merge groups example:<br />
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$w3tc_groups = array_merge($w3tc_groups, array(<br />
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'good_browsers'     =&gt; array(<br />
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'theme' =&gt; 'good_theme/good_theme',<br />
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'enabled' =&gt; true,<br />
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'redirect' =&gt; '',<br />
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'agents' =&gt; array('firefox', 'chrome')<br />
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;),<br />
+	<br />
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'bad_browsers'     =&gt; array(<br />
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'theme' =&gt; 'bad_theme/bad_theme',<br />
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'enabled' =&gt; true,<br />
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'redirect' =&gt; '',<br />
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'agents' =&gt; array('msie', 'opera')<br />
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br />
+	));<br />
+	<br />
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return $w3tc_groups;<br />
+	}<br />
+	add_filter('w3tc_mobile_groups', 'my_w3tc_mobile_groups');</p>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q78"><strong>Which web servers do you support?</strong><br />
     We are aware of no incompatibilities with <a href="http://httpd.apache.org/" target="_blank">apache</a> 1.3+, <a href="http://www.iis.net/" target="_blank">IIS</a> 5+ or <a href="http://litespeedtech.com/products/webserver/overview/" target="_blank">litespeed</a> 4.0.2+. If there's a web server you feel we should be actively testing (e.g. <a href="http://www.lighttpd.net/" target="_blank">lighttpd</a>), we're <a href="mailto:wordpressexperts@w3-edge.com">interested in hearing</a>.</p>
