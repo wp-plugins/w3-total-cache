@@ -351,7 +351,7 @@ class W3_Config
         'cdn.includes.enable' => true, 
         'cdn.includes.files' => '*.css;*.js;*.gif;*.png;*.jpg', 
         'cdn.theme.enable' => true, 
-        'cdn.theme.files' => '*.css;*.js;*.gif;*.png;*.jpg;*.ico', 
+        'cdn.theme.files' => '*.css;*.js;*.gif;*.png;*.jpg;*.ico;*.ttf;*.otf,*.woff', 
         'cdn.minify.enable' => true, 
         'cdn.custom.enable' => true, 
         'cdn.custom.files' => array(

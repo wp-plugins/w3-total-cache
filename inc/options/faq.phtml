@@ -1,7 +1,5 @@
 <?php include W3TC_DIR . '/inc/options/common/header.phtml'; ?>
 
-<h3><acronym title="Frequently Asked Questions">FAQ</acronym></h3>
-
 <h4>Table of Contents</h4>
 
 <div id="toc">
@@ -103,10 +101,10 @@
         <li><a href="#q101">Is this plugin comptatible with TDO Mini Forms?</a></li>
         <li><a href="#q102">My YSlow score is low because doesn't recognize my <acronym title="Content Delivery Network">CDN</acronym>, what can I do?</a></li>
         <li><a href="#q103">What is the purpose of the "modify attachment <acronym title="Uniform Resource Indicator">URL</acronym>s" button?</a></li>
-        <li><a href="#q104">How do I implement fragment caching?</li>
-        <li><a href="#q105">How can I prevent caching directly in my templates etc?</li>
-        <li><a href="#q106">How can I flush the cache without using the WP Admin interface?</li>
-        <li><a href="#q107">How do I programmatically modify user agent groups?</li>
+        <li><a href="#q104">How do I implement fragment caching?</a></li>
+        <li><a href="#q105">How can I prevent caching directly in my templates etc?</a></li>
+        <li><a href="#q106">How can I flush the cache without using the WP Admin interface?</a></li>
+        <li><a href="#q107">How do I programmatically modify user agent groups?</a></li>
       </ul>
     </li>
     <li class="col">
@@ -523,7 +521,7 @@ No, you can drag and drop them into the desired order on the minify settings pag
   <p>As always, it never hurts to back up your database first.</p>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q104"><strong>How do I implement fragment caching?</strong><br />
-	Edit your templates to with the following syntax to ensure that dynamic features remain so:
+	Edit your templates to with the following syntax to ensure that dynamic features remain so:</p>
 	<ul>
 		<li>Example 1:<br />&lt;!-- mfunc any PHP code --&gt;&lt;!-- /mfunc --&gt;</li>
 		<li>Example 2:<br />&lt;!-- mfunc --&gt;any PHP code&lt;!-- /mfunc --&gt;</li>
@@ -532,10 +530,9 @@ No, you can drag and drop them into the desired order on the minify settings pag
 		<li>Example 4:<br />&lt;!-- mclude path/to/file.php --&gt;&lt;!-- /mclude --&gt;</li>
 		<li>Example 5:<br />&lt;!-- mclude --&gt;path/to/file.php&lt;!-- /mclude --&gt;</li>
 	</ul>
-	</p>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q105"><strong>How can I prevent caching directly in my templates etc?</strong><br />
-  	Several constants are available for these purposes:
+  	Several constants are available for these purposes:</p>
 	<ul>
 		<li>define('DONOTCACHEPAGE', true);<br />Disables page caching for a given page.</li>
 		<li>define('DONOTCACHEDB', true);<br />Disables database caching for given page.</li>
@@ -545,7 +542,7 @@ No, you can drag and drop them into the desired order on the minify settings pag
 	</ul>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q106"><strong>How can I flush the cache without using the WP Admin interface?</strong><br />
-  	It's possible to empty the entire cache or simply purge the cache of a single post / page:
+  	It's possible to empty the entire cache or simply purge the cache of a single post / page:</p>
 	<ul>
 		<li>Purge the entire page cache:<br />
 		if (function_exists('w3tc_pgcache_flush')) {<br />
@@ -558,7 +555,7 @@ No, you can drag and drop them into the desired order on the minify settings pag
 	</ul>
   <p align="right"><a href="#toc">back to top</a></p>
   <p id="q107"><strong>How do I programmatically modify user agent groups?</strong><br />
-  	The following are commented examples of filters that can be used to manipulate user agent groups:
+  	The following are commented examples of filters that can be used to manipulate user agent groups:</p>
 	<p>function my_cached_mobile_groups($groups) {<br />
 	  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// any operations on array<br />
 	  <br />

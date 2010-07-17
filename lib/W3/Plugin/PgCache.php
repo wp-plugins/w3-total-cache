@@ -693,6 +693,11 @@ class W3_Plugin_PgCache extends W3_Plugin
         
         $rules = '';
         $rules .= "# BEGIN W3TC Page Cache\n";
+        
+        if ($browsercache && $this->_config->get_integer('browsercache.html.etag')) {
+            $rules .= "FileETag MTime Size\n";
+        }
+        
         $rules .= "AddDefaultCharset " . ($charset ? $charset : 'UTF-8') . "\n";
         
         if ($browsercache && $compression) {

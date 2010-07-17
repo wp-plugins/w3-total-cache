@@ -82,7 +82,7 @@ var W3tc_Popup_Cdn_Export_File = {
         if (this.upload_files.length) {
             jQuery.ajax( {
                 type: 'POST',
-                url: 'options-general.php?page=w3-total-cache/w3-total-cache.php',
+                url: 'admin.php?page=w3tc_cdn',
                 data: {
                     w3tc_action: 'cdn_export_process',
                     'files[]': this.upload_files
@@ -171,6 +171,7 @@ var W3tc_Popup_Cdn_Export_File = {
                     me.offset = 0;
                     me.seconds_elapsed = 0;
                     me.clear_log();
+                    me.set_progress(0);
                     me.set_elapsed('-');
                 }
                 me.paused = 0;
@@ -240,7 +241,7 @@ var W3tc_Popup_Cdn_Export_Library = {
         var me = this;
         jQuery.ajax( {
             type: 'POST',
-            url: 'options-general.php?page=w3-total-cache/w3-total-cache.php',
+            url: 'admin.php?page=w3tc_cdn',
             data: {
                 w3tc_action: 'cdn_export_library_process',
                 limit: this.limit,
@@ -325,6 +326,7 @@ var W3tc_Popup_Cdn_Export_Library = {
                     me.offset = 0;
                     me.seconds_elapsed = 0;
                     me.clear_log();
+                    me.set_progress(0);
                     me.set_elapsed('-');
                 }
                 me.paused = 0;
@@ -426,7 +428,7 @@ var W3tc_Popup_Cdn_Import_Library = {
         var me = this;
         jQuery.ajax( {
             type: 'POST',
-            url: 'options-general.php?page=w3-total-cache/w3-total-cache.php',
+            url: 'admin.php?page=w3tc_cdn',
             data: {
                 w3tc_action: 'cdn_import_library_process',
                 limit: this.limit,
@@ -514,6 +516,7 @@ var W3tc_Popup_Cdn_Import_Library = {
                     me.offset = 0;
                     me.seconds_elapsed = 0;
                     me.clear_log();
+                    me.set_progress(0);
                     me.clear_rules();
                     me.set_elapsed('-');
                 }
@@ -588,7 +591,7 @@ var W3tc_Popup_Cdn_Rename_Domain = {
         var me = this;
         jQuery.ajax( {
             type: 'POST',
-            url: 'options-general.php?page=w3-total-cache/w3-total-cache.php',
+            url: 'admin.php?page=w3tc_cdn',
             data: {
                 w3tc_action: 'cdn_rename_domain_process',
                 names: this.get_domain_names(),
@@ -679,6 +682,7 @@ var W3tc_Popup_Cdn_Rename_Domain = {
                     me.offset = 0;
                     me.seconds_elapsed = 0;
                     me.clear_log();
+                    me.set_progress(0);
                     me.set_elapsed('-');
                 }
                 me.paused = 0;

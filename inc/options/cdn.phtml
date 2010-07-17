@@ -1,8 +1,6 @@
 <?php include W3TC_DIR . '/inc/options/common/header.phtml'; ?>
 <?php wp_print_scripts('jquery-ui-sortable') ?>
 
-<h3>Content Delivery Network Settings</h3>
-
 <p>
 	Content Delivery Network support via
 	<strong><?php echo w3_get_engine_name($this->_config->get_string('cdn.engine')); ?></strong>
@@ -11,19 +9,20 @@
 
 <?php if ($cdn_mirror): ?>
 <p>
-	You can <input id="cdn_rename_domain" class="button" type="button" value="modify attachment URLs" />,
-	<input id="cdn_import_library" class="button" type="button" value="import attachments into the Media Library" /> now.
+	Maximize <acronym title="Content Delivery Network">CDN</acronym> usage by <input id="cdn_rename_domain" class="button" type="button" value="modify attachment URLs" /> or
+	<input id="cdn_import_library" class="button" type="button" value="importing attachments into the Media Library" />.
 </p>
 <?php else: ?>
 <p>
-	You can <input id="cdn_export_library" class="button" type="button" value="export media library to CDN" />,
-	<input id="cdn_import_library" class="button" type="button" value="import attachments into the Media Library" />,
-	<input id="cdn_queue" class="button" type="button" value="view unsuccessful file transfers" /> or
-	<input id="cdn_rename_domain" class="button" type="button" value="modify attachment URLs" /> now.
+	Prepare the <acronym title="Content Delivery Network">CDN</acronym> by:
+	<input id="cdn_import_library" class="button" type="button" value="importing attachments into the Media Library" /> then
+	<input id="cdn_export_library" class="button" type="button" value="exporting media library to CDN" />.
+	Check <input id="cdn_queue" class="button" type="button" value="unsuccessful file transfers" /> if some objects appear to be missing.
+	<input id="cdn_rename_domain" class="button" type="button" value="Modify attachment URLs" /> if the domain name of your site has ever changed.
 </p>
 <?php endif; ?>
 
-<form action="options-general.php?page=<?php echo urldecode(W3TC_FILE); ?>&amp;tab=<?php echo $this->_tab; ?>" method="post">
+<form action="admin.php?page=<?php echo $this->_page; ?>" method="post">
 	<fieldset id="w3tc-cdn-general">
 		<legend>General</legend>
 
@@ -203,7 +202,7 @@
         	<tr>
         		<th valign="top" colspan="2">
 					<ul>
-						<li>When using the Self-Hosted <acronym title="Content Delivery Network">CDN</acronym> type, enable <acronym title="Hypertext Transfer Protocol">HTTP</acronym> compression in the "Media &amp; Other Files" section on <a href="?page=w3-total-cache/w3-total-cache.php&amp;tab=browsercache">Browser Cache</a> Settings tab.</li>
+						<li>If using Amazon Web Services or Self-Hosted <acronym title="Content Delivery Network">CDN</acronym> types, enable <acronym title="Hypertext Transfer Protocol">HTTP</acronym> compression in the "Media &amp; Other Files" section on <a href="admin.php?page=w3tc_browsercache">Browser Cache</a> Settings tab.</li>
 					</ul>
         		</th>
         	</tr>

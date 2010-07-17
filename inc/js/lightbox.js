@@ -172,7 +172,7 @@ function w3tc_lightbox_support_us() {
     W3tc_Lightbox.open( {
         width: 590,
         height: 200,
-        url: 'options-general.php?page=w3-total-cache/w3-total-cache.php&w3tc_action=support_us',
+        url: 'admin.php?page=w3tc_general&w3tc_action=support_us',
         callback: function(lightbox) {
             jQuery('.button-tweet', lightbox.container).click(function(event) {
                 lightbox.close();
@@ -199,7 +199,7 @@ function w3tc_lightbox_tweet() {
     W3tc_Lightbox.open( {
         width: 550,
         height: 340,
-        url: 'options-general.php?page=w3-total-cache/w3-total-cache.php&w3tc_action=tweet',
+        url: 'admin.php?page=w3tc_general&w3tc_action=tweet',
         callback: function(lightbox) {
             jQuery('form', lightbox.container).submit(function() {
                 var me = this, username = jQuery('#tweet_username').val(), password = jQuery('#tweet_password').val();
@@ -216,7 +216,7 @@ function w3tc_lightbox_tweet() {
 
                 jQuery('input', this).attr('disabled', 'disabled');
 
-                jQuery.post('options-general.php?page=w3-total-cache/w3-total-cache.php', {
+                jQuery.post('admin.php?page=w3tc_general', {
                     w3tc_action: 'twitter_status_update',
                     username: username,
                     password: password
@@ -254,7 +254,7 @@ function w3tc_lightbox_minify_recommendations() {
     W3tc_Lightbox.open( {
         width: 1000,
         height: height,
-        url: 'options-general.php?page=w3-total-cache/w3-total-cache.php&w3tc_action=minify_recommendations',
+        url: 'admin.php?page=w3tc_minify&w3tc_action=minify_recommendations',
         callback: function(lightbox) {
             jQuery('#recom_container').css('height', height - 50);
 
@@ -299,7 +299,7 @@ function w3tc_lightbox_minify_recommendations() {
                     w3tc_minify_recommendations_checked[theme][hash] = jQuery(this).is(':checked');
                 });
 
-                lightbox.load('options-general.php?page=w3-total-cache/w3-total-cache.php&w3tc_action=minify_recommendations&theme_key=' + jQuery(this).val(), lightbox.options.callback);
+                lightbox.load('admin.php?page=w3tc_minify&w3tc_action=minify_recommendations&theme_key=' + jQuery(this).val(), lightbox.options.callback);
             });
 
             jQuery('#recom_js_check').click(function() {
@@ -376,7 +376,7 @@ function w3tc_lightbox_self_test() {
     W3tc_Lightbox.open( {
         width: 600,
         height: height,
-        url: 'options-general.php?page=w3-total-cache/w3-total-cache.php&w3tc_action=self_test',
+        url: 'admin.php?page=w3tc_general&w3tc_action=self_test',
         callback: function(lightbox) {
             jQuery('#self_test_container').css('height', height - 50);
 

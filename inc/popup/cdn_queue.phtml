@@ -23,13 +23,13 @@
 			<td><?php echo htmlspecialchars($result->last_error); ?></td>
 			<td align="center"><?php echo htmlspecialchars($result->date); ?></td>
 			<td align="center">
-				<a href="options-general.php?page=<?php echo W3TC_FILE; ?>&amp;w3tc_action=cdn_queue&amp;cdn_queue_tab=upload&amp;cdn_queue_action=delete&amp;cdn_queue_id=<?php echo $result->id; ?>" class="cdn_queue_delete">Delete</a>
+				<a href="admin.php?page=w3tc_cdn&amp;w3tc_action=cdn_queue&amp;cdn_queue_tab=upload&amp;cdn_queue_action=delete&amp;cdn_queue_id=<?php echo $result->id; ?>" class="cdn_queue_delete">Delete</a>
 			</td>
 		</tr>
 		<?php endforeach; ?>
 	</table>
 	<p>
-		<a href="options-general.php?page=<?php echo W3TC_FILE; ?>&amp;w3tc_action=cdn_queue&amp;cdn_queue_tab=upload&amp;cdn_queue_action=empty&amp;cdn_queue_type=<?php echo W3TC_CDN_COMMAND_UPLOAD; ?>" class="cdn_queue_empty">Empty upload queue</a>
+		<a href="admin.php?page=w3tc_cdn&amp;w3tc_action=cdn_queue&amp;cdn_queue_tab=upload&amp;cdn_queue_action=empty&amp;cdn_queue_type=<?php echo W3TC_CDN_COMMAND_UPLOAD; ?>" class="cdn_queue_empty">Empty upload queue</a>
 	</p>
 <?php else: ?>
 	<p class="empty">Upload queue is empty</p>
@@ -53,13 +53,13 @@
 			<td><?php echo htmlspecialchars($result->last_error); ?></td>
 			<td align="center"><?php echo htmlspecialchars($result->date); ?></td>
 			<td align="center">
-				<a href="options-general.php?page=<?php echo W3TC_FILE; ?>&amp;w3tc_action=cdn_queue&amp;cdn_queue_tab=delete&amp;cdn_queue_action=delete&amp;cdn_queue_id=<?php echo $result->id; ?>" class="cdn_queue_delete">Delete</a>
+				<a href="admin.php?page=w3tc_cdn&amp;w3tc_action=cdn_queue&amp;cdn_queue_tab=delete&amp;cdn_queue_action=delete&amp;cdn_queue_id=<?php echo $result->id; ?>" class="cdn_queue_delete">Delete</a>
 			</td>
 		</tr>
 		<?php endforeach; ?>
 	</table>
 	<p>
-		<a href="options-general.php?page=<?php echo W3TC_FILE; ?>&amp;w3tc_action=cdn_queue&amp;cdn_queue_tab=delete&amp;cdn_queue_action=empty&amp;cdn_queue_type=<?php echo W3TC_CDN_COMMAND_DELETE; ?>" class="cdn_queue_empty">Empty upload queue</a>
+		<a href="admin.php?page=w3tc_cdn&amp;w3tc_action=cdn_queue&amp;cdn_queue_tab=delete&amp;cdn_queue_action=empty&amp;cdn_queue_type=<?php echo W3TC_CDN_COMMAND_DELETE; ?>" class="cdn_queue_empty">Empty upload queue</a>
 	</p>
 <?php else: ?>
 	<p class="empty">Delete queue is empty</p>

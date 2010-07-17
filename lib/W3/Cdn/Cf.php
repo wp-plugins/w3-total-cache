@@ -100,18 +100,27 @@ class W3_Cdn_Cf extends W3_Cdn_S3
     /**
      * Create bucket
      * 
+     * @param string $container_id
      * @param string $error
-     * @return string
+     * @return boolean
      */
-    function create_container(&$error)
+    function create_container(&$container_id, &$error)
     {
-        if (parent::create_container($error)) {
+        if (parent::create_container($container_id, $error)) {
             $cnames = (!empty($this->_config['cname']) ? (array) $this->_config['cname'] : array());
             
-            if (!$this->_s3->createDistribution($this->_config['bucket'], true, $cnames)) {
+            $dist = $this->_s3->createDistribution($this->_config['bucket'], true, array());
+            
+            if (!$dist) {
                 $error = sprintf('Unable to create distribution for bucket %s.', $this->_config['bucket']);
                 
                 return false;
+            }
+            
+            $matches = null;
+            
+            if (preg_match('~^(.+)\.cloudfront\.net$~', $dist['domain'], $matches)) {
+                $container_id = $matches[1];
             }
             
             return true;

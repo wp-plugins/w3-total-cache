@@ -117,9 +117,16 @@ class W3_Cdn_Rscf extends W3_Cdn_Base
                 continue;
             }
             
+            try {
+                $object = & new CF_Object($this->_container, $remote_path, false, false);
+            } catch (Exception $exception) {
+                $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Unable to create object');
+                continue;
+            }
+            
             if (!$force_rewrite) {
                 try {
-                    list($status, $reason, $etag, $last_modified, $content_type, $content_length, $metadata) = $this->_container->cfs_http->head_object($this);
+                    list($status, $reason, $etag, $last_modified, $content_type, $content_length, $metadata) = $this->_container->cfs_http->head_object($object);
                 } catch (Exception $exception) {
                     $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Unable to get object info');
                     continue;
@@ -136,7 +143,6 @@ class W3_Cdn_Rscf extends W3_Cdn_Base
             }
             
             try {
-                $object = $this->_container->create_object($remote_path);
                 $object->load_from_filename($local_path);
                 
                 $result = true;
@@ -254,10 +260,11 @@ class W3_Cdn_Rscf extends W3_Cdn_Base
     /**
      * Creates container
      * 
+     * @param string $container_id
      * @param string $error
      * @return boolean
      */
-    function create_container(&$error)
+    function create_container(&$container_id, &$error)
     {
         if (!$this->_init($error)) {
             return false;
@@ -284,6 +291,12 @@ class W3_Cdn_Rscf extends W3_Cdn_Base
             $error = sprintf('Unable to create container: %s (%s).', $this->_config['container'], $exception->getMessage());
             
             return false;
+        }
+        
+        $matches = null;
+        
+        if (preg_match('~^https?://(.+)\.cdn\.cloudfiles\.rackspacecloud\.com$~', $container->cdn_uri, $matches)) {
+            $container_id = $matches[1];
         }
         
         return true;

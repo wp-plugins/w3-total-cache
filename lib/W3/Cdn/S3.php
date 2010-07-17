@@ -314,10 +314,11 @@ class W3_Cdn_S3 extends W3_Cdn_Base
     /**
      * Creates bucket
      *
+     * @param string $container_id
      * @param string $error
      * @return boolean
      */
-    function create_container(&$error)
+    function create_container(&$container_id, &$error)
     {
         if (!$this->_init($error)) {
             return false;

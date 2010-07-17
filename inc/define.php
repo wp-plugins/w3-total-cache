@@ -1077,6 +1077,7 @@ function w3_http_request($method, $url, $data = '', $auth = '', $check_status = 
         curl_setopt($ch, CURLOPT_FORBID_REUSE, true);
         curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 180);
         
         switch ($method) {
             case 'POST':
@@ -1366,27 +1367,27 @@ function w3_get_engine_name($engine)
             break;
         
         case 'netdna':
-            $engine_name = 'mirror: NetDNA / MaxCDN';
+            $engine_name = 'mirror: netdna / maxcdn';
             break;
         
         case 'ftp':
-            $engine_name = 'self-hosted / File Transfer Protocol Upload';
+            $engine_name = 'self-hosted / file transfer protocol upload';
             break;
         
         case 's3':
-            $engine_name = 'Amazon Simple Storage Service (S3)';
+            $engine_name = 'amazon simple storage service (s3)';
             break;
         
         case 'cf':
-            $engine_name = 'Amazon CloudFront';
+            $engine_name = 'amazon cloudfront';
             break;
         
         case 'rscf':
-            $engine_name = 'Rackspace Cloud Files';
+            $engine_name = 'rackspace cloud files';
             break;
         
         default:
-            $engine_name = 'N/A';
+            $engine_name = 'n/a';
             break;
     }
     

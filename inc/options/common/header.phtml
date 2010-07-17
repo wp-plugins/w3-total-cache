@@ -13,7 +13,7 @@ jQuery(function($) {
 <div class="wrap" id="w3tc">
     <?php screen_icon('w3tc-logo'); ?>
 
-	<h2>W3 Total Cache</h2>
+	<h2>W3 Total Cache <span>by W3 EDGE <sup>&reg;</sup></span></h2>
 
 	<?php foreach ($this->_errors as $error): ?>
     <div class="error">
@@ -27,21 +27,27 @@ jQuery(function($) {
     </div>
     <?php endforeach; ?>
 
-	<p id="w3tc-options-menu">
-    	<a href="?page=<?php echo W3TC_FILE; ?>&amp;tab=general"<?php if ($this->_tab == 'general'): ?> class="w3tc-options-menu-selected"<?php endif; ?>>General</a> |
-    	<a href="?page=<?php echo W3TC_FILE; ?>&amp;tab=pgcache"<?php if ($this->_tab == 'pgcache'): ?> class="w3tc-options-menu-selected"<?php endif; ?>>Page Cache</a> |
-    	<?php if (W3TC_PHP5): ?>
-    	<a href="?page=<?php echo W3TC_FILE; ?>&amp;tab=minify"<?php if ($this->_tab == 'minify'): ?> class="w3tc-options-menu-selected"<?php endif; ?>>Minify</a> |
-    	<?php else: ?>
-    	Minify |
-    	<?php endif; ?>
-    	<a href="?page=<?php echo W3TC_FILE; ?>&amp;tab=dbcache"<?php if ($this->_tab == 'dbcache'): ?> class="w3tc-options-menu-selected"<?php endif; ?>>Database Cache</a> |
-        <a href="?page=<?php echo W3TC_FILE; ?>&amp;tab=objectcache"<?php if ($this->_tab == 'objectcache'): ?> class="w3tc-options-menu-selected"<?php endif; ?>>Object Cache</a> |
-        <a href="?page=<?php echo W3TC_FILE; ?>&amp;tab=browsercache"<?php if ($this->_tab == 'browsercache'): ?> class="w3tc-options-menu-selected"<?php endif; ?>>Browser Cache</a> |
-        <a href="?page=<?php echo W3TC_FILE; ?>&amp;tab=mobile"<?php if ($this->_tab == 'mobile'): ?> class="w3tc-options-menu-selected"<?php endif; ?>>User Agent Groups</a> |
-    	<a href="?page=<?php echo W3TC_FILE; ?>&amp;tab=cdn"<?php if ($this->_tab == 'cdn'): ?> class="w3tc-options-menu-selected"<?php endif; ?>>Content Delivery Network</a> |
-    	<a href="?page=<?php echo W3TC_FILE; ?>&amp;tab=faq"<?php if ($this->_tab == 'faq'): ?> class="w3tc-options-menu-selected"<?php endif; ?>><acronym title="Frequently Asked Questions">FAQ</acronym></a> |
-    	<a href="?page=<?php echo W3TC_FILE; ?>&amp;tab=support_select"<?php if ($this->_tab == 'support_select'): ?> class="w3tc-options-menu-selected"<?php endif; ?> style="color: red;">Support</a> |
-    	<a href="?page=<?php echo W3TC_FILE; ?>&amp;tab=install"<?php if ($this->_tab == 'install'): ?> class="w3tc-options-menu-selected"<?php endif; ?>>Install</a> |
-    	<a href="?page=<?php echo W3TC_FILE; ?>&amp;tab=about"<?php if ($this->_tab == 'about'): ?> class="w3tc-options-menu-selected"<?php endif; ?>>About</a>
-    </p>
+    <h3 id="w3tc-nav">
+    	<label>
+        	Viewing: 
+            <select>
+                <optgroup label="Control Panels:">
+                    <option value="admin.php?page=w3tc_general"<?php selected($this->_page, 'w3tc_general'); ?>>General Settings</option>
+                    <option value="admin.php?page=w3tc_pgcache"<?php selected($this->_page, 'w3tc_pgcache'); ?>>Page Cache Settings</option>
+                    <option value="admin.php?page=w3tc_minify"<?php selected($this->_page, 'w3tc_minify'); ?>>Minify Settings</option>
+                    <option value="admin.php?page=w3tc_dbcache"<?php selected($this->_page, 'w3tc_dbcache'); ?>>Database Cache Settings</option>
+                    <option value="admin.php?page=w3tc_objectcache"<?php selected($this->_page, 'w3tc_objectcache'); ?>>Object Cache Settings</option>
+                    <option value="admin.php?page=w3tc_browsercache"<?php selected($this->_page, 'w3tc_browsercache'); ?>>Browser Cache Settings</option>
+                    <option value="admin.php?page=w3tc_mobile"<?php selected($this->_page, 'w3tc_mobile'); ?>>User Agent Groups Settings</option>
+                    <option value="admin.php?page=w3tc_cdn"<?php selected($this->_page, 'w3tc_cdn'); ?>>Content Delivery Network Settings&nbsp;</option>
+                </optgroup>
+                <optgroup label="Help:">
+                    <option value="admin.php?page=w3tc_faq"<?php selected($this->_page, 'w3tc_faq'); ?>>Frequently Asked Questions</option>
+                    <option style="color: red;" value="admin.php?page=w3tc_support"<?php selected($this->_page, 'w3tc_support'); ?>>Support</option>
+                    <option value="admin.php?page=w3tc_install"<?php selected($this->_page, 'w3tc_install'); ?>>Install</option>
+                    <option value="admin.php?page=w3tc_about"<?php selected($this->_page, 'w3tc_about'); ?>>About</option>
+                </optgroup>
+            </select>
+        </label>
+    </h3>
+ 

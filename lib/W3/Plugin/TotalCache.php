@@ -11,10 +11,10 @@ require_once W3TC_LIB_W3_DIR . '/Plugin.php';
 class W3_Plugin_TotalCache extends W3_Plugin
 {
     /**
-     * Page tab
+     * Current page
      * @var string
      */
-    var $_tab = '';
+    var $_page = 'w3tc_general';
     
     /**
      * Notes
@@ -387,36 +387,25 @@ class W3_Plugin_TotalCache extends W3_Plugin
     {
         require_once W3TC_LIB_W3_DIR . '/Request.php';
         
-        $this->_tab = W3_Request::get_string('tab');
+        $this->_page = W3_Request::get_string('page');
         
         switch (true) {
-            case ($this->_tab == 'general'):
-            case ($this->_tab == 'pgcache'):
-            case ($this->_tab == 'minify' && W3TC_PHP5):
-            case ($this->_tab == 'dbcache'):
-            case ($this->_tab == 'objectcache'):
-            case ($this->_tab == 'browsercache'):
-            case ($this->_tab == 'mobile'):
-            case ($this->_tab == 'cdn'):
-            case ($this->_tab == 'install'):
-            case ($this->_tab == 'faq'):
-            case ($this->_tab == 'about'):
-            case ($this->_tab == 'support_select'):
-                break;
-            
-            case ($this->_tab == 'support'):
-            case ($this->_tab == 'support_payment'):
-                $request_type = W3_Request::get_string('request_type');
-                
-                if (!$request_type || !isset($this->_request_types[$request_type]) || ($this->_tab == '' && !isset($this->_request_prices[$request_type]))) {
-                    $this->redirect(array(
-                        'tab' => 'support_select'
-                    ));
-                }
+            case ($this->_page == 'w3tc_general'):
+            case ($this->_page == 'w3tc_pgcache'):
+            case ($this->_page == 'w3tc_minify' && W3TC_PHP5):
+            case ($this->_page == 'w3tc_dbcache'):
+            case ($this->_page == 'w3tc_objectcache'):
+            case ($this->_page == 'w3tc_browsercache'):
+            case ($this->_page == 'w3tc_mobile'):
+            case ($this->_page == 'w3tc_cdn'):
+            case ($this->_page == 'w3tc_install'):
+            case ($this->_page == 'w3tc_faq'):
+            case ($this->_page == 'w3tc_about'):
+            case ($this->_page == 'w3tc_support'):
                 break;
             
             default:
-                $this->_tab = 'general';
+                $this->_page = 'w3tc_general';
         }
         
         /**
@@ -823,19 +812,83 @@ class W3_Plugin_TotalCache extends W3_Plugin
      */
     function admin_menu()
     {
-        $page = add_options_page('W3 Total Cache', 'W3 Total Cache', 'manage_options', W3TC_FILE, array(
-            &$this, 
-            'options'
-        ));
+        $pages = array(
+            'w3tc_general' => array(
+                'General Settings', 
+                'General Settings'
+            ), 
+            'w3tc_pgcache' => array(
+                'Page Cache', 
+                'Page Cache'
+            ), 
+            'w3tc_minify' => array(
+                'Minify', 
+                'Minify'
+            ), 
+            'w3tc_dbcache' => array(
+                'Database Cache', 
+                'Database Cache'
+            ), 
+            'w3tc_objectcache' => array(
+                'Object Cache', 
+                'Object Cache'
+            ), 
+            'w3tc_browsercache' => array(
+                'Browser Cache', 
+                'Browser Cache'
+            ), 
+            'w3tc_mobile' => array(
+                'User Agent Groups', 
+                'User Agent Groups'
+            ), 
+            'w3tc_cdn' => array(
+                'Content Delivery Network', 
+                '<acronym title="Content Delivery Network">CDN</acronym>'
+            ), 
+            'w3tc_faq' => array(
+                'FAQ', 
+                'FAQ'
+            ), 
+            'w3tc_support' => array(
+                'Support', 
+                '<span style="color: red;">Support</span>'
+            ), 
+            'w3tc_install' => array(
+                'Install', 
+                'Install'
+            ), 
+            'w3tc_about' => array(
+                'About', 
+                'About'
+            )
+        );
+        
+        if (!W3TC_PHP5) {
+            unset($pages['minify']);
+        }
+        
+        add_menu_page('Performance', 'Performance', 'manage_options', 'w3tc_general', '', plugins_url('w3-total-cache/inc/images/logo_small.png'));
+        
+        $submenu_pages = array();
+        
+        foreach ($pages as $slug => $titles) {
+            $submenu_pages[] = add_submenu_page('w3tc_general', $titles[0] . ' | W3 Total Cache', $titles[1], 'manage_options', $slug, array(
+                &$this, 
+                'options'
+            ));
+        }
         
         if (current_user_can('manage_options')) {
+            
             /**
              * Only admin can modify W3TC settings
              */
-            add_action('load-' . $page, array(
-                &$this, 
-                'load'
-            ));
+            foreach ($submenu_pages as $submenu_page) {
+                add_action('load-' . $submenu_page, array(
+                    &$this, 
+                    'load'
+                ));
+            }
             
             /**
              * Only admin can see W3TC notices and errors
@@ -854,7 +907,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
      */
     function plugin_action_links($links)
     {
-        array_unshift($links, '<a class="edit" href="options-general.php?page=' . W3TC_FILE . '">Settings</a>');
+        array_unshift($links, '<a class="edit" href="admin.php?page=w3tc_general">Settings</a>');
         
         return $links;
     }
@@ -864,7 +917,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
      */
     function favorite_actions($actions)
     {
-        $actions['options-general.php?page=' . W3TC_FILE . '&amp;flush_all'] = array(
+        $actions['admin.php?page=w3tc_general&amp;flush_all'] = array(
             'Empty Caches', 
             'manage_options'
         );
@@ -990,7 +1043,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
          * Check config file
          */
         if (!w3_is_preview_config() && !file_exists(W3TC_CONFIG_PATH)) {
-            $errors[] = sprintf('<strong>W3 Total Cache Error:</strong> Default settings are in use. The configuration file could not be read or doesn\'t exist. Please %s to create the file.', $this->button_link('save your settings', sprintf('options-general.php?page=%s&tab=%s&save_config', W3TC_FILE, $this->_tab)));
+            $errors[] = sprintf('<strong>W3 Total Cache Error:</strong> Default settings are in use. The configuration file could not be read or doesn\'t exist. Please %s to create the file.', $this->button_link('save your settings', sprintf('admin.php?page=%s&save_config', $this->_page)));
         }
         
         /**
@@ -1047,11 +1100,11 @@ class W3_Plugin_TotalCache extends W3_Plugin
             $texts = array();
             
             if ($this->_config->get_boolean('pgcache.enabled')) {
-                $texts[] = $this->button_link('empty the page cache', sprintf('options-general.php?page=%s&tab=%s&flush_pgcache', W3TC_FILE, $this->_tab));
+                $texts[] = $this->button_link('empty the page cache', sprintf('admin.php?page=%s&flush_pgcache', $this->_page));
             }
             
             if ($this->_config->get_boolean('minify.enabled')) {
-                $texts[] = sprintf('check your %s to maintain the desired user experience', $this->button_hide_note('minify settings', 'plugins_updated', sprintf('options-general.php?page=%s&tab=minify', W3TC_FILE)));
+                $texts[] = sprintf('check your %s to maintain the desired user experience', $this->button_hide_note('minify settings', 'plugins_updated', 'admin.php?page=w3tc_minify'));
             }
             
             if (count($texts)) {
@@ -1063,7 +1116,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
          * Show notification when page cache needs to be emptied
          */
         if ($this->_config->get_boolean('pgcache.enabled') && $this->_config->get('notes.need_empty_pgcache') && !w3_is_preview_config()) {
-            $notes[] = sprintf('The setting change(s) made either invalidate your cached data or modify the behavior of your site. %s now to provide a consistent user experience.', $this->button_link('Empty the page cache', sprintf('options-general.php?page=%s&tab=%s&flush_pgcache', W3TC_FILE, $this->_tab)));
+            $notes[] = sprintf('The setting change(s) made either invalidate your cached data or modify the behavior of your site. %s now to provide a consistent user experience.', $this->button_link('Empty the page cache', sprintf('admin.php?page=%s&flush_pgcache', $this->_page)));
         }
         
         /**
@@ -1081,7 +1134,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
              * Show notification when minify needs to be emptied
              */
             if ($this->_config->get('notes.need_empty_minify') && !w3_is_preview_config()) {
-                $notes[] = sprintf('The setting change(s) made either invalidate your cached data or modify the behavior of your site. %s now to provide a consistent user experience.', $this->button_link('Empty the minify cache', sprintf('options-general.php?page=%s&tab=%s&flush_minify', W3TC_FILE, $this->_tab)));
+                $notes[] = sprintf('The setting change(s) made either invalidate your cached data or modify the behavior of your site. %s now to provide a consistent user experience.', $this->button_link('Empty the minify cache', sprintf('admin.php?page=%s&flush_minify', $this->_page)));
             }
         }
         
@@ -1159,7 +1212,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
     function media_row_actions($actions, $post)
     {
         $actions = array_merge($actions, array(
-            'cdn_purge' => sprintf('<a href="options-general.php?page=%s&cdn_purge_attachment&attachment_id=%d">Purge from CDN</a>', W3TC_FILE, $post->ID)
+            'cdn_purge' => sprintf('<a href="admin.php?page=w3tc_general&cdn_purge_attachment&attachment_id=%d">Purge from CDN</a>', $post->ID)
         ));
         
         return $actions;
@@ -1171,7 +1224,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
     function post_row_actions($actions, $post)
     {
         $actions = array_merge($actions, array(
-            'pgcache_purge' => sprintf('<a href="options-general.php?page=%s&pgcache_purge_post&post_id=%d">Purge from Page Cache</a>', W3TC_FILE, $post->ID)
+            'pgcache_purge' => sprintf('<a href="admin.php?page=w3tc_general&pgcache_purge_post&post_id=%d">Purge from Page Cache</a>', $post->ID)
         ));
         
         return $actions;
@@ -1288,12 +1341,12 @@ class W3_Plugin_TotalCache extends W3_Plugin
                             if (w3_is_multisite()) {
                                 $this->_errors[] = sprintf('Enhanced mode page cache is not operational. Your .htaccess rules could not be modified. Please verify <strong>%s/.htaccess</strong> has the following rules: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> %s', w3_get_home_root(), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_pgcache->generate_rules_core()), $this->button_hide_note('Hide this message', 'pgcache_rules_core'));
                             } else {
-                                $this->_errors[] = sprintf('You\'ve selected disk caching with enhanced mode however the .htaccess file is not properly configured. Please run <strong>chmod 777 %s/.htaccess</strong>, then %s. To manually modify your server configuration for enhanced mode append the following code: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> and %s.', w3_get_home_root(), $this->button_link('try again', sprintf('options-general.php?page=%s&tab=%s&pgcache_write_rules_core', W3TC_FILE, $this->_tab)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_pgcache->generate_rules_core()), $this->button_hide_note('hide this message', 'pgcache_rules_core'));
+                                $this->_errors[] = sprintf('You\'ve selected disk caching with enhanced mode however the .htaccess file is not properly configured. Please run <strong>chmod 777 %s/.htaccess</strong>, then %s. To manually modify your server configuration for enhanced mode append the following code: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> and %s.', w3_get_home_root(), $this->button_link('try again', sprintf('admin.php?page=%s&pgcache_write_rules_core', $this->_page)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_pgcache->generate_rules_core()), $this->button_hide_note('hide this message', 'pgcache_rules_core'));
                             }
                         }
                         
                         if ($this->_config->get_boolean('notes.pgcache_rules_cache') && !$w3_plugin_pgcache->check_rules_cache()) {
-                            $this->_errors[] = sprintf('You\'ve selected disk caching with enhanced mode however the .htaccess file is not properly configured. Please run <strong>chmod 777 %s/.htaccess</strong>, then %s. To manually modify your server configuration for enhanced mode append the following code: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> and %s.', W3TC_CACHE_FILE_PGCACHE_DIR, $this->button_link('try again', sprintf('options-general.php?page=%s&tab=%s&pgcache_write_rules_cache', W3TC_FILE, $this->_tab)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_pgcache->generate_rules_cache()), $this->button_hide_note('hide this message', 'pgcache_rules_cache'));
+                            $this->_errors[] = sprintf('You\'ve selected disk caching with enhanced mode however the .htaccess file is not properly configured. Please run <strong>chmod 777 %s/.htaccess</strong>, then %s. To manually modify your server configuration for enhanced mode append the following code: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> and %s.', W3TC_CACHE_FILE_PGCACHE_DIR, $this->button_link('try again', sprintf('admin.php?page=%s&pgcache_write_rules_cache', $this->_page)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_pgcache->generate_rules_cache()), $this->button_hide_note('hide this message', 'pgcache_rules_cache'));
                         }
                         break;
                     
@@ -1317,7 +1370,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
                 $w3_plugin_minify = & W3_Plugin_Minify::instance();
                 
                 if ($this->_config->get_boolean('notes.minify_rules') && !$w3_plugin_minify->check_rules()) {
-                    $this->_errors[] = sprintf('The "Rewrite URL Structure" feature, requires rewrite rules be present. Please run <strong>chmod 777 %s/.htaccess</strong>, then %s. To manually modify your server configuration for minify append the following code: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> and %s.', W3TC_CACHE_FILE_MINIFY_DIR, $this->button_link('try again', sprintf('options-general.php?page=%s&tab=%s&minify_write_rules', W3TC_FILE, $this->_tab)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_minify->generate_rules()), $this->button_hide_note('hide this message', 'minify_rules'));
+                    $this->_errors[] = sprintf('The "Rewrite URL Structure" feature, requires rewrite rules be present. Please run <strong>chmod 777 %s/.htaccess</strong>, then %s. To manually modify your server configuration for minify append the following code: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> and %s.', W3TC_CACHE_FILE_MINIFY_DIR, $this->button_link('try again', sprintf('admin.php?page=%s&minify_write_rules', $this->_page)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_minify->generate_rules()), $this->button_hide_note('hide this message', 'minify_rules'));
                 }
             }
             
@@ -1371,7 +1424,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
                 if (w3_is_multisite()) {
                     $this->_errors[] = sprintf('Browser Cache feature is not operational. Your .htaccess rules could not be modified. Please verify <strong>%s/.htaccess</strong> has the following rules: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> %s', w3_get_document_root(), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_browsercache->generate_rules_cache()), $this->button_hide_note('Hide this message', 'browsercache_rules_cache'));
                 } else {
-                    $this->_errors[] = sprintf('You\'ve enabled Browser Cache feature however the .htaccess file is not properly configured. Please run <strong>chmod 777 %s/.htaccess</strong>, then %s. To manually modify these settings use the following code: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> and %s.', w3_get_document_root(), $this->button_link('try again', sprintf('options-general.php?page=%s&tab=%s&browsercache_write_rules_cache', W3TC_FILE, $this->_tab)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_browsercache->generate_rules_cache()), $this->button_hide_note('hide this message', 'browsercache_rules_cache'));
+                    $this->_errors[] = sprintf('You\'ve enabled Browser Cache feature however the .htaccess file is not properly configured. Please run <strong>chmod 777 %s/.htaccess</strong>, then %s. To manually modify these settings use the following code: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> and %s.', w3_get_document_root(), $this->button_link('try again', sprintf('admin.php?page=%s&browsercache_write_rules_cache', $this->_page)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_browsercache->generate_rules_cache()), $this->button_hide_note('hide this message', 'browsercache_rules_cache'));
                 }
             }
             
@@ -1379,7 +1432,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
                 if (w3_is_multisite()) {
                     $this->_errors[] = sprintf('Browser Cache feature is not operational. Your .htaccess rules could not be modified. Please verify <strong>%s/.htaccess</strong> has the following rules: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> %s', w3_get_home_root(), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_browsercache->generate_rules_no404wp()), $this->button_hide_note('Hide this message', 'browsercache_rules_no404wp'));
                 } else {
-                    $this->_errors[] = sprintf('You\'ve enabled Browser Cache feature however the .htaccess file is not properly configured. Please run <strong>chmod 777 %s/.htaccess</strong>, then %s. To manually modify these settings use the following code: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> and %s.', w3_get_home_root(), $this->button_link('try again', sprintf('options-general.php?page=%s&tab=%s&browsercache_write_rules_no404wp', W3TC_FILE, $this->_tab)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_browsercache->generate_rules_no404wp()), $this->button_hide_note('hide this message', 'browsercache_rules_no404wp'));
+                    $this->_errors[] = sprintf('You\'ve enabled Browser Cache feature however the .htaccess file is not properly configured. Please run <strong>chmod 777 %s/.htaccess</strong>, then %s. To manually modify these settings use the following code: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> and %s.', w3_get_home_root(), $this->button_link('try again', sprintf('admin.php?page=%s&browsercache_write_rules_no404wp', $this->_page)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_browsercache->generate_rules_no404wp()), $this->button_hide_note('hide this message', 'browsercache_rules_no404wp'));
                 }
             }
         }
@@ -1469,66 +1522,78 @@ class W3_Plugin_TotalCache extends W3_Plugin
          */
         
         if (w3_is_preview_config()) {
-            $this->_notes[] = sprintf('Preview mode is active: Changed settings will not take effect until you %s or %s preview mode. %s any changed settings (without deploying), or make additional changes.', $this->button_link('deploy', sprintf('options-general.php?page=%s&tab=%s&preview_deploy', W3TC_FILE, $this->_tab)), $this->button_link('disable', sprintf('options-general.php?page=%s&tab=%s&preview_save&preview=0', W3TC_FILE, $this->_tab)), $this->button_link('Preview', w3_get_site_url() . '/?w3tc_preview=1', true));
+            $this->_notes[] = sprintf('Preview mode is active: Changed settings will not take effect until you %s or %s preview mode. %s any changed settings (without deploying), or make additional changes.', $this->button_link('deploy', sprintf('admin.php?page=%s&preview_deploy', $this->_page)), $this->button_link('disable', sprintf('options-general.php?page=%s&preview_save&preview=0', $this->_page)), $this->button_link('Preview', w3_get_site_url() . '/?w3tc_preview=1', true));
         }
         
         /**
          * Show tab
          */
-        switch ($this->_tab) {
-            case 'general':
+        switch ($this->_page) {
+            case 'w3tc_general':
                 $this->options_general();
                 break;
             
-            case 'pgcache':
+            case 'w3tc_pgcache':
                 $this->options_pgcache();
                 break;
             
-            case 'minify':
+            case 'w3tc_minify':
                 $this->options_minify();
                 break;
             
-            case 'dbcache':
+            case 'w3tc_dbcache':
                 $this->options_dbcache();
                 break;
             
-            case 'objectcache':
+            case 'w3tc_objectcache':
                 $this->options_objectcache();
                 break;
             
-            case 'browsercache':
+            case 'w3tc_browsercache':
                 $this->options_browsercache();
                 break;
             
-            case 'mobile':
+            case 'w3tc_mobile':
                 $this->options_mobile();
                 break;
             
-            case 'cdn':
+            case 'w3tc_cdn':
                 $this->options_cdn();
                 break;
             
-            case 'faq':
+            case 'w3tc_faq':
                 $this->options_faq();
                 break;
             
-            case 'support':
-                $this->options_support();
+            case 'w3tc_support':
+                $request_type = W3_Request::get_string('request_type');
+                
+                if (!$request_type || !isset($this->_request_types[$request_type])) {
+                    $this->options_support_select();
+                } else {
+                    $payment = W3_Request::get_boolean('payment');
+                    
+                    if (isset($this->_request_prices[$request_type]) && !$payment) {
+                        $this->options_support_payment();
+                    } else {
+                        $this->options_support();
+                    }
+                }
                 break;
             
-            case 'support_select':
+            case 'w3tc_support_select':
                 $this->options_support_select();
                 break;
             
-            case 'support_payment':
+            case 'w3tc_support_payment':
                 $this->options_support_payment();
                 break;
             
-            case 'install':
+            case 'w3tc_install':
                 $this->options_install();
                 break;
             
-            case 'about':
+            case 'w3tc_about':
                 $this->options_about();
                 break;
         }
@@ -1745,6 +1810,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
         
         $ajax = W3_Request::get_boolean('ajax');
         $request_type = W3_Request::get_string('request_type');
+        $payment = W3_Request::get_boolean('payment');
         $url = W3_Request::get_string('url', w3_get_domain_url());
         $name = W3_Request::get_string('name', $name);
         $email = W3_Request::get_string('email', $email);
@@ -1783,10 +1849,10 @@ class W3_Plugin_TotalCache extends W3_Plugin
         $ajax = W3_Request::get_boolean('ajax');
         $request_type = W3_Request::get_string('request_type');
         
-        $base_url = w3_get_site_url() . '/wp-admin/options-general.php';
+        $base_url = w3_get_site_url() . '/wp-admin/admin.php';
         
-        $return_url = $base_url . '?page=' . W3TC_FILE . '&tab=support&request_type=' . $request_type;
-        $cancel_url = $base_url . '?page=' . W3TC_FILE . '&tab=general';
+        $return_url = $base_url . '?page=w3tc_support&request_type=' . $request_type . '&payment=1';
+        $cancel_url = $base_url . '?page=w3tc_general';
         
         include W3TC_DIR . '/inc/options/support_payment.phtml';
     }
@@ -1878,7 +1944,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
         /**
          * General tab
          */
-        if ($this->_tab == 'general') {
+        if ($this->_page == 'w3tc_general') {
             $debug = W3_Request::get_array('debug');
             $file_locking = W3_Request::get_boolean('file_locking');
             
@@ -1906,7 +1972,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
         /**
          * Minify tab
          */
-        if ($this->_tab == 'minify') {
+        if ($this->_page == 'w3tc_minify') {
             $js_groups = array();
             $css_groups = array();
             
@@ -1978,7 +2044,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
         /**
          * Browser Cache tab
          */
-        if ($this->_tab == 'browsercache') {
+        if ($this->_page == 'w3tc_browsercache') {
             if ($config->get_boolean('browsercache.enabled') && $config->get_boolean('browsercache.no404wp') && !get_option('permalink_structure')) {
                 $this->redirect(array(
                     'w3tc_error' => 'fancy_permalinks_disabled_browsercache'
@@ -1989,7 +2055,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
         /**
          * Mobile tab
          */
-        if ($this->_tab == 'mobile') {
+        if ($this->_page == 'w3tc_mobile') {
             $groups = W3_Request::get_array('mobile_groups');
             
             $mobile_groups = array();
@@ -2074,7 +2140,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
         /**
          * CDN tab
          */
-        if ($this->_tab == 'cdn') {
+        if ($this->_page == 'w3tc_cdn') {
             $cdn_cnames = W3_Request::get_array('cdn_cnames');
             $cdn_domains = array();
             
@@ -2163,7 +2229,8 @@ class W3_Plugin_TotalCache extends W3_Plugin
             'pgcache.debug', 
             'dbcache.enabled', 
             'minify.enabled', 
-            'cdn.enabled'
+            'cdn.enabled', 
+            'mobile.enabled'
         );
         
         $minify_dependencies = array();
@@ -2211,6 +2278,12 @@ class W3_Plugin_TotalCache extends W3_Plugin
                 'cdn.s3.bucket', 
                 'cdn.cf.id', 
                 'cdn.cf.cname'
+            ));
+        }
+        
+        if ($new_config->get_boolean('mobile.enabled')) {
+            $pgcache_dependencies = array_merge($pgcache_dependencies, array(
+                'mobile.groups'
             ));
         }
         
@@ -2610,8 +2683,8 @@ class W3_Plugin_TotalCache extends W3_Plugin
         );
         
         $request_type = W3_Request::get_string('request_type');
+        $payment = W3_Request::get_boolean('payment');
         $request_type_text = (isset($this->_request_types[$request_type]) ? $this->_request_types[$request_type] : 'Unknown');
-        
         $url = W3_Request::get_string('url');
         $name = W3_Request::get_string('name');
         $email = W3_Request::get_string('email');
@@ -2628,6 +2701,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
         
         $params = array(
             'request_type' => $request_type, 
+            'payment' => $payment, 
             'url' => $url, 
             'name' => $name, 
             'email' => $email, 
@@ -2931,7 +3005,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
      */
     function button_hide_note($text, $note, $redirect = '')
     {
-        $url = sprintf('options-general.php?page=%s&tab=%s&hide_note=%s', W3TC_FILE, $this->_tab, $note);
+        $url = sprintf('admin.php?page=%s&hide_note=%s', $this->_page, $note);
         
         if ($redirect != '') {
             $url .= '&redirect=' . urlencode($redirect);
@@ -2952,7 +3026,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
      */
     function button_popup($text, $w3tc_action, $params = '', $width = 800, $height = 600)
     {
-        $onclick = sprintf('window.open(\'options-general.php?page=%s&w3tc_action=%s%s\', \'%s\', \'width=%d,height=%d,status=no,toolbar=no,menubar=no,scrollbars=yes\');', W3TC_FILE, $w3tc_action, ($params != '' ? '&' . $params : ''), $w3tc_action, $width, $height);
+        $onclick = sprintf('window.open(\'admin.php?page=w3tc_general&w3tc_action=%s%s\', \'%s\', \'width=%d,height=%d,status=no,toolbar=no,menubar=no,scrollbars=yes\');', $w3tc_action, ($params != '' ? '&' . $params : ''), $w3tc_action, $width, $height);
         
         return $this->button($text, $onclick);
     }
@@ -3348,37 +3422,36 @@ class W3_Plugin_TotalCache extends W3_Plugin
         $engine = W3_Request::get_string('engine');
         $config = W3_Request::get_array('config');
         
+        $result = false;
+        $error = 'Incorrect type.';
+        $container_id = '';
+        
         switch ($engine) {
             case 's3':
             case 'cf':
             case 'rscf':
                 $result = true;
                 break;
-            
-            default:
-                $result = false;
-                $error = 'Incorrect type.';
-                break;
         }
         
         if ($result) {
             $w3_cdn = & W3_Cdn::instance($engine, $config);
-            $error = null;
+            
             @set_time_limit(120);
             
-            if ($w3_cdn->create_container($error)) {
+            if ($w3_cdn->create_container($container_id, $error)) {
                 $result = true;
                 $error = 'Created successfully.';
             } else {
                 $result = false;
                 $error = sprintf('Error: %s', $error);
             }
-        
         }
         
         $response = array(
             'result' => $result, 
-            'error' => $error
+            'error' => $error, 
+            'container_id' => $container_id
         );
         
         echo json_encode($response);
@@ -4079,10 +4152,9 @@ class W3_Plugin_TotalCache extends W3_Plugin
             if ($check_referer && !empty($_SERVER['HTTP_REFERER'])) {
                 $url = $_SERVER['HTTP_REFERER'];
             } else {
-                $url = 'options-general.php';
+                $url = 'admin.php';
                 $params = array_merge(array(
-                    'page' => W3TC_FILE, 
-                    'tab' => $this->_tab
+                    'page' => $this->_page
                 ), $params);
             }
         }

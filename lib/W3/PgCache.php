@@ -316,7 +316,7 @@ class W3_PgCache
                 /**
                  * Change buffer if using compression
                  */
-                if ($compression) {
+                if ($compression && isset($buffers[$compression])) {
                     $buffer = & $buffers[$compression];
                 }
                 

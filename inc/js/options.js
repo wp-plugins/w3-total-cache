@@ -112,17 +112,20 @@ function w3tc_cdn_get_cnames() {
 
     jQuery('#cdn_cnames input[type=text]').each(function() {
         var cname = jQuery(this).val();
-        var match = /^\*\.(.*)$/.exec(cname);
 
-        if (match) {
-            cnames = [];
-            for ( var i = 1; i <= 10; i++) {
-                cnames.push('cdn' + i + '.' + match[1]);
+        if (cname) {
+            var match = /^\*\.(.*)$/.exec(cname);
+
+            if (match) {
+                cnames = [];
+                for ( var i = 1; i <= 10; i++) {
+                    cnames.push('cdn' + i + '.' + match[1]);
+                }
+                return false;
             }
-            return false;
-        }
 
-        cnames.push(cname);
+            cnames.push(cname);
+        }
     });
 
     return cnames;
@@ -389,23 +392,23 @@ jQuery(function() {
     });
 
     jQuery('#cdn_export_library').click(function() {
-        w3tc_popup('options-general.php?page=w3-total-cache/w3-total-cache.php&w3tc_action=cdn_export_library', 'cdn_export_library');
+        w3tc_popup('admin.php?page=w3tc_cdn&w3tc_action=cdn_export_library', 'cdn_export_library');
     });
 
     jQuery('#cdn_import_library').click(function() {
-        w3tc_popup('options-general.php?page=w3-total-cache/w3-total-cache.php&w3tc_action=cdn_import_library', 'cdn_import_library');
+        w3tc_popup('admin.php?page=w3tc_cdn&w3tc_action=cdn_import_library', 'cdn_import_library');
     });
 
     jQuery('#cdn_queue').click(function() {
-        w3tc_popup('options-general.php?page=w3-total-cache/w3-total-cache.php&w3tc_action=cdn_queue', 'cdn_queue');
+        w3tc_popup('admin.php?page=w3tc_cdn&w3tc_action=cdn_queue', 'cdn_queue');
     });
 
     jQuery('#cdn_rename_domain').click(function() {
-        w3tc_popup('options-general.php?page=w3-total-cache/w3-total-cache.php&w3tc_action=cdn_rename_domain', 'cdn_rename_domain');
+        w3tc_popup('admin.php?page=w3tc_cdn&w3tc_action=cdn_rename_domain', 'cdn_rename_domain');
     });
 
     jQuery('.cdn_export').click(function() {
-        w3tc_popup('options-general.php?page=w3-total-cache/w3-total-cache.php&w3tc_action=cdn_export&cdn_export_type=' + this.name, 'cdn_export_' + this.name);
+        w3tc_popup('admin.php?page=w3tc_cdn&w3tc_action=cdn_export&cdn_export_type=' + this.name, 'cdn_export_' + this.name);
     });
 
     jQuery('#cdn_test').click(function() {
@@ -481,7 +484,7 @@ jQuery(function() {
         status.addClass('w3tc-process');
         status.html('Testing...');
 
-        jQuery.post('options-general.php?page=w3-total-cache/w3-total-cache.php', params, function(data) {
+        jQuery.post('admin.php?page=w3tc_general', params, function(data) {
             status.addClass(data.result ? 'w3tc-success' : 'w3tc-error');
             status.html(data.error);
         }, 'json');
@@ -490,6 +493,7 @@ jQuery(function() {
     jQuery('#cdn_create_container').click(function() {
         var me = jQuery(this);
         var cnames = w3tc_cdn_get_cnames();
+        var container_id = null;
         var params = {
             w3tc_action: 'cdn_create_container'
         };
@@ -506,6 +510,8 @@ jQuery(function() {
                 break;
 
             case me.hasClass('cdn_cf'):
+                container_id = jQuery('#cdn_cf_id');
+
                 jQuery.extend(params, {
                     engine: 'cf',
                     'config[key]': jQuery('#cdn_cf_key').val(),
@@ -516,6 +522,8 @@ jQuery(function() {
                 break;
 
             case me.hasClass('cdn_rscf'):
+                container_id = jQuery('#cdn_rscf_id');
+
                 jQuery.extend(params, {
                     engine: 'rscf',
                     'config[user]': jQuery('#cdn_rscf_user').val(),
@@ -532,9 +540,13 @@ jQuery(function() {
         status.addClass('w3tc-process');
         status.html('Creating...');
 
-        jQuery.post('options-general.php?page=w3-total-cache/w3-total-cache.php', params, function(data) {
+        jQuery.post('admin.php?page=w3tc_general', params, function(data) {
             status.addClass(data.result ? 'w3tc-success' : 'w3tc-error');
             status.html(data.error);
+
+            if (container_id && container_id.size() && data.container_id) {
+                container_id.val(data.container_id);
+            }
         }, 'json');
     });
 
@@ -544,7 +556,7 @@ jQuery(function() {
         status.removeClass('w3tc-success');
         status.addClass('w3tc-process');
         status.html('Testing...');
-        jQuery.post('options-general.php?page=w3-total-cache/w3-total-cache.php', {
+        jQuery.post('admin.php?page=w3tc_general', {
             w3tc_action: 'test_memcached',
             servers: jQuery('#memcached_servers').val()
         }, function(data) {
@@ -684,7 +696,7 @@ jQuery(function() {
         }
 
         if (action) {
-            jQuery('#support_container').html('<div id="support_loading">Loading...</div>').load('options-general.php?page=w3-total-cache/w3-total-cache&w3tc_action=' + action + '&request_type=' + request_type.val() + '&ajax=1');
+            jQuery('#support_container').html('<div id="support_loading">Loading...</div>').load('admin.php?page=w3tc_support&w3tc_action=' + action + '&request_type=' + request_type.val() + '&ajax=1');
 
             return false;
         }
@@ -693,7 +705,7 @@ jQuery(function() {
     });
 
     jQuery('#support_cancel').live('click', function() {
-        jQuery('#support_container').html('<div id="support_loading">Loading...</div>').load('options-general.php?page=w3-total-cache/w3-total-cache&w3tc_action=options_support_select&ajax=1');
+        jQuery('#support_container').html('<div id="support_loading">Loading...</div>').load('admin.php?page=w3tc_support&w3tc_action=options_support_select&ajax=1');
     });
 
     // mobile tab
@@ -829,5 +841,10 @@ jQuery(function() {
             rules.css('display', 'block');
             btn.val('hide code');
         }
+    });
+
+    // nav
+    jQuery('#w3tc-nav select').change(function() {
+        document.location.href = jQuery(this).val();
     });
 });

@@ -1,16 +1,13 @@
 <?php include W3TC_DIR . '/inc/options/common/header.phtml'; ?>
 
-<h3>General Settings</h3>
-
 <p>
-	The plugin is currently <span class="w3tc-<?php if ($enabled): ?>enabled">enabled<?php else: ?>disabled">disabled<?php endif; ?></span>. If an option is disabled it means that either your current installation is not compatible or installation is required.
+	The plugin is currently <span class="w3tc-<?php if ($enabled): ?>enabled">enabled<?php else: ?>disabled">disabled<?php endif; ?></span>. If an option is disabled it means that either your current installation is not compatible or software installation is required.
 </p>
 
-<form action="options-general.php">
+<form action="admin.php">
     <p>
-    	You can perform a
-    	<input type="hidden" name="page" value="<?php echo W3TC_FILE; ?>" />
-    	<input type="hidden" name="tab" value="<?php echo $this->_tab; ?>" />
+    	Perform a
+    	<input type="hidden" name="page" value="<?php echo $this->_page; ?>" />
     	<input type="button" class="button button-self-test" value="compatibility check" />,
     	<input class="button" type="submit" name="flush_all" value="empty all caches"<?php if (! $can_empty_memcache && ! $can_empty_opcode && ! $can_empty_file): ?> disabled="disabled"<?php endif; ?> /> at once or
     	<input class="button" type="submit" name="flush_memcached" value="empty only the memcached cache(s)"<?php if (! $can_empty_memcache): ?> disabled="disabled"<?php endif; ?> /> or
@@ -19,7 +16,7 @@
     </p>
 </form>
 
-<form action="options-general.php?page=<?php echo urldecode(W3TC_FILE); ?>&amp;tab=<?php echo $this->_tab; ?>" method="post">
+<form action="admin.php?page=<?php echo $this->_page; ?>" method="post">
     <fieldset>
     	<legend>General</legend>
     
@@ -39,7 +36,7 @@
                 	<input type="hidden" name="preview" value="0" />
                 	<input type="submit" name="preview_save" class="button-primary" value="Disable" />
                 	<?php echo $this->button_link('Preview', w3_get_site_url() . '/?w3tc_preview=1', true); ?>
-                	<?php echo $this->button_link('Deploy', sprintf('options-general.php?page=%s&tab=%s&preview_deploy', W3TC_FILE, $this->_tab)); ?>
+                	<?php echo $this->button_link('Deploy', sprintf('admin.php?page=%s&preview_deploy', $this->_page)); ?>
                 	<?php else: ?>
                 	<input type="hidden" name="preview" value="1" />
                 	<input type="submit" name="preview_save" class="button-primary" value="Enable" />
@@ -55,7 +52,7 @@
     </fieldset>
     
     <fieldset>
-    	<legend><a href="?page=<?php echo W3TC_FILE; ?>&amp;tab=pgcache">Page Cache</a></legend>
+    	<legend><a href="admin.php?page=w3tc_pgcache">Page Cache</a></legend>
 
     	<p>Enable page caching to decrease the response time of your blog.</p>
 
@@ -97,7 +94,7 @@
     <fieldset>
     	<legend>
         	<?php if (W3TC_PHP5): ?>
-        	<a href="?page=<?php echo W3TC_FILE; ?>&amp;tab=minify">Minify</a>
+        	<a href="admin.php?page=w3tc_minify">Minify</a>
         	<?php else: ?>
         	Minify
         	<?php endif; ?>
@@ -140,7 +137,7 @@
     </fieldset>
 
     <fieldset>
-    	<legend><a href="?page=<?php echo W3TC_FILE; ?>&amp;tab=dbcache">Database Cache</a></legend>
+    	<legend><a href="admin.php?page=w3tc_dbcache">Database Cache</a></legend>
 
         <p>Enable database caching to reduce post, page and feed creation time.</p>
 
@@ -180,7 +177,7 @@
     
     
     <fieldset>
-    	<legend><a href="?page=<?php echo W3TC_FILE; ?>&amp;tab=objectcache">Object Cache</a></legend>
+    	<legend><a href="admin.php?page=w3tc_objectcache">Object Cache</a></legend>
 
         <p>Enable object caching to further reduce execution time for common operations.</p>
 
@@ -219,7 +216,7 @@
 	</fieldset>
 
     <fieldset>
-    	<legend><a href="?page=<?php echo W3TC_FILE; ?>&amp;tab=cdn">Content Delivery Network</a></legend>
+    	<legend><a href="admin.php?page=w3tc_cdn">Content Delivery Network</a></legend>
 
         <p>Host static files with your content delivery network provider to reduce load time.</p>
 
@@ -258,7 +255,7 @@
 	</fieldset>
 
     <fieldset>
-    	<legend><a href="?page=<?php echo W3TC_FILE; ?>&amp;tab=browsercache">Browser Cache</a></legend>
+    	<legend><a href="admin.php?page=w3tc_browsercache">Browser Cache</a></legend>
 
         <table class="form-table">
          	<tr>
@@ -329,13 +326,14 @@
 
     	<p>
     		<input type="hidden" name="widget.latest.enabled" value="0" />
-    		<label><input type="checkbox" name="widget.latest.enabled" value="1"<?php checked($this->_config->get_boolean('widget.latest.enabled'), true); ?> /> Enable dashboard news widget</label><br />
+    		<label><input type="checkbox" name="widget.latest.enabled" value="1"<?php checked($this->_config->get_boolean('widget.latest.enabled'), true); ?> /> Enable dashboard news widget</label>
+			<br /><span class="description">Display latest tweets and support tips on the WordPress Dashboard.</span>
     	</p>
     	
     	<p>
     		<input type="hidden" name="file_locking" value="0"<?php if (! $can_empty_file): ?> disabled="disabled"<?php endif; ?> />
     		<label><input type="checkbox" name="file_locking" value="1"<?php checked($file_locking, true); ?><?php if (! $can_empty_file): ?> disabled="disabled"<?php endif; ?> /> Enable file locking</label>
-    		<br /><span class="description">Not recommended on NFS file system.</span>
+    		<br /><span class="description">Not recommended for network-based file systems.</span>
     	</p>
 
         <p class="submit">
@@ -344,7 +342,7 @@
 	</fieldset>
 </form>
 
-<form action="?page=<?php echo urldecode(W3TC_FILE); ?>&amp;tab=<?php echo $this->_tab; ?>" method="post" enctype="multipart/form-data">
+<form action="admin.php?page=<?php echo $this->_page; ?>" method="post" enctype="multipart/form-data">
     <fieldset>
     	<legend>Import / Export Settings</legend>
 
@@ -352,22 +350,23 @@
             <tr>
     			<th>Import configuration:</th>
             	<td>
-				    <input type="hidden" name="page" value="<?php echo W3TC_FILE; ?>" />
-				    <input type="hidden" name="tab" value="<?php echo $this->_tab; ?>" />
             		<input type="file" name="config_file" />
 		        	<input type="submit" name="config_import" class="button" value="Upload" />
+					<br /><span class="description">Upload and replace the settings file on the server.</span>
             	</td>
             </tr>
             <tr>
     			<th>Export configuration:</th>
             	<td>
 		        	<input type="submit" name="config_export" class="button" value="Download" />
+					<br /><span class="description">Download the settings file from the server.</span>
             	</td>
             </tr>
             <tr>
     			<th>Reset configuration:</th>
             	<td>
 		        	<input type="submit" name="config_reset" class="button" value="Restore Default Settings" />
+					<br /><span class="description">Revert all settings to the defaults. Any settings staged in preview mode will not be modified.</span>
             	</td>
             </tr>
 		</table>
