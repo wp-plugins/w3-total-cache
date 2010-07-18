@@ -35,13 +35,6 @@
         	</tr>
         	<tr>
         		<th>
-        			<input type="hidden" name="pgcache.cache.404" value="0" />
-        			<label><input type="checkbox" name="pgcache.cache.404" value="1"<?php checked($this->_config->get_boolean('pgcache.cache.404'), true); ?> /> Cache 404 (not found) pages</label><br />
-    				<span class="description">Reduce server load by caching 404 pages. The "Do not process 404 errors for static objects with WordPress" Browser Cache option is recommended.</span>
-        		</th>
-        	</tr>
-        	<tr>
-        		<th>
         			<input type="hidden" name="pgcache.cache.feed" value="0" />
         			<label><input type="checkbox" name="pgcache.cache.feed" value="1"<?php checked($this->_config->get_boolean('pgcache.cache.feed'), true); ?> /> Cache site, categories, tags, comments and feeds</label><br />
     				<span class="description">Even if using a feed proxy service (like <a href="http://en.wikipedia.org/wiki/FeedBurner" target="_blank">FeedBurner</a>), enabling this option is still recommended.</span>
@@ -52,6 +45,13 @@
         			<input type="hidden" name="pgcache.cache.query" value="0"<?php if ($this->_config->get_string('pgcache.engine') == 'file_pgcache'): ?> disabled="disabled"<?php endif; ?> />
         			<label><input type="checkbox" name="pgcache.cache.query" value="1"<?php checked($this->_config->get_boolean('pgcache.cache.query'), true); ?><?php if ($this->_config->get_string('pgcache.engine') == 'file_pgcache'): ?> disabled="disabled"<?php endif; ?> /> Cache <acronym title="Uniform Resource Identifier">URI</acronym>s with query string variables</label><br />
     				<span class="description">Search result (and similar) pages will be cached if enabled.</span>
+        		</th>
+        	</tr>
+        	<tr>
+        		<th>
+        			<input type="hidden" name="pgcache.cache.404" value="0" />
+        			<label><input type="checkbox" name="pgcache.cache.404" value="1"<?php checked($this->_config->get_boolean('pgcache.cache.404'), true); ?> /> Cache 404 (not found) pages</label><br />
+    				<span class="description">Reduce server load by caching 404 pages. The "Do not process 404 errors for static objects with WordPress" Browser Cache option is recommended.</span>
         		</th>
         	</tr>
         </table>
@@ -153,7 +153,7 @@
         		<th><label for="pgcache_prime_sitemap">Sitemap <acronym title="Uniform Resource Indicator">URL</acronym>:</label></th>
         		<td>
         			<input id="pgcache_prime_sitemap" type="text" name="pgcache.prime.sitemap" value="<?php echo $this->_config->get_string('pgcache.prime.sitemap'); ?>" size="100" /><br />
-        			<span class="description">A <a href="http://www.xml-sitemaps.com/validate-xml-sitemap.html" target="_blank">compliant</a> sitemap can be used to specify the pages to maintain in the primed cache. Pages will be cached according to the priorities specified in the <acronym title="Extensible Markup Language">XML</acronym> file. <a href="http://wordpress.org/extend/plugins/google-sitemap-generator/" target="_blank">Google <acronym title="Extensible Markup Language">XML</acronym> Sitemaps</a> is recommended plugin for use with this feature.</span>
+        			<span class="description">A <a href="http://www.xml-sitemaps.com/validate-xml-sitemap.html" target="_blank">compliant</a> sitemap can be used to specify the pages to maintain in the primed cache. Pages will be cached according to the priorities specified in the <acronym title="Extensible Markup Language">XML</acronym> file. <a href="http://wordpress.org/extend/plugins/google-sitemap-generator/" target="_blank">Google <acronym title="Extensible Markup Language">XML</acronym> Sitemaps</a> is recommended for use with this feature.</span>
     			</td>
         	</tr>
         	

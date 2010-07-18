@@ -129,13 +129,14 @@
         	<tr>
         		<th valign="top">
         			<input type="hidden" name="cdn.autoupload.enabled" value="0" />
-        			<label><input type="checkbox" name="cdn.autoupload.enabled" value="1"<?php checked($this->_config->get_boolean('cdn.autoupload.enabled'), true); ?> /> Enable files auto upload</label><br />
+        			<label><input type="checkbox" name="cdn.autoupload.enabled" value="1"<?php checked($this->_config->get_boolean('cdn.autoupload.enabled'), true); ?> /> Enable changed files auto-upload</label>
         		</th>
         		<td>
         			<label style="font-size:13px;">
         				Auto upload interval:
 						<input id="cdn_autoupload_interval" type="text" name="cdn.autoupload.interval" value="<?php echo $this->_config->get_integer('cdn.autoupload.interval'); ?>" size="8" /> seconds
-					</label>        		
+					</label><br />
+        			<span class="description">Automatically attempt to find and upload changed files.</span>
 				</td>
         	</tr>
         	<tr>

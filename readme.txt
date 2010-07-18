@@ -135,22 +135,33 @@ That depends on how you use your site and where most of your readers read your s
 
 Yes! You can take advantage of the [pipelining](http://www.mozilla.org/projects/netlib/http/pipelining-faq.html) support in some browsers by creating a sub-domain for the static content for your site. So you could select the "Origin Push / Self-hosted" method of the General Settings tab. Create static.domain.com on your server (and update your DNS zone) and then specify the FTP details for it in the plugin configuration panel and you're done. If you disable the scripting options on your server you'll find that your server will actually respond slightly faster from that sub-domain because it's just sending files and not processing them.
 
-= How do I configure Amazon Simple Storage Service (Amazon S3) or Amazon CloudFront as my CDN? =
-
-First [create an S3 account](http://aws.amazon.com/); it may take several hours for your account credentials to be functional. Next, you need to obtain your "Access key" and "Secret key" from the "Access Credentials" section of the "[Security Credentials](http://aws-portal.amazon.com/gp/aws/developer/account/index.html?action=access-key)" page of "My Account." Make sure the status is "active." Next, make sure that "Amazon Simple Storage Service (Amazon S3)" is the selected type of CDN on the General tab (if not change the setting and save the changes). Now on the CDN  tab enter your "Access key," "Secret key" and create a bucket. Click the "Test S3 Upload" button and make sure that the test is successful, if not check your settings and try again.
-
-Save your settings. Make sure that you export your media library, upload your wp-includes (WordPress core files) theme files, and custom files if you wish to host each of those with AWS. Unless you wish to use CloudFront, you're almost done, skip to the next paragraph if you're using CloudFront. Just go to the General tab and click the checkbox and save the settings to enable CDN functionality and empty the cache for the changes to take effect.
-
-To use CloudFront, perform all of the steps above, except select the "Amazon CloudFront" CDN type in the CDN section of the General Settings tab. Proceed to the [AWS Management Console](https://console.aws.amazon.com/cloudfront/) and create a new distribution: select the S3 Bucket you created earlier as the "Origin," enter a [CNAME](http://docs.amazonwebservices.com/AmazonCloudFront/latest/DeveloperGuide/index.html?CNAMEs.html) if you wish to add one to your DNS Zone. Make sure that "Distribution Status" is enabled and "State" is deployed. Now on CDN tab of the plugin, copy the subdomain found in the AWS Management Console and enter the CNAME used for the distribution in the "CNAME" field.
-
-Now go to the General tab and click the checkbox and save the settings to enable CDN functionality and empty the cache for the changes to take effect.
-
 = How do I use an Origin Pull (Mirror) CDN? =
 Login to your CDN providers control panel or account management area. Following any set up steps they provide, create a new "pull zone" or "bucket" for your site's domain name. If there's a set up wizard or any troubleshooting tips your provider offers, be sure to review them. In the CDN tab of the plugin, enter the hostname your CDN provider provided in the "replace site's hostname with" field. You should always do a quick check by opening a test file from the CDN hostname, e.g. http://cdn.domain.com/favicon.ico. Troubleshoot with your CDN provider until this test is successful.
 
 Now go to the General tab and click the checkbox and save the settings to enable CDN functionality and empty the cache for the changes to take effect.
 
+= How do I configure Amazon Simple Storage Service (Amazon S3) or Amazon CloudFront as my CDN? =
+
+First [create an S3 account](http://aws.amazon.com/); it may take several hours for your account credentials to be functional. Next, you need to obtain your "Access key ID" and "Secret key" from the "Access Credentials" section of the "[Security Credentials](http://aws-portal.amazon.com/gp/aws/developer/account/index.html?action=access-key)" page of "My Account." Make sure the status is "active." Next, make sure that "Amazon Simple Storage Service (Amazon S3)" is the selected "CDN type" on the "General Settings" tab, then save the changes. Now on the "Content Delivery Network Settings" tab enter your "Access key," "Secret key" and enter a name (avoid special characters and spaces) for your bucket in the "Create a bucket" field by clicking the button of the same name. If using an existing bucket simply specify the bucket name in the "Bucket" field. Click the "Test S3 Upload" button and make sure that the test is successful, if not check your settings and try again. Save your settings.
+
+Unless you wish to use CloudFront, you're almost done, skip to the next paragraph if you're using CloudFront. Go to the "General Settings" tab and click the "Enable" checkbox and save the settings to enable CDN functionality. Empty the cache for the changes to take effect. If preview mode is active you will need to "deploy" your changes for them to take effect.
+
+To use CloudFront, perform all of the steps above, except select the "Amazon CloudFront" "CDN type" in the "Content Delivery Network" section of the "General Settings" tab. When creating a new bucket, the distribution ID will automatically be populated. Otherwise, proceed to the [AWS Management Console](https://console.aws.amazon.com/cloudfront/) and create a new distribution: select the S3 Bucket you created earlier as the "Origin," enter a [CNAME](http://docs.amazonwebservices.com/AmazonCloudFront/latest/DeveloperGuide/index.html?CNAMEs.html) if you wish to add one or more to your DNS Zone. Make sure that "Distribution Status" is enabled and "State" is deployed. Now on "Content Delivery Network" tab of the plugin, copy the subdomain found in the AWS Management Console and enter the CNAME used for the distribution in the "CNAME" field.
+
+You may optionally, specify up to 10 hostnames to use rather than the default hostname, doing so will improve the render performance of your site's pages. Additional hostnames should also be specified in the settings for the distribution you're using in the AWS Management Console.
+
+Now go to the General tab and click the "Enable" checkbox and save the settings to enable CDN functionality and empty the cache for the changes to take effect. If preview mode is active you will need to "deploy" your changes for them to take effect.
+
+= How do I configure Rackspace Cloud Files as my CDN? =
+
+First [create an account](http://www.rackspacecloud.com/cloud_hosting_products/files). Next, in the "Content Delivery Network" section of the "General Settings" tab, select Rackspace Cloud Files as the "CDN Type." Now, in the "Configuration" section of the "Content Delivery Network" tab, enter the "Username" and "API key" associated with your account (found in the API Access section of the [rackspace cloud control panel](https://manage.rackspacecloud.com/APIAccess.do)) in the respective fields. Next enter a name for the container to use (avoid special characters and spaces). If the operation is successful, the container's ID will automatically appear in the "Replace site's hostname with" field. You may optionally, specify the container name and container ID of an [existing container](https://manage.rackspacecloud.com/CloudFiles.do) if you wish. Click the "Test Cloud Files Upload" button and make sure that the test is successful, if not check your settings and try again. Save your settings. You're now ready to export your media library, theme and any other files to the CDN.
+
+You may optionally, specify up to 10 hostnames to use rather than the default hostname, doing so will improve the render performance of your site's pages.
+
+Now go to the General tab and click the "Enable" checkbox and save the settings to enable CDN functionality and empty the cache for the changes to take effect.  If preview mode is active you will need to "deploy" your changes for them to take effect.
+
 = My YSlow score is low because it doesn't recognize my CDN, what can I do? =
+
 Rule 2 says to use a content delivery network (CDN). The score for this rule is computed by checking the hostname of each component against the list of known CDNs. Unfortunately, the list of "known CDNs" are the ones used by Yahoo!. Most likely these are not relevant to your web site, except for potentially yui.yahooapis.com. If you want an accurate score for your web site, you can add your CDN hostnames to YSlow using Firefox's preferences. Here are the steps to follow:
 
 * Go to about:config in Firefox. You'll see the current list of preferences.
@@ -241,6 +252,7 @@ Please reach out to all of these people and support their projects if you're so 
 1. *Recommended:* On the "Minify Settings" tab, all of the recommended settings are preset. Use the help button to simplify discovery of your CSS and JS files and groups. Pay close attention to the method and location of your JS group embeddings. See the plugin's FAQ for more information on usage.
 1. *Recommended:* On the "Browser Cache" tab, all of the recommended settings are preset. Use these options to improve user experience by using the brower's cache.
 1. *Recommended:* If you already have a content delivery network (CDN) provider, proceed to the "Content Delivery Network" tab and populate the fields and set your preferences. If you do not use the Media Library, you will need to import your images etc into the default locations. Use the Media Library Import Tool on the "Content Delivery Network" tab to perform this task. If you do not have a CDN provider, you can still improve your site's performance using the "Self-hosted" method. On your own server, create a subdomain and matching DNS Zone record; e.g. static.domain.com and configure FTP options on the "Content Delivery Network" tab accordingly. Be sure to FTP upload the appropriate files, using the available upload buttons.
+1. *Recommended:* On the "Browser Cache" tab, HTTP compression is enabled by default. Make sure to enable other options to suit your goals.
 1. *Optional:* On the "Database Cache" tab, the recommended settings are preset. If using a shared hosting account use the "disk" method with caution, the response time of the disk may not be fast enough, so this option is disabled by default. Try object caching instead for shared hosting.
 1. *Optional:* On the "Object Cache" tab, all of the recommended settings are preset. If using a shared hosting account use the "disk" method with caution, the response time of the disk may not be fast enough, so this option is disabled by default. Test this option with and without database cache to ensure that it provides a performance increase.
 1. *Optional:* On the "User Agent Groups" tab, specify any user agents, like mobile phones if a mobile theme is used. 
@@ -299,7 +311,7 @@ Read [testimonials](http://bit.ly/6Wbvpt) from W3TC users.
 * Added preview feature so all cache settings can be reviewed prior to deployment
 * Added minify configuration wizard (help button on minify tab)
 * Added "never cache the following pages" to database and object cache
-* Added minify option to JavaScript embed after <body>
+* Added minify option to JavaScript embed after &lt;body&gt;
 * Added minify error notifications
 * Added drag and drop dependency resolution for minify CSS / JavaScript groups
 * Added object caching
@@ -309,8 +321,8 @@ Read [testimonials](http://bit.ly/6Wbvpt) from W3TC users.
 * Added support for page caching of multiple themes for various user agent groups
 * Added support for theme switching / redirection based on groups of user agents
 * Added compatibility with WP Super Cache fragment caching method (disk basic mode only)
-* Added http compression and headers for AWS S3
-* Added ignored comment stems field, with Google AdSense default value
+* Added HTTP compression and headers for AWS S3
+* Added ignored comment stems field, with Google AdSense default value to HTML minify
 * Added support for varnish purging
 * Added Rackspace CloudFiles support
 * Added native NetDNA / MaxCDN integration
@@ -318,9 +330,9 @@ Read [testimonials](http://bit.ly/6Wbvpt) from W3TC users.
 * Added changed files auto-upload to CDN
 * Added option to handle 404 errors for static objects directly with the web server
 * Added support for gravity forms to database cache default settings
-* Added settings file import / export
+* Added changed file auto-upload to CDN
 * Database connection errors now return internal server (500) error response and are thus not cached
-* Incomplete plugin installation /removal no longer generates public errors
+* Incomplete plugin installation / removal no longer generates public errors
 * Unterminated string errors no longer display publicly
 * Support tab improvements
 * Install tab improvements
@@ -345,6 +357,7 @@ Read [testimonials](http://bit.ly/6Wbvpt) from W3TC users.
 * Added option to force replacement of uploaded attachments on CDN
 * Added option to toggle feed minification
 * Added combine only option for CSS minification to overcome invalid CSS files
+* Added configuration file import / export
 * Database caching now disabled by default to improve compatibility with some shared hosting environments
 * Default page caching method now disk enhanced
 * Improved HTTP Compression inter-operability

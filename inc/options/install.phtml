@@ -9,6 +9,7 @@
         <li>On the "<a href="admin.php?page=w3tc_general">General</a>" tab and select your caching methods for page, database and minify. In most cases, "disk enhanced" mode for page cache, "disk" mode for minify and "disk" mode for database caching are "good" settings.</li>
         <li><em>Recommended:</em> On the "<a href="admin.php?page=w3tc_minify">Minify</a>" tab all of the recommended settings are preset. Use the help button to simplify discovery of your <acronym title="Cascading Style Sheet">CSS</acronym> and <acronym title="JavaScript">JS</acronym> files and groups. Pay close attention to the method and location of your <acronym title="JavaScript">JS</acronym> group embeddings. See the plugin's <a href="admin.php?page=w3tc_faq">FAQ</a> for more information on usage.</li>
         <li><em>Recommended:</em> If you already have a content delivery network (<acronym title="Content Delivery Network">CDN</acronym>) provider, proceed to the "<a href="admin.php?page=w3tc_cdn">Content Delivery Network</a>" tab and populate the fields and set your preferences. If you do not use the Media Library, you will need to import your images etc into the default locations. Use the Media Library Import Tool on the "Content Delivery Network" tab to perform this task. If you do not have a <acronym title="Content Delivery Network">CDN</acronym> provider, you can still improve your site's performance using the "Self-hosted" method. On your own server, create a subdomain and matching <acronym title="Domain Name System">DNS</acronym> Zone record; e.g. static.domain.com and configure <acronym title="File Transfer Protocol">FTP</acronym> options on the "Content Delivery Network" tab accordingly. Be sure to <acronym title="File Transfer Protocol">FTP</acronym> upload the appropriate files, using the available upload buttons.</li>
+        <li><em>Recommended:</em> On the "<a href="admin.php?page=w3tc_browsercache">Browser Cache</a>" tab, HTTP compression is enabled by default. Make sure to enable other options to suit your goals.</li>
         <li><em>Optional:</em> On the "<a href="admin.php?page=w3tc_dbcache">Database Cache</a>" tab the recommended settings are preset. If using a shared hosting account use the "disk" method with caution; in either of these cases the response time of the disk may not be fast enough, so this option is disabled by default.</li>
         <li><em>Optional:</em> On the "<a href="admin.php?page=w3tc_objectcache">Object Cache</a>" tab the recommended settings are preset. If using a shared hosting account use the "disk" method with caution, the response time of the disk may not be fast enough, so this option is disabled by default. Test this option with and without database cache to ensure that it provides a performance increase.</li>
         <li><em>Optional:</em> On the "<a href="admin.php?page=w3tc_mobile">User Agent Groups</a>" tab, specify any user agents, like mobile phones if a mobile theme is used.</li>
@@ -211,6 +212,39 @@
     
 	<hr />
 	
+	<p id="XCache"><strong>XCache Installation:</strong><br /><em>Time required: 1 minute</em></p>
+	
+    <ol> 
+        <li>
+        	Download the <a href="http://xcache.lighttpd.net/wiki/ReleaseArchive" target="_blank">latest compatible version</a> and extract:
+			<pre class="console"># cd /usr/local/src &amp;&amp; wget <a href="http://xcache.lighttpd.net/pub/Releases/1.3.0/xcache-1.3.0.tar.gz" target="_blank">http://xcache.lighttpd.net/pub/Releases/1.3.0/xcache-1.3.0.tar.gz</a> &amp;&amp; tar -xzf xcache-1.3.0.tar.gz &amp;&amp; cd xcache-1.3.0</pre>
+		</li>
+		<li>
+			Note the path returned for the following command:
+			<pre class="console"># whereis php-config</pre>
+		</li>
+		<li>
+			Use the output from #2 to modify the --with-php-config flag in the following compile command:
+			<pre class="console"># phpize &amp;&amp; ./configure --with-php-config=/usr/bin/php-config --enable-xcache --enable-xcache-optimizer --enable-xcache-coverager &amp;&amp; make &amp;&amp; make install</pre>
+			The result should be similar to:
+			<pre class="console">Installing shared extensions: /usr/lib/php/modules/</pre>
+		</li>
+        <li>
+        	You can also use the eaccelerator.ini file we prepared for you:
+			<pre class="console"># cp /var/www/vhosts/domain.com/httpdocs/wp-content/plugins/w3-total-cache/ini/xcache.ini /etc/php.d/</pre>
+		</li>
+		<li>
+			Restart apache when ready:
+			<pre class="console"># /etc/init.d/httpd restart</pre>
+		</li>
+		<li>
+			You're done! XCache should now be available. If the following command retuns anything, you're all set:
+			<pre class="console"># php -r 'phpinfo();' | grep 'xcache'</pre>
+		</li>
+    </ol>
+    
+	<hr />
+	
 	<p id="eAccelerator"><strong>eAccelerator Installation:</strong><br /><em>Time required: 1 minute</em></p>
 	
     <ol> 
@@ -247,39 +281,6 @@
     <ul> 
         <li><a href="http://www.sitebuddy.com/PHP/Accelerators/eAccelerator_windows_binaries_builds" target="_blank">eAccelerator binaries for <acronym title="Hypertext Preprocessor">PHP</acronym> 5.x (windows builds)</a></li>
     </ul>
-    
-	<hr />
-	
-	<p id="XCache"><strong>XCache Installation:</strong><br /><em>Time required: 1 minute</em></p>
-	
-    <ol> 
-        <li>
-        	Download the <a href="http://xcache.lighttpd.net/wiki/ReleaseArchive" target="_blank">latest compatible version</a> and extract:
-			<pre class="console"># cd /usr/local/src &amp;&amp; wget <a href="http://xcache.lighttpd.net/pub/Releases/1.3.0/xcache-1.3.0.tar.gz" target="_blank">http://xcache.lighttpd.net/pub/Releases/1.3.0/xcache-1.3.0.tar.gz</a> &amp;&amp; tar -xzf xcache-1.3.0.tar.gz &amp;&amp; cd xcache-1.3.0</pre>
-		</li>
-		<li>
-			Note the path returned for the following command:
-			<pre class="console"># whereis php-config</pre>
-		</li>
-		<li>
-			Use the output from #2 to modify the --with-php-config flag in the following compile command:
-			<pre class="console"># phpize &amp;&amp; ./configure --with-php-config=/usr/bin/php-config --enable-xcache --enable-xcache-optimizer --enable-xcache-coverager &amp;&amp; make &amp;&amp; make install</pre>
-			The result should be similar to:
-			<pre class="console">Installing shared extensions: /usr/lib/php/modules/</pre>
-		</li>
-        <li>
-        	You can also use the eaccelerator.ini file we prepared for you:
-			<pre class="console"># cp /var/www/vhosts/domain.com/httpdocs/wp-content/plugins/w3-total-cache/ini/xcache.ini /etc/php.d/</pre>
-		</li>
-		<li>
-			Restart apache when ready:
-			<pre class="console"># /etc/init.d/httpd restart</pre>
-		</li>
-		<li>
-			You're done! XCache should now be available. If the following command retuns anything, you're all set:
-			<pre class="console"># php -r 'phpinfo();' | grep 'xcache'</pre>
-		</li>
-    </ol>
     
     <hr />
     
