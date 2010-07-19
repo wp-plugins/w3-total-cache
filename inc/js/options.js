@@ -845,6 +845,6 @@ jQuery(function() {
 
     // nav
     jQuery('#w3tc-nav select').change(function() {
-        document.location.href = jQuery(this).val();
+        document.location.href = 'admin.php?page=' + jQuery(this).val();
     });
 });

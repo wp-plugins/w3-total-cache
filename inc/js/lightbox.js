@@ -374,7 +374,7 @@ function w3tc_lightbox_self_test() {
     }
 
     W3tc_Lightbox.open( {
-        width: 600,
+        width: 800,
         height: height,
         url: 'admin.php?page=w3tc_general&w3tc_action=self_test',
         callback: function(lightbox) {

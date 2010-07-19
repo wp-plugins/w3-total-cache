@@ -42,6 +42,16 @@
     	<?php else: ?>
     	<span class="w3tc-test-error">Not installed</span>
     	<?php endif; ?>
+    	(required for Self-hosted (FTP) CDN support)
+        <br />
+        
+    	Multibyte String support:
+    	<?php if (function_exists('mb_substr')): ?>
+    	<span class="w3tc-test-ok">OK</span>
+    	<?php else: ?>
+    	<span class="w3tc-test-error">Not installed</span>
+    	<?php endif; ?>
+    	(required for Rackspace Cloud Files support)
         <br />
     
     	cURL extension:
@@ -50,6 +60,7 @@
     	<?php else: ?>
     	<span class="w3tc-test-error">Not installed</span>
     	<?php endif; ?>
+    	(required for Amazon S3 support)
         <br />
     
     	zlib extension:
@@ -58,6 +69,7 @@
     	<?php else: ?>
     	<span class="w3tc-test-error">Not installed</span>
     	<?php endif; ?>
+    	(required for compression support)
         <br />
     
     	Opcode cache:
@@ -100,6 +112,7 @@
     	<?php else: ?>
     	<span class="w3tc-test-error">Not installed</span>
     	<?php endif; ?>
+    	(required for NetDNA purge support)
         <br />
     
     	Safe mode:

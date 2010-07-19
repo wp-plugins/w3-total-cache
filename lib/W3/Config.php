@@ -294,8 +294,8 @@ class W3_Config
         'pgcache.varnish.enabled' => false, 
         'pgcache.varnish.servers' => array(), 
         'pgcache.prime.enabled' => false, 
-        'pgcache.prime.interval' => 86400, 
-        'pgcache.prime.limit' => 100, 
+        'pgcache.prime.interval' => 900, 
+        'pgcache.prime.limit' => 10, 
         'pgcache.prime.sitemap' => '', 
         
         'minify.enabled' => false, 

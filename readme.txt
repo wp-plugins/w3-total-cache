@@ -261,6 +261,7 @@ Please reach out to all of these people and support their projects if you're so 
 
 = Press: Mentions, Tutorials &amp; Reviews =
 
+* July 19, 2010: [11 Ways to Speed Up WordPress](http://mashable.com/2010/07/19/speed-up-wordpress/), Cyrus Patten
 * July 14, 2010: [How To Decrease Page Loading Time Of Your WordPress Blog By 75%](http://bloggingwithsuccess.net/decrease-loading-times), Ishan Sharma
 * July 14, 2010: [Top 10 Wordpress Plugins which I use on DailyBlogging](http://www.dailyblogging.org/wordpress/top-10-wordpress-plugins-which-i-use-on-dailyblogging/), Mani Viswanathan
 * July 12, 2010: [Install and Configure W3 Total Cache in 7 Easy Steps](http://zemalf.com/1443/w3-total-cache/), Antti Kokkonen

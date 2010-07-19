@@ -2344,6 +2344,19 @@ class W3_Plugin_TotalCache extends W3_Plugin
         }
         
         /**
+         * Disable browsercache when browsercache features disabled
+         */
+        if ($old_config->get_boolean('browsercache.enabled') == $new_config->get_boolean('browsercache.enabled')) {
+            $borwsercache_enabled = ($new_config->get_boolean('browsercache.cssjs.expires') || $new_config->get_boolean('browsercache.html.expires') || $new_config->get_boolean('browsercache.other.expires'));
+            $borwsercache_enabled = $borwsercache_enabled || ($new_config->get_boolean('browsercache.cssjs.cache.control') || $new_config->get_boolean('browsercache.html.cache.control') || $new_config->get_boolean('browsercache.other.cache.control'));
+            $borwsercache_enabled = $borwsercache_enabled || ($new_config->get_boolean('browsercache.cssjs.etag') || $new_config->get_boolean('browsercache.html.etag') || $new_config->get_boolean('browsercache.other.etag'));
+            $borwsercache_enabled = $borwsercache_enabled || ($new_config->get_boolean('browsercache.cssjs.w3tc') || $new_config->get_boolean('browsercache.html.w3tc') || $new_config->get_boolean('browsercache.other.w3tc'));
+            $borwsercache_enabled = $borwsercache_enabled || ($new_config->get_boolean('browsercache.cssjs.compression') || $new_config->get_boolean('browsercache.html.compression') || $new_config->get_boolean('browsercache.other.compression'));
+            
+            $new_config->set('browsercache.enabled', $borwsercache_enabled);
+        }
+        
+        /**
          * Save config
          */
         if ($new_config->save($preview)) {
@@ -4765,7 +4778,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
                     }
                 }
                 
-                if (isset($attrs['href']) && isset($attrs['rel']) && $attrs['rel'] == 'stylesheet' && isset($attrs['type']) && $attrs['type'] == 'text/css' && (!isset($attrs['media']) || stristr($attrs['media'], 'print') === false)) {
+                if (isset($attrs['href']) && isset($attrs['rel']) && stristr($attrs['rel'], 'stylesheet') !== false && (!isset($attrs['media']) || stristr($attrs['media'], 'print') === false)) {
                     $files[] = $attrs['href'];
                 }
             }

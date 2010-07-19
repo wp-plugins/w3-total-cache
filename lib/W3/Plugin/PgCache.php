@@ -305,7 +305,24 @@ class W3_Plugin_PgCache extends W3_Plugin
      */
     function prime($start = 0)
     {
-        //return;
+        /**
+         * Don't start cache prime if queues are still scheduled
+         */
+        if ($start == 0) {
+            $crons = _get_cron_array();
+            
+            foreach ($crons as $timestamp => $hooks) {
+                foreach ($hooks as $hook => $keys) {
+                    foreach ($keys as $key => $data) {
+                        if ($hook == 'w3_pgcache_prime' && count($data['args'])) {
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+        
+        $interval = $this->_config->get_integer('pgcache.prime.interval');
         $limit = $this->_config->get_integer('pgcache.prime.limit');
         $sitemap_url = $this->_config->get_string('pgcache.prime.sitemap');
         $sitemap_xml = w3_http_get($sitemap_url);
@@ -353,7 +370,7 @@ class W3_Plugin_PgCache extends W3_Plugin
         $urls = array_slice($queue, $start, $limit);
         
         if (count($queue) > ($start + $limit)) {
-            wp_schedule_single_event(time() + 600, 'w3_pgcache_prime', array(
+            wp_schedule_single_event(time() + $interval, 'w3_pgcache_prime', array(
                 $start + $limit
             ));
         }
