@@ -384,6 +384,11 @@ class W3_ObjectCache
         
         $key = sprintf('w3tc_%s_object_%s', md5($host), md5($prefix . $group . $id));
         
+        /**
+         * Allow to modify cache key by W3TC plugins
+         */
+        $key = w3tc_do_action('w3tc_objectcache_cache_key', $key);
+        
         return $key;
     }
     

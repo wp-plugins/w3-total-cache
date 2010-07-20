@@ -99,6 +99,11 @@ class W3_Plugin_TotalCache extends W3_Plugin
             'deactivate'
         ));
         
+        add_action('admin_init', array(
+            &$this, 
+            'admin_init'
+        ));
+        
         add_action('admin_menu', array(
             &$this, 
             'admin_menu'
@@ -736,9 +741,6 @@ class W3_Plugin_TotalCache extends W3_Plugin
         }
         
         $this->_support_reminder = ($this->_config->get_boolean('notes.support_us') && $this->_config->get_integer('common.install') < (time() - W3TC_SUPPORT_US_TIMEOUT) && !$this->is_supported());
-        
-        wp_enqueue_style('w3tc-options', WP_PLUGIN_URL . '/w3-total-cache/inc/css/options.css');
-        wp_enqueue_style('w3tc-lightbox', WP_PLUGIN_URL . '/w3-total-cache/inc/css/lightbox.css');
     }
     
     /**
@@ -805,6 +807,18 @@ class W3_Plugin_TotalCache extends W3_Plugin
         } else {
             include W3TC_DIR . '/inc/widget/latest_control.phtml';
         }
+    }
+    
+    /**
+     * Admin init
+     */
+    function admin_init()
+    {
+        wp_register_style('w3tc-options', WP_PLUGIN_URL . '/w3-total-cache/inc/css/options.css');
+        wp_register_style('w3tc-lightbox', WP_PLUGIN_URL . '/w3-total-cache/inc/css/lightbox.css');
+        
+        wp_register_script('w3tc-options', WP_PLUGIN_URL . '/w3-total-cache/inc/js/options.js');
+        wp_register_script('w3tc-lightbox', WP_PLUGIN_URL . '/w3-total-cache/inc/js/lightbox.js');
     }
     
     /**
@@ -888,6 +902,16 @@ class W3_Plugin_TotalCache extends W3_Plugin
                     &$this, 
                     'load'
                 ));
+                
+                add_action('admin_print_styles-' . $submenu_page, array(
+                    &$this, 
+                    'admin_print_styles'
+                ));
+                
+                add_action('admin_print_scripts-' . $submenu_page, array(
+                    &$this, 
+                    'admin_print_scripts'
+                ));
             }
             
             /**
@@ -897,6 +921,32 @@ class W3_Plugin_TotalCache extends W3_Plugin
                 &$this, 
                 'admin_notices'
             ));
+        }
+    }
+    
+    /**
+     * Print styles
+     */
+    function admin_print_styles()
+    {
+        wp_enqueue_style('w3tc-options');
+        wp_enqueue_style('w3tc-lightbox');
+    }
+    
+    /**
+     * Print scripts
+     */
+    function admin_print_scripts()
+    {
+        wp_enqueue_script('w3tc-options');
+        wp_enqueue_script('w3tc-lightbox');
+        
+        switch ($this->_page) {
+            case 'w3tc_minify':
+            case 'w3tc_mobile':
+            case 'w3tc_cdn':
+                wp_enqueue_script('jquery-ui-sortable');
+                break;
         }
     }
     
@@ -1878,8 +1928,11 @@ class W3_Plugin_TotalCache extends W3_Plugin
             require_once W3TC_LIB_W3_DIR . '/Plugin/BrowserCache.php';
             $w3_plugin_browsercache = & W3_Plugin_BrowserCache::instance();
             
-            $home_root_rules .= $w3_plugin_browsercache->generate_rules_no404wp();
             $document_root_rules .= $w3_plugin_browsercache->generate_rules_cache();
+            
+            if ($this->_config->get_boolean('browsercache.no404wp')) {
+                $home_root_rules .= $w3_plugin_browsercache->generate_rules_no404wp();
+            }
             
             if ($this->_config->get_boolean('cdn.enabled') && $this->_config->get_string('cdn.engine') == 'ftp') {
                 require_once W3TC_LIB_W3_DIR . '/Plugin/Cdn.php';
@@ -1901,7 +1954,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
             $w3_plugin_pgcache = & W3_Plugin_PgCache::instance();
             
             $home_root_rules .= $w3_plugin_pgcache->generate_rules_core();
-            $home_root_rules .= $w3_plugin_pgcache->generate_rules_cache();
+            $pgcache_rules .= $w3_plugin_pgcache->generate_rules_cache();
         }
         
         if ($this->_config->get_boolean('minify.enabled')) {
@@ -2341,19 +2394,6 @@ class W3_Plugin_TotalCache extends W3_Plugin
             'netdna'
         ))) {
             $new_config->set('notes.cdn_upload', true);
-        }
-        
-        /**
-         * Disable browsercache when browsercache features disabled
-         */
-        if ($old_config->get_boolean('browsercache.enabled') == $new_config->get_boolean('browsercache.enabled')) {
-            $borwsercache_enabled = ($new_config->get_boolean('browsercache.cssjs.expires') || $new_config->get_boolean('browsercache.html.expires') || $new_config->get_boolean('browsercache.other.expires'));
-            $borwsercache_enabled = $borwsercache_enabled || ($new_config->get_boolean('browsercache.cssjs.cache.control') || $new_config->get_boolean('browsercache.html.cache.control') || $new_config->get_boolean('browsercache.other.cache.control'));
-            $borwsercache_enabled = $borwsercache_enabled || ($new_config->get_boolean('browsercache.cssjs.etag') || $new_config->get_boolean('browsercache.html.etag') || $new_config->get_boolean('browsercache.other.etag'));
-            $borwsercache_enabled = $borwsercache_enabled || ($new_config->get_boolean('browsercache.cssjs.w3tc') || $new_config->get_boolean('browsercache.html.w3tc') || $new_config->get_boolean('browsercache.other.w3tc'));
-            $borwsercache_enabled = $borwsercache_enabled || ($new_config->get_boolean('browsercache.cssjs.compression') || $new_config->get_boolean('browsercache.html.compression') || $new_config->get_boolean('browsercache.other.compression'));
-            
-            $new_config->set('browsercache.enabled', $borwsercache_enabled);
         }
         
         /**
@@ -4275,6 +4315,20 @@ class W3_Plugin_TotalCache extends W3_Plugin
         $theme = get_theme($theme_name);
         
         if ($theme && isset($theme['Template Files'])) {
+            $front_page_template = false;
+            
+            if (get_option('show_on_front') == 'page') {
+                $front_page_id = get_option('page_on_front');
+                
+                if ($front_page_id) {
+                    $front_page_template_file = get_post_meta($front_page_id, '_wp_page_template', true);
+                    
+                    if ($front_page_template_file) {
+                        $front_page_template = basename($front_page_template_file, '.php');
+                    }
+                }
+            }
+            
             $home_url = w3_get_home_url();
             $template_files = (array) $theme['Template Files'];
             
@@ -4301,9 +4355,14 @@ class W3_Plugin_TotalCache extends W3_Plugin
                     /**
                      * Handle home.php or index.php or front-page.php
                      */
-                    case ($template == 'home'):
-                    case ($template == 'index'):
-                    case ($template == 'front-page'):
+                    case (!$front_page_template && $template == 'home'):
+                    case (!$front_page_template && $template == 'index'):
+                    case (!$front_page_template && $template == 'front-page'):
+                    
+                    /**
+                     * Handle custom home page
+                     */
+                    case ($template == $front_page_template):
                         $link = $home_url . '/';
                         break;
                     
@@ -4717,7 +4776,14 @@ class W3_Plugin_TotalCache extends W3_Plugin
          * If there are common files append add them into default group
          */
         if (count($default_files)) {
-            $groups['default'] = $default_files;
+            $new_groups = array();
+            $new_groups['default'] = $default_files;
+            
+            foreach ($groups as $template => $files) {
+                $new_groups[$template] = $files;
+            }
+            
+            $groups = $new_groups;
         }
         
         /**

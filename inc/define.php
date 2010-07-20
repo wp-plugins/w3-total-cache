@@ -53,6 +53,8 @@ define('W3TC_CDN_TABLE_QUEUE', 'w3tc_cdn_queue');
 @ini_set('pcre.backtrack_limit', 4194304);
 @ini_set('pcre.recursion_limit', 4194304);
 
+$_w3tc_actions = array();
+
 /**
  * W3 activate error
  *
@@ -1730,14 +1732,37 @@ function w3_get_permalink_rules()
 }
 
 /**
- * Disable buggy sitewide activation in WPMU and WP 3.0
+ * Add W3TC action callback
+ * 
+ * @param string $action
+ * @param mixed $callback
+ * @return void
  */
-if (isset($_GET['action']) && $_GET['action'] == 'activate' && isset($_GET['plugin']) && $_GET['plugin'] == W3TC_FILE) {
-    if (w3_is_wpmu() && isset($_GET['sitewide'])) {
-        unset($_GET['sitewide']);
+function w3tc_add_action($action, $callback)
+{
+    global $_w3tc_actions;
+    
+    $_w3tc_actions[$action][] = $callback;
+}
+
+/**
+ * Do W3TC action
+ * 
+ * @param string $action
+ * @param mixed $value
+ * @return mixed
+ */
+function w3tc_do_action($action, $value = null)
+{
+    global $_w3tc_actions;
+    
+    if (isset($_w3tc_actions[$action])) {
+        foreach ((array) $_w3tc_actions[$action] as $callback) {
+            if (is_callable($callback)) {
+                $value = call_user_func($callback, $value);
+            }
+        }
     }
     
-    if (w3_is_network_mode() && isset($_GET['networkwide'])) {
-        w3_network_activate_error();
-    }
+    return $value;
 }

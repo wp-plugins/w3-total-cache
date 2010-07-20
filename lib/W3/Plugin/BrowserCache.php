@@ -128,21 +128,25 @@ class W3_Plugin_BrowserCache extends W3_Plugin
         $html_types = $this->get_html_types();
         $other_types = $this->get_other_types();
         
+        $cssjs_expires = $this->_config->get_boolean('browsercache.cssjs.expires');
+        $html_expires = $this->_config->get_boolean('browsercache.html.expires');
+        $other_expires = $this->_config->get_boolean('browsercache.other.expires');
+        
         $cssjs_lifetime = $this->_config->get_integer('browsercache.cssjs.lifetime');
         $html_lifetime = $this->_config->get_integer('browsercache.html.lifetime');
         $other_lifetime = $this->_config->get_integer('browsercache.other.lifetime');
         
         $mime_types = array();
         
-        if ($this->_config->get_boolean('browsercache.cssjs.expires') && $cssjs_lifetime) {
+        if ($cssjs_expires && $cssjs_lifetime) {
             $mime_types = array_merge($mime_types, $cssjs_types);
         }
         
-        if ($this->_config->get_boolean('browsercache.html.expires') && $html_lifetime) {
+        if ($html_expires && $html_lifetime) {
             $mime_types = array_merge($mime_types, $html_types);
         }
         
-        if ($this->_config->get_boolean('browsercache.other.expires') && $other_lifetime) {
+        if ($other_expires && $this->_config->get_boolean('browsercache.other.expires') && $other_lifetime) {
             $mime_types = array_merge($mime_types, $other_types);
         }
         
@@ -169,19 +173,19 @@ class W3_Plugin_BrowserCache extends W3_Plugin
             $rules .= "<IfModule mod_expires.c>\n";
             $rules .= "    ExpiresActive On\n";
             
-            if ($cssjs_lifetime) {
+            if ($cssjs_expires && $cssjs_lifetime) {
                 foreach ($cssjs_types as $mime_type) {
                     $rules .= "    ExpiresByType " . $mime_type . " M" . $cssjs_lifetime . "\n";
                 }
             }
             
-            if ($html_lifetime) {
+            if ($html_expires && $html_lifetime) {
                 foreach ($html_types as $mime_type) {
                     $rules .= "    ExpiresByType " . $mime_type . " M" . $html_lifetime . "\n";
                 }
             }
             
-            if ($other_lifetime) {
+            if ($other_expires && $other_lifetime) {
                 foreach ($other_types as $mime_type) {
                     $rules .= "    ExpiresByType " . $mime_type . " M" . $other_lifetime . "\n";
                 }

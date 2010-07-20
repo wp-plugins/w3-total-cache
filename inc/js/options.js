@@ -171,10 +171,10 @@ function w3tc_toggle(name) {
     var id = '#' + name, cls = '.' + name;
 
     jQuery(cls).click(function() {
-        var checked = false;
+        var checked = true;
         jQuery(cls).each(function() {
-            if (jQuery(this).is(':checked')) {
-                checked = true;
+            if (!jQuery(this).is(':checked')) {
+                checked = false;
             }
         });
         jQuery(id).each(function() {

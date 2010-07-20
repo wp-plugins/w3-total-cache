@@ -575,7 +575,14 @@ class W3_Db extends wpdb
             $blogname = w3_get_host();
         }
         
-        return sprintf('w3tc_%s_sql_%s', md5($blogname), md5($sql));
+        $key = sprintf('w3tc_%s_sql_%s', md5($blogname), md5($sql));
+        
+        /**
+         * Allow to modify cache key by W3TC plugins
+         */
+        $key = w3tc_do_action('w3tc_dbcache_cache_key', $key);
+        
+        return $key;
     }
     
     /**

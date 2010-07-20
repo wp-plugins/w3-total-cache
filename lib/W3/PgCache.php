@@ -986,6 +986,11 @@ class W3_PgCache
             }
         }
         
+        /**
+         * Allow to modify page key by W3TC plugins
+         */
+        $key = w3tc_do_action('w3tc_pgcache_cache_key', $key);
+        
         return $key;
     }
     
