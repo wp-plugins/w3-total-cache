@@ -377,7 +377,27 @@ class W3_Plugin_BrowserCache extends W3_Plugin
             $data = '';
         }
         
-        $data = trim($this->generate_rules_cache() . $data);
+        $rules = $this->generate_rules_cache();
+        
+        $search = array(
+            '# BEGIN W3TC Page Cache', 
+            '# BEGIN WordPress'
+        );
+        
+        foreach ($search as $string) {
+            $rules_pos = strpos($data, $string);
+            
+            if ($rules_pos !== false) {
+                break;
+            }
+        }
+        
+        if ($rules_pos !== false) {
+            $data = trim(substr_replace($data, $rules, $rules_pos, 0));
+        } else {
+            $data = trim($rules . $data);
+        
+        }
         
         return @file_put_contents($path, $data);
     }
@@ -401,7 +421,28 @@ class W3_Plugin_BrowserCache extends W3_Plugin
             $data = '';
         }
         
-        $data = trim($this->generate_rules_no404wp() . $data);
+        $rules = $this->generate_rules_no404wp();
+        
+        $search = array(
+            '# BEGIN W3TC Browser Cache', 
+            '# BEGIN W3TC Page Cache', 
+            '# BEGIN WordPress'
+        );
+        
+        foreach ($search as $string) {
+            $rules_pos = strpos($data, $string);
+            
+            if ($rules_pos !== false) {
+                break;
+            }
+        }
+        
+        if ($rules_pos !== false) {
+            $data = trim(substr_replace($data, $rules, $rules_pos, 0));
+        } else {
+            $data = trim($rules . $data);
+        
+        }
         
         return @file_put_contents($path, $data);
     }
