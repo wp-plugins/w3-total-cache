@@ -1,0 +1,15 @@
+<div id="w3tc-help">
+	<p>Request professional <a href="admin.php?page=w3tc_support" style="color: red;"><strong>support</strong></a> or troubleshoot issues using the common questions below:</p>
+
+	<?php foreach ($columns as $questions): ?>
+    <ul>
+        <?php foreach ($questions as $question): ?>
+    	<li>
+    		<a href="admin.php?page=w3tc_faq#q<?php echo ++$q; ?>"><?php echo $question; ?></a>
+    	</li>
+        <?php endforeach; ?>
+    </ul>
+    <?php endforeach; ?>
+    
+    <div style="clear: left;"></div>
+</div>

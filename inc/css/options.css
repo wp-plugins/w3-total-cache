@@ -48,6 +48,25 @@
 	color: #f00;
 }
 
+#w3tc-help ul {
+	float: left;
+	width: 29%;	
+	list-style-type: disc;
+	margin: 1em 2% 1em 2%;
+}
+
+#w3tc-help li {
+	margin: 0;
+}
+
+#w3tc-help a {
+	text-decoration: none;
+}
+
+#w3tc-help a:hover {
+	text-decoration: underline;
+}
+
 #w3tc-nav select {
 	background: #f9f9f9 !important;
 	border: 0;

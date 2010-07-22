@@ -109,6 +109,11 @@ class W3_Plugin_TotalCache extends W3_Plugin
             'admin_menu'
         ));
         
+        add_filter('contextual_help_list', array(
+            &$this, 
+            'contextual_help_list'
+        ));
+        
         add_filter('plugin_action_links_' . W3TC_FILE, array(
             &$this, 
             'plugin_action_links'
@@ -948,6 +953,43 @@ class W3_Plugin_TotalCache extends W3_Plugin
                 wp_enqueue_script('jquery-ui-sortable');
                 break;
         }
+    }
+    
+    /**
+     * Contextual help list filter
+     * @param string $list
+     * @return string
+     */
+    function contextual_help_list($list)
+    {
+        $faq_file = W3TC_DIR . '/inc/options/faq.xml';
+        
+        $dom = new DOMDocument();
+        $dom->preserveWhiteSpace = true;
+        $dom->load($faq_file);
+        
+        $xpath = new DOMXPath($dom);
+        
+        $q = $xpath->query('//faqs/section[@name="General"]/entry/question')->length;
+        
+        $questions = array();
+        
+        foreach ($xpath->query('//faqs/section[@name="Usage"]/entry/question') as $node) {
+            $questions[] = $node->nodeValue;
+        }
+        
+        $columns = array_chunk($questions, ceil(count($questions) / 3));
+        
+        ob_start();
+        include W3TC_DIR . '/inc/options/common/help.phtml';
+        $help = ob_get_contents();
+        ob_end_clean();
+        
+        $hook = get_plugin_page_hookname($this->_page, 'w3tc_general');
+        
+        $list[$hook] = $list[$hook] . $help;
+        
+        return $list;
     }
     
     /**
@@ -1822,6 +1864,14 @@ class W3_Plugin_TotalCache extends W3_Plugin
      */
     function options_faq()
     {
+        $faq_file = W3TC_DIR . '/inc/options/faq.xml';
+        
+        $dom = new DOMDocument();
+        $dom->preserveWhiteSpace = true;
+        $dom->load($faq_file);
+        
+        $xpath = new DOMXPath($dom);
+        
         include W3TC_DIR . '/inc/options/faq.phtml';
     }
     
