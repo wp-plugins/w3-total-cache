@@ -592,7 +592,7 @@ class W3_Plugin_PgCache extends W3_Plugin
          * Check mobile groups
          */
         if ($this->_config->get_boolean('mobile.enabled')) {
-            $mobile_groups = array_reverse($this->_config->get_array('mobile.groups'));
+            $mobile_groups = array_reverse($this->_config->get_array('mobile.rgroups'));
             
             foreach ($mobile_groups as $mobile_group => $mobile_config) {
                 $mobile_agents = (isset($mobile_config['agents']) ? (array) $mobile_config['agents'] : '');
@@ -625,7 +625,7 @@ class W3_Plugin_PgCache extends W3_Plugin
          * Check for mobile redirect
          */
         if ($this->_config->get_boolean('mobile.enabled')) {
-            $mobile_groups = $this->_config->get_array('mobile.groups');
+            $mobile_groups = $this->_config->get_array('mobile.rgroups');
             
             foreach ($mobile_groups as $mobile_group => $mobile_config) {
                 $mobile_agents = (isset($mobile_config['agents']) ? (array) $mobile_config['agents'] : '');

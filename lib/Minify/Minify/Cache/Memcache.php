@@ -47,7 +47,9 @@ class Minify_Cache_Memcache {
      */
     public function store($id, $data)
     {
-        return $this->_mc->set($id, "{$_SERVER['REQUEST_TIME']}|{$data}", 0, $this->_exp);
+        $data = "{$_SERVER['REQUEST_TIME']}|{$data}";
+        
+        return $this->_mc->set($id, $data, 0, $this->_exp);
     }
     
     

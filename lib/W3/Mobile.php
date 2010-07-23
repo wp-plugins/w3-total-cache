@@ -23,7 +23,7 @@ class W3_Mobile
         require_once W3TC_LIB_W3_DIR . '/Config.php';
         $config = & W3_Config::instance();
         
-        $this->groups = $config->get_array('mobile.groups');
+        $this->groups = $config->get_array('mobile.rgroups');
     }
     
     /**

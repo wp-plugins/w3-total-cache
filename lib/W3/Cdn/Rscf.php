@@ -237,7 +237,7 @@ class W3_Cdn_Rscf extends W3_Cdn_Base
         if (!empty($this->_config['cname'])) {
             return (array) $this->_config['cname'];
         } elseif (!empty($this->_config['id'])) {
-            $domain = sprintf('%s.cdn.cloudfiles.rackspacecloud.com', $this->_config['id']);
+            $domain = sprintf('%s.cloudfiles.rackspacecloud.com', $this->_config['id']);
             
             return array(
                 $domain
@@ -295,7 +295,7 @@ class W3_Cdn_Rscf extends W3_Cdn_Base
         
         $matches = null;
         
-        if (preg_match('~^https?://(.+)\.cdn\.cloudfiles\.rackspacecloud\.com$~', $container->cdn_uri, $matches)) {
+        if (preg_match('~^https?://(.+)\.cloudfiles\.rackspacecloud\.com$~', $container->cdn_uri, $matches)) {
             $container_id = $matches[1];
         }
         

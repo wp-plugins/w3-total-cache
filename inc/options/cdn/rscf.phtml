@@ -21,7 +21,7 @@
 <tr>
     <th><label for="cdn_rscf_id">Replace site's hostname with:</label></th>
     <td>
-		<input id="cdn_rscf_id" type="text" name="cdn.rscf.id" value="<?php echo htmlspecialchars($this->_config->get_string('cdn.rscf.id')); ?>" size="18" style="text-align:right;" />.cdn.cloudfiles.rackspacecloud.com or CNAME:
+		<input id="cdn_rscf_id" type="text" name="cdn.rscf.id" value="<?php echo htmlspecialchars($this->_config->get_string('cdn.rscf.id')); ?>" size="18" style="text-align:right;" />.cloudfiles.rackspacecloud.com or CNAME:
 		<?php $cnames = $this->_config->get_array('cdn.rscf.cname'); include W3TC_DIR . '/inc/options/cdn/common/cnames.phtml'; ?>
     </td>
 </tr>

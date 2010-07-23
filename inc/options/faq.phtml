@@ -4,13 +4,13 @@
 
 <div id="toc">
     <ul>
-    <?php $q = 1; foreach ($xpath->query('//faqs/section') as $section): ?>
+    <?php foreach ($faq as $section => $entries): ?>
     <li class="col">
-        <h5><?php echo strtoupper($section->attributes->getNamedItem('name')->nodeValue); ?>:</h5>
+        <h5><?php echo strtoupper($section); ?>:</h5>
         <ul>
-    	    <?php foreach ($xpath->query('./entry/question', $section) as $entry): ?>
-	        <li><a href="#q<?php echo $q; ?>"><?php echo $entry->nodeValue; ?></a></li>
-            <?php $q++; endforeach; ?>
+    	    <?php foreach ($entries as $entry): ?>
+	        <li><a href="#q<?php echo $entry['index']; ?>"><?php echo $entry['question']; ?></a></li>
+            <?php endforeach; ?>
         </ul>
     </li>
     <?php endforeach; ?>
@@ -18,11 +18,13 @@
 </div>
 <div id="qa">
 	<hr />
-    <?php $q = 1; foreach ($xpath->query('//faqs/section/entry') as $entry): ?>
-	<p id="q<?php echo $q; ?>"><strong><?php echo $xpath->query('question', $entry)->item(0)->nodeValue; ?></strong></p>
-    <?php echo $xpath->query('answer', $entry)->item(0)->nodeValue; ?>
-	<p align="right"><a href="#toc">back to top</a></p>
-	<?php $q++; endforeach; ?>
+    <?php foreach ($faq as $section => $entries): ?>
+        <?php foreach ($entries as $entry): ?>
+    	<p id="q<?php echo $entry['index']; ?>"><strong><?php echo $entry['question']; ?></strong></p>
+        <?php echo $entry['answer']; ?>
+    	<p align="right"><a href="#toc">back to top</a></p>
+    	<?php endforeach; ?>
+    <?php endforeach; ?>
 </div>
 
 <?php include W3TC_DIR . '/inc/options/common/footer.phtml'; ?>

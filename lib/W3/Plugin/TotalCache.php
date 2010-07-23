@@ -957,37 +957,26 @@ class W3_Plugin_TotalCache extends W3_Plugin
     
     /**
      * Contextual help list filter
+     * 
      * @param string $list
      * @return string
      */
     function contextual_help_list($list)
     {
-        $faq_file = W3TC_DIR . '/inc/options/faq.xml';
+        $faq = $this->parse_faq();
         
-        $dom = new DOMDocument();
-        $dom->preserveWhiteSpace = true;
-        $dom->load($faq_file);
-        
-        $xpath = new DOMXPath($dom);
-        
-        $q = $xpath->query('//faqs/section[@name="General"]/entry/question')->length;
-        
-        $questions = array();
-        
-        foreach ($xpath->query('//faqs/section[@name="Usage"]/entry/question') as $node) {
-            $questions[] = $node->nodeValue;
+        if (isset($faq['Usage'])) {
+            $columns = array_chunk($faq['Usage'], ceil(count($faq['Usage']) / 3));
+            
+            ob_start();
+            include W3TC_DIR . '/inc/options/common/help.phtml';
+            $help = ob_get_contents();
+            ob_end_clean();
+            
+            $hook = get_plugin_page_hookname($this->_page, 'w3tc_general');
+            
+            $list[$hook] = $help;
         }
-        
-        $columns = array_chunk($questions, ceil(count($questions) / 3));
-        
-        ob_start();
-        include W3TC_DIR . '/inc/options/common/help.phtml';
-        $help = ob_get_contents();
-        ob_end_clean();
-        
-        $hook = get_plugin_page_hookname($this->_page, 'w3tc_general');
-        
-        $list[$hook] = $list[$hook] . $help;
         
         return $list;
     }
@@ -1057,16 +1046,22 @@ class W3_Plugin_TotalCache extends W3_Plugin
         $document_root = w3_get_document_root();
         $config_path = (w3_is_preview_config() ? W3TC_CONFIG_PREVIEW_PATH : W3TC_CONFIG_PATH);
         
+        $pgcache_rules_core_path = $home_root . '/.htaccess';
+        $pgcache_rules_cache_path = W3TC_CACHE_FILE_PGCACHE_DIR . '/.htaccess';
+        $browsercache_rules_cache_path = $document_root . '/.htaccess';
+        $browsercache_rules_no404wp_path = $home_root . '/.htaccess';
+        $minify_rules_path = W3TC_CACHE_FILE_MINIFY_DIR . '/.htaccess';
+        
         $error_messages = array(
-            'config_save' => sprintf('The settings could not be saved because the config file is not write-able. Please run <strong>chmod 777 %s</strong> to resolve this issue.', file_exists($config_path) ? $config_path : WP_CONTENT_DIR), 
+            'config_save' => sprintf('The settings could not be saved because the config file is not write-able. Please run <strong>chmod 777 %s</strong> to resolve this issue.', (file_exists($config_path) ? $config_path : dirname($config_path))), 
             'fancy_permalinks_disabled_pgcache' => sprintf('Fancy permalinks are disabled. Please %s it first, then re-attempt to enabling the enhanced disk mode.', $this->button_link('enable', 'options-permalink.php')), 
             'fancy_permalinks_disabled_browsercache' => sprintf('Fancy permalinks are disabled. Please %s it first, then re-attempt to enabling the \'Do not process 404 errors for static objects with WordPress\'.', $this->button_link('enable', 'options-permalink.php')), 
-            'pgcache_write_rules_core' => sprintf('Either your .htaccess file does not exist or cannot be modified (%s/.htaccess). Please run <strong>chmod 777 %s/.htaccess</strong> to resolve this issue.', $home_root, $home_root), 
-            'pgcache_write_rules_cache' => sprintf('The page cache rules (%s/.htaccess) could not be modified. Please run <strong>chmod 777 %s/.htaccess</strong> to resolve this issue.', W3TC_CACHE_FILE_PGCACHE_DIR, W3TC_CACHE_FILE_PGCACHE_DIR), 
-            'browsercache_write_rules_cache' => sprintf('The browser cache rules (%s/.htaccess) could not be modified. Please run <strong>chmod 777 %s/.htaccess</strong> to resolve this issue.', $home_root, $home_root), 
-            'browsercache_write_rules_no404wp' => sprintf('The browser cache rules (%s/.htaccess) could not be modified. Please run <strong>chmod 777 %s/.htaccess</strong> to resolve this issue.', $document_root, $document_root), 
+            'pgcache_write_rules_core' => sprintf('Either your .htaccess file does not exist or cannot be modified (%s). Please run <strong>chmod 777 %s</strong> to resolve this issue.', $pgcache_rules_core_path, (file_exists($pgcache_rules_core_path) ? $pgcache_rules_core_path : dirname($pgcache_rules_core_path))), 
+            'pgcache_write_rules_cache' => sprintf('The page cache rules (%s) could not be modified. Please run <strong>chmod 777 %s</strong> to resolve this issue.', $pgcache_rules_cache_path, (file_exists($pgcache_rules_cache_path) ? $pgcache_rules_cache_path : dirname($pgcache_rules_cache_path))), 
+            'browsercache_write_rules_cache' => sprintf('The browser cache rules (%s) could not be modified. Please run <strong>chmod 777 %s</strong> to resolve this issue.', $browsercache_rules_cache_path, (file_exists($browsercache_rules_cache_path) ? $browsercache_rules_cache_path : dirname($browsercache_rules_cache_path))), 
+            'browsercache_write_rules_no404wp' => sprintf('The browser cache rules (%s) could not be modified. Please run <strong>chmod 777 %s</strong> to resolve this issue.', $browsercache_rules_no404wp_path, (file_exists($browsercache_rules_no404wp_path) ? $browsercache_rules_no404wp_path : dirname($browsercache_rules_no404wp_path))), 
             'browsercache_write_rules_cdn' => sprintf('The browser cache rules for CDN could not be modified. Please check CDN settings.'), 
-            'minify_write_rules' => sprintf('The minify cache rules (%s/.htaccess) could not be modified. Please run <strong>chmod 777 %s/.htaccess</strong> to resolve this issue.', W3TC_CACHE_FILE_MINIFY_DIR, W3TC_CACHE_FILE_MINIFY_DIR), 
+            'minify_write_rules' => sprintf('The minify cache rules (%s) could not be modified. Please run <strong>chmod 777 %s</strong> to resolve this issue.', $minify_rules_path, (file_exists($minify_rules_path) ? $minify_rules_path : dirname($minify_rules_path))), 
             'support_request_type' => 'Please select request type.', 
             'support_request_url' => 'Please enter the address of your site in the site <acronym title="Uniform Resource Locator">URL</acronym> field.', 
             'support_request_name' => 'Please enter your name in the Name field', 
@@ -1082,9 +1077,11 @@ class W3_Plugin_TotalCache extends W3_Plugin
             'support_request' => 'Unable to send your support request.', 
             'config_import_no_file' => 'Please select config file.', 
             'config_import_upload' => 'Unable to upload config file.', 
-            'config_import_import' => 'Unable to import config file.', 
-            'config_reset' => 'Unable to restore default settings.', 
-            'preview_deploy' => 'Unable to deploy preview settings.', 
+            'config_import_import' => sprintf('Configuration file could not be imported. Please run <strong>chmod 777 %s</strong> to make the configuration file write-able, then try again.', (file_exists($config_path) ? $config_path : dirname($config_path))), 
+            'config_reset' => sprintf('Default settings could not be restored. Please run <strong>chmod 777 %s</strong> to make the configuration file write-able, then try again.', (file_exists(W3TC_CONFIG_PREVIEW_PATH) ? W3TC_CONFIG_PREVIEW_PATH : W3TC_CONFIG_PREVIEW_PATH)), 
+            'preview_enable' => sprintf('Preview mode could not be enabled. Please run <strong>chmod 777 %s</strong> to make the configuration file write-able, then try again.', (file_exists(W3TC_CONFIG_PREVIEW_PATH) ? W3TC_CONFIG_PREVIEW_PATH : dirname(W3TC_CONFIG_PREVIEW_PATH))), 
+            'preview_disable' => sprintf('Preview mode could not be disabled. Please run <strong>chmod 777 %s</strong> to make the configuration file write-able, then try again.', (file_exists($config_path) ? $config_path : dirname($config_path))), 
+            'preview_deploy' => sprintf('Preview settings could not be deployed. Please run <strong>chmod 777 %s</strong> to make the configuration file write-able, then try again.', (file_exists(W3TC_CONFIG_PATH) ? W3TC_CONFIG_PATH : dirname(W3TC_CONFIG_PATH))), 
             'cdn_purge_attachment' => 'Unable to purge attachment.', 
             'pgcache_purge_post' => 'Unable to purge post.'
         );
@@ -1107,6 +1104,8 @@ class W3_Plugin_TotalCache extends W3_Plugin
             'support_request' => 'Your support request has been successfully sent.', 
             'config_import' => 'Settings successfully imported.', 
             'config_reset' => 'Settings successfully restored.', 
+            'preview_enable' => 'Preview mode was successfully enabled', 
+            'preview_disable' => 'Preview mode was successfully disabled', 
             'preview_deploy' => 'Preview settings successfully deployed.', 
             'cdn_purge_attachment' => 'Attachment successfully purged.', 
             'pgcache_purge_post' => 'Post successfully purged.'
@@ -1430,15 +1429,19 @@ class W3_Plugin_TotalCache extends W3_Plugin
                         $w3_plugin_pgcache = & W3_Plugin_PgCache::instance();
                         
                         if ($this->_config->get_boolean('notes.pgcache_rules_core') && !$w3_plugin_pgcache->check_rules_core()) {
+                            $pgcache_rules_core_path = w3_get_home_root() . '/.htaccess';
+                            
                             if (w3_is_multisite()) {
-                                $this->_errors[] = sprintf('Enhanced mode page cache is not operational. Your .htaccess rules could not be modified. Please verify <strong>%s/.htaccess</strong> has the following rules: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> %s', w3_get_home_root(), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_pgcache->generate_rules_core()), $this->button_hide_note('Hide this message', 'pgcache_rules_core'));
+                                $this->_errors[] = sprintf('Enhanced mode page cache is not operational. Your .htaccess rules could not be modified. Please verify <strong>%s</strong> has the following rules: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> %s', $pgcache_rules_core_path, $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_pgcache->generate_rules_core()), $this->button_hide_note('Hide this message', 'pgcache_rules_core'));
                             } else {
-                                $this->_errors[] = sprintf('You\'ve selected disk caching with enhanced mode however the .htaccess file is not properly configured. Please run <strong>chmod 777 %s/.htaccess</strong>, then %s. To manually modify your server configuration for enhanced mode append the following code: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> and %s.', w3_get_home_root(), $this->button_link('try again', sprintf('admin.php?page=%s&pgcache_write_rules_core', $this->_page)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_pgcache->generate_rules_core()), $this->button_hide_note('hide this message', 'pgcache_rules_core'));
+                                $this->_errors[] = sprintf('You\'ve selected disk caching with enhanced mode however the .htaccess file is not properly configured. Please run <strong>chmod 777 %s</strong>, then %s. To manually modify your server configuration for enhanced mode append the following code: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> and %s.', (file_exists($pgcache_rules_core_path) ? $pgcache_rules_core_path : dirname($pgcache_rules_core_path)), $this->button_link('try again', sprintf('admin.php?page=%s&pgcache_write_rules_core', $this->_page)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_pgcache->generate_rules_core()), $this->button_hide_note('hide this message', 'pgcache_rules_core'));
                             }
                         }
                         
                         if ($this->_config->get_boolean('notes.pgcache_rules_cache') && !$w3_plugin_pgcache->check_rules_cache()) {
-                            $this->_errors[] = sprintf('You\'ve selected disk caching with enhanced mode however the .htaccess file is not properly configured. Please run <strong>chmod 777 %s/.htaccess</strong>, then %s. To manually modify your server configuration for enhanced mode append the following code: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> and %s.', W3TC_CACHE_FILE_PGCACHE_DIR, $this->button_link('try again', sprintf('admin.php?page=%s&pgcache_write_rules_cache', $this->_page)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_pgcache->generate_rules_cache()), $this->button_hide_note('hide this message', 'pgcache_rules_cache'));
+                            $pgcache_rules_cache_path = W3TC_CACHE_FILE_PGCACHE_DIR . '/.htaccess';
+                            
+                            $this->_errors[] = sprintf('You\'ve selected disk caching with enhanced mode however the .htaccess file is not properly configured. Please run <strong>chmod 777 %s</strong>, then %s. To manually modify your server configuration for enhanced mode append the following code: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> and %s.', (file_exists($pgcache_rules_cache_path) ? $pgcache_rules_cache_path : dirname($pgcache_rules_cache_path)), $this->button_link('try again', sprintf('admin.php?page=%s&pgcache_write_rules_cache', $this->_page)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_pgcache->generate_rules_cache()), $this->button_hide_note('hide this message', 'pgcache_rules_cache'));
                         }
                         break;
                     
@@ -1462,7 +1465,9 @@ class W3_Plugin_TotalCache extends W3_Plugin
                 $w3_plugin_minify = & W3_Plugin_Minify::instance();
                 
                 if ($this->_config->get_boolean('notes.minify_rules') && !$w3_plugin_minify->check_rules()) {
-                    $this->_errors[] = sprintf('The "Rewrite URL Structure" feature, requires rewrite rules be present. Please run <strong>chmod 777 %s/.htaccess</strong>, then %s. To manually modify your server configuration for minify append the following code: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> and %s.', W3TC_CACHE_FILE_MINIFY_DIR, $this->button_link('try again', sprintf('admin.php?page=%s&minify_write_rules', $this->_page)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_minify->generate_rules()), $this->button_hide_note('hide this message', 'minify_rules'));
+                    $minify_rules_path = W3TC_CACHE_FILE_MINIFY_DIR . '/.htaccess';
+                    
+                    $this->_errors[] = sprintf('The "Rewrite URL Structure" feature, requires rewrite rules be present. Please run <strong>chmod 777 %s</strong>, then %s. To manually modify your server configuration for minify append the following code: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> and %s.', (file_exists($minify_rules_path) ? $minify_rules_path : dirname($minify_rules_path)), $this->button_link('try again', sprintf('admin.php?page=%s&minify_write_rules', $this->_page)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_minify->generate_rules()), $this->button_hide_note('hide this message', 'minify_rules'));
                 }
             }
             
@@ -1513,18 +1518,22 @@ class W3_Plugin_TotalCache extends W3_Plugin
             $w3_plugin_browsercache = & W3_Plugin_BrowserCache::instance();
             
             if ($this->_config->get_boolean('notes.browsercache_rules_cache') && !$w3_plugin_browsercache->check_rules_cache()) {
+                $browsercache_rules_cache_path = w3_get_document_root() . '/.htaccess';
+                
                 if (w3_is_multisite()) {
-                    $this->_errors[] = sprintf('Browser Cache feature is not operational. Your .htaccess rules could not be modified. Please verify <strong>%s/.htaccess</strong> has the following rules: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> %s', w3_get_document_root(), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_browsercache->generate_rules_cache()), $this->button_hide_note('Hide this message', 'browsercache_rules_cache'));
+                    $this->_errors[] = sprintf('Browser Cache feature is not operational. Your .htaccess rules could not be modified. Please verify <strong>%s</strong> has the following rules: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> %s', $browsercache_rules_cache_path, $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_browsercache->generate_rules_cache()), $this->button_hide_note('Hide this message', 'browsercache_rules_cache'));
                 } else {
-                    $this->_errors[] = sprintf('You\'ve enabled Browser Cache feature however the .htaccess file is not properly configured. Please run <strong>chmod 777 %s/.htaccess</strong>, then %s. To manually modify these settings use the following code: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> and %s.', w3_get_document_root(), $this->button_link('try again', sprintf('admin.php?page=%s&browsercache_write_rules_cache', $this->_page)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_browsercache->generate_rules_cache()), $this->button_hide_note('hide this message', 'browsercache_rules_cache'));
+                    $this->_errors[] = sprintf('You\'ve enabled Browser Cache feature however the .htaccess file is not properly configured. Please run <strong>chmod 777 %s</strong>, then %s. To manually modify these settings use the following code: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> and %s.', (file_exists($browsercache_rules_cache_path) ? $browsercache_rules_cache_path : dirname($browsercache_rules_cache_path)), $this->button_link('try again', sprintf('admin.php?page=%s&browsercache_write_rules_cache', $this->_page)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_browsercache->generate_rules_cache()), $this->button_hide_note('hide this message', 'browsercache_rules_cache'));
                 }
             }
             
             if ($this->_config->get_boolean('notes.browsercache_rules_no404wp') && $this->_config->get_boolean('browsercache.no404wp') && !$w3_plugin_browsercache->check_rules_no404wp()) {
+                $browsercache_rules_no404wp_path = w3_get_home_root() . '/.htaccess';
+                
                 if (w3_is_multisite()) {
-                    $this->_errors[] = sprintf('Browser Cache feature is not operational. Your .htaccess rules could not be modified. Please verify <strong>%s/.htaccess</strong> has the following rules: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> %s', w3_get_home_root(), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_browsercache->generate_rules_no404wp()), $this->button_hide_note('Hide this message', 'browsercache_rules_no404wp'));
+                    $this->_errors[] = sprintf('Browser Cache feature is not operational. Your .htaccess rules could not be modified. Please verify <strong>%s</strong> has the following rules: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> %s', $browsercache_rules_no404wp_path, $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_browsercache->generate_rules_no404wp()), $this->button_hide_note('Hide this message', 'browsercache_rules_no404wp'));
                 } else {
-                    $this->_errors[] = sprintf('You\'ve enabled Browser Cache feature however the .htaccess file is not properly configured. Please run <strong>chmod 777 %s/.htaccess</strong>, then %s. To manually modify these settings use the following code: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> and %s.', w3_get_home_root(), $this->button_link('try again', sprintf('admin.php?page=%s&browsercache_write_rules_no404wp', $this->_page)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_browsercache->generate_rules_no404wp()), $this->button_hide_note('hide this message', 'browsercache_rules_no404wp'));
+                    $this->_errors[] = sprintf('You\'ve enabled Browser Cache feature however the .htaccess file is not properly configured. Please run <strong>chmod 777 %s</strong>, then %s. To manually modify these settings use the following code: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> and %s.', (file_exists($browsercache_rules_no404wp_path) ? $browsercache_rules_no404wp_path : dirname($browsercache_rules_no404wp_path)), $this->button_link('try again', sprintf('admin.php?page=%s&browsercache_write_rules_no404wp', $this->_page)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_browsercache->generate_rules_no404wp()), $this->button_hide_note('hide this message', 'browsercache_rules_no404wp'));
                 }
             }
         }
@@ -1835,7 +1844,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
     function options_mobile()
     {
         $mobile_enabled = $this->_config->get_boolean('mobile.enabled');
-        $groups = $this->_config->get_array('mobile.groups');
+        $groups = $this->_config->get_array('mobile.rgroups');
         
         require_once W3TC_LIB_W3_DIR . '/Mobile.php';
         $w3_mobile = & W3_Mobile::instance();
@@ -1864,13 +1873,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
      */
     function options_faq()
     {
-        $faq_file = W3TC_DIR . '/inc/options/faq.xml';
-        
-        $dom = new DOMDocument();
-        $dom->preserveWhiteSpace = true;
-        $dom->load($faq_file);
-        
-        $xpath = new DOMXPath($dom);
+        $faq = $this->parse_faq();
         
         include W3TC_DIR . '/inc/options/faq.phtml';
     }
@@ -1914,10 +1917,12 @@ class W3_Plugin_TotalCache extends W3_Plugin
         $url = W3_Request::get_string('url', w3_get_domain_url());
         $name = W3_Request::get_string('name', $name);
         $email = W3_Request::get_string('email', $email);
+        $twitter = W3_Request::get_string('twitter');
         $phone = W3_Request::get_string('phone');
         $subject = W3_Request::get_string('subject');
         $description = W3_Request::get_string('description');
         $templates = W3_Request::get_array('templates');
+        $forum_url = W3_Request::get_string('forum_url');
         $wp_login = W3_Request::get_string('wp_login');
         $wp_password = W3_Request::get_string('wp_password');
         $ftp_host = W3_Request::get_string('ftp_host');
@@ -2237,7 +2242,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
                 sort($mobile_groups[$group]['agents']);
             }
             
-            $config->set('mobile.groups', $mobile_groups);
+            $config->set('mobile.rgroups', $mobile_groups);
         }
         
         /**
@@ -2386,7 +2391,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
         
         if ($new_config->get_boolean('mobile.enabled')) {
             $pgcache_dependencies = array_merge($pgcache_dependencies, array(
-                'mobile.groups'
+                'mobile.rgroups'
             ));
         }
         
@@ -2699,25 +2704,23 @@ class W3_Plugin_TotalCache extends W3_Plugin
         if ($preview) {
             if ($this->_config->save(true)) {
                 $this->redirect(array(
-                    'w3tc_note' => 'config_save'
+                    'w3tc_note' => 'preview_enable'
                 ));
             } else {
                 $this->redirect(array(
-                    'w3tc_error' => 'config_save'
+                    'w3tc_error' => 'preview_enable'
                 ));
             }
         } else {
-            @unlink(W3TC_CONFIG_PREVIEW_PATH);
-            
             $config = & new W3_Config(false);
             
-            if ($this->config_save($this->_config, $config)) {
+            if (@unlink(W3TC_CONFIG_PREVIEW_PATH) && $this->config_save($this->_config, $config, false)) {
                 $this->redirect(array(
-                    'w3tc_note' => 'config_save'
+                    'w3tc_note' => 'preview_disable'
                 ));
             } else {
                 $this->redirect(array(
-                    'w3tc_error' => 'config_save'
+                    'w3tc_error' => 'preview_disable'
                 ));
             }
         }
@@ -2791,6 +2794,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
         $url = W3_Request::get_string('url');
         $name = W3_Request::get_string('name');
         $email = W3_Request::get_string('email');
+        $twitter = W3_Request::get_string('twitter');
         $phone = W3_Request::get_string('phone');
         $subject = W3_Request::get_string('subject');
         $description = W3_Request::get_string('description');
@@ -2808,6 +2812,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
             'url' => $url, 
             'name' => $name, 
             'email' => $email, 
+            'twitter' => $twitter, 
             'phone' => $phone, 
             'subject' => $subject, 
             'description' => $description, 
@@ -4951,5 +4956,69 @@ class W3_Plugin_TotalCache extends W3_Plugin
         $path .= (strstr($path, '?') !== false ? '&' : '?') . 'w3tc_preview=1';
         
         return sprintf('%s=%s%s%s', $attr, $quote, $domain_url, $path);
+    }
+    
+    /**
+     * Parses FAQ XML file into array
+     * 
+     * @return array
+     */
+    function parse_faq()
+    {
+        $faq = array();
+        $file = W3TC_DIR . '/inc/options/faq.xml';
+        
+        $xml = @file_get_contents($file);
+        
+        if ($xml) {
+            if (function_exists('xml_parser_create')) {
+                $parser = @xml_parser_create('UTF-8');
+                
+                xml_parser_set_option($parser, XML_OPTION_TARGET_ENCODING, 'UTF-8');
+                xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, 0);
+                xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE, 1);
+                $values = null;
+                
+                $result = xml_parse_into_struct($parser, $xml, $values);
+                xml_parser_free($parser);
+                
+                if ($result) {
+                    $index = 0;
+                    $current_section = '';
+                    $current_entry = array();
+                    
+                    foreach ($values as $value) {
+                        switch ($value['type']) {
+                            case 'open':
+                                if ($value['tag'] === 'section') {
+                                    $current_section = $value['attributes']['name'];
+                                }
+                                break;
+                            
+                            case 'complete':
+                                switch ($value['tag']) {
+                                    case 'question':
+                                        $current_entry['question'] = $value['value'];
+                                        break;
+                                    
+                                    case 'answer':
+                                        $current_entry['answer'] = $value['value'];
+                                        break;
+                                }
+                                break;
+                            
+                            case 'close':
+                                if ($value['tag'] == 'entry') {
+                                    $current_entry['index'] = ++$index;
+                                    $faq[$current_section][] = $current_entry;
+                                }
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+        
+        return $faq;
     }
 }

@@ -183,7 +183,7 @@ class W3_Config
         'browsercache.other.w3tc' => 'boolean', 
         
         'mobile.enabled' => 'boolean', 
-        'mobile.groups' => 'array', 
+        'mobile.rgroups' => 'array', 
         
         'common.support' => 'string', 
         'common.install' => 'integer', 
@@ -419,7 +419,7 @@ class W3_Config
         'browsercache.other.w3tc' => true, 
         
         'mobile.enabled' => true, 
-        'mobile.groups' => array(
+        'mobile.rgroups' => array(
             'high' => array(
                 'theme' => '', 
                 'enabled' => true, 

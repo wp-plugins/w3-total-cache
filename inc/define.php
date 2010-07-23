@@ -1,6 +1,6 @@
 <?php
 
-define('W3TC_VERSION', '0.9b');
+define('W3TC_VERSION', '0.9.1');
 define('W3TC_POWERED_BY', 'W3 Total Cache/' . W3TC_VERSION);
 define('W3TC_EMAIL', 'w3tc@w3-edge.com');
 define('W3TC_PAYPAL_URL', 'https://www.paypal.com/cgi-bin/webscr');
@@ -100,11 +100,7 @@ function w3_writable_error($path)
     $reactivate_button = sprintf('<input type="button" value="re-activate plugin" onclick="top.location.href = \'%s\'" />', addslashes($activate_url));
     
     if (w3_check_open_basedir($path)) {
-        if (file_exists($path)) {
-            $error = sprintf('<strong>%s</strong> is not write-able, please run following command:<br /><strong style="color: #f00;">chmod 777 %s</strong><br />then %s.', $path, $path, $reactivate_button);
-        } else {
-            $error = sprintf('<strong>%s</strong> could not be created, please run following command:<br /><strong style="color: #f00;">chmod 777 %s</strong><br />then %s.', $path, dirname($path), $reactivate_button);
-        }
+        $error = sprintf('<strong>%s</strong> could not be created, please run following command:<br /><strong style="color: #f00;">chmod 777 %s</strong><br />then %s.', $path, (file_exists($path) ? $path : dirname($path)), $reactivate_button);
     } else {
         $error = sprintf('<strong>%s</strong> could not be created, <strong>open_basedir</strong> restriction in effect, please check your php.ini settings:<br /><strong style="color: #f00;">open_basedir = "%s"</strong><br />then %s.', $path, ini_get('open_basedir'), $reactivate_button);
     }
