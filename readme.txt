@@ -302,7 +302,7 @@ Install the plugin to read the full FAQ.
 
 **December 2009:**
 
-* [WordPress Plugin – Best of 4 Caching Plugins](http://nimopress.com/pressed/wordpress-plugin-best-of-4-caching-plugins/), Nicholas Ong
+* [WordPress Plugin &mdash; Best of 4 Caching Plugins](http://nimopress.com/pressed/wordpress-plugin-best-of-4-caching-plugins/), Nicholas Ong
 * [Speed Up Your Blog With W3 Total Cache &amp; Amazon](http://www.freedomtarget.com/w3-total-cache-with-amazon-s3-and-cloudfront), Kevin McKillop
 * [W3 Total Cache with Amazon S3 and CloudFront](http://kovshenin.com/archives/w3-total-cache-with-amazon-s3-and-cloudfront/), Konstantin Kovshenin
 
