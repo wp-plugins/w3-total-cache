@@ -236,15 +236,14 @@ Install the plugin to read the full FAQ.
 1. *Optional:* On the "Object Cache" tab, all of the recommended settings are preset. If using a shared hosting account use the "disk" method with caution, the response time of the disk may not be fast enough, so this option is disabled by default. Test this option with and without database cache to ensure that it provides a performance increase.
 1. *Optional:* On the "User Agent Groups" tab, specify any user agents, like mobile phones if a mobile theme is used. 
 
-== Other Notes ==
-
-= What users have to say: =
+== What users have to say: ==
 
 * Read [testimonials](http://bit.ly/6Wbvpt) from W3TC users.
 
-= Press: Mentions, Tutorials &amp; Reviews =
+== Press: Mentions, Tutorials &amp; Reviews ==
 
 **July 2010:**
+
 * [Getting W3 Total Cache and a mobile plugin to work in WordPress](http://blog.trasatti.it/2010/07/getting-w3-total-cache-and-a-mobile-plugin-to-work-in-wordpress.html), Andrea Trasatti
 * [Improve Your WordPress Performance With W3 Total Cache](http://maketecheasier.com/improve-wordpress-performance-with-w3-total-cache/2010/07/21), Damien Oh
 * [Four Simple Steps For Big Gains In Page Speed](http://www.dailyblogtips.com/four-simple-steps-for-big-gains-in-page-speed/), Greg Hayes
@@ -259,17 +258,20 @@ Install the plugin to read the full FAQ.
 * [5 Wordpress Plugins You Need To Know About](http://thenextweb.com/apps/2010/07/06/5-wordpress-plugins-you-need-to-know-about/), James Hicks
 
 **June 2010:**
+
 * [12 Ways to Improve Wordpress Page Load Time](http://myblog2day.com/12-ways-to-improve-wordpress-page-load-time.php), Lee Ka Hoong
 * [Significantly Speed Up Your WordPress Blog in 9 Easy Steps](http://www.bloggingpro.com/archives/2010/06/21/significantly-speed-up-your-wordpress-blog-in-9-easy-steps/), Robyn-Dale Samuda
 * [Speed 'Em Up: Wordpress &amp; W3 Total Cache](http://translate.google.com/translate?js=y&prev=_t&hl=en&ie=UTF-8&layout=1&eotf=1&u=http://www.andilicious.com/blog/1473/20100610/wordpress-beschleunigen-grundlagen-w3-total-cache-page-speed&sl=auto&tl=en),  Andi Licious
 
 **May 2010:**
+
 * [Make Your Blog 10x Faster With W3 Total Cache Plug-in](http://www.strictlyonlinebiz.com/blog/speed-up-wordpress-with-w3-total-cache/1231/), Udegbunam Chukwudi
 * [xCache v1.3.0 Now Available](http://webcache.googleusercontent.com/search?q=cache%3Ahttp%3A%2F%2Fresellr.net%2Fxcache-now-available%2F&rls=com.microsoft:en-us&ie=UTF-8&oe=UTF-8&startIndex=&startPage=1&rlz=1I7GGIE_en&redir_esc=&ei=NO49TNaAFIH60wS2zuXLDg), Michael
 * [Maximize WordPress and BuddyPress Performance With W3 Total Cache](http://wpmu.org/maximize-wordpress-and-buddypress-performance-with-w3-total-cache/), Sarah Gooding
 * [Is Your Wordpress Blog Slow to Load?](http://homenotion.com/blog/blogs/is-your-wordpress-blog-slow-to-load/), Elizabeth McGee
 
 **April 2010:**
+
 * [WordPress Optimization: How I Reduced Page Load Time by 75%](http://www.kadavy.net/blog/posts/wordpress-optimization-dreamhost-rackspace/), David Kadavy
 * [Top 10 Wordpress Plugins Your Blog Should Have (Video)](http://www.blogsuccessjournal.com/blog-tips-and-advice/wordpress-tips-advice/top-10-wordpress-plugins-your-blog-should-have-video/), Dan &amp; Jennifer
 * [Super or Total? Money Talks But Cache Rules](http://website-in-a-weekend.net/website-maintenance/super-total-money-talks-cache-rules/), Dave Thackeray
@@ -277,11 +279,13 @@ Install the plugin to read the full FAQ.
 * [10 OF THE BEST WORDPRESS PLUGINS IN 2010](http://www.sitesketch101.com/best-wordpress-plugins), Nicholas Cardot
 
 **March 2010:**
+
 * [Howto: Speed up WordPress sites by using Amazon Cloudfront](http://www.jitscale.com/howto-speed-up-wordpress-sites-by-using-amazon-cloudfront/), Niek Waarbroek
 * [Wordpress Cache Plugin Benchmarks](http://cd34.com/blog/scalability/wordpress-cache-plugin-benchmarks/), Chris Davies
 * [Wordpress + W3 Total Cache + MaxCDN How-To](http://rackerhacker.com/2010/02/13/wordpress-w3-total-cache-maxcdn/), Major Hayden
 
 **February 2010:**
+
 * [Blog Building: How To Dramatically Speed Up Your WordPress Site with W3 Total Cache](http://nimopress.com/pressed/blog-building-how-to-dramatically-speed-up-your-wordpress-site-with-w3-total-cache/), Nicholas Ong
 * [Wordpress + W3 Total Cache + MaxCDN How-To](http://rackerhacker.com/2010/02/13/wordpress-w3-total-cache-maxcdn/), Major Hayden
 * [Utilizing W3 Total Cache](http://www.reviewkin.com/utilizing-w3-total-cache/), Anangga Pratama
@@ -290,34 +294,41 @@ Install the plugin to read the full FAQ.
 * [W3 Total Cache Plugin for Wordpress Eats WP Super Cache's Lunch!](http://human3rror.com/w3-total-cache-plugin-for-wordpress-eats-wp-super-caches-lunch/), John Saddington
 
 **January 2010:**
+
 * [WordPress Cacheing with W3 Total Cache](http://blog.whoishostingthis.com/2010/01/19/wordpress-cacheing-w3-total-cache/), Jonathan
 * [Configuring W3 Total Cache for WordPress](http://translate.google.com/translate?js=y&prev=_t&hl=en&ie=UTF-8&layout=1&eotf=1&u=http://da.clausheinrich.com/w3-total-cache-wordpress/&sl=auto&tl=en)
 * [Wordpress load test part 2 - amendment](http://loadimpact.com/blog/wordpress-load-test-part-2-amendment), Erik Torsner
 * [Wordpress - Accelerate your site with W3 Total Cache](http://translate.google.com/translate?hl=en&sl=auto&tl=en&u=http://www.egonomik.com/2010/01/wordpress-w3-total-cache-ile-sitenizi-hizlandirin-sunucunuzu-rahatlatin/), Caner Phenix
 
 **December 2009:**
+
 * [WordPress Plugin – Best of 4 Caching Plugins](http://nimopress.com/pressed/wordpress-plugin-best-of-4-caching-plugins/), Nicholas Ong
 * [Speed Up Your Blog With W3 Total Cache &amp; Amazon](http://www.freedomtarget.com/w3-total-cache-with-amazon-s3-and-cloudfront), Kevin McKillop
 * [W3 Total Cache with Amazon S3 and CloudFront](http://kovshenin.com/archives/w3-total-cache-with-amazon-s3-and-cloudfront/), Konstantin Kovshenin
 
 **November 2009:**
+
 * [How to Boost Ad Revenue: Speed is Your Secret Weapon](http://blog.buysellads.com/2009/11/how-to-boost-ad-revenue-speed-is-your-secret-weapon/), Todd Garland
 
 **October 2009:**
+
 * [Plugin: WordPress Caching with CDN Integration](http://www.blogperfume.com/plugin-wordpress-caching-with-cdn-integration/)
 * [8 Powerful Wordpress Plugins You Probably Don't Use But Should](http://www.smashingapps.com/2009/10/19/8-powerful-wordpress-plugins-you-probably-dont-use-but-should.html), AN Jay
 * [Beyond Super Cache: W3 Total Cache](http://www.webmaster-source.com/2009/10/15/beyond-super-cache-w3-total-cache/), Matt Harzewski
 
 **September 2009:**
+
 * [Why Noupe.com is Loading So Much Faster?](http://209.85.129.132/search?q=cache:PgY8haU_0I4J:www.noupe.com/spotlight/why-noupe-com-is-loading-pretty-fast.html+http://www.noupe.com/spotlight/why-noupe-com-is-loading-pretty-fast.html&cd=1&hl=en&ct=clnk&gl=it), Noura Yehia
 
 **August 2009:**
+
 * [W3 Total Cache Plugin](http://dougal.gunters.org/blog/2009/08/26/w3-total-cache-plugin), Dougal Campbell
 
 **July 2009:**
+
 * [W3 Total Cache](http://weblogtoolscollection.com/pluginblog/2009/07/27/w3-total-cache/)
 
-= Who do I thank for all of this? =
+== Who do I thank for all of this? ==
 
 It's quite difficult to recall all of the innovators that have shared their thoughts, code and experiences in the blogosphere over the years, but here are some names to get you started:
 
