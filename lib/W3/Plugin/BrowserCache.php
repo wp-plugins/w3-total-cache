@@ -146,7 +146,7 @@ class W3_Plugin_BrowserCache extends W3_Plugin
             $mime_types = array_merge($mime_types, $html_types);
         }
         
-        if ($other_expires && $this->_config->get_boolean('browsercache.other.expires') && $other_lifetime) {
+        if ($other_expires && $other_lifetime) {
             $mime_types = array_merge($mime_types, $other_types);
         }
         
@@ -232,7 +232,7 @@ class W3_Plugin_BrowserCache extends W3_Plugin
         
         $this->_generate_rules_cache($rules, $cssjs_types, 'cssjs');
         $this->_generate_rules_cache($rules, $html_types, 'html');
-        $this->_generate_rules_cache($rules, $other_types, 'html');
+        $this->_generate_rules_cache($rules, $other_types, 'other');
         
         $rules .= "# END W3TC Browser Cache\n\n";
         

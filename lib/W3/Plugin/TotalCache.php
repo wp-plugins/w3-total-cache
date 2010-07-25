@@ -263,6 +263,26 @@ class W3_Plugin_TotalCache extends W3_Plugin
      */
     function activate()
     {
+        $files = array(
+            W3TC_INSTALL_DIR . '/db.php', 
+            W3TC_INSTALL_DIR . '/advanced-cache.php', 
+            W3TC_INSTALL_DIR . '/object-cache.php'
+        );
+        
+        $nonexistent_files = array();
+        
+        foreach ($files as $file) {
+            if (!file_exists($file)) {
+                $nonexistent_files[] = $file;
+            }
+        }
+        
+        if (count($nonexistent_files)) {
+            $error = sprintf('Unfortunately core file(s): (<strong>%s</strong>) are missing, so activation will fail. Please re-start the installation process from the beginning.', implode(', ', $nonexistent_files));
+            
+            w3_activate_error($error);
+        }
+        
         if (!@is_dir(W3TC_CONTENT_DIR)) {
             if (@mkdir(W3TC_CONTENT_DIR, 0755)) {
                 @chmod(W3TC_CONTENT_DIR, 0755);
@@ -1623,7 +1643,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
          */
         
         if (w3_is_preview_config()) {
-            $this->_notes[] = sprintf('Preview mode is active: Changed settings will not take effect until you %s or %s preview mode. %s any changed settings (without deploying), or make additional changes.', $this->button_link('deploy', sprintf('admin.php?page=%s&preview_deploy', $this->_page)), $this->button_link('disable', sprintf('options-general.php?page=%s&preview_save&preview=0', $this->_page)), $this->button_link('Preview', w3_get_site_url() . '/?w3tc_preview=1', true));
+            $this->_notes[] = sprintf('Preview mode is active: Changed settings will not take effect until you %s or %s preview mode. %s any changed settings (without deploying), or make additional changes.', $this->button_link('deploy', sprintf('admin.php?page=%s&preview_deploy', $this->_page)), $this->button_link('disable', sprintf('admin.php?page=%s&preview_save&preview=0', $this->_page)), $this->button_link('Preview', w3_get_site_url() . '/?w3tc_preview=1', true));
         }
         
         /**
@@ -4157,7 +4177,10 @@ class W3_Plugin_TotalCache extends W3_Plugin
                 foreach ((array) $locations as $location => $config) {
                     if (isset($config['files'])) {
                         foreach ((array) $config['files'] as $file) {
-                            $js_groups[$template][] = $file;
+                            if (!in_array($file, $js_groups[$template])) {
+                                $js_groups[$template][] = $file;
+                            }
+                            
                             $checked_js[$template][$file] = true;
                             $locations_js[$template][$file] = $location;
                         }
@@ -4171,7 +4194,10 @@ class W3_Plugin_TotalCache extends W3_Plugin
                 foreach ((array) $locations as $location => $config) {
                     if (isset($config['files'])) {
                         foreach ((array) $config['files'] as $file) {
-                            $css_groups[$template][] = $file;
+                            if (!in_array($file, $css_groups[$template])) {
+                                $css_groups[$template][] = $file;
+                            }
+                            
                             $checked_css[$template][$file] = true;
                         }
                     }

@@ -3,7 +3,7 @@ Contributors: fredericktownes
 Tags: user experience, cache, caching, page cache, css cache, js cache, db cache, disk cache, disk caching, database cache, http compression, gzip, deflate, minify, CDN, content delivery network, media library, performance, speed, multiple hosts, CSS, merge, combine, unobtrusive javascript, compress, optimize, optimizer, JavaScript, JS, cascading style sheet, plugin, yslow, YUI, google, google rank, google page speed, S3, CloudFront, AWS, Amazon Web Services, cloud files, rackspace, batcache, wp cache, wp super cache, w3 total cache, buddypress
 Requires at least: 2.6
 Tested up to: 3.1
-Stable tag: 0.9.1
+Stable tag: 0.9.1.1
 
 Dramatically improve the speed and user experience of your site. Add browser, page, object and database caching as well as minify and content delivery network (CDN) to WordPress.
 
@@ -348,6 +348,13 @@ It's quite difficult to recall all of the innovators that have shared their thou
 Please reach out to all of these people and support their projects if you're so inclined.
 
 == Changelog ==
+
+= 0.9.1.1 =
+* Added an additional notification to help users identify incomplete installations upon activation
+* Reverted previous Cloud Files workaround
+* Fixed a bug with preview mode buttons
+* Fixed a bug with duplicate entries appearing when using minify help tool more than once
+* Fixed a bug with browser cache rules generation for media files
 
 = 0.9.1 =
 * Improved Rackspace Cloud Files implementation
