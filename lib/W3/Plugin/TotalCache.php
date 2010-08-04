@@ -4177,7 +4177,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
                 foreach ((array) $locations as $location => $config) {
                     if (isset($config['files'])) {
                         foreach ((array) $config['files'] as $file) {
-                            if (!in_array($file, $js_groups[$template])) {
+                            if (!isset($js_groups[$template]) || !in_array($file, $js_groups[$template])) {
                                 $js_groups[$template][] = $file;
                             }
                             
@@ -4194,7 +4194,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
                 foreach ((array) $locations as $location => $config) {
                     if (isset($config['files'])) {
                         foreach ((array) $config['files'] as $file) {
-                            if (!in_array($file, $css_groups[$template])) {
+                            if (!isset($css_groups[$template]) || !in_array($file, $css_groups[$template])) {
                                 $css_groups[$template][] = $file;
                             }
                             
