@@ -932,7 +932,7 @@ class W3_Config
     {
         @fputs($fp, str_repeat("\t", $this->_tabs));
         
-        if (is_numeric($key)) {
+        if (is_numeric($key) && (string) (int) $key === (string) $key) {
             @fputs($fp, sprintf("%d => ", $key));
         } else {
             @fputs($fp, sprintf("'%s' => ", addslashes($key)));
