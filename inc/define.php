@@ -702,12 +702,12 @@ function w3_get_document_root()
     static $document_root = null;
     
     if ($document_root === null) {
-        if (isset($_SERVER['DOCUMENT_ROOT'])) {
-            $document_root = $_SERVER['DOCUMENT_ROOT'];
-        } elseif (isset($_SERVER['SCRIPT_FILENAME'])) {
+        if (isset($_SERVER['SCRIPT_FILENAME'])) {
             $document_root = substr($_SERVER['SCRIPT_FILENAME'], 0, -strlen($_SERVER['PHP_SELF']));
         } elseif (isset($_SERVER['PATH_TRANSLATED'])) {
             $document_root = substr($_SERVER['PATH_TRANSLATED'], 0, -strlen($_SERVER['PHP_SELF']));
+        } elseif (isset($_SERVER['DOCUMENT_ROOT'])) {
+            $document_root = $_SERVER['DOCUMENT_ROOT'];
         } else {
             $document_root = w3_get_site_root();
         }

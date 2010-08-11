@@ -258,7 +258,7 @@ class Minify_HTML {
         $ws2 = ($m[4] === '') ? '' : ' ';
 
         // remove HTML comments (and ending "//" if present)
-        $js = preg_replace('/(?:^\\s*<!--\\s*|\\s*(?:\\/\\/)?\\s*-->\\s*$)/', '', $js);
+        $js = preg_replace('/(?:^\\s*(?:\\/\\/)?\\s*<!--\\s*|\\s*(?:\\/\\/)?\\s*-->\\s*$)/', '', $js);
 
         // remove CDATA section markers
         $js = $this->_removeCdata($js);
