@@ -965,7 +965,7 @@ class W3_Plugin_Cdn extends W3_Plugin
                                             /**
                                              * Otherwise copy file from local path
                                              */
-                                            $src_path = w3_get_document_root() . urldecode($src);
+                                            $src_path = w3_get_document_root() . '/' . urldecode($src);
                                             
                                             if (file_exists($src_path)) {
                                                 $download_result = @copy($src_path, $dst);

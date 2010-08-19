@@ -253,7 +253,7 @@ class W3_Plugin_BrowserCache extends W3_Plugin
         $etag = $this->_config->get_boolean('browsercache.' . $section . '.etag');
         $w3tc = $this->_config->get_boolean('browsercache.' . $section . '.w3tc');
         
-        $rules .= "<FilesMatch \"\\.(" . implode('|', array_keys($mime_types)) . ")$\">\n";
+        $rules .= "<FilesMatch \"\\.(?i:" . implode('|', array_keys($mime_types)) . ")$\">\n";
         
         if ($cache_control) {
             switch ($cache_policy) {
