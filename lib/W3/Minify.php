@@ -498,7 +498,7 @@ class W3_Minify
         $from_email = 'wordpress@' . w3_get_domain($_SERVER['SERVER_NAME']);
         $from_name = get_option('blogname');
         $to_name = $to_email = get_option('admin_email');
-        $body = @readfile(W3TC_DIR . '/inc/email/minify_error_notification.html');
+        $body = @file_get_contents(W3TC_DIR . '/inc/email/minify_error_notification.html');
         
         $headers = array(
             sprintf('From: "%s" <%s>', addslashes($from_name), $from_email), 

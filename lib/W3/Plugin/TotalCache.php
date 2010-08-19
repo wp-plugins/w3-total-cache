@@ -1601,7 +1601,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
         /**
          * Check permalinks
          */
-        if ($this->_config->get_boolean('notes.no_permalink_rules') && (($this->_config->get_boolean('pgcache.enabled') && $this->_config->get_string('pgcache.engine') == 'file_pgcache') || $this->_config->get_boolean('browsercache.enabled')) && $this->_config->get_boolean('browsercache.no404wp') && !w3_is_permalink_rules()) {
+        if ($this->_config->get_boolean('notes.no_permalink_rules') && (($this->_config->get_boolean('pgcache.enabled') && $this->_config->get_string('pgcache.engine') == 'file_pgcache') || ($this->_config->get_boolean('browsercache.enabled') && $this->_config->get_boolean('browsercache.no404wp'))) && !w3_is_permalink_rules()) {
             $this->_errors[] = sprintf('The required directives for fancy permalinks could not be detected, please confirm they are available: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> %s', $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars(w3_get_permalink_rules()), $this->button_hide_note('Hide this message', 'no_permalink_rules'));
         }
         

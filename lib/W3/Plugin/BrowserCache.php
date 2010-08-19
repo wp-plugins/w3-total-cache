@@ -583,7 +583,7 @@ class W3_Plugin_BrowserCache extends W3_Plugin
         $expires = $this->_config->get_boolean('browsercache.' . $section . '.expires');
         $lifetime = $this->_config->get_integer('browsercache.' . $section . '.lifetime');
         $cache_control = $this->_config->get_boolean('browsercache.' . $section . '.cache.control');
-        $cache_policy = $this->_config->get_boolean('browsercache.' . $section . '.cache.policy');
+        $cache_policy = $this->_config->get_string('browsercache.' . $section . '.cache.policy');
         $etag = $this->_config->get_boolean('browsercache.' . $section . '.etag');
         $w3tc = $this->_config->get_boolean('browsercache.' . $section . '.w3tc');
         

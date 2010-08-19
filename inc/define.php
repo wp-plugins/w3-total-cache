@@ -1690,24 +1690,33 @@ function w3_get_permalink_rules()
         $rules .= "</Files>\n";
         $rules .= "</IfModule>\n";
     } elseif (w3_is_network_mode()) {
+        $subdomain_install = is_subdomain_install();
+        
         $rules .= "# BEGIN WordPress\n";
         $rules .= "<IfModule mod_rewrite.c>\n";
-        $rules .= "   RewriteEngine On\n";
-        $rules .= "   RewriteBase " . $base_path . "\n";
-        $rules .= "   RewriteRule ^index\\.php$ - [L]\n\n";
+        $rules .= "RewriteEngine On\n";
+        $rules .= "RewriteBase " . $base_path . "\n";
+        $rules .= "RewriteRule ^index\\.php$ - [L]\n\n";
         
-        $rules .= "   # uploaded files\n";
-        $rules .= "   RewriteRule ^([_0-9a-zA-Z-]+/)?files/(.+) wp-includes/ms-files.php?file= [L]\n\n";
+        $rules .= "# uploaded files\n";
+        $rules .= "RewriteRule ^" . ($subdomain_install ? '' : '([_0-9a-zA-Z-]+/)?') . "files/(.+) wp-includes/ms-files.php?file=$" . ($subdomain_install ? 1 : 2) . " [L]\n\n";
         
-        $rules .= "   # add a trailing slash to /wp-admin\n";
-        $rules .= "   RewriteRule ^([_0-9a-zA-Z-]+/)?wp-admin$ wp-admin/ [R=301,L]\n\n";
+        if (!$subdomain_install) {
+            $rules .= "# add a trailing slash to /wp-admin\n";
+            $rules .= "RewriteRule ^([_0-9a-zA-Z-]+/)?wp-admin$ $1wp-admin/ [R=301,L]\n";
+        }
         
-        $rules .= "   RewriteCond %{REQUEST_FILENAME} -f [OR]\n";
-        $rules .= "   RewriteCond %{REQUEST_FILENAME} -d\n";
-        $rules .= "   RewriteRule ^ - [L]\n";
-        $rules .= "   RewriteRule  ^([_0-9a-zA-Z-]+/)?(wp-(content|admin|includes).*)  [L]\n";
-        $rules .= "   RewriteRule  ^([_0-9a-zA-Z-]+/)?(.*\\.php)$  [L]\n";
-        $rules .= "   RewriteRule . index.php [L]\n";
+        $rules .= "RewriteCond %{REQUEST_FILENAME} -f [OR]\n";
+        $rules .= "RewriteCond %{REQUEST_FILENAME} -d\n";
+        $rules .= "RewriteRule ^ - [L]\n";
+        
+        // @todo custom content dir.
+        if (!$subdomain_install) {
+            $rules .= "RewriteRule  ^([_0-9a-zA-Z-]+/)?(wp-(content|admin|includes).*) $2 [L]\n";
+            $rules .= "RewriteRule  ^([_0-9a-zA-Z-]+/)?(.*\\.php)$ $2 [L]\n";
+        }
+        
+        $rules .= "RewriteRule . index.php [L]\n";
         $rules .= "</IfModule>\n";
         $rules .= "# END WordPress\n";
     } else {
@@ -1719,7 +1728,7 @@ function w3_get_permalink_rules()
         $rules .= "   RewriteBase " . $home_path . "\n";
         $rules .= "   RewriteCond %{REQUEST_FILENAME} !-f\n";
         $rules .= "   RewriteCond %{REQUEST_FILENAME} !-d\n";
-        $rules .= "   RewriteRule . " . $base_path . "index.php [L]\n";
+        $rules .= "   RewriteRule . " . $home_path . "index.php [L]\n";
         $rules .= "</IfModule>\n";
         $rules .= "# END WordPress\n";
     }
