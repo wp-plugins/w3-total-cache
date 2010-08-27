@@ -175,19 +175,19 @@ class W3_Plugin_BrowserCache extends W3_Plugin
             
             if ($cssjs_expires && $cssjs_lifetime) {
                 foreach ($cssjs_types as $mime_type) {
-                    $rules .= "    ExpiresByType " . $mime_type . " M" . $cssjs_lifetime . "\n";
+                    $rules .= "    ExpiresByType " . $mime_type . " A" . $cssjs_lifetime . "\n";
                 }
             }
             
             if ($html_expires && $html_lifetime) {
                 foreach ($html_types as $mime_type) {
-                    $rules .= "    ExpiresByType " . $mime_type . " M" . $html_lifetime . "\n";
+                    $rules .= "    ExpiresByType " . $mime_type . " A" . $html_lifetime . "\n";
                 }
             }
             
             if ($other_expires && $other_lifetime) {
                 foreach ($other_types as $mime_type) {
-                    $rules .= "    ExpiresByType " . $mime_type . " M" . $other_lifetime . "\n";
+                    $rules .= "    ExpiresByType " . $mime_type . " A" . $other_lifetime . "\n";
                 }
             }
             
@@ -253,7 +253,7 @@ class W3_Plugin_BrowserCache extends W3_Plugin
         $etag = $this->_config->get_boolean('browsercache.' . $section . '.etag');
         $w3tc = $this->_config->get_boolean('browsercache.' . $section . '.w3tc');
         
-        $rules .= "<FilesMatch \"\\.(?i:" . implode('|', array_keys($mime_types)) . ")$\">\n";
+        $rules .= "<FilesMatch \"\\.(" . implode('|', array_keys($mime_types)) . ")$\">\n";
         
         if ($cache_control) {
             switch ($cache_policy) {

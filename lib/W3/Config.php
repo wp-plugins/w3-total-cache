@@ -547,7 +547,6 @@ class W3_Config
                     'sgh', 
                     'sharp', 
                     'sharp\-tq\-gx10', 
-                    'sie', 
                     'small', 
                     'smartphone', 
                     'softbank', 

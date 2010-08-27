@@ -4969,7 +4969,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
     {
         $themes = array();
         $wp_themes = get_themes();
-        $theme_root = get_theme_root_uri();
+        $theme_root = get_theme_root();
         
         foreach ($wp_themes as $wp_theme) {
             $theme_key = substr(md5($theme_root . $wp_theme['Template'] . $wp_theme['Stylesheet']), 0, 6);
