@@ -1,6 +1,6 @@
 <?php
 
-define('W3TC_VERSION', '0.9.1.1');
+define('W3TC_VERSION', '0.9.1.2');
 define('W3TC_POWERED_BY', 'W3 Total Cache/' . W3TC_VERSION);
 define('W3TC_EMAIL', 'w3tc@w3-edge.com');
 define('W3TC_PAYPAL_URL', 'https://www.paypal.com/cgi-bin/webscr');
@@ -56,6 +56,36 @@ define('W3TC_CDN_TABLE_QUEUE', 'w3tc_cdn_queue');
 $_w3tc_actions = array();
 
 /**
+ * Deactivate plugin after activation error
+ * 
+ * @return void
+ */
+function w3_activation_cleanup()
+{
+    $active_plugins = (array) get_option('active_plugins');
+    $active_plugins_network = (array) get_site_option('active_sitewide_plugins');
+    
+    // workaround for WPMU deactivation bug
+    remove_action('deactivate_' . W3TC_FILE, 'deactivate_sitewide_plugin');
+    
+    do_action('deactivate_plugin', W3TC_FILE);
+    
+    $key = array_search(W3TC_FILE, $active_plugins);
+    
+    if ($key !== false) {
+        array_splice($active_plugins, $key, 1);
+    }
+    
+    unset($active_plugins_network[W3TC_FILE]);
+    
+    do_action('deactivate_' . W3TC_FILE);
+    do_action('deactivated_plugin', W3TC_FILE);
+    
+    update_option('active_plugins', $active_plugins);
+    update_site_option('active_sitewide_plugins', $active_plugins_network);
+}
+
+/**
  * W3 activate error
  *
  * @param string $error
@@ -63,26 +93,7 @@ $_w3tc_actions = array();
  */
 function w3_activate_error($error)
 {
-    $active_plugins = (array) get_option('active_plugins');
-    
-    // workaround for WPMU deactivation bug
-    remove_action('deactivate_' . W3TC_FILE, 'deactivate_sitewide_plugin');
-    
-    $key = array_search(W3TC_FILE, $active_plugins);
-    
-    if ($key !== false) {
-        do_action('deactivate_plugin', W3TC_FILE);
-        
-        array_splice($active_plugins, $key, 1);
-        
-        do_action('deactivate_' . W3TC_FILE);
-        do_action('deactivated_plugin', W3TC_FILE);
-        
-        update_option('active_plugins', $active_plugins);
-    
-    } else {
-        do_action('deactivate_' . W3TC_FILE);
-    }
+    w3_activation_cleanup();
     
     include W3TC_DIR . '/inc/error.phtml';
     exit();
@@ -115,6 +126,9 @@ function w3_writable_error($path)
  */
 function w3_network_activate_error()
 {
+    w3_activation_cleanup();
+    wp_redirect(plugins_url('inc/network_activation.php', W3TC_FILE));
+    
     echo '<p><strong>W3 Total Cache Error:</strong> plugin cannot be activated network-wide.</p>';
     echo '<p><a href="javascript:history.back(-1);">Back</a>';
     exit();

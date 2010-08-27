@@ -29,14 +29,14 @@
         	<tr>
         		<th>
         			<input type="hidden" name="pgcache.cache.home" value="0" />
-        			<label><input type="checkbox" name="pgcache.cache.home" value="1"<?php checked($this->_config->get_boolean('pgcache.cache.home'), true); ?> /> Cache the home page</label><br />
+        			<label><input type="checkbox" name="pgcache.cache.home" value="1"<?php checked($this->_config->get_boolean('pgcache.cache.home'), true); ?> /> Cache home page</label><br />
     				<span class="description">For many blogs this is your most visited page, it is recommended that you cache it.</span>
         		</th>
         	</tr>
         	<tr>
         		<th>
         			<input type="hidden" name="pgcache.cache.feed" value="0" />
-        			<label><input type="checkbox" name="pgcache.cache.feed" value="1"<?php checked($this->_config->get_boolean('pgcache.cache.feed'), true); ?> /> Cache site, categories, tags, comments and feeds</label><br />
+        			<label><input type="checkbox" name="pgcache.cache.feed" value="1"<?php checked($this->_config->get_boolean('pgcache.cache.feed'), true); ?> /> Cache feeds: site, categories, tags, comments</label><br />
     				<span class="description">Even if using a feed proxy service (like <a href="http://en.wikipedia.org/wiki/FeedBurner" target="_blank">FeedBurner</a>), enabling this option is still recommended.</span>
         		</th>
         	</tr>

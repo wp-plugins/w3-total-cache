@@ -263,6 +263,16 @@ class W3_Plugin_TotalCache extends W3_Plugin
      */
     function activate()
     {
+        /**
+         * Disable buggy sitewide activation in WPMU and WP 3.0
+         */
+        if ((w3_is_wpmu() && isset($_GET['sitewide'])) || (w3_is_network_mode() && isset($_GET['networkwide']))) {
+            w3_network_activate_error();
+        }
+        
+        /**
+         * Check installation files
+         */
         $files = array(
             W3TC_INSTALL_DIR . '/db.php', 
             W3TC_INSTALL_DIR . '/advanced-cache.php', 

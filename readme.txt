@@ -3,7 +3,7 @@ Contributors: fredericktownes
 Tags: user experience, cache, caching, page cache, css cache, js cache, db cache, disk cache, disk caching, database cache, http compression, gzip, deflate, minify, CDN, content delivery network, media library, performance, speed, multiple hosts, CSS, merge, combine, unobtrusive javascript, compress, optimize, optimizer, JavaScript, JS, cascading style sheet, plugin, yslow, YUI, google, google rank, google page speed, S3, CloudFront, AWS, Amazon Web Services, cloud files, rackspace, batcache, wp cache, wp super cache, w3 total cache, buddypress
 Requires at least: 2.6
 Tested up to: 3.1
-Stable tag: 0.9.1.1
+Stable tag: 0.9.1.2
 
 Dramatically improve the speed and user experience of your site. Add browser, page, object and database caching as well as minify and content delivery network (CDN) to WordPress.
 
@@ -244,6 +244,8 @@ Install the plugin to read the full FAQ.
 
 **August 2010:**
 
+* [Speed up, compress and optimise WordPress using W3 Total Cache](http://thisishelpful.com/speed-compress-optimise-wordpress-w3-total-cache.html)
+* [W3 Total Cache - Further optimization of the blog](http://www.bhoffmeier.de/2010/08/21/w3-total-cache-weitere-optimierung-des-blogs/), Bernd Hoffmeier
 * [W3 Total Cache Fixes Bugs, Adds Features with Update](http://www.whoishostingthis.com/blog/2010/08/04/first-draft-w3-total-cache-fixes-bugs-adds-features-with-update/), Jonathan
 * [The Quickest Way To Make Your Blog Load Faster](http://www.peterleehc.com/blog/work-from-home/the-quickest-way-to-make-your-blog-load-faster), Peter Lee
 

@@ -398,7 +398,7 @@ class W3_Config
         'browsercache.no404wp' => false, 
         'browsercache.cssjs.compression' => true, 
         'browsercache.cssjs.expires' => false, 
-        'browsercache.cssjs.lifetime' => 3600, 
+        'browsercache.cssjs.lifetime' => 31536000, 
         'browsercache.cssjs.cache.control' => false, 
         'browsercache.cssjs.cache.policy' => 'cache_validation', 
         'browsercache.cssjs.etag' => false, 
