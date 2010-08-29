@@ -5,7 +5,7 @@ Requires at least: 2.8
 Tested up to: 3.1
 Stable tag: 0.9.1.1
 
-Dramatically improve the speed and user experience of your site. Add browser, page, object and database caching as well as minify and content delivery network (CDN) to WordPress.
+Optimize the speed and user experience of your site with transparent: browser, page, object / database, minify and content delivery network support.
 
 == Description ==
 
