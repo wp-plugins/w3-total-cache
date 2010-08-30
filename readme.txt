@@ -244,6 +244,7 @@ Install the plugin to read the full FAQ.
 
 **August 2010:**
 
+* [How to Install and Setup W3 Total Cache for Beginners](http://www.wpbeginner.com/plugins/how-to-install-and-setup-w3-total-cache-for-beginners/)
 * [Speed up, compress and optimise WordPress using W3 Total Cache](http://thisishelpful.com/speed-compress-optimise-wordpress-w3-total-cache.html)
 * [W3 Total Cache - Further optimization of the blog](http://www.bhoffmeier.de/2010/08/21/w3-total-cache-weitere-optimierung-des-blogs/), Bernd Hoffmeier
 * [W3 Total Cache Fixes Bugs, Adds Features with Update](http://www.whoishostingthis.com/blog/2010/08/04/first-draft-w3-total-cache-fixes-bugs-adds-features-with-update/), Jonathan
