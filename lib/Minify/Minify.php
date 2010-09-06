@@ -275,7 +275,7 @@ class Minify {
             // memory.
             $cacheId = self::_getCacheId();
             $fullCacheId = (self::$_options['encodeMethod'])
-                ? $cacheId . '.' . self::$_options['encodeMethod']
+                ? $cacheId . self::$_options['encodeMethod']
                 : $cacheId;
             // check cache for valid entry
             $cacheIsReady = self::$_cache->isValid($fullCacheId, self::$_options['lastModifiedTime']); 
@@ -287,7 +287,7 @@ class Minify {
                 self::$_cache->store($cacheId, $content);
                 
                 if (self::$_options['encodeOutput'] && function_exists('gzencode')) {
-                    self::$_cache->store($cacheId . '.' . self::$_options['encodeMethod'], gzencode($content, self::$_options['encodeLevel']));
+                    self::$_cache->store($cacheId . '.gzip', gzencode($content, self::$_options['encodeLevel']));
                 }
             }
         } else {

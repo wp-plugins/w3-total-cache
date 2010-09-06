@@ -398,7 +398,7 @@ class W3_Config
         'browsercache.no404wp' => false, 
         'browsercache.cssjs.compression' => true, 
         'browsercache.cssjs.expires' => false, 
-        'browsercache.cssjs.lifetime' => 31536000, 
+        'browsercache.cssjs.lifetime' => 3600, 
         'browsercache.cssjs.cache.control' => false, 
         'browsercache.cssjs.cache.policy' => 'cache_validation', 
         'browsercache.cssjs.etag' => false, 
@@ -547,6 +547,7 @@ class W3_Config
                     'sgh', 
                     'sharp', 
                     'sharp\-tq\-gx10', 
+                    'sie', 
                     'small', 
                     'smartphone', 
                     'softbank', 
@@ -931,7 +932,7 @@ class W3_Config
     {
         @fputs($fp, str_repeat("\t", $this->_tabs));
         
-        if (is_numeric($key) && (string) (int) $key === (string) $key) {
+        if (is_numeric($key)) {
             @fputs($fp, sprintf("%d => ", $key));
         } else {
             @fputs($fp, sprintf("'%s' => ", addslashes($key)));

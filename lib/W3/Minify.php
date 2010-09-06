@@ -59,11 +59,6 @@ class W3_Minify
             require_once W3TC_LIB_MINIFY_DIR . '/Minify.php';
             require_once W3TC_LIB_MINIFY_DIR . '/HTTP/Encoder.php';
             
-            /**
-             * Fix DOCUMENT_ROOT for minify
-             */
-            $_SERVER['DOCUMENT_ROOT'] = w3_get_document_root();
-            
             HTTP_Encoder::$encodeToIe6 = true;
             
             Minify::$uploaderHoursBehind = $this->_config->get_integer('minify.fixtime');
@@ -72,7 +67,7 @@ class W3_Minify
             $browsercache = $this->_config->get_boolean('browsercache.enabled');
             
             $serve_options = $this->_config->get_array('minify.options');
-            $serve_options['maxAge'] = $this->_config->get_integer('browsercache.cssjs.lifetime');
+            $serve_options['maxAge'] = 0;$this->_config->get_integer('browsercache.cssjs.lifetime');
             $serve_options['encodeOutput'] = ($browsercache && $this->_config->get_boolean('browsercache.cssjs.compression'));
             $serve_options['cacheHeaders'] = array(
                 'use_etag' => ($browsercache && $this->_config->get_boolean('browsercache.cssjs.etag')), 
@@ -498,7 +493,7 @@ class W3_Minify
         $from_email = 'wordpress@' . w3_get_domain($_SERVER['SERVER_NAME']);
         $from_name = get_option('blogname');
         $to_name = $to_email = get_option('admin_email');
-        $body = @file_get_contents(W3TC_DIR . '/inc/email/minify_error_notification.html');
+        $body = @readfile(W3TC_DIR . '/inc/email/minify_error_notification.html');
         
         $headers = array(
             sprintf('From: "%s" <%s>', addslashes($from_name), $from_email), 

@@ -3,7 +3,7 @@ Contributors: fredericktownes
 Tags: user experience, cache, caching, page cache, css cache, js cache, db cache, disk cache, disk caching, database cache, http compression, gzip, deflate, minify, CDN, content delivery network, media library, performance, speed, multiple hosts, CSS, merge, combine, unobtrusive javascript, compress, optimize, optimizer, JavaScript, JS, cascading style sheet, plugin, yslow, YUI, google, google rank, google page speed, S3, CloudFront, AWS, Amazon Web Services, cloud files, rackspace, batcache, wp cache, wp super cache, w3 total cache, buddypress
 Requires at least: 2.8
 Tested up to: 3.1
-Stable tag: 0.9.1.1
+Stable tag: 0.9.1.2
 
 Optimize the speed and user experience of your site with transparent: browser, page, object / database, minify and content delivery network support.
 
@@ -244,6 +244,7 @@ Install the plugin to read the full FAQ.
 
 **August 2010:**
 
+* [How to configure WordPress Blogs Search Engine Friendly](http://solvater.com/2010/09/how-to-configure-wordpress-blog-search-engine-friendly-complete-beginners-guide-for-wordpress-seo/), Arafath Hashmi
 * [How to Install and Setup W3 Total Cache for Beginners](http://www.wpbeginner.com/plugins/how-to-install-and-setup-w3-total-cache-for-beginners/)
 * [20 Most Useful WordPress Plugins](http://zemalf.posterous.com/20-most-useful-wordpress-plugins), Antti Kokkonen
 * [Speed up, compress and optimise WordPress using W3 Total Cache](http://thisishelpful.com/speed-compress-optimise-wordpress-w3-total-cache.html)
@@ -358,12 +359,25 @@ Please reach out to all of these people and support their projects if you're so 
 
 == Changelog ==
 
+= 0.9.1.2 =
+* Fixed issues with document root detection on some servers
+* Fixed an issue with minification of script tags with HTML comments inside
+* Fixed bug with minify gzip compression
+* Fixed bug with cache-control headers
+* Fixed bug with empty fatal error notification on network activation
+* Fixed bug with minify when https is active
+* Fixed bug with fatal error upon activation when uploads path does not exist
+* Changed expires implementation to last accessed instead of last modified
+* Resolved Apache 1.3 compatibility issue
+* Improved media library import compatibility
+* Improved various notifications
+
 = 0.9.1.1 =
 * Added an additional notification to help users identify incomplete installations upon activation
 * Reverted previous Cloud Files workaround
-* Fixed a bug with preview mode buttons
-* Fixed a bug with duplicate entries appearing when using minify help tool more than once
-* Fixed a bug with browser cache rules generation for media files
+* Fixed bug with preview mode buttons
+* Fixed bug with duplicate entries appearing when using minify help tool more than once
+* Fixed bug with browser cache rules generation for media files
 
 = 0.9.1 =
 * Improved Rackspace Cloud Files implementation
@@ -442,7 +456,7 @@ Please reach out to all of these people and support their projects if you're so 
 * Improved memcached detection by supporting only PECL memcache
 * Fixed bug with disk enhanced method of page cache in WordPress MU
 * Fixed false match of page cache files in disk enhanced method of page cache
-* Fixed a bug with cron anomalies caused by caching of wp_options table
+* Fixed bug with cron anomalies caused by caching of wp_options table
 * Fixed missing trailing slash issue when using disk enhanced page caching
 * Fixed auto-embed bug CSS and JS when already manually embedded
 
@@ -542,12 +556,12 @@ Please reach out to all of these people and support their projects if you're so 
 * Removed unnecessary minify options
 * Minification error dialogs now disabled when JS or CSS minify settings disabled
 * Normalized line endings with /n as per minify author's direction
-* Resolved a bug in the minify library preventing proper permission notification messages
+* Resolved bug in the minify library preventing proper permission notification messages
 
 = 0.7.5 =
 * Added handling for magic_quotes set to on
 * Fixed issue with auto-download/upgrade and additional error checking
-* Fixed a bug preventing minify working properly if either CSS or JS minification was disabled
+* Fixed bug preventing minify working properly if either CSS or JS minification was disabled
 * Improved handling of inline comments and JavaScript in HTML documents
 * Improved handing of @import CSS embedding
 * Addressed privilege control issue

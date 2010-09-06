@@ -280,7 +280,8 @@
         	<?php else: ?>
         	<span class="w3tc-test-error">Not write-able</span>
         	<?php endif; ?>
-        <?php endif; ?><br /><?php endif; ?>
+        <?php endif; endif; ?>
+        <br />
         
     	Uploads directory:
     	<?php $uploads_dir = @wp_upload_dir(); if (!empty($uploads_dir['error'])): ?>

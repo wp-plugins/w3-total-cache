@@ -557,7 +557,7 @@ class W3_Plugin_PgCache extends W3_Plugin
         $rules .= "# BEGIN W3TC Page Cache\n";
         $rules .= "<IfModule mod_rewrite.c>\n";
         $rules .= "    RewriteEngine On\n";
-        $rules .= "    RewriteBase " . ($is_multisite ? $base_path : $home_path) . "\n";
+        $rules .= "    RewriteBase " . $home_path . "\n";
         
         /**
          * Network mode rules

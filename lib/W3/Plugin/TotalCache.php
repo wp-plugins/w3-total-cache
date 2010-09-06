@@ -263,16 +263,6 @@ class W3_Plugin_TotalCache extends W3_Plugin
      */
     function activate()
     {
-        /**
-         * Disable buggy sitewide activation in WPMU and WP 3.0
-         */
-        if ((w3_is_wpmu() && isset($_GET['sitewide'])) || (w3_is_network_mode() && isset($_GET['networkwide']))) {
-            w3_network_activate_error();
-        }
-        
-        /**
-         * Check installation files
-         */
         $files = array(
             W3TC_INSTALL_DIR . '/db.php', 
             W3TC_INSTALL_DIR . '/advanced-cache.php', 
@@ -1086,12 +1076,12 @@ class W3_Plugin_TotalCache extends W3_Plugin
             'config_save' => sprintf('The settings could not be saved because the config file is not write-able. Please run <strong>chmod 777 %s</strong> to resolve this issue.', (file_exists($config_path) ? $config_path : dirname($config_path))), 
             'fancy_permalinks_disabled_pgcache' => sprintf('Fancy permalinks are disabled. Please %s it first, then re-attempt to enabling the enhanced disk mode.', $this->button_link('enable', 'options-permalink.php')), 
             'fancy_permalinks_disabled_browsercache' => sprintf('Fancy permalinks are disabled. Please %s it first, then re-attempt to enabling the \'Do not process 404 errors for static objects with WordPress\'.', $this->button_link('enable', 'options-permalink.php')), 
-            'pgcache_write_rules_core' => sprintf('The page cache rules could not be modified. Please %srun <strong>chmod 777 %s</strong> to resolve this issue.', (file_exists($pgcache_rules_core_path) ? '' : sprintf('create an empty file in <strong>%s</strong> and ', $pgcache_rules_core_path)), $pgcache_rules_core_path), 
-            'pgcache_write_rules_cache' => sprintf('The page cache rules could not be modified. Please run <strong>chmod 777 %s</strong> to resolve this issue.', (file_exists($pgcache_rules_cache_path) ? $pgcache_rules_cache_path : dirname($pgcache_rules_cache_path))), 
-            'browsercache_write_rules_cache' => sprintf('The browser cache rules could not be modified. Please %srun <strong>chmod 777 %s</strong> to resolve this issue.', (file_exists($browsercache_rules_cache_path) ? '' : sprintf('create an empty file in <strong>%s</strong> and ', $browsercache_rules_cache_path)), $browsercache_rules_cache_path), 
-            'browsercache_write_rules_no404wp' => sprintf('The browser cache rules could not be modified. Please %srun <strong>chmod 777 %s</strong> to resolve this issue.', (file_exists($browsercache_rules_no404wp_path) ? '' : sprintf('create an empty file in <strong>%s</strong> and ', $browsercache_rules_no404wp_path)), $browsercache_rules_no404wp_path), 
+            'pgcache_write_rules_core' => sprintf('Either your .htaccess file does not exist or cannot be modified (%s). Please run <strong>chmod 777 %s</strong> to resolve this issue.', $pgcache_rules_core_path, (file_exists($pgcache_rules_core_path) ? $pgcache_rules_core_path : dirname($pgcache_rules_core_path))), 
+            'pgcache_write_rules_cache' => sprintf('The page cache rules (%s) could not be modified. Please run <strong>chmod 777 %s</strong> to resolve this issue.', $pgcache_rules_cache_path, (file_exists($pgcache_rules_cache_path) ? $pgcache_rules_cache_path : dirname($pgcache_rules_cache_path))), 
+            'browsercache_write_rules_cache' => sprintf('The browser cache rules (%s) could not be modified. Please run <strong>chmod 777 %s</strong> to resolve this issue.', $browsercache_rules_cache_path, (file_exists($browsercache_rules_cache_path) ? $browsercache_rules_cache_path : dirname($browsercache_rules_cache_path))), 
+            'browsercache_write_rules_no404wp' => sprintf('The browser cache rules (%s) could not be modified. Please run <strong>chmod 777 %s</strong> to resolve this issue.', $browsercache_rules_no404wp_path, (file_exists($browsercache_rules_no404wp_path) ? $browsercache_rules_no404wp_path : dirname($browsercache_rules_no404wp_path))), 
             'browsercache_write_rules_cdn' => sprintf('The browser cache rules for CDN could not be modified. Please check CDN settings.'), 
-            'minify_write_rules' => sprintf('The minify cache rules could not be modified. Please run <strong>chmod 777 %s</strong> to resolve this issue.', (file_exists($minify_rules_path) ? $minify_rules_path : dirname($minify_rules_path))), 
+            'minify_write_rules' => sprintf('The minify cache rules (%s) could not be modified. Please run <strong>chmod 777 %s</strong> to resolve this issue.', $minify_rules_path, (file_exists($minify_rules_path) ? $minify_rules_path : dirname($minify_rules_path))), 
             'support_request_type' => 'Please select request type.', 
             'support_request_url' => 'Please enter the address of your site in the site <acronym title="Uniform Resource Locator">URL</acronym> field.', 
             'support_request_name' => 'Please enter your name in the Name field', 
@@ -1295,9 +1285,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
         
         if ($data) {
             $matches = null;
-            $regexp = '~==\s*Changelog\s*==\s*=\s*[0-9.]+\s*=(.*)(=\s*' . preg_quote(W3TC_VERSION) . '\s*=|$)~Uis';
-            
-            if (preg_match($regexp, $data, $matches)) {
+            if (preg_match('~==\s*Changelog\s*==\s*=\s*[0-9.]+\s*=(.*)(=\s*[0-9.]+\s*=|$)~Uis', $data, $matches)) {
                 $changelog = (array) preg_split('~[\r\n]+~', trim($matches[1]));
                 
                 echo '<div style="color: #f00;">Take a minute to update, here\'s why:</div><div style="font-weight: normal;">';
@@ -1466,7 +1454,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
                             if (w3_is_multisite()) {
                                 $this->_errors[] = sprintf('Enhanced mode page cache is not operational. Your .htaccess rules could not be modified. Please verify <strong>%s</strong> has the following rules: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> %s', $pgcache_rules_core_path, $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_pgcache->generate_rules_core()), $this->button_hide_note('Hide this message', 'pgcache_rules_core'));
                             } else {
-                                $this->_errors[] = sprintf('You\'ve selected disk caching with enhanced mode however the .htaccess file is not properly configured. Please %srun <strong>chmod 777 %s</strong>, then %s. To manually modify your server configuration for enhanced mode append the following code: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> and %s.', (file_exists($pgcache_rules_core_path) ? '' : sprintf('create an empty file in <strong>%s</strong> and ', $pgcache_rules_core_path)), $pgcache_rules_core_path, $this->button_link('try again', sprintf('admin.php?page=%s&pgcache_write_rules_core', $this->_page)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_pgcache->generate_rules_core()), $this->button_hide_note('hide this message', 'pgcache_rules_core'));
+                                $this->_errors[] = sprintf('You\'ve selected disk caching with enhanced mode however the .htaccess file is not properly configured. Please run <strong>chmod 777 %s</strong>, then %s. To manually modify your server configuration for enhanced mode append the following code: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> and %s.', (file_exists($pgcache_rules_core_path) ? $pgcache_rules_core_path : dirname($pgcache_rules_core_path)), $this->button_link('try again', sprintf('admin.php?page=%s&pgcache_write_rules_core', $this->_page)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_pgcache->generate_rules_core()), $this->button_hide_note('hide this message', 'pgcache_rules_core'));
                             }
                         }
                         
@@ -1555,7 +1543,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
                 if (w3_is_multisite()) {
                     $this->_errors[] = sprintf('Browser Cache feature is not operational. Your .htaccess rules could not be modified. Please verify <strong>%s</strong> has the following rules: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> %s', $browsercache_rules_cache_path, $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_browsercache->generate_rules_cache()), $this->button_hide_note('Hide this message', 'browsercache_rules_cache'));
                 } else {
-                    $this->_errors[] = sprintf('You\'ve enabled Browser Cache feature however the .htaccess file is not properly configured. Please %srun <strong>chmod 777 %s</strong>, then %s. To manually modify these settings use the following code: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> and %s.', (file_exists($browsercache_rules_cache_path) ? '' : sprintf('create an empty file in <strong>%s</strong> and ', $browsercache_rules_cache_path)), $browsercache_rules_cache_path, $this->button_link('try again', sprintf('admin.php?page=%s&browsercache_write_rules_cache', $this->_page)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_browsercache->generate_rules_cache()), $this->button_hide_note('hide this message', 'browsercache_rules_cache'));
+                    $this->_errors[] = sprintf('You\'ve enabled Browser Cache feature however the .htaccess file is not properly configured. Please run <strong>chmod 777 %s</strong>, then %s. To manually modify these settings use the following code: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> and %s.', (file_exists($browsercache_rules_cache_path) ? $browsercache_rules_cache_path : dirname($browsercache_rules_cache_path)), $this->button_link('try again', sprintf('admin.php?page=%s&browsercache_write_rules_cache', $this->_page)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_browsercache->generate_rules_cache()), $this->button_hide_note('hide this message', 'browsercache_rules_cache'));
                 }
             }
             
@@ -1565,7 +1553,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
                 if (w3_is_multisite()) {
                     $this->_errors[] = sprintf('Browser Cache feature is not operational. Your .htaccess rules could not be modified. Please verify <strong>%s</strong> has the following rules: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> %s', $browsercache_rules_no404wp_path, $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_browsercache->generate_rules_no404wp()), $this->button_hide_note('Hide this message', 'browsercache_rules_no404wp'));
                 } else {
-                    $this->_errors[] = sprintf('You\'ve enabled Browser Cache feature however the .htaccess file is not properly configured. Please %srun <strong>chmod 777 %s</strong>, then %s. To manually modify these settings use the following code: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> and %s.', (file_exists($browsercache_rules_no404wp_path) ? '' : sprintf('create an empty file in <strong>%s</strong> and ', $browsercache_rules_no404wp_path)), $browsercache_rules_no404wp_path, $this->button_link('try again', sprintf('admin.php?page=%s&browsercache_write_rules_no404wp', $this->_page)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_browsercache->generate_rules_no404wp()), $this->button_hide_note('hide this message', 'browsercache_rules_no404wp'));
+                    $this->_errors[] = sprintf('You\'ve enabled Browser Cache feature however the .htaccess file is not properly configured. Please run <strong>chmod 777 %s</strong>, then %s. To manually modify these settings use the following code: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> and %s.', (file_exists($browsercache_rules_no404wp_path) ? $browsercache_rules_no404wp_path : dirname($browsercache_rules_no404wp_path)), $this->button_link('try again', sprintf('admin.php?page=%s&browsercache_write_rules_no404wp', $this->_page)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_browsercache->generate_rules_no404wp()), $this->button_hide_note('hide this message', 'browsercache_rules_no404wp'));
                 }
             }
         }
@@ -1613,35 +1601,14 @@ class W3_Plugin_TotalCache extends W3_Plugin
         /**
          * Check permalinks
          */
-        if ($this->_config->get_boolean('notes.no_permalink_rules') && (($this->_config->get_boolean('pgcache.enabled') && $this->_config->get_string('pgcache.engine') == 'file_pgcache') || ($this->_config->get_boolean('browsercache.enabled') && $this->_config->get_boolean('browsercache.no404wp'))) && !w3_is_permalink_rules()) {
+        if ($this->_config->get_boolean('notes.no_permalink_rules') && (($this->_config->get_boolean('pgcache.enabled') && $this->_config->get_string('pgcache.engine') == 'file_pgcache') || $this->_config->get_boolean('browsercache.enabled')) && $this->_config->get_boolean('browsercache.no404wp') && !w3_is_permalink_rules()) {
             $this->_errors[] = sprintf('The required directives for fancy permalinks could not be detected, please confirm they are available: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> %s', $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars(w3_get_permalink_rules()), $this->button_hide_note('Hide this message', 'no_permalink_rules'));
         }
         
         /**
-         * CDN
+         * Check CDN settings
          */
         if ($this->_config->get_boolean('cdn.enabled')) {
-            /**
-             * Check upload settings
-             */
-            $upload_info = w3_upload_info();
-            
-            if (!$upload_info) {
-                $upload_path = get_option('upload_path');
-                $upload_path = trim($upload_path);
-                
-                if (empty($upload_path)) {
-                    $upload_path = WP_CONTENT_DIR . '/uploads';
-                    
-                    $this->_errors[] = sprintf('Your store uploads folder is not available. Default WordPress directories will be created: <strong>%s</strong>.', $upload_path);
-                }
-                
-                $this->_errors[] = sprintf('The path found in the database (%s) is inconsistent with the current paths found on your server. Please manually adjust the upload path either in miscellaneous settings or in the site\'s edit page if in network mode.', $upload_path);
-            }
-            
-            /**
-             * Check CDN settings
-             */
             $cdn_engine = $this->_config->get_string('cdn.engine');
             
             switch (true) {
@@ -4210,7 +4177,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
                 foreach ((array) $locations as $location => $config) {
                     if (isset($config['files'])) {
                         foreach ((array) $config['files'] as $file) {
-                            if (!isset($js_groups[$template]) || !in_array($file, $js_groups[$template])) {
+                            if (!in_array($file, $js_groups[$template])) {
                                 $js_groups[$template][] = $file;
                             }
                             
@@ -4227,7 +4194,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
                 foreach ((array) $locations as $location => $config) {
                     if (isset($config['files'])) {
                         foreach ((array) $config['files'] as $file) {
-                            if (!isset($css_groups[$template]) || !in_array($file, $css_groups[$template])) {
+                            if (!in_array($file, $css_groups[$template])) {
                                 $css_groups[$template][] = $file;
                             }
                             
@@ -4992,7 +4959,7 @@ class W3_Plugin_TotalCache extends W3_Plugin
     {
         $themes = array();
         $wp_themes = get_themes();
-        $theme_root = get_theme_root();
+        $theme_root = get_theme_root_uri();
         
         foreach ($wp_themes as $wp_theme) {
             $theme_key = substr(md5($theme_root . $wp_theme['Template'] . $wp_theme['Stylesheet']), 0, 6);

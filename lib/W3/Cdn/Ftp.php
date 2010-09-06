@@ -81,7 +81,6 @@ class W3_Cdn_Ftp extends W3_Cdn_Base
     
     /**
      * Sends MDTM command
-     * 
      * @param string $remote_file
      * @return boolean
      */
@@ -90,22 +89,6 @@ class W3_Cdn_Ftp extends W3_Cdn_Base
         $command = sprintf('MDTM %s %s', date('YmdHis', $mtime), $remote_file);
         
         return @ftp_raw($this->_ftp, $command);
-    }
-    
-    /**
-     * Changes permissions
-     * 
-     * @param string $filename
-     * @param integer $mode
-     * @return boolean
-     */
-    function _chmod($filename, $mode)
-    {
-        if (function_exists('ftp_chmod')) {
-            return @ftp_chmod($this->_ftp, $mode, $filename);
-        }
-        
-        return true;
     }
     
     /**
@@ -147,7 +130,7 @@ class W3_Cdn_Ftp extends W3_Cdn_Base
                         continue 2;
                     }
                     
-                    $this->_chmod($dir, 0755);
+                    @ftp_chmod($this->_ftp, 0755, $dir);
                     
                     if (!@ftp_chdir($this->_ftp, $dir)) {
                         @ftp_close($this->_ftp);
@@ -178,7 +161,7 @@ class W3_Cdn_Ftp extends W3_Cdn_Base
             
             if ($result) {
                 $count++;
-                $this->_chmod($remote_file, 0644);
+                @ftp_chmod($this->_ftp, 0644, $remote_file);
             }
         }
         
@@ -259,7 +242,7 @@ class W3_Cdn_Ftp extends W3_Cdn_Base
             
             return false;
         } else {
-            $this->_chmod($tmp_dir, 0755);
+            @ftp_chmod($this->_ftp, 0755, $tmp_dir);
         }
         
         if (!@ftp_chdir($this->_ftp, $tmp_dir)) {
