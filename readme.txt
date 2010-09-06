@@ -5,7 +5,7 @@ Requires at least: 2.8
 Tested up to: 3.1
 Stable tag: 0.9.1.2
 
-Optimize the speed and user experience of your site with transparent: browser, page, object / database, minify and content delivery network support.
+Easily optimize the speed and user experience of your site with caching: browser, page, object, database, minify and content delivery network support.
 
 == Description ==
 
@@ -360,6 +360,10 @@ Please reach out to all of these people and support their projects if you're so 
 == Changelog ==
 
 = 0.9.1.2 =
+* Improved media library import compatibility
+* Improved various notifications
+* Changed expires implementation to last accessed instead of last modified
+* Resolved Apache 1.3 compatibility issue
 * Fixed issues with document root detection on some servers
 * Fixed an issue with minification of script tags with HTML comments inside
 * Fixed bug with minify gzip compression
@@ -367,10 +371,6 @@ Please reach out to all of these people and support their projects if you're so 
 * Fixed bug with empty fatal error notification on network activation
 * Fixed bug with minify when https is active
 * Fixed bug with fatal error upon activation when uploads path does not exist
-* Changed expires implementation to last accessed instead of last modified
-* Resolved Apache 1.3 compatibility issue
-* Improved media library import compatibility
-* Improved various notifications
 
 = 0.9.1.1 =
 * Added an additional notification to help users identify incomplete installations upon activation
