@@ -56,6 +56,36 @@ define('W3TC_CDN_TABLE_QUEUE', 'w3tc_cdn_queue');
 $_w3tc_actions = array();
 
 /**
+ * Deactivate plugin after activation error
+ * 
+ * @return void
+ */
+function w3_activation_cleanup()
+{
+    $active_plugins = (array) get_option('active_plugins');
+    $active_plugins_network = (array) get_site_option('active_sitewide_plugins');
+    
+    // workaround for WPMU deactivation bug
+    remove_action('deactivate_' . W3TC_FILE, 'deactivate_sitewide_plugin');
+    
+    do_action('deactivate_plugin', W3TC_FILE);
+    
+    $key = array_search(W3TC_FILE, $active_plugins);
+    
+    if ($key !== false) {
+        array_splice($active_plugins, $key, 1);
+    }
+    
+    unset($active_plugins_network[W3TC_FILE]);
+    
+    do_action('deactivate_' . W3TC_FILE);
+    do_action('deactivated_plugin', W3TC_FILE);
+    
+    update_option('active_plugins', $active_plugins);
+    update_site_option('active_sitewide_plugins', $active_plugins_network);
+}
+
+/**
  * W3 activate error
  *
  * @param string $error
@@ -63,26 +93,7 @@ $_w3tc_actions = array();
  */
 function w3_activate_error($error)
 {
-    $active_plugins = (array) get_option('active_plugins');
-    
-    // workaround for WPMU deactivation bug
-    remove_action('deactivate_' . W3TC_FILE, 'deactivate_sitewide_plugin');
-    
-    $key = array_search(W3TC_FILE, $active_plugins);
-    
-    if ($key !== false) {
-        do_action('deactivate_plugin', W3TC_FILE);
-        
-        array_splice($active_plugins, $key, 1);
-        
-        do_action('deactivate_' . W3TC_FILE);
-        do_action('deactivated_plugin', W3TC_FILE);
-        
-        update_option('active_plugins', $active_plugins);
-    
-    } else {
-        do_action('deactivate_' . W3TC_FILE);
-    }
+    w3_activation_cleanup();
     
     include W3TC_DIR . '/inc/error.phtml';
     exit();
@@ -115,6 +126,9 @@ function w3_writable_error($path)
  */
 function w3_network_activate_error()
 {
+    w3_activation_cleanup();
+    wp_redirect(plugins_url('inc/network_activation.php', W3TC_FILE));
+    
     echo '<p><strong>W3 Total Cache Error:</strong> plugin cannot be activated network-wide.</p>';
     echo '<p><a href="javascript:history.back(-1);">Back</a>';
     exit();
@@ -702,12 +716,12 @@ function w3_get_document_root()
     static $document_root = null;
     
     if ($document_root === null) {
-        if (isset($_SERVER['DOCUMENT_ROOT'])) {
-            $document_root = $_SERVER['DOCUMENT_ROOT'];
-        } elseif (isset($_SERVER['SCRIPT_FILENAME'])) {
+        if (isset($_SERVER['SCRIPT_FILENAME'])) {
             $document_root = substr($_SERVER['SCRIPT_FILENAME'], 0, -strlen($_SERVER['PHP_SELF']));
         } elseif (isset($_SERVER['PATH_TRANSLATED'])) {
             $document_root = substr($_SERVER['PATH_TRANSLATED'], 0, -strlen($_SERVER['PHP_SELF']));
+        } elseif (isset($_SERVER['DOCUMENT_ROOT'])) {
+            $document_root = $_SERVER['DOCUMENT_ROOT'];
         } else {
             $document_root = w3_get_site_root();
         }
@@ -1108,7 +1122,7 @@ function w3_http_request($method, $url, $data = '', $auth = '', $check_status = 
             $request_uri = $path . ($query != '' ? '?' . $query : '');
             
             $request_headers_array = array(
-                sprintf('%s %s HTTP/1.1', $method, $request_uri), 
+                sprintf('%s %s HTTP/1.0', $method, $request_uri), 
                 sprintf('Host: %s', $host), 
                 sprintf('User-Agent: %s', W3TC_POWERED_BY), 
                 'Connection: close'
@@ -1690,24 +1704,33 @@ function w3_get_permalink_rules()
         $rules .= "</Files>\n";
         $rules .= "</IfModule>\n";
     } elseif (w3_is_network_mode()) {
+        $subdomain_install = is_subdomain_install();
+        
         $rules .= "# BEGIN WordPress\n";
         $rules .= "<IfModule mod_rewrite.c>\n";
-        $rules .= "   RewriteEngine On\n";
-        $rules .= "   RewriteBase " . $base_path . "\n";
-        $rules .= "   RewriteRule ^index\\.php$ - [L]\n\n";
+        $rules .= "RewriteEngine On\n";
+        $rules .= "RewriteBase " . $base_path . "\n";
+        $rules .= "RewriteRule ^index\\.php$ - [L]\n\n";
         
-        $rules .= "   # uploaded files\n";
-        $rules .= "   RewriteRule ^([_0-9a-zA-Z-]+/)?files/(.+) wp-includes/ms-files.php?file= [L]\n\n";
+        $rules .= "# uploaded files\n";
+        $rules .= "RewriteRule ^" . ($subdomain_install ? '' : '([_0-9a-zA-Z-]+/)?') . "files/(.+) wp-includes/ms-files.php?file=$" . ($subdomain_install ? 1 : 2) . " [L]\n\n";
         
-        $rules .= "   # add a trailing slash to /wp-admin\n";
-        $rules .= "   RewriteRule ^([_0-9a-zA-Z-]+/)?wp-admin$ wp-admin/ [R=301,L]\n\n";
+        if (!$subdomain_install) {
+            $rules .= "# add a trailing slash to /wp-admin\n";
+            $rules .= "RewriteRule ^([_0-9a-zA-Z-]+/)?wp-admin$ $1wp-admin/ [R=301,L]\n";
+        }
         
-        $rules .= "   RewriteCond %{REQUEST_FILENAME} -f [OR]\n";
-        $rules .= "   RewriteCond %{REQUEST_FILENAME} -d\n";
-        $rules .= "   RewriteRule ^ - [L]\n";
-        $rules .= "   RewriteRule  ^([_0-9a-zA-Z-]+/)?(wp-(content|admin|includes).*)  [L]\n";
-        $rules .= "   RewriteRule  ^([_0-9a-zA-Z-]+/)?(.*\\.php)$  [L]\n";
-        $rules .= "   RewriteRule . index.php [L]\n";
+        $rules .= "RewriteCond %{REQUEST_FILENAME} -f [OR]\n";
+        $rules .= "RewriteCond %{REQUEST_FILENAME} -d\n";
+        $rules .= "RewriteRule ^ - [L]\n";
+        
+        // @todo custom content dir.
+        if (!$subdomain_install) {
+            $rules .= "RewriteRule  ^([_0-9a-zA-Z-]+/)?(wp-(content|admin|includes).*) $2 [L]\n";
+            $rules .= "RewriteRule  ^([_0-9a-zA-Z-]+/)?(.*\\.php)$ $2 [L]\n";
+        }
+        
+        $rules .= "RewriteRule . index.php [L]\n";
         $rules .= "</IfModule>\n";
         $rules .= "# END WordPress\n";
     } else {
@@ -1719,7 +1742,7 @@ function w3_get_permalink_rules()
         $rules .= "   RewriteBase " . $home_path . "\n";
         $rules .= "   RewriteCond %{REQUEST_FILENAME} !-f\n";
         $rules .= "   RewriteCond %{REQUEST_FILENAME} !-d\n";
-        $rules .= "   RewriteRule . " . $base_path . "index.php [L]\n";
+        $rules .= "   RewriteRule . " . $home_path . "index.php [L]\n";
         $rules .= "</IfModule>\n";
         $rules .= "# END WordPress\n";
     }

@@ -12,42 +12,49 @@
 
         <table class="form-table">
             <tr>
-                <th>
+                <th colspan="2">
                     <label><input id="browsercache_expires" type="checkbox" name="expires" value="1"<?php checked($browsercache_expires, true); ?> /> Set expires header</label>
                     <br /><span class="description">Set the expires header to encourage browser caching of files.</span>
                 </th>
             </tr>
             <tr>
-                <th>
+                <th colspan="2">
                     <label><input id="browsercache_cache_control" type="checkbox" name="cache_control" value="1"<?php checked($browsercache_cache_control, true); ?> /> Set cache control header</label>
                     <br /><span class="description">Set pragma and cache-control headers to encourage browser caching of files.</span>
                 </th>
             </tr>
             <tr>
-                <th>
+                <th colspan="2">
                     <label><input id="browsercache_etag" type="checkbox" name="etag" value="1"<?php checked($browsercache_etag, true); ?> /> Set entity tag (eTag)</label>
                     <br /><span class="description">Set the Etag header to encourage browser caching of files.</span>
                 </th>
             </tr>
             <tr>
-                <th>
+                <th colspan="2">
                     <label><input id="browsercache_w3tc" type="checkbox" name="w3tc" value="1"<?php checked($browsercache_w3tc, true); ?> /> Set W3 Total Cache header</label>
                     <br /><span class="description">Set this header to assist in identifying optimized files.</span>
                 </th>
             </tr>
             <tr>
-                <th>
+                <th colspan="2">
                     <label><input id="browsercache_compression" type="checkbox" name="compression"<?php checked($browsercache_compression, true); ?> value="1" /> Enable <acronym title="Hypertext Transfer Protocol">HTTP</acronym> (gzip) compression</label>
                     <br /><span class="description">Reduce the download time for text-based files.</span>
                 </th>
             </tr>
             <tr>
-                <th>
+                <th colspan="2">
                     <input type="hidden" name="browsercache.no404wp" value="0" />
                     <label><input type="checkbox" name="browsercache.no404wp" value="1"<?php checked($this->_config->get_boolean('browsercache.no404wp'), true); ?> /> Do not process 404 errors for static objects with WordPress</label>
                     <br /><span class="description">Reduce server load by allowing the web server to handle 404 errors for static files, like images etc.</span>
                 </th>
             </tr>
+        	<tr>
+        		<th valign="top"><label for="browsercache_no404wp_exceptions">404 errors exception list:</label></th>
+        		<td>
+        			<textarea id="browsercache_no404wp_exceptions" name="browsercache.no404wp.exceptions" cols="40" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('browsercache.no404wp.exceptions'))); ?></textarea><br />
+        			<span class="description">Always ignore the specified files.</span>
+        		</td>
+        	</tr>
         </table>
 
         <p class="submit">

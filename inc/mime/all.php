@@ -236,7 +236,7 @@ return array(
     'jpeg|jpg|jpe' => 'image/jpeg', 
     'jpgv' => 'video/jpeg', 
     'jpm|jpgm' => 'video/jpm', 
-    'js' => 'application/javascript', 
+    'js' => 'application/x-javascript', 
     'json' => 'application/json', 
     'karbon' => 'application/vnd.kde.karbon', 
     'kfo' => 'application/vnd.kde.kformula', 
