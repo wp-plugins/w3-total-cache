@@ -549,8 +549,9 @@ class W3_Plugin_PgCache extends W3_Plugin
         /**
          * Generate directives
          */
-        $home_path = w3_get_home_path();
         $base_path = w3_get_base_path();
+        $home_path = ($is_multisite ? $base_path : w3_get_home_path());
+        
         $cache_dir = w3_path(W3TC_CACHE_FILE_PGCACHE_DIR);
         
         $rules = '';
@@ -682,12 +683,12 @@ class W3_Plugin_PgCache extends W3_Plugin
         /**
          * Check if cache file exists
          */
-        $rules .= "    RewriteCond \"" . $cache_dir . $base_path . "$1/_index%{ENV:W3TC_UA}%{ENV:W3TC_SSL}.html%{ENV:W3TC_ENC}\" -f\n";
+        $rules .= "    RewriteCond \"" . $cache_dir . $home_path . "$1/_index%{ENV:W3TC_UA}%{ENV:W3TC_SSL}.html%{ENV:W3TC_ENC}\" -f\n";
         
         /**
          * Make final rewrite
          */
-        $rules .= "    RewriteRule (.*) \"" . $base_path . ltrim(str_replace(w3_get_site_root(), '', $cache_dir), '/') . $base_path . "$1/_index%{ENV:W3TC_UA}%{ENV:W3TC_SSL}.html%{ENV:W3TC_ENC}\" [L]\n";
+        $rules .= "    RewriteRule (.*) \"" . $base_path . ltrim(str_replace(w3_get_site_root(), '', $cache_dir), '/') . $home_path . "$1/_index%{ENV:W3TC_UA}%{ENV:W3TC_SSL}.html%{ENV:W3TC_ENC}\" [L]\n";
         $rules .= "</IfModule>\n";
         
         $rules .= "# END W3TC Page Cache\n\n";
