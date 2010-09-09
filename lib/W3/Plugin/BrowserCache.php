@@ -175,19 +175,19 @@ class W3_Plugin_BrowserCache extends W3_Plugin
             
             if ($cssjs_expires && $cssjs_lifetime) {
                 foreach ($cssjs_types as $mime_type) {
-                    $rules .= "    ExpiresByType " . $mime_type . " M" . $cssjs_lifetime . "\n";
+                    $rules .= "    ExpiresByType " . $mime_type . " A" . $cssjs_lifetime . "\n";
                 }
             }
             
             if ($html_expires && $html_lifetime) {
                 foreach ($html_types as $mime_type) {
-                    $rules .= "    ExpiresByType " . $mime_type . " M" . $html_lifetime . "\n";
+                    $rules .= "    ExpiresByType " . $mime_type . " A" . $html_lifetime . "\n";
                 }
             }
             
             if ($other_expires && $other_lifetime) {
                 foreach ($other_types as $mime_type) {
-                    $rules .= "    ExpiresByType " . $mime_type . " M" . $other_lifetime . "\n";
+                    $rules .= "    ExpiresByType " . $mime_type . " A" . $other_lifetime . "\n";
                 }
             }
             
@@ -344,10 +344,17 @@ class W3_Plugin_BrowserCache extends W3_Plugin
             }
         }
         
+        $exceptions = $this->_config->get_array('browsercache.no404wp.exceptions');
+        
         $rules = '';
         $rules .= "# BEGIN W3TC Skip 404 error handling by WordPress for static files\n";
         $rules .= "<IfModule mod_rewrite.c>\n";
         $rules .= "    RewriteEngine On\n";
+        
+        if (count($exceptions)) {
+            $rules .= "    RewriteCond %{REQUEST_URI} !(" . implode('|', $exceptions) . ")\n";
+        }
+        
         $rules .= "    RewriteCond %{REQUEST_FILENAME} !-f\n";
         $rules .= "    RewriteCond %{REQUEST_FILENAME} !-d\n";
         $rules .= "    RewriteCond %{REQUEST_FILENAME} \\.(" . implode('|', $extensions) . ")$ [NC]\n";
@@ -583,7 +590,7 @@ class W3_Plugin_BrowserCache extends W3_Plugin
         $expires = $this->_config->get_boolean('browsercache.' . $section . '.expires');
         $lifetime = $this->_config->get_integer('browsercache.' . $section . '.lifetime');
         $cache_control = $this->_config->get_boolean('browsercache.' . $section . '.cache.control');
-        $cache_policy = $this->_config->get_boolean('browsercache.' . $section . '.cache.policy');
+        $cache_policy = $this->_config->get_string('browsercache.' . $section . '.cache.policy');
         $etag = $this->_config->get_boolean('browsercache.' . $section . '.etag');
         $w3tc = $this->_config->get_boolean('browsercache.' . $section . '.w3tc');
         

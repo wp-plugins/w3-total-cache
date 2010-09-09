@@ -118,20 +118,6 @@ class W3_Plugin_Cdn extends W3_Plugin
     {
         global $wpdb;
         
-        $upload_info = w3_upload_info();
-        
-        if (!$upload_info) {
-            $upload_path = get_option('upload_path');
-            $upload_path = trim($upload_path);
-            
-            if (empty($upload_path)) {
-                echo 'Your store uploads folder is not available. Default WordPress directories will be created: <strong>wp-content/uploads/</strong>.<br />';
-                $upload_path = WP_CONTENT_DIR . '/uploads';
-            }
-            
-            w3_writable_error($upload_path);
-        }
-        
         $sql = sprintf('DROP TABLE IF EXISTS `%s%s`', $wpdb->prefix, W3TC_CDN_TABLE_QUEUE);
         
         $wpdb->query($sql);
@@ -965,7 +951,7 @@ class W3_Plugin_Cdn extends W3_Plugin
                                             /**
                                              * Otherwise copy file from local path
                                              */
-                                            $src_path = w3_get_document_root() . urldecode($src);
+                                            $src_path = w3_get_document_root() . '/' . urldecode($src);
                                             
                                             if (file_exists($src_path)) {
                                                 $download_result = @copy($src_path, $dst);

@@ -37,19 +37,6 @@ if (!defined('W3TC_IN_MINIFY')) {
     require_once dirname(__FILE__) . '/inc/define.php';
     
     /**
-     * Disable buggy sitewide activation in WPMU and WP 3.0
-     */
-    if (isset($_GET['action']) && $_GET['action'] == 'activate' && isset($_GET['plugin']) && $_GET['plugin'] == W3TC_FILE) {
-        if (w3_is_wpmu() && isset($_GET['sitewide'])) {
-            unset($_GET['sitewide']);
-        }
-        
-        if (w3_is_network_mode() && isset($_GET['networkwide'])) {
-            w3_network_activate_error();
-        }
-    }
-    
-    /**
      * Load plugins
      */
     w3_load_plugins();

@@ -422,7 +422,7 @@ class W3_Plugin_Minify extends W3_Plugin
         static $theme = null;
         
         if ($theme === null) {
-            $theme = substr(md5(get_theme_root_uri() . get_template() . get_stylesheet()), 0, 6);
+            $theme = substr(md5(get_theme_root() . get_template() . get_stylesheet()), 0, 6);
         }
         
         return $theme;
