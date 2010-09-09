@@ -160,6 +160,7 @@ class W3_Config
         
         'browsercache.enabled' => 'boolean', 
         'browsercache.no404wp' => 'boolean', 
+        'browsercache.no404wp.exceptions' => 'array', 
         'browsercache.cssjs.compression' => 'boolean', 
         'browsercache.cssjs.expires' => 'boolean', 
         'browsercache.cssjs.lifetime' => 'integer', 
@@ -396,9 +397,12 @@ class W3_Config
         
         'browsercache.enabled' => true, 
         'browsercache.no404wp' => false, 
+        'browsercache.no404wp.exceptions' => array(
+            'robots\.txt'
+        ), 
         'browsercache.cssjs.compression' => true, 
         'browsercache.cssjs.expires' => false, 
-        'browsercache.cssjs.lifetime' => 3600, 
+        'browsercache.cssjs.lifetime' => 31536000, 
         'browsercache.cssjs.cache.control' => false, 
         'browsercache.cssjs.cache.policy' => 'cache_validation', 
         'browsercache.cssjs.etag' => false, 
@@ -547,7 +551,6 @@ class W3_Config
                     'sgh', 
                     'sharp', 
                     'sharp\-tq\-gx10', 
-                    'sie', 
                     'small', 
                     'smartphone', 
                     'softbank', 
@@ -932,7 +935,7 @@ class W3_Config
     {
         @fputs($fp, str_repeat("\t", $this->_tabs));
         
-        if (is_numeric($key)) {
+        if (is_numeric($key) && (string) (int) $key === (string) $key) {
             @fputs($fp, sprintf("%d => ", $key));
         } else {
             @fputs($fp, sprintf("'%s' => ", addslashes($key)));
