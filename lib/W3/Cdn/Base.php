@@ -127,14 +127,70 @@ class W3_Cdn_Base
     /**
      * Returns first domain
      * 
+     * @param string $path
      * @return string
      */
-    function get_domain()
+    function get_domain($path = '')
     {
         $domains = $this->get_domains();
+        $count = count($domains);
         
-        if (count($domains)) {
-            return current($domains);
+        if ($count) {
+            switch (true) {
+                /**
+                 * Reserved CSS
+                 */
+                case (isset($domains[0]) && $this->_is_css($path)):
+                    $domain = $domains[0];
+                    break;
+                
+                /**
+                 * Reserved JS in head
+                 */
+                case (isset($domains[1]) && $this->_is_js($path)):
+                    $domain = $domains[1];
+                    break;
+                
+                /**
+                 * Reserved JS after body
+                 */
+                case (isset($domains[2]) && $this->_is_js_body($path)):
+                    $domain = $domains[2];
+                    break;
+                
+                /**
+                 * Reserved JS before /body
+                 */
+                case (isset($domains[3]) && $this->_is_js_footer($path)):
+                    $domain = $domains[3];
+                    break;
+                
+                default:
+                    if ($count > 4) {
+                        $domain = $this->_get_domain(array_slice($domains, 4), $path);
+                    } else {
+                        $domain = $this->_get_domain($domains, $path);
+                    }
+            }
+            
+            /**
+             * Custom host for SSL
+             */
+            list($domain_http, $domain_https) = array_map('trim', explode(',', $domain . ','));
+            
+            $scheme = $this->_get_scheme();
+            
+            switch ($scheme) {
+                case 'http':
+                    $domain = $domain_http;
+                    break;
+                
+                case 'https':
+                    $domain = ($domain_https ? $domain_https : $domain_http);
+                    break;
+            }
+            
+            return $domain;
         }
         
         return false;
@@ -174,48 +230,11 @@ class W3_Cdn_Base
      */
     function format_url($path)
     {
-        $domains = $this->get_domains();
-        $count = count($domains);
+        $domain = $this->get_domain($path);
         
-        if ($count) {
-            switch (true) {
-                /**
-                 * Reserved CSS
-                 */
-                case (isset($domains[0]) && $this->_is_css($path)):
-                    $host = $domains[0];
-                    break;
-                
-                /**
-                 * Reserved JS in head
-                 */
-                case (isset($domains[1]) && $this->_is_js($path)):
-                    $host = $domains[1];
-                    break;
-                
-                /**
-                 * Reserved JS after body
-                 */
-                case (isset($domains[2]) && $this->_is_js_body($path)):
-                    $host = $domains[2];
-                    break;
-                
-                /**
-                 * Reserved JS before /body
-                 */
-                case (isset($domains[3]) && $this->_is_js_footer($path)):
-                    $host = $domains[3];
-                    break;
-                
-                default:
-                    if ($count > 4) {
-                        $host = $this->_get_host(array_slice($domains, 4), $path);
-                    } else {
-                        $host = $this->_get_host($domains, $path);
-                    }
-            }
-            
-            $url = sprintf('%s://%s/%s', (w3_is_https() ? 'https' : 'http'), $host, $path);
+        if ($domain) {
+            $scheme = $this->_get_scheme();
+            $url = sprintf('%s://%s/%s', $scheme, $domain, $path);
             
             return $url;
         }
@@ -372,10 +391,20 @@ class W3_Cdn_Base
         }
         
         foreach ($domains as $domain) {
-            if ($domain && gethostbyname($domain) === $domain) {
-                $error = sprintf('Unable to resolve domain: %s.', $domain);
+            $_domains = array_map('trim', explode(',', $domain));
+            
+            foreach ($_domains as $_domain) {
+                if (!$_domain) {
+                    $error = 'Empty domain';
+                    
+                    return false;
+                }
                 
-                return false;
+                if (gethostbyname($_domain) === $_domain) {
+                    $error = sprintf('Unable to resolve domain: %s.', $_domain);
+                    
+                    return false;
+                }
             }
         }
         
@@ -427,13 +456,13 @@ class W3_Cdn_Base
     }
     
     /**
-     * Returns host for path
+     * Returns domain for path
      * 
      * @param array $domains
      * @param string $path
      * @return string
      */
-    function _get_host($domains, $path)
+    function _get_domain($domains, $path)
     {
         $count = count($domains);
         
@@ -442,9 +471,9 @@ class W3_Cdn_Base
              * Use for equal URLs same host to allow caching by browser
              */
             $hash = $this->_get_hash($path);
-            $host = $domains[$hash % $count];
+            $domain = $domains[$hash % $count];
             
-            return $host;
+            return $domain;
         }
         
         return false;
@@ -461,5 +490,30 @@ class W3_Cdn_Base
         $hash = abs(crc32($key));
         
         return $hash;
+    }
+    
+    /**
+     * Returns scheme
+     * 
+     * @return string
+     */
+    function _get_scheme()
+    {
+        switch ($this->_config['ssl']) {
+            default:
+            case 'auto':
+                $scheme = (w3_is_https() ? 'https' : 'http');
+                break;
+            
+            case 'enabled':
+                $scheme = 'https';
+                break;
+            
+            case 'disabled':
+                $scheme = 'http';
+                break;
+        }
+        
+        return $scheme;
     }
 }

@@ -29,7 +29,7 @@
  */
 require_once("cloudfiles_exceptions.php");
 
-define("PHP_CF_VERSION", "1.7.0");
+define("PHP_CF_VERSION", "1.7.4");
 define("USER_AGENT", sprintf("PHP-CloudFiles/%s", PHP_CF_VERSION));
 define("ACCOUNT_CONTAINER_COUNT", "X-Account-Container-Count");
 define("ACCOUNT_BYTES_USED", "X-Account-Bytes-Used");
@@ -156,7 +156,7 @@ class CF_Http
         # connect to SSL Websites. It is the first 3 letters of the PHP_OS
         # variable.
         $OS_CAFILE_NONUPDATED=array(
-            "win",
+            "win","dar"
         ); 
 
         if (in_array((strtolower (substr(PHP_OS, 0,3))), $OS_CAFILE_NONUPDATED))
@@ -1187,7 +1187,7 @@ class CF_Http
         if ($conn_type == "PUT_OBJ") {
             curl_setopt($ch, CURLOPT_PUT, 1);
             curl_setopt($ch, CURLOPT_READFUNCTION, array(&$this, '_read_cb'));
-	        //curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         }
         if ($conn_type == "HEAD") {
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "HEAD");
@@ -1300,7 +1300,7 @@ class CF_Http
         curl_setopt($this->connections[$conn_type],
             CURLOPT_URL, $url_path);
 
-        if (!curl_exec($this->connections[$conn_type])) {
+        if (!curl_exec($this->connections[$conn_type]) && curl_errno($this->connections[$conn_type]) !== 0) {
             $this->error_str = "(curl error: "
                 . curl_errno($this->connections[$conn_type]) . ") ";
             $this->error_str .= curl_error($this->connections[$conn_type]);

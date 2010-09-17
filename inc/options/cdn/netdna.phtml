@@ -11,6 +11,17 @@
     </td>
 </tr>
 <tr>
+	<th><label for="cdn_netdna_ssl"><acronym title="Secure Sockets Layer">SSL</acronym> support:</label></th>
+	<td>
+		<select id="cdn_netdna_ssl" name="cdn.netdna.ssl">
+			<option value="auto"<?php selected($this->_config->get_string('cdn.netdna.ssl'), 'auto'); ?>>Auto (determine connection type automatically)</option>
+			<option value="enabled"<?php selected($this->_config->get_string('cdn.netdna.ssl'), 'enabled'); ?>>Enabled (always use SSL)</option>
+			<option value="disabled"<?php selected($this->_config->get_string('cdn.netdna.ssl'), 'disabled'); ?>>Disabled (always use HTTP)</option>
+		</select>
+        <br /><span class="description">Some <acronym>CDN</acronym> providers may or may not support <acronym title="Secure Sockets Layer">SSL</acronym>, contact your vendor for more information.</span>
+	</td>
+</tr>
+<tr>
     <th><label for="cdn_cnames">Replace site's hostname with:</label></th>
     <td>
 		<?php $cnames = $this->_config->get_array('cdn.netdna.domain'); include W3TC_DIR . '/inc/options/cdn/common/cnames.phtml'; ?>

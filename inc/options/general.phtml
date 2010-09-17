@@ -54,7 +54,7 @@
     <fieldset>
     	<legend><a href="admin.php?page=w3tc_pgcache">Page Cache</a></legend>
 
-    	<p>Enable page caching to decrease the response time of your blog.</p>
+    	<p>Enable page caching to decrease the response time of your site.</p>
 
         <table class="form-table">
             <tr>
@@ -147,7 +147,7 @@
          		<td>
          			<input type="hidden" name="dbcache.enabled" value="0" />
         			<label><input class="enabled" type="checkbox" name="dbcache.enabled" value="1"<?php checked($dbcache_enabled, true); ?> />&nbsp;<strong>Enable</strong></label>
-        			<br /><span class="description">Caching database objects may decrease the response time of your blog by up to 100x.</span>
+        			<br /><span class="description">Caching database objects decreases the response time of your site. Best used if object caching is not possible.</span>
         		</td>
         	</tr>
         	<tr>
@@ -187,7 +187,7 @@
          		<td>
          			<input type="hidden" name="objectcache.enabled" value="0" />
         			<label><input class="enabled" type="checkbox" name="objectcache.enabled" value="1"<?php checked($objectcache_enabled, true); ?> />&nbsp;<strong>Enable</strong></label>
-        			<br /><span class="description">Object caching greatly increases performance for highly dynamic sites (that use the Object Cache API).</span>
+        			<br /><span class="description">Object caching greatly increases performance for highly dynamic sites (that use the Object Cache <acronym title="Application Programming Interface">API</acronym>).</span>
         		</td>
         	</tr>
         	<tr>
@@ -218,7 +218,7 @@
     <fieldset>
     	<legend><a href="admin.php?page=w3tc_cdn">Content Delivery Network</a></legend>
 
-        <p>Host static files with your content delivery network provider to reduce load time.</p>
+        <p>Host static files with your content delivery network provider to reduce page load time.</p>
 
         <table class="form-table">
             <tr>

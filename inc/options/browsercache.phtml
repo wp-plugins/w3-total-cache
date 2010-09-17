@@ -45,14 +45,14 @@
                 <th colspan="2">
                     <input type="hidden" name="browsercache.no404wp" value="0" />
                     <label><input type="checkbox" name="browsercache.no404wp" value="1"<?php checked($this->_config->get_boolean('browsercache.no404wp'), true); ?> /> Do not process 404 errors for static objects with WordPress</label>
-                    <br /><span class="description">Reduce server load by allowing the web server to handle 404 errors for static files, like images etc.</span>
+                    <br /><span class="description">Reduce server load by allowing the web server to handle 404 (not found) errors for static files (images etc).</span>
                 </th>
             </tr>
         	<tr>
-        		<th valign="top"><label for="browsercache_no404wp_exceptions">404 errors exception list:</label></th>
+        		<th valign="top"><label for="browsercache_no404wp_exceptions">404 error exception list:</label></th>
         		<td>
         			<textarea id="browsercache_no404wp_exceptions" name="browsercache.no404wp.exceptions" cols="40" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('browsercache.no404wp.exceptions'))); ?></textarea><br />
-        			<span class="description">Always ignore the specified files.</span>
+        			<span class="description">Never process 404 (not found) events for the specified files.</span>
         		</td>
         	</tr>
         </table>

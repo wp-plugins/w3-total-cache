@@ -29,6 +29,13 @@ class W3_Cdn_S3 extends W3_Cdn_Base
     var $_gzip_extension = '.gzip';
     
     /**
+     * Last error
+     * 
+     * @var string
+     */
+    var $_last_error = '';
+    
+    /**
      * Inits S3 object
      *
      * @param string $error
@@ -239,10 +246,14 @@ class W3_Cdn_S3 extends W3_Cdn_Base
             return false;
         }
         
+        $this->set_error_handler();
+        
         $buckets = @$this->_s3->listBuckets();
         
         if (!$buckets) {
-            $error = 'Unable to list buckets (check your credentials).';
+            $error = sprintf('Unable to list buckets (%s).', $this->get_last_error());
+            
+            $this->restore_error_handler();
             
             return false;
         }
@@ -250,33 +261,46 @@ class W3_Cdn_S3 extends W3_Cdn_Base
         if (!in_array($this->_config['bucket'], (array) $buckets)) {
             $error = sprintf('Bucket doesn\'t exist: %s', $this->_config['bucket']);
             
+            $this->restore_error_handler();
+            
             return false;
         }
         
         if (!@$this->_s3->putObjectString($string, $this->_config['bucket'], $string, S3::ACL_PUBLIC_READ)) {
-            $error = 'Unable to put object.';
+            $error = sprintf('Unable to put object (%s).', $this->get_last_error());
+            
+            $this->restore_error_handler();
             
             return false;
         }
         
         if (!($object = @$this->_s3->getObject($this->_config['bucket'], $string))) {
-            $error = 'Unable to get object.';
+            $error = sprintf('Unable to get object (%s).', $this->get_last_error());
+            
+            $this->restore_error_handler();
             
             return false;
         }
         
         if ($object->body != $string) {
             @$this->_s3->deleteObject($this->_config['bucket'], $string);
+            
             $error = 'Objects are not equal.';
+            
+            $this->restore_error_handler();
             
             return false;
         }
         
         if (!@$this->_s3->deleteObject($this->_config['bucket'], $string)) {
-            $error = 'Unable to delete object.';
+            $error = sprintf('Unable to delete object (%s).', $this->get_last_error());
+            
+            $this->restore_error_handler();
             
             return false;
         }
+        
+        $this->restore_error_handler();
         
         return true;
     }
@@ -324,10 +348,14 @@ class W3_Cdn_S3 extends W3_Cdn_Base
             return false;
         }
         
+        $this->set_error_handler();
+        
         $buckets = @$this->_s3->listBuckets();
         
         if (!$buckets) {
-            $error = 'Unable to list buckets (check your credentials).';
+            $error = sprintf('Unable to list buckets (%s).', $this->get_last_error());
+            
+            $this->restore_error_handler();
             
             return false;
         }
@@ -335,14 +363,20 @@ class W3_Cdn_S3 extends W3_Cdn_Base
         if (in_array($this->_config['bucket'], (array) $buckets)) {
             $error = sprintf('Bucket already exists: %s.', $this->_config['bucket']);
             
+            $this->restore_error_handler();
+            
             return false;
         }
         
         if (!@$this->_s3->putBucket($this->_config['bucket'], S3::ACL_PUBLIC_READ)) {
-            $error = sprintf('Unable to create bucket: %s.', $this->_config['bucket']);
+            $error = sprintf('Unable to create bucket: %s (%s).', $this->_config['bucket'], $this->get_last_error());
+
+            $this->restore_error_handler();
             
             return false;
         }
+        
+            $this->restore_error_handler();
         
         return true;
     }
@@ -367,5 +401,52 @@ class W3_Cdn_S3 extends W3_Cdn_Base
         }
         
         return $url;
+    }
+    
+    /**
+     * Our error handler 
+     * 
+     * @param integer $errno
+     * @param string $errstr
+     * @return boolean
+     */
+    function error_handler($errno, $errstr)
+    {
+        $this->_last_error = $errstr;
+        
+        return false;
+    }
+    
+    /**
+     * Returns last error
+     * 
+     * @return string
+     */
+    function get_last_error()
+    {
+        return $this->_last_error;
+    }
+    
+    /**
+     * Set our error handler
+     * 
+     * @return void
+     */
+    function set_error_handler()
+    {
+        set_error_handler(array(
+            &$this, 
+            'error_handler'
+        ));
+    }
+    
+    /**
+     * Restore prev error handler
+     * 
+     * @return void
+     */
+    function restore_error_handler()
+    {
+        restore_error_handler();
     }
 }

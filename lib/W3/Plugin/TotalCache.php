@@ -3429,13 +3429,13 @@ class W3_Plugin_TotalCache extends W3_Plugin
         $w3_plugin_cdn = & W3_Plugin_Cdn::instance();
         
         $files = W3_Request::get_array('files');
-        $site_path = ltrim(w3_get_site_path(), '/');
+        $document_root = w3_get_document_root();
         
         $upload = array();
         $results = array();
         
         foreach ($files as $file) {
-            $upload[ABSPATH . $file] = $site_path . $file;
+            $upload[$document_root . '/' . $file] = $file;
         }
         
         $w3_plugin_cdn->upload($upload, false, $results);
@@ -3459,13 +3459,13 @@ class W3_Plugin_TotalCache extends W3_Plugin
         $w3_plugin_cdn = & W3_Plugin_Cdn::instance();
         
         $files = $w3_plugin_cdn->get_files_minify();
-        $site_path = ltrim(w3_get_site_path(), '/');
+        $document_root = w3_get_document_root();
         
         $upload = array();
         $results = array();
         
         foreach ($files as $file) {
-            $upload[ABSPATH . $file] = $site_path . $file;
+            $upload[$document_root . '/' . $file] = $file;
         }
         
         return $w3_plugin_cdn->upload($upload, true, $results);
@@ -3484,13 +3484,17 @@ class W3_Plugin_TotalCache extends W3_Plugin
         $w3_plugin_cdn = & W3_Plugin_Cdn::instance();
         $w3_plugin_browsercache = & W3_Plugin_BrowserCache::instance();
         
+        $tmp_root = W3TC_TMP_DIR;
+        $document_root = w3_get_document_root();
+        $tmp_path = ltrim(str_replace($document_root, '', $tmp_root), '/');
+        
         $path = W3TC_TMP_DIR . '/htaccess_ftp.txt';
         $rules = $w3_plugin_browsercache->generate_rules_cache();
         
         if (@file_put_contents($path, $rules)) {
             $results = array();
             $upload = array(
-                $path => '.htaccess'
+                $path => $tmp_path . '/.htaccess'
             );
             
             return $w3_plugin_cdn->upload($upload, true, $results);
@@ -3512,11 +3516,15 @@ class W3_Plugin_TotalCache extends W3_Plugin
         $w3_plugin_cdn = & W3_Plugin_Cdn::instance();
         $w3_plugin_browsercache = & W3_Plugin_BrowserCache::instance();
         
+        $tmp_root = W3TC_TMP_DIR;
+        $document_root = w3_get_document_root();
+        $tmp_path = ltrim(str_replace($document_root, '', $tmp_root), '/');
+        
         $path = W3TC_TMP_DIR . '/htaccess_ftp.txt';
         
         $results = array();
         $delete = array(
-            $path => '.htaccess'
+            $path => $tmp_path . '/.htaccess'
         );
         
         return $w3_plugin_cdn->delete($delete, true, $results);

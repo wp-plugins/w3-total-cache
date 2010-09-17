@@ -82,6 +82,7 @@
         			<span class="description">If modified files are not always detected and replaced, use this option to over-write them.</span>
         		</th>
         	</tr>
+        	<?php endif; ?>
         	<tr>
         		<th colspan="2">
         			<input type="hidden" name="cdn.import.external" value="0" />
@@ -89,7 +90,6 @@
         			<span class="description">Download attachments hosted elsewhere into your media library and deliver them via <acronym title="Content Delivery Network">CDN</acronym>.</span>
         		</th>
         	</tr>
-        	<?php endif; ?>
         </table>
 
         <p class="submit">
@@ -137,6 +137,13 @@
 					</label><br />
         			<span class="description">Automatically attempt to find and upload changed files.</span>
 				</td>
+        	</tr>
+        	<tr>
+        		<th><label for="cdn_limit_interval">Re-transfer cycle interval:</label></th>
+        		<td>
+        			<input id="cdn_limit_interval" type="text" name="cdn.queue.interval" value="<?php echo htmlspecialchars($this->_config->get_integer('cdn.queue.interval')); ?>" size="10" /> seconds<br />
+        			<span class="description">The number of seconds to wait before upload attempt.</span>
+        		</td>
         	</tr>
         	<tr>
         		<th><label for="cdn_limit_queue">Re-transfer cycle limit:</label></th>

@@ -19,6 +19,17 @@
 	</td>
 </tr>
 <tr>
+	<th><label for="cdn_s3_ssl"><acronym title="Secure Sockets Layer">SSL</acronym> support:</label></th>
+	<td>
+		<select id="cdn_s3_ssl" name="cdn.s3.ssl">
+			<option value="auto"<?php selected($this->_config->get_string('cdn.s3.ssl'), 'auto'); ?>>Auto (determine connection type automatically)</option>
+			<option value="enabled"<?php selected($this->_config->get_string('cdn.s3.ssl'), 'enabled'); ?>>Enabled (always use SSL)</option>
+			<option value="disabled"<?php selected($this->_config->get_string('cdn.s3.ssl'), 'disabled'); ?>>Disabled (always use HTTP)</option>
+		</select>
+        <br /><span class="description">Some <acronym>CDN</acronym> providers may or may not support <acronym title="Secure Sockets Layer">SSL</acronym>, contact your vendor for more information.</span>
+	</td>
+</tr>
+<tr>
 	<th><label for="cdn_cnames">Replace site's hostname with:</label></th>
 	<td>
 		<?php if (($cdn_s3_bucket = $this->_config->get_string('cdn.s3.bucket')) != ''): ?>

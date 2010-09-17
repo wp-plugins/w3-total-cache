@@ -59,9 +59,19 @@ class W3_Plugin_Cdn extends W3_Plugin
                     'delete_attachment'
                 ));
                 
+                add_filter('update_attached_file', array(
+                    &$this, 
+                    'update_attached_file'
+                ));
+                
                 add_filter('wp_generate_attachment_metadata', array(
                     &$this, 
                     'generate_attachment_metadata'
+                ));
+                
+                add_filter('wp_update_attachment_metadata', array(
+                    &$this, 
+                    'update_attachment_metadata'
                 ));
                 
                 add_action('w3_cdn_cron_queue_process', array(
@@ -229,13 +239,13 @@ class W3_Plugin_Cdn extends W3_Plugin
     function cron_upload()
     {
         $files = $this->get_files();
-        $site_path = ltrim(w3_get_site_path(), '/');
+        $document_root = w3_get_document_root();
         
         $upload = array();
         $results = array();
         
         foreach ($files as $file) {
-            $upload[ABSPATH . $file] = $site_path . $file;
+            $upload[$document_root . '/' . $file] = $file;
         }
         
         $this->upload($upload, true, $results);
@@ -243,12 +253,17 @@ class W3_Plugin_Cdn extends W3_Plugin
     
     /**
      * On attachment add action
+     * 
+     * Upload _wp_attached_file
      *
      * @param integer $attachment_id
+     * @return void
      */
     function add_attachment($attachment_id)
     {
-        $files = $this->get_attachment_files($attachment_id);
+        $attached_file = get_post_meta($attachment_id, '_wp_attached_file', true);
+        
+        $files = $this->get_files_for_upload($attached_file);
         $files = apply_filters('w3tc_cdn_add_attachment', $files);
         
         $results = array();
@@ -257,7 +272,48 @@ class W3_Plugin_Cdn extends W3_Plugin
     }
     
     /**
+     * Update attachment file
+     * 
+     * Upload _wp_attached_file 
+     * 
+     * @param string $attached_file
+     * @return string
+     */
+    function update_attached_file($attached_file)
+    {
+        $files = $this->get_files_for_upload($attached_file);
+        $files = apply_filters('w3tc_cdn_update_attachment', $files);
+        
+        $results = array();
+        
+        $this->upload($files, true, $results);
+        
+        return $attached_file;
+    }
+    
+    /**
+     * On attachment delete action
+     * 
+     * Delete _wp_attached_file, _wp_attachment_metadata, _wp_attachment_backup_sizes
+     *
+     * @param integer $attachment_id
+     */
+    function delete_attachment($attachment_id)
+    {
+        $files = array();
+        
+        $files = $this->get_attachment_files($attachment_id);
+        $files = apply_filters('w3tc_cdn_delete_attachment', $files);
+        
+        $results = array();
+        
+        $this->delete($files, true, $results);
+    }
+    
+    /**
      * Generate attachment metadata filter
+     * 
+     * Upload _wp_attachment_metadata
      *
      * @param array $metadata
      * @return array
@@ -275,22 +331,29 @@ class W3_Plugin_Cdn extends W3_Plugin
     }
     
     /**
-     * On attachment delete action
-     *
-     * @param integer $attachment_id
+     * Update attachment metadata filter
+     * 
+     * Upload _wp_attachment_metadata
+     * 
+     * @param array $metadata
+     * @return array
      */
-    function delete_attachment($attachment_id)
+    function update_attachment_metadata($metadata)
     {
-        $files = $this->get_attachment_files($attachment_id);
-        $files = apply_filters('w3tc_cdn_delete_attachment', $files);
+        $files = $this->get_metadata_files($metadata);
+        $files = apply_filters('w3tc_cdn_update_attachment_metadata', $files);
         
         $results = array();
         
-        $this->delete($files, true, $results);
+        $this->upload($files, true, $results);
+        
+        return $metadata;
     }
     
     /**
      * Purge attachment
+     * 
+     * Upload _wp_attached_file, _wp_attachment_metadata, _wp_attachment_backup_sizes
      * 
      * @param integer $attachment_id
      * @return boolean
@@ -298,13 +361,14 @@ class W3_Plugin_Cdn extends W3_Plugin
     function purge_attachment($attachment_id)
     {
         $files = $this->get_attachment_files($attachment_id);
-        $results = array();
         
         if ($this->_config->get_string('cdn.engine') == 'netdna') {
             $queue_failed = false;
         } else {
             $queue_failed = true;
         }
+        
+        $results = array();
         
         return $this->purge($files, $queue_failed, $results);
     }
@@ -317,16 +381,17 @@ class W3_Plugin_Cdn extends W3_Plugin
      */
     function cron_schedules($schedules)
     {
-        $interval = $this->_config->get_integer('cdn.autoupload.interval');
+        $queue_interval = $this->_config->get_integer('cdn.queue.interval');
+        $autoupload_interval = $this->_config->get_integer('cdn.autoupload.interval');
         
         return array_merge($schedules, array(
             'w3_cdn_cron_queue_process' => array(
-                'interval' => 900, 
-                'display' => '[W3TC] CDN queue process (every 15 minutes)'
+                'interval' => $queue_interval, 
+                'display' => sprintf('[W3TC] CDN queue process (every %d seconds)', $queue_interval)
             ), 
             'w3_cdn_cron_upload' => array(
-                'interval' => $interval, 
-                'display' => sprintf('[W3TC] CDN auto upload (every %d seconds)', $interval)
+                'interval' => $autoupload_interval, 
+                'display' => sprintf('[W3TC] CDN auto upload (every %d seconds)', $autoupload_interval)
             )
         ));
     }
@@ -354,6 +419,73 @@ class W3_Plugin_Cdn extends W3_Plugin
     }
     
     /**
+     * Returns array of local_file => remote_file for specified file
+     * 
+     * @param string $file
+     * @return array
+     */
+    function get_files_for_upload($file)
+    {
+        $files = array();
+        $upload_info = w3_upload_info();
+        
+        if ($upload_info) {
+            $file = $this->normalize_attachment_file($file);
+            
+            $local_file = $upload_info['basedir'] . '/' . $file;
+            $remote_file = ltrim($upload_info['baseurlpath'] . $file, '/');
+            
+            $files[$local_file] = $remote_file;
+        }
+        
+        return $files;
+    }
+    
+    /**
+     * Returns array of files from sizes array
+     * 
+     * @param string $base_dir
+     * @param array $sizes
+     * @return array
+     */
+    function get_sizes_files($attached_file, $sizes)
+    {
+        $files = array();
+        $base_dir = w3_dirname($attached_file);
+        
+        foreach ((array) $sizes as $size) {
+            if (isset($size['file'])) {
+                if ($base_dir) {
+                    $file = $base_dir . '/' . $size['file'];
+                } else {
+                    $file = $size['file'];
+                }
+                
+                $files = array_merge($files, $this->get_files_for_upload($file));
+            }
+        }
+        
+        return $files;
+    }
+    
+    /**
+     * Returns attachment files by metadata
+     *
+     * @param array $metadata
+     * @return array
+     */
+    function get_metadata_files($metadata)
+    {
+        $files = array();
+        
+        if (isset($metadata['file']) && isset($metadata['sizes'])) {
+            $files = array_merge($files, $this->get_sizes_files($metadata['file'], $metadata['sizes']));
+        }
+        
+        return $files;
+    }
+    
+    /**
      * Returns attachment files by attachment ID
      *
      * @param integer $attachment_id
@@ -362,25 +494,34 @@ class W3_Plugin_Cdn extends W3_Plugin
     function get_attachment_files($attachment_id)
     {
         $files = array();
-        $upload_info = w3_upload_info();
         
-        if ($upload_info) {
-            $attached_file = get_post_meta($attachment_id, '_wp_attached_file', true);
-            $attachment_metadata = get_post_meta($attachment_id, '_wp_attachment_metadata', true);
+        /**
+         * Get attached file
+         */
+        $attached_file = get_post_meta($attachment_id, '_wp_attached_file', true);
+        
+        if ($attached_file != '') {
+            $files = array_merge($files, $this->get_files_for_upload($attached_file));
             
-            if ($attached_file) {
-                $file = $this->normalize_attachment_file($attached_file);
-                
-                $local_file = $upload_info['basedir'] . '/' . $file;
-                $remote_file = ltrim($upload_info['baseurlpath'] . $file, '/');
-                
-                $files[$local_file] = $remote_file;
-            }
+            /**
+             * Get backup sizes files
+             */
+            $attachment_backup_sizes = get_post_meta($attachment_id, '_wp_attachment_backup_sizes', true);
             
-            if ($attachment_metadata) {
-                $files = array_merge($files, $this->get_metadata_files($attachment_metadata));
+            if (is_array($attachment_backup_sizes)) {
+                $files = array_merge($files, $this->get_sizes_files($attached_file, $attachment_backup_sizes));
             }
         }
+        
+        /**
+         * Get files from metadata
+         */
+        $attachment_metadata = get_post_meta($attachment_id, '_wp_attachment_metadata', true);
+        
+        if (is_array($attachment_metadata)) {
+            $files = array_merge($files, $this->get_metadata_files($attachment_metadata));
+        }
+        
         return $files;
     }
     
@@ -459,44 +600,6 @@ class W3_Plugin_Cdn extends W3_Plugin
         }
         
         return $buffer;
-    }
-    
-    /**
-     * Returns attachment files by metadata
-     *
-     * @param array $metadata
-     * @return array
-     */
-    function get_metadata_files($metadata)
-    {
-        $files = array();
-        
-        $upload_info = w3_upload_info();
-        
-        if ($upload_info) {
-            if (isset($metadata['file'])) {
-                $file = $this->normalize_attachment_file($metadata['file']);
-                
-                if (isset($metadata['sizes'])) {
-                    $file_dir = w3_dirname($file);
-                    
-                    if ($file_dir) {
-                        $file_dir .= '/';
-                    }
-                    
-                    foreach ((array) $metadata['sizes'] as $size) {
-                        if (isset($size['file'])) {
-                            $local_file = $upload_info['basedir'] . '/' . $file_dir . $size['file'];
-                            $remote_file = ltrim($upload_info['baseurlpath'] . $file_dir . $size['file'], '/');
-                            
-                            $files[$local_file] = $remote_file;
-                        }
-                    }
-                }
-            }
-        }
-        
-        return $files;
     }
     
     /**
@@ -828,6 +931,8 @@ class W3_Plugin_Cdn extends W3_Plugin
         $results = array();
         
         $upload_info = w3_upload_info();
+        $uploads_use_yearmonth_folders = get_option('uploads_use_yearmonth_folders');
+        $document_root = w3_get_document_root();
         
         @set_time_limit(300);
         
@@ -887,7 +992,7 @@ class W3_Plugin_Cdn extends W3_Plugin
                             $error = '';
                             $result = false;
                             
-                            $src = w3_normalize_file($origin);
+                            $src = w3_normalize_file_minify($origin);
                             $dst = '';
                             
                             /**
@@ -905,9 +1010,15 @@ class W3_Plugin_Cdn extends W3_Plugin
                                         list($dst, $dst_url) = $attachments[$src];
                                         $result = true;
                                     } else {
-                                        $upload_subdir = date('Y/m', strtotime($post->post_date));
-                                        $upload_dir = sprintf('%s/%s', $upload_info['basedir'], $upload_subdir);
-                                        $upload_url = sprintf('%s/%s', $upload_info['baseurl'], $upload_subdir);
+                                        if ($uploads_use_yearmonth_folders) {
+                                            $upload_subdir = date('Y/m', strtotime($post->post_date));
+                                            $upload_dir = sprintf('%s/%s', $upload_info['basedir'], $upload_subdir);
+                                            $upload_url = sprintf('%s/%s', $upload_info['baseurl'], $upload_subdir);
+                                        } else {
+                                            $upload_subdir = '';
+                                            $upload_dir = $upload_info['basedir'];
+                                            $upload_url = $upload_info['baseurl'];
+                                        }
                                         
                                         $src_filename = pathinfo($src, PATHINFO_FILENAME);
                                         $src_extension = pathinfo($src, PATHINFO_EXTENSION);
@@ -924,10 +1035,12 @@ class W3_Plugin_Cdn extends W3_Plugin
                                         }
                                         
                                         $dst_basename = basename($dst);
-                                        $dst_dirname = str_replace($upload_dir, '', $upload_info['basedir']);
                                         $dst_url = sprintf('%s/%s', $upload_url, $dst_basename);
+                                        $dst_path = ltrim(str_replace($document_root, '', w3_path($dst)), '/');
                                         
-                                        w3_mkdir($dst_dirname, 0755, $upload_info['basedir']);
+                                        if ($upload_subdir) {
+                                            w3_mkdir($upload_subdir, 0755, $upload_info['basedir']);
+                                        }
                                         
                                         $download_result = false;
                                         
@@ -951,7 +1064,7 @@ class W3_Plugin_Cdn extends W3_Plugin
                                             /**
                                              * Otherwise copy file from local path
                                              */
-                                            $src_path = w3_get_document_root() . '/' . urldecode($src);
+                                            $src_path = $document_root . '/' . urldecode($src);
                                             
                                             if (file_exists($src_path)) {
                                                 $download_result = @copy($src_path, $dst);
@@ -970,7 +1083,7 @@ class W3_Plugin_Cdn extends W3_Plugin
                                         if ($download_result) {
                                             $title = $dst_basename;
                                             $guid = ltrim($upload_info['baseurlpath'] . $title, ',');
-                                            $mime_type = w3_get_mime_type($dst_basename);
+                                            $mime_type = w3_get_mime_type($dst);
                                             
                                             $GLOBALS['wp_rewrite'] = & new WP_Rewrite();
                                             
@@ -1018,16 +1131,19 @@ class W3_Plugin_Cdn extends W3_Plugin
                                 } else {
                                     $error = 'File type rejected';
                                 }
-                            } else {
+                            } else 
+
+                            {
                                 $error = 'File already exists in the media library';
                             }
                             
                             /**
                              * Add new entry to the log file
                              */
+                            
                             $results[] = array(
                                 'src' => $src, 
-                                'dst' => $dst, 
+                                'dst' => $dst_path, 
                                 'result' => $result, 
                                 'error' => $error
                             );
@@ -1222,7 +1338,11 @@ class W3_Plugin_Cdn extends W3_Plugin
      */
     function get_files_includes()
     {
-        $files = $this->search_files(ABSPATH . WPINC, WPINC, $this->_config->get_string('cdn.includes.files'));
+        $includes_root = w3_path(ABSPATH . WPINC);
+        $document_root = w3_get_document_root();
+        $includes_path = ltrim(str_replace($document_root, '', $includes_root), '/');
+        
+        $files = $this->search_files($includes_root, $includes_path, $this->_config->get_string('cdn.includes.files'));
         
         return $files;
     }
@@ -1237,13 +1357,16 @@ class W3_Plugin_Cdn extends W3_Plugin
          * we should upload whole themes directory
          */
         if ($this->_config->get_boolean('mobile.enabled')) {
-            $theme_root = get_theme_root();
+            $themes_root = get_theme_root();
         } else {
-            $theme_root = get_stylesheet_directory();
+            $themes_root = get_stylesheet_directory();
         }
         
-        $theme_dir = ltrim(str_replace(ABSPATH, '', $theme_root), '/\\');
-        $files = $this->search_files($theme_root, $theme_dir, $this->_config->get_string('cdn.theme.files'));
+        $themes_root = w3_path($themes_root);
+        $document_root = w3_get_document_root();
+        $themes_path = ltrim(str_replace($document_root, '', $themes_root), '/');
+        
+        $files = $this->search_files($themes_root, $themes_path, $this->_config->get_string('cdn.theme.files'));
         
         return $files;
     }
@@ -1258,6 +1381,11 @@ class W3_Plugin_Cdn extends W3_Plugin
         if (W3TC_PHP5 && $this->_config->get_boolean('minify.rewrite')) {
             require_once W3TC_LIB_W3_DIR . '/Plugin/Minify.php';
             $minify = & W3_Plugin_Minify::instance();
+            
+            $document_root = w3_get_document_root();
+            $minify_root = w3_path(W3TC_CACHE_FILE_MINIFY_DIR);
+            $minify_path = ltrim(str_replace($document_root, '', $minify_root), '/');
+            
             $urls = $minify->get_urls();
             
             if ($this->_config->get_string('minify.engine') == 'file') {
@@ -1265,23 +1393,26 @@ class W3_Plugin_Cdn extends W3_Plugin
                     w3_http_get($url);
                 }
                 
-                $files = $this->search_files(W3TC_CACHE_FILE_MINIFY_DIR, W3TC_CONTENT_MINIFY_DIR_NAME, '*.css;*.js');
+                $files = $this->search_files($minify_root, $minify_path, '*.css;*.js');
             } else {
+                $domain_url_regexp = '~' . w3_get_domain_url_regexp() . '~';
+                
                 foreach ($urls as $url) {
-                    $file = w3_normalize_file($url);
+                    $file = w3_normalize_file_minify($url);
                     $file = w3_translate_file($file);
                     
                     if (!w3_is_url($file)) {
-                        $file = ltrim(str_replace(W3TC_CONTENT_MINIFY_DIR_NAME, '', $file), '/');
+                        $file = $document_root . '/' . $file;
+                        $file = ltrim(str_replace($minify_root, '', $file), '/');
                         
                         $dir = dirname($file);
                         
                         if ($dir) {
-                            w3_mkdir($dir, 0755, W3TC_CACHE_FILE_MINIFY_DIR);
+                            w3_mkdir($dir, 0755, $minify_root);
                         }
                         
-                        if (w3_download($url, W3TC_CACHE_FILE_MINIFY_DIR . '/' . $file) !== false) {
-                            $files[] = W3TC_CONTENT_MINIFY_DIR_NAME . '/' . $file;
+                        if (w3_download($url, $minify_root . '/' . $file) !== false) {
+                            $files[] = $minify_path . '/' . $file;
                         }
                     }
                 }
@@ -1297,6 +1428,7 @@ class W3_Plugin_Cdn extends W3_Plugin
     function get_files_custom()
     {
         $files = array();
+        $document_root = w3_get_document_root();
         $custom_files = $this->_config->get_array('cdn.custom.files');
         
         foreach ($custom_files as $custom_file) {
@@ -1309,7 +1441,7 @@ class W3_Plugin_Cdn extends W3_Plugin
                 }
                 
                 $mask = basename($custom_file);
-                $files = array_merge($files, $this->search_files(ABSPATH . $dir, $dir, $mask));
+                $files = array_merge($files, $this->search_files($document_root . '/' . $dir, $dir, $mask));
             }
         }
         
@@ -1501,7 +1633,8 @@ class W3_Plugin_Cdn extends W3_Plugin
             switch ($engine) {
                 case 'mirror':
                     $engine_config = array(
-                        'domain' => $this->_config->get_array('cdn.mirror.domain')
+                        'domain' => $this->_config->get_array('cdn.mirror.domain'), 
+                        'ssl' => $this->_config->get_string('cdn.mirror.ssl')
                     );
                     break;
                 
@@ -1509,7 +1642,8 @@ class W3_Plugin_Cdn extends W3_Plugin
                     $engine_config = array(
                         'apiid' => $this->_config->get_string('cdn.netdna.apiid'), 
                         'apikey' => $this->_config->get_string('cdn.netdna.apikey'), 
-                        'domain' => $this->_config->get_array('cdn.netdna.domain')
+                        'domain' => $this->_config->get_array('cdn.netdna.domain'), 
+                        'ssl' => $this->_config->get_string('cdn.netdna.ssl')
                     );
                     break;
                 
@@ -1520,7 +1654,8 @@ class W3_Plugin_Cdn extends W3_Plugin
                         'pass' => $this->_config->get_string('cdn.ftp.pass'), 
                         'path' => $this->_config->get_string('cdn.ftp.path'), 
                         'pasv' => $this->_config->get_boolean('cdn.ftp.pasv'), 
-                        'domain' => $this->_config->get_array('cdn.ftp.domain')
+                        'domain' => $this->_config->get_array('cdn.ftp.domain'), 
+                        'ssl' => $this->_config->get_string('cdn.ftp.ssl')
                     );
                     break;
                 
@@ -1530,7 +1665,8 @@ class W3_Plugin_Cdn extends W3_Plugin
                         'secret' => $this->_config->get_string('cdn.s3.secret'), 
                         'bucket' => $this->_config->get_string('cdn.s3.bucket'), 
                         'cname' => $this->_config->get_array('cdn.s3.cname'), 
-                        'compression' => ($this->_config->get_boolean('browsercache.enabled') && $this->_config->get_boolean('browsercache.html.compression'))
+                        'compression' => ($this->_config->get_boolean('browsercache.enabled') && $this->_config->get_boolean('browsercache.html.compression')), 
+                        'ssl' => $this->_config->get_string('cdn.s3.ssl')
                     );
                     break;
                 
@@ -1541,7 +1677,8 @@ class W3_Plugin_Cdn extends W3_Plugin
                         'bucket' => $this->_config->get_string('cdn.cf.bucket'), 
                         'id' => $this->_config->get_string('cdn.cf.id'), 
                         'cname' => $this->_config->get_array('cdn.cf.cname'), 
-                        'compression' => ($this->_config->get_boolean('browsercache.enabled') && $this->_config->get_boolean('browsercache.html.compression'))
+                        'compression' => ($this->_config->get_boolean('browsercache.enabled') && $this->_config->get_boolean('browsercache.html.compression')), 
+                        'ssl' => $this->_config->get_string('cdn.cf.ssl')
                     );
                     break;
                 
@@ -1551,7 +1688,8 @@ class W3_Plugin_Cdn extends W3_Plugin
                         'key' => $this->_config->get_string('cdn.rscf.key'), 
                         'container' => $this->_config->get_string('cdn.rscf.container'), 
                         'id' => $this->_config->get_string('cdn.rscf.id'), 
-                        'cname' => $this->_config->get_array('cdn.rscf.cname')
+                        'cname' => $this->_config->get_array('cdn.rscf.cname'), 
+                        'ssl' => $this->_config->get_string('cdn.rscf.ssl')
                     );
                     break;
             }

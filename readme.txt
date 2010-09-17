@@ -2,8 +2,8 @@
 Contributors: fredericktownes
 Tags: user experience, cache, caching, page cache, css cache, js cache, db cache, disk cache, disk caching, database cache, http compression, gzip, deflate, minify, CDN, content delivery network, media library, performance, speed, multiple hosts, CSS, merge, combine, unobtrusive javascript, compress, optimize, optimizer, JavaScript, JS, cascading style sheet, plugin, yslow, YUI, google, google rank, google page speed, S3, CloudFront, AWS, Amazon Web Services, cloud files, rackspace, batcache, wp cache, wp super cache, w3 total cache, buddypress
 Requires at least: 2.8
-Tested up to: 3.1
-Stable tag: 0.9.1.2
+Tested up to: 3.0.1
+Stable tag: 0.9.1.3
 
 Easily optimize the speed and user experience of your site with caching: browser, page, object, database, minify and content delivery network support.
 
@@ -65,13 +65,9 @@ Rarely do readers take the time to complain. They typically just stop browsing e
 
 It's in every web site owner's best interest is to make sure that the performance of your site is not hindering its success.
 
-= And how many years of university do I need to use this thing? =
-
--4 - That's right; a youngster in junior high school can get started with this plugin. Seriously, if you did your own WordPress install or have ever installed a plugin before you're in good shape. If you need help, let us know or perhaps we'll make some videos or the like.
-
 = Which WordPress versions are supported? =
 
-To use all features in the suite, a minimum of version WordPress 2.6 with PHP 5 is required. Earlier versions will benefit from our Media Library Importer to get them back on the upgrade path and into a CDN of their choosing.
+To use all features in the suite, a minimum of version WordPress 2.8 with PHP 5 is required. Earlier versions will benefit from our Media Library Importer to get them back on the upgrade path and into a CDN of their choosing.
 
 = What about comments? Does the plugin slow down the rate at which comments appear? =
 
@@ -242,8 +238,15 @@ Install the plugin to read the full FAQ.
 
 == Press: Mentions, Tutorials &amp; Reviews ==
 
+**September 2010:**
+
+* [Performance Unleashed: How To Optimize Websites For Speed](http://diythemes.com/thesis/improve-website-pagespeed/), Willie Jackson
+* [5 Best WordPress Plugins To Improve The Loading Speed Of a Blog](http://www.gadgetcage.com/2010/09/5-best-wordpress-plugins-to-improve-the-loading-speed-of-a-blog.html/)
+* [WordPress Fat-Loss Diet to Speed Up & Ease Load](http://www.daljinskapodrska.com/wordpress-fat-loss-diet-to-speed-up-ease-load/)
+
 **August 2010:**
 
+* [WordPress Speed and Optimization Guide](http://thesocialmediaguide.com.au/2010/08/30/wordpress-speed-and-optimization-guide/), Matthew Tommasi
 * [How to configure WordPress Blogs Search Engine Friendly](http://solvater.com/2010/09/how-to-configure-wordpress-blog-search-engine-friendly-complete-beginners-guide-for-wordpress-seo/), Arafath Hashmi
 * [How to Install and Setup W3 Total Cache for Beginners](http://www.wpbeginner.com/plugins/how-to-install-and-setup-w3-total-cache-for-beginners/)
 * [20 Most Useful WordPress Plugins](http://zemalf.posterous.com/20-most-useful-wordpress-plugins), Antti Kokkonen
@@ -358,6 +361,18 @@ It's quite difficult to recall all of the innovators that have shared their thou
 Please reach out to all of these people and support their projects if you're so inclined.
 
 == Changelog ==
+
+= 0.9.1.3 =
+* Improved error messages with AWS S3 CDN
+* Added SSL support for CDN
+* Added control for CDN queue upload interval
+* Added option for 404 file exceptions list in browser cache
+* Added exception for NextGen Gallery flash image rotator to CDN settings
+* Fixed bug with external file imports
+* Fixed bug with document root detection for CDN
+* Fixed bug with minify file search
+* Fixed bugs with AWS CloudFront distribution creation and saving
+* Fixed bug with Rackspace Cloud Files API
 
 = 0.9.1.2 =
 * Improved media library import compatibility

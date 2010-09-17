@@ -41,10 +41,14 @@ class W3_Cdn_Cf extends W3_Cdn_S3
         /**
          * Search active CF distribution
          */
+        $this->set_error_handler();
+        
         $dists = @$this->_s3->listDistributions();
         
+        $this->restore_error_handler();
+        
         if (!$dists) {
-            $error = 'Unable to list distributions.';
+            $error = sprintf('Unable to list distributions (%s).', $this->get_last_error());
             
             return false;
         }
@@ -78,10 +82,14 @@ class W3_Cdn_Cf extends W3_Cdn_S3
             $cnames = (isset($dist['cnames']) ? (array) $dist['cnames'] : array());
             
             foreach ($domains as $domain) {
-                if ($domain && !in_array($domain, $cnames)) {
-                    $error = sprintf('Domain name %s is not in distribution CNAME list.', $domain);
-                    
-                    return false;
+                $_domains = array_map('trim', explode(',', $domain));
+                
+                foreach ($_domains as $_domain) {
+                    if (!in_array($_domain, $cnames)) {
+                        $error = sprintf('Domain name %s is not in distribution CNAME list.', $_domain);
+                        
+                        return false;
+                    }
                 }
             }
         } elseif (!empty($this->_config['id'])) {
@@ -107,12 +115,28 @@ class W3_Cdn_Cf extends W3_Cdn_S3
     function create_container(&$container_id, &$error)
     {
         if (parent::create_container($container_id, $error)) {
-            $cnames = (!empty($this->_config['cname']) ? (array) $this->_config['cname'] : array());
+            $cnames = array();
             
-            $dist = $this->_s3->createDistribution($this->_config['bucket'], true, array());
+            if (!empty($this->_config['cname'])) {
+                $domains = (array) $this->_config['cname'];
+                
+                foreach ($domains as $domain) {
+                    $_domains = array_map('trim', explode(',', $domain));
+                    
+                    foreach ($_domains as $_domain) {
+                        $cnames[] = $_domain;
+                    }
+                }
+            }
+            
+            $this->set_error_handler();
+            
+            $dist = @$this->_s3->createDistribution($this->_config['bucket'], true, $cnames);
+            
+            $this->restore_error_handler();
             
             if (!$dist) {
-                $error = sprintf('Unable to create distribution for bucket %s.', $this->_config['bucket']);
+                $error = sprintf('Unable to create distribution for bucket %s (%s).', $this->_config['bucket'], $this->get_last_error());
                 
                 return false;
             }

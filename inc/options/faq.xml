@@ -105,7 +105,7 @@
 		</entry>
 		<entry>
 			<question><![CDATA[ Which WordPress versions are supported? ]]></question>
-			<answer><![CDATA[ <p>To use all features in the suite, a minimum version of 2.6 is required. Earlier versions will benefit from our Media Library Importer to get them back on the upgrade path and into a <acronym title="Content Delivery Network">CDN</acronym> of their choosing.</p> ]]></answer>
+			<answer><![CDATA[ <p>To use all features in the suite, a minimum version of 2.8 is required. Earlier versions will benefit from our Media Library Importer to get them back on the upgrade path and into a <acronym title="Content Delivery Network">CDN</acronym> of their choosing.</p> ]]></answer>
 		</entry>
 		<entry>
 			<question><![CDATA[ I understand the database caching and the page caching, but	what's minify all about? ]]></question>

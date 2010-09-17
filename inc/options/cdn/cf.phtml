@@ -19,6 +19,17 @@
 	</td>
 </tr>
 <tr>
+	<th><label for="cdn_cf_ssl"><acronym title="Secure Sockets Layer">SSL</acronym> support:</label></th>
+	<td>
+		<select id="cdn_cf_ssl" name="cdn.cf.ssl">
+			<option value="auto"<?php selected($this->_config->get_string('cdn.cf.ssl'), 'auto'); ?>>Auto (determine connection type automatically)</option>
+			<option value="enabled"<?php selected($this->_config->get_string('cdn.cf.ssl'), 'enabled'); ?>>Enabled (always use SSL)</option>
+			<option value="disabled"<?php selected($this->_config->get_string('cdn.cf.ssl'), 'disabled'); ?>>Disabled (always use HTTP)</option>
+		</select>
+        <br /><span class="description">Some <acronym>CDN</acronym> providers may or may not support <acronym title="Secure Sockets Layer">SSL</acronym>, contact your vendor for more information.</span>
+	</td>
+</tr>
+<tr>
 	<th><label for="cdn_cf_id">Replace site's hostname with:</label></th>
 	<td>
 		<input id="cdn_cf_id" type="text" name="cdn.cf.id" value="<?php echo htmlspecialchars($this->_config->get_string('cdn.cf.id')); ?>" size="18" style="text-align:right;" />.cloudfront.net or CNAME:

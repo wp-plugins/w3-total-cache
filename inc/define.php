@@ -1,6 +1,6 @@
 <?php
 
-define('W3TC_VERSION', '0.9.1.2');
+define('W3TC_VERSION', '0.9.1.3');
 define('W3TC_POWERED_BY', 'W3 Total Cache/' . W3TC_VERSION);
 define('W3TC_EMAIL', 'w3tc@w3-edge.com');
 define('W3TC_PAYPAL_URL', 'https://www.paypal.com/cgi-bin/webscr');
