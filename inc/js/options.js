@@ -167,23 +167,31 @@ function w3tc_cdn_cnames_assign() {
     });
 }
 
-function w3tc_toggle(name) {
+function w3tc_toggle(name, check) {
+    if (check === undefined) {
+        check = true;
+    }
+
     var id = '#' + name, cls = '.' + name;
 
     jQuery(cls).click(function() {
-        var checked = true;
+        var checked = check;
+
         jQuery(cls).each(function() {
-            if (!jQuery(this).is(':checked')) {
-                checked = false;
+            var _checked = jQuery(this).is(':checked');
+
+            if ((check && !_checked) || (!check && _checked)) {
+                checked = !check;
+
+                return false;
             }
         });
-        jQuery(id).each(function() {
-            if (checked) {
-                jQuery(this).attr('checked', 'checked');
-            } else {
-                jQuery(this).removeAttr('checked');
-            }
-        });
+
+        if (checked) {
+            jQuery(id).attr('checked', 'checked');
+        } else {
+            jQuery(id).removeAttr('checked');
+        }
     });
 
     jQuery(id).click(function() {
@@ -200,7 +208,7 @@ function w3tc_toggle(name) {
 
 jQuery(function() {
     // general page
-    w3tc_toggle('enabled');
+    w3tc_toggle('enabled', false);
 
     jQuery('.button-rating').click(function() {
         window.open('http://wordpress.org/extend/plugins/w3-total-cache/', '_blank');

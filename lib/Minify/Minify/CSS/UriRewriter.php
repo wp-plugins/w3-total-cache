@@ -271,7 +271,7 @@ class Minify_CSS_UriRewriter {
       
         self::$debugText .= "traversals removed : {$uri}\n\n";
 
-        $uri = str_replace(w3_get_base_path(), w3_get_site_path(), $uri);
+        $uri = preg_replace('~^' . w3_preg_quote(w3_get_base_path()) . '~', w3_get_site_path(), $uri);
         
         return $uri;
     }

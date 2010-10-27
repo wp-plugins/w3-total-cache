@@ -93,22 +93,6 @@ class W3_Cdn_Ftp extends W3_Cdn_Base
     }
     
     /**
-     * Changes permissions
-     * 
-     * @param string $filename
-     * @param integer $mode
-     * @return boolean
-     */
-    function _chmod($filename, $mode)
-    {
-        if (function_exists('ftp_chmod')) {
-            return @ftp_chmod($this->_ftp, $mode, $filename);
-        }
-        
-        return true;
-    }
-    
-    /**
      * Uploads files to FTP
      *
      * @param array $files
@@ -142,15 +126,11 @@ class W3_Cdn_Ftp extends W3_Cdn_Base
             foreach ($remote_dirs as $dir) {
                 if (!@ftp_chdir($this->_ftp, $dir)) {
                     if (!@ftp_mkdir($this->_ftp, $dir)) {
-                        @ftp_close($this->_ftp);
                         $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Unable to create directory');
                         continue 2;
                     }
                     
-                    $this->_chmod($dir, 0755);
-                    
                     if (!@ftp_chdir($this->_ftp, $dir)) {
-                        @ftp_close($this->_ftp);
                         $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Unable to change directory');
                         continue 2;
                     }
@@ -172,13 +152,13 @@ class W3_Cdn_Ftp extends W3_Cdn_Base
             }
             
             $result = @ftp_put($this->_ftp, $remote_file, $local_path, FTP_BINARY);
-            $this->_mdtm($remote_file, $mtime);
-            
-            $results[] = $this->get_result($local_path, $remote_path, ($result ? W3TC_CDN_RESULT_OK : W3TC_CDN_RESULT_ERROR), ($result ? 'OK' : 'Unable to upload file'));
             
             if ($result) {
+                $this->_mdtm($remote_file, $mtime);
+                $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'OK');
                 $count++;
-                $this->_chmod($remote_file, 0644);
+            } else {
+                $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Unable to upload file');
             }
         }
         
@@ -258,8 +238,6 @@ class W3_Cdn_Ftp extends W3_Cdn_Base
             $error = sprintf('Unable to make directory: %s.', $tmp_dir);
             
             return false;
-        } else {
-            $this->_chmod($tmp_dir, 0755);
         }
         
         if (!@ftp_chdir($this->_ftp, $tmp_dir)) {

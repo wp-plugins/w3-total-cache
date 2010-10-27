@@ -118,8 +118,8 @@ minify_templates['<?php echo addslashes($theme_key); ?>']['<?php echo addslashes
         			<label><input class="js_enabled" type="checkbox" name="minify.js.combine.header" value="1"<?php checked($this->_config->get_boolean('minify.js.combine.header'), true); ?> /> Combine only after &lt;head&gt;</label><br />
         			<label><input class="js_enabled" type="checkbox" name="minify.js.combine.body" value="1"<?php checked($this->_config->get_boolean('minify.js.combine.body'), true); ?> /> Combine only after &lt;body&gt;</label><br />
         			<label><input class="js_enabled" type="checkbox" name="minify.js.combine.footer" value="1"<?php checked($this->_config->get_boolean('minify.js.combine.footer'), true); ?> /> Combine only before &lt;/body&gt;</label><br />
-        			<label><input class="js_enabled" type="checkbox" name="minify.js.strip.comments" value="1"<?php checked($this->_config->get_boolean('minify.js.strip.comments'), true); ?> /> Comment removal</label><br />
-        			<label><input class="js_enabled" type="checkbox" name="minify.js.strip.crlf" value="1"<?php checked($this->_config->get_boolean('minify.js.strip.crlf'), true); ?> /> Line break removal</label><br />
+        			<label><input class="js_enabled" type="checkbox" name="minify.js.strip.comments" value="1"<?php checked($this->_config->get_boolean('minify.js.strip.comments'), true); ?> /> Comment removal (not applied when combine only is active)</label><br />
+        			<label><input class="js_enabled" type="checkbox" name="minify.js.strip.crlf" value="1"<?php checked($this->_config->get_boolean('minify.js.strip.crlf'), true); ?> /> Line break removal (not applied when combine only is active)</label><br />
         		</td>
         	</tr>
         	<tr>
@@ -211,8 +211,8 @@ minify_templates['<?php echo addslashes($theme_key); ?>']['<?php echo addslashes
         			<input type="hidden" name="minify.css.strip.crlf" value="0" />
         			<label><input id="css_enabled" type="checkbox" name="minify.css.enable" value="1"<?php checked($this->_config->get_boolean('minify.css.enable'), true); ?> /> Enable</label><br />
         			<label><input class="css_enabled" type="checkbox" name="minify.css.combine" value="1"<?php checked($this->_config->get_boolean('minify.css.combine'), true); ?> /> Combine only</label><br />
-        			<label><input class="css_enabled" type="checkbox" name="minify.css.strip.comments" value="1"<?php checked($this->_config->get_boolean('minify.css.strip.comments'), true); ?> /> Comment removal</label><br />
-        			<label><input class="css_enabled" type="checkbox" name="minify.css.strip.crlf" value="1"<?php checked($this->_config->get_boolean('minify.css.strip.crlf'), true); ?> /> Line break removal</label><br />
+        			<label><input class="css_enabled" type="checkbox" name="minify.css.strip.comments" value="1"<?php checked($this->_config->get_boolean('minify.css.strip.comments'), true); ?> /> Comment removal (not applied when combine only is active)</label><br />
+        			<label><input class="css_enabled" type="checkbox" name="minify.css.strip.crlf" value="1"<?php checked($this->_config->get_boolean('minify.css.strip.crlf'), true); ?> /> Line break removal (not applied when combine only is active)</label><br />
         		</td>
         	</tr>
         	<tr>

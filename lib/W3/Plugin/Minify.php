@@ -55,18 +55,23 @@ class W3_Plugin_Minify extends W3_Plugin
             'cron_schedules'
         ));
         
-        if ($this->_config->get_boolean('minify.enabled') && $this->_config->get_string('minify.engine') == 'file') {
-            add_action('w3_minify_cleanup', array(
-                &$this, 
-                'cleanup'
-            ));
-        }
-        
-        if ($this->can_minify()) {
-            ob_start(array(
-                &$this, 
-                'ob_callback'
-            ));
+        if ($this->_config->get_boolean('minify.enabled')) {
+            if ($this->_config->get_string('minify.engine') == 'file') {
+                add_action('w3_minify_cleanup', array(
+                    &$this, 
+                    'cleanup'
+                ));
+            }
+            
+            /**
+             * Start minify
+             */
+            if ($this->can_minify()) {
+                ob_start(array(
+                    &$this, 
+                    'ob_callback'
+                ));
+            }
         }
     }
     
@@ -92,24 +97,22 @@ class W3_Plugin_Minify extends W3_Plugin
      */
     function activate()
     {
-        if (!@is_dir(W3TC_CONTENT_MINIFY_DIR)) {
-            if (@mkdir(W3TC_CONTENT_MINIFY_DIR, 0755)) {
-                @chmod(W3TC_CONTENT_MINIFY_DIR, 0755);
-            } else {
-                w3_writable_error(W3TC_CONTENT_MINIFY_DIR);
-            }
+        if (!@is_dir(W3TC_CONTENT_MINIFY_DIR) && !@mkdir(W3TC_CONTENT_MINIFY_DIR)) {
+            w3_writable_error(W3TC_CONTENT_MINIFY_DIR);
         }
         
         $file_index = W3TC_CONTENT_MINIFY_DIR . '/index.php';
         
-        if (@copy(W3TC_INSTALL_MINIFY_DIR . '/index.php', $file_index)) {
-            @chmod($file_index, 0644);
-        } else {
+        if (!@copy(W3TC_INSTALL_MINIFY_DIR . '/index.php', $file_index)) {
             w3_writable_error($file_index);
         }
         
-        if ($this->_config->get_boolean('minify.rewrite')) {
-            $this->write_rules();
+        if ($this->_config->get_boolean('minify.enabled') && $this->_config->get_boolean('minify.rewrite')) {
+            $this->write_rules_core();
+            
+            if ($this->_config->get_string('minify.engine') == 'file') {
+                $this->write_rules_cache();
+            }
         }
         
         $this->schedule();
@@ -122,7 +125,8 @@ class W3_Plugin_Minify extends W3_Plugin
     {
         $this->unschedule();
         
-        $this->remove_rules();
+        $this->remove_rules_cache();
+        $this->remove_rules_core();
         
         @unlink(W3TC_CONTENT_MINIFY_DIR . '/index.php');
     }
@@ -721,15 +725,6 @@ class W3_Plugin_Minify extends W3_Plugin
     function can_minify()
     {
         /**
-         * Skip if Minify is disabled
-         */
-        if (!$this->_config->get_boolean('minify.enabled')) {
-            $this->minify_reject_reason = 'minify is disabled';
-            
-            return false;
-        }
-        
-        /**
          * Skip if doint AJAX
          */
         if (defined('DOING_AJAX')) {
@@ -891,61 +886,186 @@ class W3_Plugin_Minify extends W3_Plugin
      *
      * @return string
      */
-    function generate_rules()
+    function generate_rules_core()
     {
+        switch (true) {
+            case w3_is_apache():
+                return $this->generate_rules_core_apache();
+            
+            case w3_is_nginx():
+                return $this->generate_rules_core_nginx();
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Generates rules
+     *
+     * @return string
+     */
+    function generate_rules_core_apache()
+    {
+        $cache_dir = str_replace(w3_get_document_root(), '', w3_path(W3TC_CACHE_FILE_MINIFY_DIR));
+        
         $engine = $this->_config->get_string('minify.engine');
         $browsercache = $this->_config->get_integer('browsercache.enabled');
-        $compression = $this->_config->get_boolean('browsercache.cssjs.compression');
-        $expires = $this->_config->get_boolean('browsercache.cssjs.expires');
-        $lifetime = $this->_config->get_integer('browsercache.cssjs.lifetime');
+        $compression = ($browsercache && $this->_config->get_boolean('browsercache.cssjs.compression'));
         
         $rules = '';
-        $rules .= "# BEGIN W3TC Minify\n";
+        $rules .= W3TC_MARKER_BEGIN_MINIFY_CORE . "\n";
+        $rules .= "<IfModule mod_rewrite.c>\n";
+        $rules .= "    RewriteEngine On\n";
+        $rules .= "    RewriteBase " . $cache_dir . "/\n";
         
         if ($engine == 'file') {
-            if ($browsercache && $expires && $lifetime) {
-                $rules .= "<IfModule mod_expires.c>\n";
-                $rules .= "    ExpiresActive On\n";
-                $rules .= "    ExpiresByType text/css M" . $lifetime . "\n";
-                $rules .= "    ExpiresByType application/x-javascript M" . $lifetime . "\n";
-                $rules .= "</IfModule>\n";
+            if ($compression) {
+                $rules .= "    RewriteCond %{HTTP:Accept-Encoding} gzip\n";
+                $rules .= "    RewriteRule .* - [E=APPEND_EXT:.gzip]\n";
             }
+            
+            $rules .= "    RewriteCond %{REQUEST_FILENAME}%{ENV:APPEND_EXT} -f\n";
+            $rules .= "    RewriteRule (.*) $1%{ENV:APPEND_EXT} [L]\n";
+        }
+        
+        $rules .= "    RewriteRule ^([a-f0-9]+)\\/(.+)\\.(include(\\-(footer|body))?(-nb)?)\\.[0-9]+\\.(css|js)$ index.php?tt=$1&gg=$2&g=$3&t=$7 [L]\n";
+        $rules .= "</IfModule>\n";
+        $rules .= W3TC_MARKER_END_MINIFY_CORE . "\n";
+        
+        return $rules;
+    }
+    
+    /**
+     * Generates rules
+     *
+     * @return string
+     */
+    function generate_rules_core_nginx()
+    {
+        $is_network = (w3_is_network() && !w3_is_subdomain_install());
+        
+        $cache_root = w3_path(W3TC_CACHE_FILE_MINIFY_DIR);
+        $cache_dir = rtrim(str_replace(w3_get_document_root(), '', $cache_root), '/');
+        
+        if ($is_network) {
+            $cache_dir_condition = preg_replace('~/w3tc.*?/~', '/w3tc(.*?)/', $cache_dir, 1);
+            $cache_dir_rewrite = preg_replace('~/w3tc.*?/~', '/w3tc\$1/', $cache_dir, 1);
+        } else {
+            $cache_dir_condition = $cache_dir_rewrite = $cache_dir;
+        }
+        
+        $engine = $this->_config->get_string('minify.engine');
+        $browsercache = $this->_config->get_integer('browsercache.enabled');
+        $compression = ($browsercache && $this->_config->get_boolean('browsercache.cssjs.compression'));
+        
+        $rules = '';
+        $rules .= W3TC_MARKER_BEGIN_MINIFY_CORE . "\n";
+        
+        if ($engine == 'file') {
+            $rules .= "set \$w3tc_enc \"\";\n";
             
             if ($compression) {
-                $rules .= "<IfModule mod_mime.c>\n";
-                $rules .= "    AddEncoding gzip .gzip\n";
-                $rules .= "    <Files *.css.gzip>\n";
-                $rules .= "        ForceType text/css\n";
-                $rules .= "    </Files>\n";
-                $rules .= "    <Files *.js.gzip>\n";
-                $rules .= "        ForceType application/x-javascript\n";
-                $rules .= "    </Files>\n";
-                $rules .= "</IfModule>\n";
-                $rules .= "<IfModule mod_deflate.c>\n";
-                $rules .= "    <IfModule mod_setenvif.c>\n";
-                $rules .= "        SetEnvIfNoCase Request_URI \\.gzip$ no-gzip\n";
-                $rules .= "    </IfModule>\n";
-                $rules .= "</IfModule>\n";
-            } else {
-                $rules .= "<IfModule mod_deflate.c>\n";
-                $rules .= "    <IfModule mod_env.c>\n";
-                $rules .= "        SetEnv no-gzip\n";
-                $rules .= "    </IfModule>\n";
-                $rules .= "</IfModule>\n";
+                $rules .= "if (\$http_accept_encoding ~ gzip) {\n";
+                $rules .= "    set \$w3tc_enc .gzip;\n";
+                $rules .= "}\n";
             }
             
+            $rules .= "if (-f \$request_filename\$w3tc_enc) {\n";
+            $rules .= "    rewrite (.*) $1\$w3tc_enc break;\n";
+            $rules .= "}\n";
+        }
+        
+        if ($is_network) {
+            $rules .= "rewrite ^" . $cache_dir_condition . "/([a-f0-9]+)\\/(.+)\\.(include(\\-(footer|body))?(-nb)?)\\.[0-9]+\\.(css|js)$ " . $cache_dir_rewrite . "/index.php?tt=$2&gg=$3&g=$4&t=$8 last;\n";
+        } else {
+            $rules .= "rewrite ^" . $cache_dir_condition . "/([a-f0-9]+)\\/(.+)\\.(include(\\-(footer|body))?(-nb)?)\\.[0-9]+\\.(css|js)$ " . $cache_dir_rewrite . "/index.php?tt=$1&gg=$2&g=$3&t=$7 last;\n";
+        }
+        
+        $rules .= W3TC_MARKER_END_MINIFY_CORE . "\n";
+        
+        return $rules;
+    }
+    
+    /**
+     * Generates rules
+     *
+     * @return string
+     */
+    function generate_rules_cache()
+    {
+        switch (true) {
+            case w3_is_apache():
+                return $this->generate_rules_cache_apache();
+            
+            case w3_is_nginx():
+                return $this->generate_rules_cache_nginx();
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Generates rules
+     *
+     * @return string
+     */
+    function generate_rules_cache_apache()
+    {
+        $browsercache = $this->_config->get_integer('browsercache.enabled');
+        $compression = ($browsercache && $this->_config->get_boolean('browsercache.cssjs.compression'));
+        $expires = ($browsercache && $this->_config->get_boolean('browsercache.cssjs.expires'));
+        $lifetime = ($browsercache ? $this->_config->get_integer('browsercache.cssjs.lifetime') : 0);
+        $cache_control = ($browsercache && $this->_config->get_boolean('browsercache.cssjs.cache.control'));
+        $etag = ($browsercache && $this->_config->get_integer('browsercache.html.etag'));
+        $w3tc = ($browsercache && $this->_config->get_integer('browsercache.cssjs.w3tc'));
+        
+        $rules = '';
+        $rules .= W3TC_MARKER_BEGIN_MINIFY_CACHE . "\n";
+        
+        if ($etag) {
+            $rules .= "FileETag MTime Size\n";
+        }
+        
+        if ($compression) {
+            $rules .= "<IfModule mod_mime.c>\n";
+            $rules .= "    AddEncoding gzip .gzip\n";
+            $rules .= "    <Files *.css.gzip>\n";
+            $rules .= "        ForceType text/css\n";
+            $rules .= "    </Files>\n";
+            $rules .= "    <Files *.js.gzip>\n";
+            $rules .= "        ForceType application/x-javascript\n";
+            $rules .= "    </Files>\n";
+            $rules .= "</IfModule>\n";
+            $rules .= "<IfModule mod_deflate.c>\n";
+            $rules .= "    <IfModule mod_setenvif.c>\n";
+            $rules .= "        SetEnvIfNoCase Request_URI \\.gzip$ no-gzip\n";
+            $rules .= "    </IfModule>\n";
+            $rules .= "</IfModule>\n";
+        }
+        
+        if ($expires) {
+            $rules .= "<IfModule mod_expires.c>\n";
+            $rules .= "    ExpiresActive On\n";
+            $rules .= "    ExpiresByType text/css M" . $lifetime . "\n";
+            $rules .= "    ExpiresByType application/x-javascript M" . $lifetime . "\n";
+            $rules .= "</IfModule>\n";
+        }
+        
+        if ($w3tc || $compression || $cache_control) {
             $rules .= "<IfModule mod_headers.c>\n";
             
-            if ($browsercache && $this->_config->get_integer('browsercache.cssjs.w3tc')) {
+            if ($w3tc) {
                 $rules .= "    Header set X-Powered-By \"" . W3TC_POWERED_BY . "\"\n";
             }
             
-            if ($browsercache && $compression) {
+            if ($compression) {
                 $rules .= "    Header set Vary \"Accept-Encoding\"\n";
             }
             
-            if ($this->_config->get_boolean('browsercache.cssjs.cache.control')) {
-                switch ($this->_config->get_string('browsercache.cssjs.cache.policy')) {
+            if ($cache_control) {
+                $cache_policy = $this->_config->get_string('browsercache.cssjs.cache.policy');
+                
+                switch ($cache_policy) {
                     case 'cache':
                         $rules .= "    Header set Pragma \"public\"\n";
                         $rules .= "    Header set Cache-Control \"public\"\n";
@@ -981,23 +1101,111 @@ class W3_Plugin_Minify extends W3_Plugin
             $rules .= "</IfModule>\n";
         }
         
-        $rules .= "<IfModule mod_rewrite.c>\n";
-        $rules .= "    RewriteEngine On\n";
-        $rules .= "    RewriteBase " . str_replace(w3_get_document_root(), '', w3_path(W3TC_CACHE_FILE_MINIFY_DIR)) . "/\n";
+        $rules .= W3TC_MARKER_END_MINIFY_CACHE . "\n";
         
-        if ($engine == 'file') {
-            if ($browsercache && $compression) {
-                $rules .= "    RewriteCond %{HTTP:Accept-Encoding} gzip\n";
-                $rules .= "    RewriteRule .* - [E=APPEND_EXT:.gzip]\n";
-            }
-            
-            $rules .= "    RewriteCond %{REQUEST_FILENAME}%{ENV:APPEND_EXT} -f\n";
-            $rules .= "    RewriteRule (.*) $1%{ENV:APPEND_EXT} [L]\n";
+        return $rules;
+    }
+    
+    /**
+     * Generates rules
+     *
+     * @return string
+     */
+    function generate_rules_cache_nginx()
+    {
+        $cache_root = w3_path(W3TC_CACHE_FILE_MINIFY_DIR);
+        $cache_dir = rtrim(str_replace(w3_get_document_root(), '', $cache_root), '/');
+        
+        if (w3_is_network() && !w3_is_subdomain_install()) {
+            $cache_dir = preg_replace('~/w3tc.*?/~', '/w3tc.*?/', $cache_dir, 1);
         }
         
-        $rules .= "    RewriteRule ^([a-f0-9]+)\\/(.+)\\.(include(\\-(footer|body))?(-nb)?)\\.[0-9]+\\.(css|js)$ index.php?tt=$1&gg=$2&g=$3&t=$7 [L]\n";
-        $rules .= "</IfModule>\n";
-        $rules .= "# END W3TC Minify\n";
+        $browsercache = $this->_config->get_integer('browsercache.enabled');
+        $compression = ($browsercache && $this->_config->get_boolean('browsercache.cssjs.compression'));
+        $expires = ($browsercache && $this->_config->get_boolean('browsercache.cssjs.expires'));
+        $lifetime = ($browsercache ? $this->_config->get_integer('browsercache.cssjs.lifetime') : 0);
+        $cache_control = ($browsercache && $this->_config->get_boolean('browsercache.cssjs.cache.control'));
+        $w3tc = ($browsercache && $this->_config->get_integer('browsercache.cssjs.w3tc'));
+        
+        $rules = '';
+        $rules .= W3TC_MARKER_BEGIN_MINIFY_CACHE . "\n";
+        
+        $common_rules = '';
+        
+        if ($expires) {
+            $common_rules .= "    expires modified " . $lifetime . "s;\n";
+        }
+        
+        if ($w3tc) {
+            $common_rules .= "    add_header X-Powered-By \"" . W3TC_POWERED_BY . "\";\n";
+        }
+        
+        if ($compression) {
+            $common_rules .= "    add_header Vary \"Accept-Encoding\";\n";
+        }
+        
+        if ($cache_control) {
+            $cache_policy = $this->_config->get_string('browsercache.cssjs.cache.policy');
+            
+            switch ($cache_policy) {
+                case 'cache':
+                    $common_rules .= "    add_header Pragma \"public\";\n";
+                    $common_rules .= "    add_header Cache-Control \"public\";\n";
+                    break;
+                
+                case 'cache_validation':
+                    $common_rules .= "    add_header Pragma \"public\";\n";
+                    $common_rules .= "    add_header Cache-Control \"public, must-revalidate, proxy-revalidate\";\n";
+                    break;
+                
+                case 'cache_noproxy':
+                    $common_rules .= "    add_header Pragma \"public\";\n";
+                    $common_rules .= "    add_header Cache-Control \"public, must-revalidate\";\n";
+                    break;
+                
+                case 'cache_maxage':
+                    $common_rules .= "    add_header Pragma \"public\";\n";
+                    $common_rules .= "    add_header Cache-Control \"max-age=" . $lifetime . ", public, must-revalidate, proxy-revalidate\";\n";
+                    break;
+                
+                case 'no_cache':
+                    $common_rules .= "    add_header Pragma \"no-cache\";\n";
+                    $common_rules .= "    add_header Cache-Control \"max-age=0, private, no-store, no-cache, must-revalidate\";\n";
+                    break;
+            }
+        }
+        
+        $rules .= "location ~ " . $cache_dir . ".*\\.js$ {\n";
+        $rules .= "    types {}\n";
+        $rules .= "    default_type application/x-javascript;\n";
+        $rules .= $common_rules;
+        $rules .= "}\n";
+        
+        $rules .= "location ~ " . $cache_dir . ".*\\.css$ {\n";
+        $rules .= "    types {}\n";
+        $rules .= "    default_type text/css;\n";
+        $rules .= $common_rules;
+        $rules .= "}\n";
+        
+        if ($compression) {
+            $rules .= "location ~ " . $cache_dir . ".*js\\.gzip$ {\n";
+            $rules .= "    gzip off;\n";
+            $rules .= "    types {}\n";
+            $rules .= "    default_type application/x-javascript;\n";
+            $rules .= $common_rules;
+            $rules .= "    add_header Content-Encoding gzip;\n";
+            $rules .= "}\n";
+            
+            $rules .= "location ~ " . $cache_dir . ".*css\\.gzip$ {\n";
+            $rules .= "    gzip off;\n";
+            $rules .= "    types {}\n";
+            $rules .= "    default_type text/css;\n";
+            $rules .= $common_rules;
+            $rules .= "    add_header Content-Encoding gzip;\n";
+            $rules .= "}\n";
+        }
+        
+        $rules .= W3TC_MARKER_END_MINIFY_CACHE . "\n";
         
         return $rules;
     }
@@ -1007,23 +1215,101 @@ class W3_Plugin_Minify extends W3_Plugin
      *
      * @return boolean
      */
-    function write_rules()
+    function write_rules_core()
     {
-        $path = W3TC_CONTENT_MINIFY_DIR . '/.htaccess';
+        $path = w3_get_minify_rules_core_path();
         
-        if (file_exists($path)) {
-            if (($data = @file_get_contents($path)) !== false) {
-                $data = $this->erase_rules($data);
+        if (w3_can_modify_rules($path)) {
+            $rules = $this->generate_rules_core();
+            
+            if (file_exists($path)) {
+                if (($data = @file_get_contents($path)) !== false) {
+                    $data = $this->erase_rules_core($data);
+                } else {
+                    return false;
+                }
             } else {
-                return false;
+                $data = '';
             }
-        } else {
-            $data = '';
+            
+            $search = array(
+                W3TC_MARKER_BEGIN_PGCACHE_CORE => 0, 
+                W3TC_MARKER_BEGIN_BROWSERCACHE_NO404WP => 0, 
+                W3TC_MARKER_BEGIN_WORDPRESS => 0, 
+                W3TC_MARKER_END_BROWSERCACHE_CACHE => strlen(W3TC_MARKER_END_BROWSERCACHE_CACHE) + 1, 
+                W3TC_MARKER_END_PGCACHE_CACHE => strlen(W3TC_MARKER_END_PGCACHE_CACHE) + 1, 
+                W3TC_MARKER_END_MINIFY_CACHE => strlen(W3TC_MARKER_END_MINIFY_CACHE) + 1
+            );
+            
+            foreach ($search as $string => $length) {
+                $rules_pos = strpos($data, $string);
+                
+                if ($rules_pos !== false) {
+                    $rules_pos += $length;
+                    break;
+                }
+            }
+            
+            if ($rules_pos !== false) {
+                $data = trim(substr_replace($data, $rules, $rules_pos, 0));
+            } else {
+                $data = trim($rules . $data);
+            }
+            
+            return @file_put_contents($path, $data);
         }
         
-        $data = trim($this->generate_rules() . $data);
+        return true;
+    }
+    
+    /**
+     * Writes rules to file cache .htaccess
+     *
+     * @return boolean
+     */
+    function write_rules_cache()
+    {
+        $path = w3_get_minify_rules_cache_path();
         
-        return @file_put_contents($path, $data);
+        if (w3_can_modify_rules($path)) {
+            $rules = $this->generate_rules_cache();
+            
+            if (file_exists($path)) {
+                if (($data = @file_get_contents($path)) !== false) {
+                    $data = $this->erase_rules_cache($data);
+                } else {
+                    return false;
+                }
+            } else {
+                $data = '';
+            }
+            
+            $search = array(
+                W3TC_MARKER_BEGIN_PGCACHE_CACHE => 0, 
+                W3TC_MARKER_BEGIN_BROWSERCACHE_CACHE => 0, 
+                W3TC_MARKER_BEGIN_MINIFY_CORE => 0, 
+                W3TC_MARKER_BEGIN_PGCACHE_CORE => 0, 
+                W3TC_MARKER_BEGIN_BROWSERCACHE_NO404WP => 0, 
+                W3TC_MARKER_BEGIN_WORDPRESS => 0
+            );
+            
+            foreach ($search as $string => $length) {
+                $rules_pos = strpos($data, $string);
+                
+                if ($rules_pos !== false) {
+                    $rules_pos += $length;
+                    break;
+                }
+            }
+            
+            if ($rules_pos !== false) {
+                $data = trim(substr_replace($data, $rules, $rules_pos, 0));
+            } else {
+                $data = trim($rules . $data);
+            }
+            
+            return @file_put_contents($path, $data);
+        }
     }
     
     /**
@@ -1032,9 +1318,22 @@ class W3_Plugin_Minify extends W3_Plugin
      * @param string $data
      * @return string
      */
-    function erase_rules($data)
+    function erase_rules_core($data)
     {
-        $data = w3_erase_text($data, '# BEGIN W3TC Minify', '# END W3TC Minify');
+        $data = w3_erase_text($data, W3TC_MARKER_BEGIN_MINIFY_CORE, W3TC_MARKER_END_MINIFY_CORE);
+        
+        return $data;
+    }
+    
+    /**
+     * Erases W3TC rules from config
+     *
+     * @param string $data
+     * @return string
+     */
+    function erase_rules_cache($data)
+    {
+        $data = w3_erase_text($data, W3TC_MARKER_BEGIN_MINIFY_CACHE, W3TC_MARKER_END_MINIFY_CACHE);
         
         return $data;
     }
@@ -1044,11 +1343,43 @@ class W3_Plugin_Minify extends W3_Plugin
      *
      * @return boolean
      */
-    function remove_rules()
+    function remove_rules_core()
     {
-        $path = W3TC_CONTENT_MINIFY_DIR . '/.htaccess';
+        $path = w3_get_minify_rules_core_path();
         
-        return @unlink($path);
+        if (w3_can_modify_rules($path) && file_exists($path)) {
+            if (($data = @file_get_contents($path)) !== false) {
+                $data = $this->erase_rules_core($data);
+                
+                return @file_put_contents($path, $data);
+            }
+            
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Removes W3TC rules from file cache dir
+     *
+     * @return boolean
+     */
+    function remove_rules_cache()
+    {
+        $path = w3_get_minify_rules_cache_path();
+        
+        if (w3_can_modify_rules($path) && file_exists($path)) {
+            if (($data = @file_get_contents($path)) !== false) {
+                $data = $this->erase_rules_cache($data);
+                
+                return @file_put_contents($path, $data);
+            }
+            
+            return false;
+        }
+        
+        return true;
     }
     
     /**
@@ -1056,10 +1387,23 @@ class W3_Plugin_Minify extends W3_Plugin
      *
      * @return boolean
      */
-    function check_rules()
+    function check_rules_core()
     {
-        $path = W3TC_CACHE_FILE_MINIFY_DIR . '/.htaccess';
-        $search = $this->generate_rules();
+        $path = w3_get_minify_rules_core_path();
+        $search = $this->generate_rules_core();
+        
+        return (($data = @file_get_contents($path)) && strstr(w3_clean_rules($data), w3_clean_rules($search)) !== false);
+    }
+    
+    /**
+     * Checks rules
+     *
+     * @return boolean
+     */
+    function check_rules_cache()
+    {
+        $path = w3_get_minify_rules_cache_path();
+        $search = $this->generate_rules_cache();
         
         return (($data = @file_get_contents($path)) && strstr(w3_clean_rules($data), w3_clean_rules($search)) !== false);
     }

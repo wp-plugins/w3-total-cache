@@ -1,6 +1,6 @@
 <?php
 
-define('W3TC_VERSION', '0.9.1.3');
+define('W3TC_VERSION', '0.9.1.4');
 define('W3TC_POWERED_BY', 'W3 Total Cache/' . W3TC_VERSION);
 define('W3TC_EMAIL', 'w3tc@w3-edge.com');
 define('W3TC_PAYPAL_URL', 'https://www.paypal.com/cgi-bin/webscr');
@@ -50,10 +50,34 @@ define('W3TC_CDN_COMMAND_UPLOAD', 1);
 define('W3TC_CDN_COMMAND_DELETE', 2);
 define('W3TC_CDN_TABLE_QUEUE', 'w3tc_cdn_queue');
 
+define('W3TC_MARKER_BEGIN_WORDPRESS', '# BEGIN WordPress');
+define('W3TC_MARKER_BEGIN_SUPERCACHE', '# BEGIN WPSuperCache');
+define('W3TC_MARKER_BEGIN_PGCACHE_CORE', '# BEGIN W3TC Page Cache core');
+define('W3TC_MARKER_BEGIN_PGCACHE_CACHE', '# BEGIN W3TC Page Cache cache');
+define('W3TC_MARKER_BEGIN_BROWSERCACHE_CACHE', '# BEGIN W3TC Browser Cache');
+define('W3TC_MARKER_BEGIN_BROWSERCACHE_NO404WP', '# BEGIN W3TC Skip 404 error handling by WordPress for static files');
+define('W3TC_MARKER_BEGIN_MINIFY_CORE', '# BEGIN W3TC Minify core');
+define('W3TC_MARKER_BEGIN_MINIFY_CACHE', '# BEGIN W3TC Minify cache');
+
+define('W3TC_MARKER_END_WORDPRESS', '# END WordPress');
+define('W3TC_MARKER_END_SUPERCACHE', '# END WPSuperCache');
+define('W3TC_MARKER_END_PGCACHE_CORE', '# END W3TC Page Cache core');
+define('W3TC_MARKER_END_PGCACHE_CACHE', '# END W3TC Page Cache cache');
+define('W3TC_MARKER_END_BROWSERCACHE_CACHE', '# END W3TC Browser Cache');
+define('W3TC_MARKER_END_BROWSERCACHE_NO404WP', '# END W3TC Skip 404 error handling by WordPress for static files');
+define('W3TC_MARKER_END_MINIFY_CORE', '# END W3TC Minify core');
+define('W3TC_MARKER_END_MINIFY_CACHE', '# END W3TC Minify cache');
+
+define('W3TC_INSTALL_FILE_ADVANCED_CACHE', W3TC_INSTALL_DIR . '/advanced-cache.php');
+define('W3TC_INSTALL_FILE_DB', W3TC_INSTALL_DIR . '/db.php');
+define('W3TC_INSTALL_FILE_OBJECT_CACHE', W3TC_INSTALL_DIR . '/object-cache.php');
+
+define('W3TC_ADDIN_FILE_ADVANCED_CACHE', WP_CONTENT_DIR . '/advanced-cache.php');
+define('W3TC_ADDIN_FILE_DB', WP_CONTENT_DIR . '/db.php');
+define('W3TC_ADDIN_FILE_OBJECT_CACHE', WP_CONTENT_DIR . '/object-cache.php');
+
 @ini_set('pcre.backtrack_limit', 4194304);
 @ini_set('pcre.recursion_limit', 4194304);
-
-$_w3tc_actions = array();
 
 /**
  * Deactivate plugin after activation error
@@ -141,7 +165,7 @@ function w3_network_activate_error()
  */
 function w3_microtime()
 {
-    list($usec, $sec) = explode(" ", microtime());
+    list ($usec, $sec) = explode(" ", microtime());
     return ((float) $usec + (float) $sec);
 }
 
@@ -153,7 +177,7 @@ function w3_microtime()
  * @param string
  * @return boolean
  */
-function w3_mkdir($path, $mask = 0755, $curr_path = '')
+function w3_mkdir($path, $mask = 0777, $curr_path = '')
 {
     $path = w3_realpath($path);
     $path = trim($path, '/');
@@ -167,9 +191,7 @@ function w3_mkdir($path, $mask = 0755, $curr_path = '')
         $curr_path .= ($curr_path == '' ? '' : '/') . $dir;
         
         if (!@is_dir($curr_path)) {
-            if (@mkdir($curr_path, $mask)) {
-                @chmod($curr_path, $mask);
-            } else {
+            if (!@mkdir($curr_path, $mask)) {
                 return false;
             }
         }
@@ -243,7 +265,7 @@ function w3_is_wpmu()
     static $wpmu = null;
     
     if ($wpmu === null) {
-        $wpmu = (w3_is_vhost() || file_exists(ABSPATH . 'wpmu-settings.php'));
+        $wpmu = file_exists(ABSPATH . 'wpmu-settings.php');
     }
     
     return $wpmu;
@@ -254,15 +276,15 @@ function w3_is_wpmu()
  *
  * @return boolean
  */
-function w3_is_network_mode()
+function w3_is_multisite()
 {
-    static $network_mode = null;
+    static $multisite = null;
     
-    if ($network_mode === null) {
-        $network_mode = (defined('MULTISITE') && MULTISITE);
+    if ($multisite === null) {
+        $multisite = (defined('MULTISITE') && MULTISITE);
     }
     
-    return $network_mode;
+    return $multisite;
 }
 
 /**
@@ -270,9 +292,9 @@ function w3_is_network_mode()
  * 
  * @return boolean
  */
-function w3_is_multisite()
+function w3_is_network()
 {
-    return (w3_is_wpmu() || w3_is_network_mode());
+    return (w3_is_wpmu() || w3_is_multisite());
 }
 
 /**
@@ -280,7 +302,7 @@ function w3_is_multisite()
  *
  * @return boolean
  */
-function w3_is_vhost()
+function w3_is_subdomain_install()
 {
     return ((defined('SUBDOMAIN_INSTALL') && SUBDOMAIN_INSTALL) || (defined('VHOST') && VHOST == 'yes'));
 }
@@ -319,9 +341,13 @@ function w3_is_https()
  */
 function w3_is_permalink_rules()
 {
-    $path = w3_get_home_root() . '/.htaccess';
+    if (w3_is_apache() && !w3_is_network()) {
+        $path = w3_get_home_root() . '/.htaccess';
+        
+        return (($data = @file_get_contents($path)) && strstr($data, W3TC_MARKER_BEGIN_WORDPRESS) !== false);
+    }
     
-    return (($data = @file_get_contents($path)) && (strstr($data, 'add a trailing slash to') !== false || strstr($data, 'BEGIN WordPress') !== false));
+    return true;
 }
 
 /**
@@ -391,6 +417,26 @@ function w3_is_writable_dir($dir)
     $file = $dir . '/' . uniqid(mt_rand()) . '.tmp';
     
     return w3_is_writable($file);
+}
+
+/**
+ * Returns true if server is Apache
+ * 
+ * @return boolean
+ */
+function w3_is_apache()
+{
+    return (isset($_SERVER['SERVER_SOFTWARE']) && stristr($_SERVER['SERVER_SOFTWARE'], 'apache') !== false);
+}
+
+/**
+ * Returns true if server is nginx
+ * 
+ * @return boolean
+ */
+function w3_is_nginx()
+{
+    return (isset($_SERVER['SERVER_SOFTWARE']) && stristr($_SERVER['SERVER_SOFTWARE'], 'nginx') !== false);
 }
 
 /**
@@ -490,11 +536,11 @@ function w3_get_blogname()
     static $blogname = null;
     
     if ($blogname === null) {
-        if (w3_is_multisite()) {
+        if (w3_is_network()) {
             $host = w3_get_host();
             $domain = w3_get_domain($host);
             
-            if (w3_is_vhost()) {
+            if (w3_is_subdomain_install()) {
                 $blogname = $domain;
             } else {
                 $uri = $_SERVER['REQUEST_URI'];
@@ -716,11 +762,11 @@ function w3_get_document_root()
     static $document_root = null;
     
     if ($document_root === null) {
-        if (isset($_SERVER['SCRIPT_FILENAME'])) {
+        if (!empty($_SERVER['SCRIPT_FILENAME'])) {
             $document_root = substr($_SERVER['SCRIPT_FILENAME'], 0, -strlen($_SERVER['PHP_SELF']));
-        } elseif (isset($_SERVER['PATH_TRANSLATED'])) {
+        } elseif (!empty($_SERVER['PATH_TRANSLATED'])) {
             $document_root = substr($_SERVER['PATH_TRANSLATED'], 0, -strlen($_SERVER['PHP_SELF']));
-        } elseif (isset($_SERVER['DOCUMENT_ROOT'])) {
+        } elseif (!empty($_SERVER['DOCUMENT_ROOT'])) {
             $document_root = $_SERVER['DOCUMENT_ROOT'];
         } else {
             $document_root = w3_get_site_root();
@@ -753,7 +799,7 @@ function w3_get_home_root()
     $home_url = w3_get_home_url();
     $site_url = w3_get_site_url();
     
-    if (w3_is_multisite()) {
+    if (w3_is_network()) {
         $path = w3_get_base_path();
     } else {
         $path = w3_get_home_path();
@@ -887,10 +933,167 @@ function w3_get_host()
     static $host = null;
     
     if ($host === null) {
-        $host = (isset($_SERVER['HTTP_X_FORWARDED_HOST']) ? $_SERVER['HTTP_X_FORWARDED_HOST'] : $_SERVER['HTTP_HOST']);
+        $host = (!empty($_SERVER['HTTP_X_FORWARDED_HOST']) ? $_SERVER['HTTP_X_FORWARDED_HOST'] : $_SERVER['HTTP_HOST']);
     }
     
     return $host;
+}
+
+/**
+ * Returns path of pagecache core rules file
+ * 
+ * @return string
+ */
+function w3_get_pgcache_rules_core_path()
+{
+    switch (true) {
+        case w3_is_apache():
+            return w3_get_home_root() . '/.htaccess';
+        
+        case w3_is_nginx():
+            return w3_get_document_root() . '/nginx.conf';
+    }
+    
+    return false;
+}
+
+/**
+ * Returns path of pgcache cache rules file
+ * 
+ * @return string
+ */
+function w3_get_pgcache_rules_cache_path()
+{
+    switch (true) {
+        case w3_is_apache():
+            return W3TC_CACHE_FILE_PGCACHE_DIR . '/.htaccess';
+        
+        case w3_is_nginx():
+            return w3_get_document_root() . '/nginx.conf';
+    }
+    
+    return false;
+}
+
+/**
+ * Returns path of browsercache cache rules file
+ * 
+ * @return string
+ */
+function w3_get_browsercache_rules_cache_path()
+{
+    switch (true) {
+        case w3_is_apache():
+            return w3_get_document_root() . '/.htaccess';
+        
+        case w3_is_nginx():
+            return w3_get_document_root() . '/nginx.conf';
+    }
+    
+    return false;
+}
+
+/**
+ * Returns path of browsercache no404wp rules file
+ * 
+ * @return string
+ */
+function w3_get_browsercache_rules_no404wp_path()
+{
+    switch (true) {
+        case w3_is_apache():
+            return w3_get_home_root() . '/.htaccess';
+        
+        case w3_is_nginx():
+            return w3_get_document_root() . '/nginx.conf';
+    }
+    
+    return false;
+}
+
+/**
+ * Returns path of minify rules file
+ * 
+ * @return string
+ */
+function w3_get_minify_rules_core_path()
+{
+    switch (true) {
+        case w3_is_apache():
+            return W3TC_CACHE_FILE_MINIFY_DIR . '/.htaccess';
+        
+        case w3_is_nginx():
+            return w3_get_document_root() . '/nginx.conf';
+    }
+    
+    return false;
+}
+
+/**
+ * Returns path of minify rules file
+ * 
+ * @return string
+ */
+function w3_get_minify_rules_cache_path()
+{
+    switch (true) {
+        case w3_is_apache():
+            return W3TC_CACHE_FILE_MINIFY_DIR . '/.htaccess';
+        
+        case w3_is_nginx():
+            return w3_get_document_root() . '/nginx.conf';
+    }
+    
+    return false;
+}
+
+/**
+ * Returns path of minify rules file
+ * 
+ * @return string
+ */
+function w3_get_cdn_rules_path()
+{
+    switch (true) {
+        case w3_is_apache():
+            return '.htaccess';
+        
+        case w3_is_nginx():
+            return 'nginx.conf';
+    }
+    
+    return false;
+}
+
+/**
+ * Returns true if we can modify rules
+ * 
+ * @param string $path
+ * @return boolean
+ */
+function w3_can_modify_rules($path)
+{
+    if (w3_is_apache()) {
+        if (w3_is_network()) {
+            switch ($path) {
+                case w3_get_pgcache_rules_cache_path():
+                case w3_get_minify_rules_core_path():
+                case w3_get_minify_rules_cache_path():
+                    return true;
+                
+                case w3_get_pgcache_rules_core_path():
+                case w3_get_browsercache_rules_cache_path():
+                case w3_get_browsercache_rules_no404wp_path():
+                    return false;
+            }
+        } else {
+            return true;
+        }
+    } elseif (w3_is_nginx() && !w3_is_network()) {
+        return true;
+    }
+    
+    return false;
 }
 
 /**
@@ -1156,7 +1359,7 @@ function w3_http_request($method, $url, $data = '', $auth = '', $check_status = 
             
             @fclose($fp);
             
-            list($response_headers, $contents) = explode("\r\n\r\n", $response, 2);
+            list ($response_headers, $contents) = explode("\r\n\r\n", $response, 2);
             
             $matches = null;
             
@@ -1440,25 +1643,6 @@ function w3_to_boolean($value)
 }
 
 /**
- * Loads plugins
- *
- * @return void
- */
-function w3_load_plugins()
-{
-    $dir = @opendir(W3TC_PLUGINS_DIR);
-    
-    if ($dir) {
-        while (($entry = @readdir($dir)) !== false) {
-            if (strrchr($entry, '.') === '.php') {
-                require_once W3TC_PLUGINS_DIR . '/' . $entry;
-            }
-        }
-        @closedir($dir);
-    }
-}
-
-/**
  * Returns file mime type
  *
  * @param string $file
@@ -1661,93 +1845,33 @@ function w3_clean_rules($rules)
  */
 function w3_erase_text($text, $start, $end)
 {
-    $text = preg_replace('~' . w3_preg_quote($start) . '.*' . w3_preg_quote($end) . '~Us', '', $text);
+    $text = preg_replace('~' . w3_preg_quote($start) . '.*?' . w3_preg_quote($end) . "\n*~s", '', $text);
     $text = trim($text);
+    
+    if ($text != '') {
+        $text .= "\n";
+    }
     
     return $text;
 }
 
 /**
- * Return deafult htaccess rules for current WP version
+ * Loads plugins
  *
- * @return string
+ * @return void
  */
-function w3_get_permalink_rules()
+function w3_load_plugins()
 {
-    $rules = '';
-    $base_path = w3_get_base_path();
+    $dir = @opendir(W3TC_PLUGINS_DIR);
     
-    if (w3_is_wpmu()) {
-        $rules .= "RewriteEngine On\n";
-        $rules .= "RewriteBase " . $base_path . "\n\n";
-        
-        $rules .= "#uploaded files\n";
-        $rules .= "RewriteRule ^(.*/)?files/$ index.php [L]\n";
-        $rules .= "RewriteCond %{REQUEST_URI} !.*wp-content/plugins.*\n";
-        $rules .= "RewriteRule ^(.*/)?files/(.*) wp-content/blogs.php?file=$2 [L]\n\n";
-        
-        $rules .= "# add a trailing slash to /wp-admin\n";
-        $rules .= "RewriteCond %{REQUEST_URI} ^.*/wp-admin$\n";
-        $rules .= "RewriteRule ^(.+)$ $1/ [R=301,L]\n\n";
-        
-        $rules .= "RewriteCond %{REQUEST_FILENAME} -f [OR]\n";
-        $rules .= "RewriteCond %{REQUEST_FILENAME} -d\n";
-        $rules .= "RewriteRule . - [L]\n";
-        $rules .= "RewriteRule  ^([_0-9a-zA-Z-]+/)?(wp-.*) $2 [L]\n";
-        $rules .= "RewriteRule  ^([_0-9a-zA-Z-]+/)?(.*\\.php)$ $2 [L]\n";
-        $rules .= "RewriteRule . index.php [L]\n\n";
-        
-        $rules .= "<IfModule mod_security.c>\n";
-        $rules .= "<Files async-upload.php>\n";
-        $rules .= "SecFilterEngine Off\n";
-        $rules .= "SecFilterScanPOST Off\n";
-        $rules .= "</Files>\n";
-        $rules .= "</IfModule>\n";
-    } elseif (w3_is_network_mode()) {
-        $subdomain_install = is_subdomain_install();
-        
-        $rules .= "# BEGIN WordPress\n";
-        $rules .= "<IfModule mod_rewrite.c>\n";
-        $rules .= "RewriteEngine On\n";
-        $rules .= "RewriteBase " . $base_path . "\n";
-        $rules .= "RewriteRule ^index\\.php$ - [L]\n\n";
-        
-        $rules .= "# uploaded files\n";
-        $rules .= "RewriteRule ^" . ($subdomain_install ? '' : '([_0-9a-zA-Z-]+/)?') . "files/(.+) wp-includes/ms-files.php?file=$" . ($subdomain_install ? 1 : 2) . " [L]\n\n";
-        
-        if (!$subdomain_install) {
-            $rules .= "# add a trailing slash to /wp-admin\n";
-            $rules .= "RewriteRule ^([_0-9a-zA-Z-]+/)?wp-admin$ $1wp-admin/ [R=301,L]\n";
+    if ($dir) {
+        while (($entry = @readdir($dir)) !== false) {
+            if (strrchr($entry, '.') === '.php') {
+                require_once W3TC_PLUGINS_DIR . '/' . $entry;
+            }
         }
-        
-        $rules .= "RewriteCond %{REQUEST_FILENAME} -f [OR]\n";
-        $rules .= "RewriteCond %{REQUEST_FILENAME} -d\n";
-        $rules .= "RewriteRule ^ - [L]\n";
-        
-        // @todo custom content dir.
-        if (!$subdomain_install) {
-            $rules .= "RewriteRule  ^([_0-9a-zA-Z-]+/)?(wp-(content|admin|includes).*) $2 [L]\n";
-            $rules .= "RewriteRule  ^([_0-9a-zA-Z-]+/)?(.*\\.php)$ $2 [L]\n";
-        }
-        
-        $rules .= "RewriteRule . index.php [L]\n";
-        $rules .= "</IfModule>\n";
-        $rules .= "# END WordPress\n";
-    } else {
-        $home_path = w3_get_home_path();
-        
-        $rules .= "# BEGIN WordPress\n";
-        $rules .= "<IfModule mod_rewrite.c>\n";
-        $rules .= "   RewriteEngine On\n";
-        $rules .= "   RewriteBase " . $home_path . "\n";
-        $rules .= "   RewriteCond %{REQUEST_FILENAME} !-f\n";
-        $rules .= "   RewriteCond %{REQUEST_FILENAME} !-d\n";
-        $rules .= "   RewriteRule . " . $home_path . "index.php [L]\n";
-        $rules .= "</IfModule>\n";
-        $rules .= "# END WordPress\n";
+        @closedir($dir);
     }
-    
-    return $rules;
 }
 
 /**
@@ -1759,9 +1883,7 @@ function w3_get_permalink_rules()
  */
 function w3tc_add_action($action, $callback)
 {
-    global $_w3tc_actions;
-    
-    $_w3tc_actions[$action][] = $callback;
+    $GLOBALS['_w3tc_actions'][$action][] = $callback;
 }
 
 /**
@@ -1773,10 +1895,8 @@ function w3tc_add_action($action, $callback)
  */
 function w3tc_do_action($action, $value = null)
 {
-    global $_w3tc_actions;
-    
-    if (isset($_w3tc_actions[$action])) {
-        foreach ((array) $_w3tc_actions[$action] as $callback) {
+    if (isset($GLOBALS['_w3tc_actions'][$action])) {
+        foreach ((array) $GLOBALS['_w3tc_actions'][$action] as $callback) {
             if (is_callable($callback)) {
                 $value = call_user_func($callback, $value);
             }

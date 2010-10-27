@@ -83,7 +83,7 @@ class W3_Cache_File extends W3_Cache_Base
         $sub_dir = dirname($sub_path);
         $dir = dirname($path);
         
-        if ((@is_dir($dir) || w3_mkdir($sub_dir, 0755, $this->_cache_dir))) {
+        if ((@is_dir($dir) || w3_mkdir($sub_dir, 0777, $this->_cache_dir))) {
             $fp = @fopen($path, 'wb');
             
             if ($fp) {

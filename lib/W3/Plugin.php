@@ -69,7 +69,7 @@ class W3_Plugin
         static $locked = null;
         
         if ($locked === null) {
-            if (w3_is_multisite() && function_exists('get_blog_list')) {
+            if (w3_is_network() && function_exists('get_blog_list')) {
                 global $blog_id;
                 
                 $blogs = get_blog_list();

@@ -59,7 +59,7 @@ class W3_Cache_File_PgCache extends W3_Cache_File
         $sub_dir = dirname($sub_path);
         $dir = dirname($path);
         
-        if ((@is_dir($dir) || w3_mkdir($sub_dir, 0755, $this->_cache_dir))) {
+        if ((@is_dir($dir) || w3_mkdir($sub_dir, 0777, $this->_cache_dir))) {
             $fp = @fopen($path, 'w');
             
             if ($fp) {

@@ -122,14 +122,8 @@ class W3_Plugin_DbCache extends W3_Plugin
      */
     function activate()
     {
-        if (!$this->locked()) {
-            $file_db = WP_CONTENT_DIR . '/db.php';
-            
-            if (@copy(W3TC_INSTALL_DIR . '/db.php', $file_db)) {
-                @chmod($file_db, 0644);
-            } else {
-                w3_writable_error($file_db);
-            }
+        if (!$this->locked() && !@copy(W3TC_INSTALL_FILE_DB, W3TC_ADDIN_FILE_DB)) {
+            w3_writable_error(W3TC_ADDIN_FILE_DB);
         }
         
         $this->schedule();
@@ -143,7 +137,7 @@ class W3_Plugin_DbCache extends W3_Plugin
         $this->unschedule();
         
         if (!$this->locked()) {
-            @unlink(WP_CONTENT_DIR . '/db.php');
+            @unlink(W3TC_ADDIN_FILE_DB);
         }
     }
     

@@ -21,32 +21,14 @@
 	
 	<hr />
 	
-	<?php if ($document_root_rules || $home_root_rules || $pgcache_rules || $minify_rules || $cdn_rules): ?>
+	<?php if (count($rewrite_rules)): ?>
 	<h3>Rewrite rules</h3>
-	<?php if ($document_root_rules): ?>
-	<p><strong><?php echo htmlspecialchars($document_root_htaccess); ?>:</strong></p>
-	<pre class="code"><?php echo htmlspecialchars($document_root_rules); ?></pre>
-	<?php endif; ?>
-    
-	<?php if ($home_root_rules): ?>
-	<p><strong><?php echo htmlspecialchars($home_root_htaccess); ?>:</strong></p>
-	<pre class="code"><?php echo htmlspecialchars($home_root_rules); ?></pre>
-	<?php endif; ?>
 
-	<?php if ($pgcache_rules): ?>
-	<p><strong><?php echo htmlspecialchars($pgcache_htaccess); ?>:</strong></p>
-	<pre class="code"><?php echo htmlspecialchars($pgcache_rules); ?></pre>
-	<?php endif; ?>
+	<?php foreach ($rewrite_rules as $path => $rules): ?>
+	<p><strong><?php echo htmlspecialchars($path); ?>:</strong></p>
+	<pre class="code"><?php echo htmlspecialchars($rules); ?></pre>
+	<?php endforeach; ?>
 
-	<?php if ($minify_rules): ?>
-	<p><strong><?php echo htmlspecialchars($minify_htaccess); ?>:</strong></p>
-	<pre class="code"><?php echo htmlspecialchars($minify_rules); ?></pre>
-	<?php endif; ?>
-    
-	<?php if ($cdn_rules): ?>
-	<p><strong><?php echo htmlspecialchars($cdn_htaccess); ?>:</strong></p>
-	<pre class="code"><?php echo htmlspecialchars($cdn_rules); ?></pre>
-	<?php endif; ?>
 	<hr />
 	<?php endif; ?>
         

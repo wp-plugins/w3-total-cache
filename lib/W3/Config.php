@@ -210,7 +210,8 @@ class W3_Config
         'notes.need_empty_minify' => 'boolean', 
         'notes.pgcache_rules_core' => 'boolean', 
         'notes.pgcache_rules_cache' => 'boolean', 
-        'notes.minify_rules' => 'boolean', 
+        'notes.minify_rules_core' => 'boolean', 
+        'notes.minify_rules_cache' => 'boolean', 
         'notes.support_us' => 'boolean', 
         'notes.no_curl' => 'boolean', 
         'notes.no_zlib' => 'boolean', 
@@ -364,7 +365,8 @@ class W3_Config
         'cdn.custom.enable' => true, 
         'cdn.custom.files' => array(
             'favicon.ico', 
-            'wp-content/gallery/*'
+            'wp-content/gallery/*', 
+            'wp-content/uploads/avatars/*'
         ), 
         'cdn.import.external' => false, 
         'cdn.import.files' => '*.jpg;*.png;*.gif;*.avi;*.wmv;*.mpg;*.wav;*.mp3;*.txt;*.rtf;*.doc;*.xls;*.rar;*.zip;*.tar;*.gz;*.exe', 
@@ -611,7 +613,8 @@ class W3_Config
         'notes.need_empty_minify' => false, 
         'notes.pgcache_rules_core' => true, 
         'notes.pgcache_rules_cache' => true, 
-        'notes.minify_rules' => true, 
+        'notes.minify_rules_core' => true, 
+        'notes.minify_rules_cache' => true, 
         'notes.support_us' => true, 
         'notes.no_curl' => true, 
         'notes.no_zlib' => true, 

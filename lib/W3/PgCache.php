@@ -118,6 +118,7 @@ class W3_PgCache
              * Skip caching for some pages
              */
             switch (true) {
+                case defined('DONOTCACHEPAGE'):
                 case defined('DOING_AJAX'):
                 case defined('DOING_CRON'):
                 case defined('APP_REQUEST'):
@@ -1169,6 +1170,12 @@ class W3_PgCache
             if ($this->_config->get_boolean('browsercache.html.etag')) {
                 $headers = array_merge($headers, array(
                     'Etag' => $etag
+                ));
+            }
+            
+            if ($this->_config->get_boolean('browsercache.html.w3tc')) {
+                $headers = array_merge($headers, array(
+                    'X-Powered-By' => W3TC_POWERED_BY
                 ));
             }
         }

@@ -95,6 +95,9 @@ class W3_Plugin_Cdn extends W3_Plugin
                 ));
             }
             
+            /**
+             * Start rewrite engine
+             */
             if ($this->can_cdn()) {
                 ob_start(array(
                     &$this, 
@@ -618,7 +621,9 @@ class W3_Plugin_Cdn extends W3_Plugin
         $table = $wpdb->prefix . W3TC_CDN_TABLE_QUEUE;
         $sql = sprintf('SELECT id FROM %s WHERE local_path = "%s" AND remote_path = "%s" AND command != %d', $table, $wpdb->escape($local_path), $wpdb->escape($remote_path), $command);
         
-        if (($row = $wpdb->get_row($sql))) {
+        $row = $wpdb->get_row($sql);
+        
+        if ($row) {
             $sql = sprintf('DELETE FROM %s WHERE id = %d', $table, $row->id);
         } else {
             $sql = sprintf('REPLACE INTO %s (local_path, remote_path, command, last_error, date) VALUES ("%s", "%s", %d, "%s", NOW())', $table, $wpdb->escape($local_path), $wpdb->escape($remote_path), $command, $wpdb->escape($last_error));
@@ -1039,7 +1044,7 @@ class W3_Plugin_Cdn extends W3_Plugin
                                         $dst_path = ltrim(str_replace($document_root, '', w3_path($dst)), '/');
                                         
                                         if ($upload_subdir) {
-                                            w3_mkdir($upload_subdir, 0755, $upload_info['basedir']);
+                                            w3_mkdir($upload_subdir, 0777, $upload_info['basedir']);
                                         }
                                         
                                         $download_result = false;
@@ -1408,7 +1413,7 @@ class W3_Plugin_Cdn extends W3_Plugin
                         $dir = dirname($file);
                         
                         if ($dir) {
-                            w3_mkdir($dir, 0755, $minify_root);
+                            w3_mkdir($dir, 0777, $minify_root);
                         }
                         
                         if (w3_download($url, $minify_root . '/' . $file) !== false) {
@@ -1744,15 +1749,6 @@ class W3_Plugin_Cdn extends W3_Plugin
      */
     function can_cdn()
     {
-        /**
-         * Skip if CDN is disabled
-         */
-        if (!$this->_config->get_boolean('cdn.enabled')) {
-            $this->cdn_reject_reason = 'CDN is disabled';
-            
-            return false;
-        }
-        
         /**
          * Skip if admin
          */

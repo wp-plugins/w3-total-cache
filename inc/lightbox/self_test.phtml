@@ -140,94 +140,31 @@
         <br />
         
         <?php 
-        if (function_exists('apache_get_modules')): 
-            $apache_modules = apache_get_modules(); 
-        else: 
-            $apache_modules = false; 
-        endif; 
+        $apache_modules = (function_exists('apache_get_modules') ? apache_get_modules() : false); 
+        
+        $modules = array(
+            'mod_mime',
+            'mod_expires',
+            'mod_deflate',
+            'mod_headers',
+            'mod_env',
+            'mod_setenvif',
+            'mod_rewrite'
+        );
         ?>
-    	mod_mime:
-    	<?php if ($apache_modules): ?>
-    	<?php if (in_array('mod_mime', $apache_modules)): ?>
-    	<span class="w3tc-test-ok">OK</span>
-    	<?php else: ?>
-    	<span class="w3tc-test-error">Not installed</span>
-    	<?php endif; ?>
-        <?php else: ?>
-    	<span class="w3tc-test-warn">Not detected</span>
-        <?php endif; ?>
-        <br />
-		          
-    	mod_expires:
-    	<?php if ($apache_modules): ?>
-    	<?php if (in_array('mod_expires', $apache_modules)): ?>
-    	<span class="w3tc-test-ok">OK</span>
-    	<?php else: ?>
-    	<span class="w3tc-test-error">Not installed</span>
-    	<?php endif; ?>
-        <?php else: ?>
-    	<span class="w3tc-test-warn">Not detected</span>
-        <?php endif; ?>
-        <br />
-
-    	mod_deflate / mod_gzip:
-    	<?php if ($apache_modules): ?>
-    	<?php if (in_array('mod_deflate', $apache_modules)): ?>
-    	<span class="w3tc-test-ok">OK</span>
-    	<?php else: ?>
-    	<span class="w3tc-test-error">Not installed</span>
-    	<?php endif; ?>
-        <?php else: ?>
-    	<span class="w3tc-test-warn">Not detected</span>
-        <?php endif; ?>
-        <br />
-    
-    	mod_headers:
-    	<?php if ($apache_modules): ?>
-    	<?php if (in_array('mod_headers', $apache_modules)): ?>
-    	<span class="w3tc-test-ok">OK</span>
-    	<?php else: ?>
-    	<span class="w3tc-test-error">Not installed</span>
-    	<?php endif; ?>
-        <?php else: ?>
-    	<span class="w3tc-test-warn">Not detected</span>
-        <?php endif; ?>
-        <br />
-    
-    	mod_env:
-    	<?php if ($apache_modules): ?>
-    	<?php if (in_array('mod_env', $apache_modules)): ?>
-    	<span class="w3tc-test-ok">OK</span>
-    	<?php else: ?>
-    	<span class="w3tc-test-error">Not installed</span>
-    	<?php endif; ?>
-        <?php else: ?>
-    	<span class="w3tc-test-warn">Not detected</span>
-        <?php endif; ?>
-        <br />
-    
-    	mod_setenvif:
-    	<?php if ($apache_modules): ?>
-    	<?php if (in_array('mod_setenvif', $apache_modules)): ?>
-    	<span class="w3tc-test-ok">OK</span>
-    	<?php else: ?>
-    	<span class="w3tc-test-error">Not installed</span>
-    	<?php endif; ?>
-        <?php else: ?>
-    	<span class="w3tc-test-warn">Not detected</span>
-        <?php endif; ?>
-        <br />
-    
-    	mod_rewrite:
-    	<?php if ($apache_modules): ?>
-    	<?php if (in_array('mod_rewrite', $apache_modules)): ?>
-    	<span class="w3tc-test-ok">OK</span>
-    	<?php else: ?>
-    	<span class="w3tc-test-error">Not installed</span>
-    	<?php endif; ?>
-        <?php else: ?>
-    	<span class="w3tc-test-warn">Not detected</span>
-        <?php endif; ?>
+		<?php foreach ($modules as $module): ?>
+    		<?php echo $module; ?>:
+	    	<?php if ($apache_modules): ?>
+            	<?php if (in_array($module, $apache_modules)): ?>
+            	<span class="w3tc-test-ok">OK</span>
+            	<?php else: ?>
+            	<span class="w3tc-test-error">Not installed</span>
+            	<?php endif; ?>
+            <?php else: ?>
+        	<span class="w3tc-test-warn">Not detected</span>
+            <?php endif; ?>
+            <br />
+        <?php endforeach; ?>
 	</div>
 	    
     <h4>WordPress Resources</h4>
@@ -242,45 +179,29 @@
     	<br />
         
         <?php 
-        $home_root = w3_get_home_root();
-        $htaccess_home_path = $home_root . '/.htaccess';
-    	
-        if (file_exists($htaccess_home_path)): ?>
-        	<?php echo htmlspecialchars($htaccess_home_path); ?>
-        	<?php if (w3_is_writable($htaccess_home_path)): ?>
-        	<span class="w3tc-test-ok">Write-able</span>
-        	<?php else: ?>
-        	<span class="w3tc-test-error">Not write-able</span>
-        	<?php endif; ?>
-        <?php else: ?>
-        	<?php echo htmlspecialchars($home_root); ?>
-        	<?php if (w3_is_writable_dir($home_root)): ?>
-        	<span class="w3tc-test-ok">Write-able</span>
-        	<?php else: ?>
-        	<span class="w3tc-test-error">Not write-able</span>
-        	<?php endif; ?>
-        <?php endif; ?>
-        <br />
-        
-    	<?php
-    	$document_root = w3_get_document_root(); 
-    	$htaccess_docroot_path = $document_root . '/.htaccess'; 
-    	
-    	if ($document_root != $home_root): if (file_exists($htaccess_docroot_path)): ?>
-        	<?php echo htmlspecialchars($htaccess_docroot_path); ?>
-        	<?php if (w3_is_writable($htaccess_docroot_path)): ?>
-        	<span class="w3tc-test-ok">Write-able</span>
-        	<?php else: ?>
-        	<span class="w3tc-test-error">Not write-able</span>
-        	<?php endif; ?>
-        <?php else: ?>
-        	<?php echo htmlspecialchars($document_root); ?>
-        	<?php if (w3_is_writable_dir($document_root)): ?>
-        	<span class="w3tc-test-ok">Write-able</span>
-        	<?php else: ?>
-        	<span class="w3tc-test-error">Not write-able</span>
-        	<?php endif; ?>
-        <?php endif; ?><br /><?php endif; ?>
+        $paths = array_unique(array(
+            w3_get_pgcache_rules_core_path(),
+            w3_get_browsercache_rules_cache_path(),
+            w3_get_browsercache_rules_no404wp_path()
+        ));
+        ?>
+        <?php foreach ($paths as $path): ?>
+        	<?php echo htmlspecialchars($path); ?>
+        	<?php if (file_exists($path)): ?>
+            	<?php if (w3_is_writable($path)): ?>
+            	<span class="w3tc-test-ok">Write-able</span>
+            	<?php else: ?>
+            	<span class="w3tc-test-error">Not write-able</span>
+            	<?php endif; ?>
+           	<?php else: ?>
+            	<?php if (w3_is_writable_dir(dirname($path))): ?>
+            	<span class="w3tc-test-ok">Write-able</span>
+            	<?php else: ?>
+            	<span class="w3tc-test-error">Not write-able</span>
+            	<?php endif; ?>
+            <?php endif; ?>
+	        <br />
+	    <?php endforeach; ?>
         
     	Uploads directory:
     	<?php $uploads_dir = @wp_upload_dir(); if (!empty($uploads_dir['error'])): ?>
@@ -309,16 +230,16 @@
     	<br />
     
     	Network mode:
-    	<?php if (w3_is_multisite()): ?>
+    	<?php if (w3_is_network()): ?>
     	<span class="w3tc-test-ok">On</span>
     	<?php else: ?>
     	<span class="w3tc-test-ok">Off</span>
     	<?php endif; ?>
     	<br />
         
-        <?php if (w3_is_multisite()): ?>
-        	VHOST mode:
-        	<?php if (w3_is_vhost()): ?>
+        <?php if (w3_is_network()): ?>
+        	Subdomain install:
+        	<?php if (w3_is_subdomain_install()): ?>
         	<span class="w3tc-test-ok">On</span>
         	<?php else: ?>
         	<span class="w3tc-test-ok">Off</span>

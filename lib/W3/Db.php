@@ -76,7 +76,7 @@ class W3_Db extends wpdb
         $this->_config = & W3_Config::instance();
         $this->_lifetime = $this->_config->get_integer('dbcache.lifetime');
         
-        if ($this->_config->get_boolean('dbcache.enabled') && $this->_config->get_boolean('dbcache.debug')) {
+        if ($this->_can_ob()) {
             ob_start(array(
                 &$this, 
                 'ob_callback'
@@ -130,7 +130,7 @@ class W3_Db extends wpdb
         $this->last_query = $query;
         
         $reason = '';
-        $caching = $this->can_cache($query, $reason);
+        $caching = $this->_can_cache($query, $reason);
         $cached = false;
         $data = false;
         $time_total = 0;
@@ -235,6 +235,7 @@ class W3_Db extends wpdb
                 'caching' => $caching, 
                 'reason' => $reason, 
                 'cached' => $cached, 
+                'data_size' => ($data ? strlen(serialize($data)) : 0), 
                 'time_total' => $time_total
             );
         }
@@ -245,12 +246,94 @@ class W3_Db extends wpdb
     }
     
     /**
+     * Flushes cache
+     *
+     * @return boolean
+     */
+    function flush_cache()
+    {
+        $cache = & $this->_get_cache();
+        
+        return $cache->flush();
+    }
+    
+    /**
+     * Returns onject instance
+     *
+     * @return W3_Db
+     */
+    function &instance()
+    {
+        static $instances = array();
+        
+        if (!isset($instances[0])) {
+            $class = __CLASS__;
+            $instances[0] = & new $class(DB_USER, DB_PASSWORD, DB_NAME, DB_HOST);
+        }
+        
+        return $instances[0];
+    }
+    
+    /**
+     * Output buffering callback
+     *
+     * @param string $buffer
+     * @return string
+     */
+    function ob_callback(&$buffer)
+    {
+        if ($buffer != '' && w3_is_xml($buffer)) {
+            $buffer .= "\r\n\r\n" . $this->_get_debug_info();
+        }
+        
+        return $buffer;
+    }
+    
+    /**
+     * Returns cache object
+     *
+     * @return W3_Cache_Base
+     */
+    function &_get_cache()
+    {
+        static $cache = array();
+        
+        if (!isset($cache[0])) {
+            $engine = $this->_config->get_string('dbcache.engine');
+            
+            switch ($engine) {
+                case 'memcached':
+                    $engineConfig = array(
+                        'servers' => $this->_config->get_array('dbcache.memcached.servers'), 
+                        'persistant' => $this->_config->get_boolean('dbcache.memcached.persistant')
+                    );
+                    break;
+                
+                case 'file':
+                    $engineConfig = array(
+                        'cache_dir' => W3TC_CACHE_FILE_DBCACHE_DIR, 
+                        'locking' => $this->_config->get_boolean('dbcache.file.locking')
+                    );
+                    break;
+                
+                default:
+                    $engineConfig = array();
+            }
+            
+            require_once W3TC_LIB_W3_DIR . '/Cache.php';
+            $cache[0] = & W3_Cache::instance($engine, $engineConfig);
+        }
+        
+        return $cache[0];
+    }
+    
+    /**
      * Check if can cache sql
      *
      * @param string $sql
      * @return boolean
      */
-    function can_cache($sql, &$cache_reject_reason)
+    function _can_cache($sql, &$cache_reject_reason)
     {
         /**
          * Skip if disabled
@@ -364,85 +447,69 @@ class W3_Db extends wpdb
     }
     
     /**
-     * Flushes cache
-     *
+     * Check if we can start OB
+     * 
      * @return boolean
      */
-    function flush_cache()
+    function _can_ob()
     {
-        $cache = & $this->_get_cache();
-        
-        return $cache->flush();
-    }
-    
-    /**
-     * Returns onject instance
-     *
-     * @return W3_Db
-     */
-    function &instance()
-    {
-        static $instances = array();
-        
-        if (!isset($instances[0])) {
-            $class = __CLASS__;
-            $instances[0] = & new $class(DB_USER, DB_PASSWORD, DB_NAME, DB_HOST);
+        /**
+         * Database cache should be enabled
+         */
+        if (!$this->_config->get_boolean('dbcache.enabled')) {
+            return false;
         }
         
-        return $instances[0];
-    }
-    
-    /**
-     * Output buffering callback
-     *
-     * @param string $buffer
-     * @return string
-     */
-    function ob_callback(&$buffer)
-    {
-        if ($buffer != '' && w3_is_xml($buffer)) {
-            $buffer .= "\r\n\r\n" . $this->_get_debug_info();
+        /**
+         * Debug should be enabled
+         */
+        if (!$this->_config->get_boolean('dbcache.debug')) {
+            return false;
         }
         
-        return $buffer;
-    }
-    
-    /**
-     * Returns cache object
-     *
-     * @return W3_Cache_Base
-     */
-    function &_get_cache()
-    {
-        static $cache = array();
-        
-        if (!isset($cache[0])) {
-            $engine = $this->_config->get_string('dbcache.engine');
-            
-            switch ($engine) {
-                case 'memcached':
-                    $engineConfig = array(
-                        'servers' => $this->_config->get_array('dbcache.memcached.servers'), 
-                        'persistant' => $this->_config->get_boolean('dbcache.memcached.persistant')
-                    );
-                    break;
-                
-                case 'file':
-                    $engineConfig = array(
-                        'cache_dir' => W3TC_CACHE_FILE_DBCACHE_DIR, 
-                        'locking' => $this->_config->get_boolean('dbcache.file.locking')
-                    );
-                    break;
-                
-                default:
-                    $engineConfig = array();
-            }
-            
-            require_once W3TC_LIB_W3_DIR . '/Cache.php';
-            $cache[0] = & W3_Cache::instance($engine, $engineConfig);
+        /**
+         * Skip if admin
+         */
+        if (defined('WP_ADMIN')) {
+            return false;
         }
         
-        return $cache[0];
+        /**
+         * Skip if doint AJAX
+         */
+        if (defined('DOING_AJAX')) {
+            return false;
+        }
+        
+        /**
+         * Skip if doing cron
+         */
+        if (defined('DOING_CRON')) {
+            return false;
+        }
+        
+        /**
+         * Skip if APP request
+         */
+        if (defined('APP_REQUEST')) {
+            return false;
+        }
+        
+        /**
+         * Skip if XMLRPC request
+         */
+        if (defined('XMLRPC_REQUEST')) {
+            return false;
+        }
+        
+        /**
+         * Check for WPMU's and WP's 3.0 short init
+         */
+        if (defined('SHORTINIT') && SHORTINIT) {
+            return false;
+        }
+        
+        return true;
     }
     
     /**
@@ -600,9 +667,9 @@ class W3_Db extends wpdb
         
         if (count($this->query_stats)) {
             $debug_info .= "SQL info:\r\n";
-            $debug_info .= sprintf("%s | %s | %s | % s | %s\r\n", str_pad('#', 5, ' ', STR_PAD_LEFT), str_pad('Time (s)', 8, ' ', STR_PAD_LEFT), str_pad('Caching (Reject reason)', 30, ' ', STR_PAD_BOTH), str_pad('Status', 10, ' ', STR_PAD_BOTH), 'Query');
+            $debug_info .= sprintf("%s | %s | %s | % s | %s | %s\r\n", str_pad('#', 5, ' ', STR_PAD_LEFT), str_pad('Time (s)', 8, ' ', STR_PAD_LEFT), str_pad('Caching (Reject reason)', 30, ' ', STR_PAD_BOTH), str_pad('Status', 10, ' ', STR_PAD_BOTH), str_pad('Data size (b)', 13, ' ', STR_PAD_LEFT), 'Query');
             foreach ($this->query_stats as $index => $query) {
-                $debug_info .= sprintf("%s | %s | %s | %s | %s\r\n", str_pad($index + 1, 5, ' ', STR_PAD_LEFT), str_pad(round($query['time_total'], 3), 8, ' ', STR_PAD_LEFT), str_pad(($query['caching'] ? 'enabled' : sprintf('disabled (%s)', $query['reason'])), 30, ' ', STR_PAD_BOTH), str_pad(($query['cached'] ? 'cached' : 'not cached'), 10, ' ', STR_PAD_BOTH), str_replace('-->', '-- >', trim($query['query'])));
+                $debug_info .= sprintf("%s | %s | %s | %s | %s | %s\r\n", str_pad($index + 1, 5, ' ', STR_PAD_LEFT), str_pad(round($query['time_total'], 3), 8, ' ', STR_PAD_LEFT), str_pad(($query['caching'] ? 'enabled' : sprintf('disabled (%s)', $query['reason'])), 30, ' ', STR_PAD_BOTH), str_pad(($query['cached'] ? 'cached' : 'not cached'), 10, ' ', STR_PAD_BOTH), str_pad($query['data_size'], 13, ' ', STR_PAD_LEFT), str_replace('-->', '-- >', trim($query['query'])));
             }
         }
         

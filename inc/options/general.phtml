@@ -24,7 +24,7 @@
         	<tr>
         		<th colspan="2">
                 	<label>
-                		<input id="enabled" type="checkbox" name="enabled" value="1"<?php checked($enabled_checked, true); ?> />
+                		<input id="enabled" type="checkbox" name="enabled" value="1"<?php checked($enabled, true); ?> />
                 		Deselect this option to disable all caching functionality.
                 	</label>
         		</th>
@@ -35,7 +35,7 @@
                 	<?php if ($preview): ?>
                 	<input type="hidden" name="preview" value="0" />
                 	<input type="submit" name="preview_save" class="button-primary" value="Disable" />
-                	<?php echo $this->button_link('Preview', w3_get_site_url() . '/?w3tc_preview=1', true); ?>
+                	<?php echo $this->button_link('Preview', w3_get_home_url() . '/?w3tc_preview=1', true); ?>
                 	<?php echo $this->button_link('Deploy', sprintf('admin.php?page=%s&preview_deploy', $this->_page)); ?>
                 	<?php else: ?>
                 	<input type="hidden" name="preview" value="1" />

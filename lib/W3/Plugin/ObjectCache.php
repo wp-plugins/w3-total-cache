@@ -122,14 +122,8 @@ class W3_Plugin_ObjectCache extends W3_Plugin
      */
     function activate()
     {
-        if (!$this->locked()) {
-            $file = WP_CONTENT_DIR . '/object-cache.php';
-            
-            if (@copy(W3TC_INSTALL_DIR . '/object-cache.php', $file)) {
-                @chmod($file, 0644);
-            } else {
-                w3_writable_error($file);
-            }
+        if (!$this->locked() && !@copy(W3TC_INSTALL_FILE_OBJECT_CACHE, W3TC_ADDIN_FILE_OBJECT_CACHE)) {
+            w3_writable_error(W3TC_ADDIN_FILE_OBJECT_CACHE);
         }
         
         $this->schedule();
@@ -143,7 +137,7 @@ class W3_Plugin_ObjectCache extends W3_Plugin
         $this->unschedule();
         
         if (!$this->locked()) {
-            @unlink(WP_CONTENT_DIR . '/object-cache.php');
+            @unlink(W3TC_ADDIN_FILE_OBJECT_CACHE);
         }
     }
     

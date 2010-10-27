@@ -199,7 +199,8 @@ class W3_ObjectCache
                 'caching' => $caching, 
                 'reason' => $reason, 
                 'cached' => $cached, 
-                'internal' => $internal
+                'internal' => $internal, 
+                'data_size' => ($value ? strlen(serialize($value)) : 0)
             );
         }
         
@@ -629,10 +630,10 @@ class W3_ObjectCache
         $debug_info .= sprintf("%s%d\r\n", str_pad('Cache misses: ', 20), $this->cache_misses);
         
         $debug_info .= "W3TC Object Cache info:\r\n";
-        $debug_info .= sprintf("%s | %s | %s | %s | %s\r\n", str_pad('#', 5, ' ', STR_PAD_LEFT), str_pad('Caching (Reject reason)', 30, ' ', STR_PAD_BOTH), str_pad('Status', 15, ' ', STR_PAD_BOTH), str_pad('Source', 15, ' ', STR_PAD_BOTH), 'ID:Group');
+        $debug_info .= sprintf("%s | %s | %s | %s | %s | %s\r\n", str_pad('#', 5, ' ', STR_PAD_LEFT), str_pad('Caching (Reject reason)', 30, ' ', STR_PAD_BOTH), str_pad('Status', 15, ' ', STR_PAD_BOTH),str_pad('Source', 15, ' ', STR_PAD_BOTH),  str_pad('Data size (b)', 13, ' ', STR_PAD_LEFT), 'ID:Group');
         
         foreach ($this->debug_info as $index => $debug) {
-            $debug_info .= sprintf("%s | %s | %s | %s | %s\r\n", str_pad($index + 1, 5, ' ', STR_PAD_LEFT), str_pad(($debug['caching'] ? 'enabled' : sprintf('disabled (%s)', $debug['reason'])), 30, ' ', STR_PAD_BOTH), str_pad(($debug['cached'] ? 'cached' : 'not cached'), 15, ' ', STR_PAD_BOTH), str_pad(($debug['internal'] ? 'internal' : 'persistent'), 15, ' ', STR_PAD_BOTH), sprintf('%s:%s', $debug['id'], $debug['group']));
+            $debug_info .= sprintf("%s | %s | %s | %s | %s | %s\r\n", str_pad($index + 1, 5, ' ', STR_PAD_LEFT), str_pad(($debug['caching'] ? 'enabled' : sprintf('disabled (%s)', $debug['reason'])), 30, ' ', STR_PAD_BOTH), str_pad(($debug['cached'] ? 'cached' : 'not cached'), 15, ' ', STR_PAD_BOTH), str_pad(($debug['internal'] ? 'internal' : 'persistent'), 15, ' ', STR_PAD_BOTH), str_pad($debug['data_size'], 13, ' ', STR_PAD_LEFT), sprintf('%s:%s', $debug['id'], $debug['group']));
         }
         
         $debug_info .= '-->';

@@ -37,7 +37,7 @@ class Minify_Cache_File {
         $dir = dirname($id);
         
         if ($dir) {
-            w3_mkdir($dir, 0755, $this->_path);
+            w3_mkdir($dir, 0777, $this->_path);
         }
         
         if (! @file_put_contents($this->_path . '/' . $id, $data, $flag)) {
