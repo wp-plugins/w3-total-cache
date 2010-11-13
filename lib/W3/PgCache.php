@@ -149,7 +149,7 @@ class W3_PgCache
             
             $this->_caching = $this->_can_cache();
             
-            if ($this->_caching) {
+            if ($this->_caching && !$this->_enhanced_mode) {
                 $cache = & $this->_get_cache();
                 
                 $compression = $this->_get_compression();
@@ -512,15 +512,6 @@ class W3_PgCache
         }
         
         /**
-         * Skip if posting
-         */
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $this->cache_reject_reason = 'request method is POST';
-            
-            return false;
-        }
-        
-        /**
          * Skip if session defined
          */
         if (defined('SID') && SID != '') {
@@ -530,10 +521,28 @@ class W3_PgCache
         }
         
         /**
+         * Skip if posting
+         */
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $this->cache_reject_reason = 'request method is POST';
+            
+            return false;
+        }
+        
+        /**
          * Skip if there is query in the request uri
          */
         if (!$this->_config->get_boolean('pgcache.cache.query') && strstr($this->_request_uri, '?') !== false) {
             $this->cache_reject_reason = 'request URI contains query';
+            
+            return false;
+        }
+        
+        /**
+         * Check for request URI trailing slash 
+         */
+        if ($this->_enhanced_mode && substr($this->_request_uri, -1) !== '/') {
+            $this->cache_reject_reason = 'request URI doesn\'t have a trailing slash';
             
             return false;
         }
@@ -856,7 +865,7 @@ class W3_PgCache
             $headers_list = headers_list();
             if ($headers_list) {
                 foreach ($headers_list as $header) {
-                    list($header_name, $header_value) = explode(': ', $header, 2);
+                    list ($header_name, $header_value) = explode(': ', $header, 2);
                     $headers[$header_name] = $header_value;
                 }
             }

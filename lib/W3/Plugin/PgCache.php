@@ -604,6 +604,69 @@ class W3_Plugin_PgCache extends W3_Plugin
         }
         
         /**
+         * Network mode rules
+         */
+        if ($is_multisite) {
+            /**
+             * Detect domain
+             */
+            $rules .= "    RewriteCond %{HTTP_HOST} ^(www\\.)?([a-z0-9\\-\\.]+\\.[a-z]+)\\.?(:[0-9]+)?$\n";
+            $rules .= "    RewriteRule .* - [E=W3TC_DOMAIN:%2]\n";
+            
+            $replacement = '/w3tc-%{ENV:W3TC_DOMAIN}/';
+            
+            /**
+             * If VHOST is off, detect blogname from URI
+             */
+            if (!$is_vhost) {
+                $blognames = w3_get_blognames();
+                
+                if (count($blognames)) {
+                    $rules .= "    RewriteCond %{REQUEST_URI} ^" . $base_path . "(" . implode('|', array_map('w3_preg_quote', $blognames)) . ")/\n";
+                    $rules .= "    RewriteRule .* - [E=W3TC_BLOGNAME:%1.]\n";
+                    
+                    $replacement = '/w3tc-%{ENV:W3TC_BLOGNAME}%{ENV:W3TC_DOMAIN}/';
+                }
+            }
+            
+            $cache_dir = preg_replace('~/w3tc.*/~U', $replacement, $cache_dir, 1);
+        }
+        
+        /**
+         * Set mobile groups
+         */
+        if ($this->_config->get_boolean('mobile.enabled')) {
+            $mobile_groups = array_reverse($this->_config->get_array('mobile.rgroups'));
+            
+            foreach ($mobile_groups as $mobile_group => $mobile_config) {
+                $mobile_enabled = (isset($mobile_config['enabled']) ? (boolean) $mobile_config['enabled'] : false);
+                $mobile_agents = (isset($mobile_config['agents']) ? (array) $mobile_config['agents'] : '');
+                $mobile_redirect = (isset($mobile_config['redirect']) ? $mobile_config['redirect'] : '');
+                
+                if ($mobile_enabled && count($mobile_agents) && !$mobile_redirect) {
+                    $rules .= "    RewriteCond %{HTTP_USER_AGENT} (" . implode('|', $mobile_agents) . ") [NC]\n";
+                    $rules .= "    RewriteRule .* - [E=W3TC_UA:_" . $mobile_group . "]\n";
+                }
+            }
+        }
+        
+        /**
+         * Set HTTPS
+         */
+        $rules .= "    RewriteCond %{HTTPS} =on\n";
+        $rules .= "    RewriteRule .* - [E=W3TC_SSL:_ssl]\n";
+        $rules .= "    RewriteCond %{SERVER_PORT} =443\n";
+        $rules .= "    RewriteRule .* - [E=W3TC_SSL:_ssl]\n";
+        
+        /**
+         * Set Accept-Encoding
+         */
+        if ($this->_config->get_boolean('browsercache.enabled') && $this->_config->get_boolean('browsercache.html.compression')) {
+            $rules .= "    RewriteCond %{HTTP:Accept-Encoding} gzip\n";
+            $rules .= "    RewriteRule .* - [E=W3TC_ENC:.gzip]\n";
+        }
+        
+        /**
          * Don't accept POSTs
          */
         $rules .= "    RewriteCond %{REQUEST_METHOD} !=POST\n";
@@ -642,69 +705,6 @@ class W3_Plugin_PgCache extends W3_Plugin
          */
         if (count($reject_user_agents)) {
             $rules .= "    RewriteCond %{HTTP_USER_AGENT} !(" . implode('|', array_map('w3_preg_quote', $reject_user_agents)) . ") [NC]\n";
-        }
-        
-        /**
-         * Network mode rules
-         */
-        if ($is_multisite) {
-            /**
-             * Detect domain
-             */
-            $rules .= "    RewriteCond %{HTTP_HOST} ^(www\\.)?([a-z0-9\\-\\.]+\\.[a-z]+)\\.?(:[0-9]+)?$\n";
-            $rules .= "    RewriteRule .* - [E=W3TC_DOMAIN:%2]\n";
-            
-            $replacement = '/w3tc-%{ENV:W3TC_DOMAIN}/';
-            
-            /**
-             * If VHOST is off, detect blogname from URI
-             */
-            if (!$is_vhost) {
-                $blognames = w3_get_blognames();
-                
-                if (count($blognames)) {
-                    $rules .= "    RewriteCond %{REQUEST_URI} ^" . $base_path . "(" . implode('|', array_map('w3_preg_quote', $blognames)) . ")/\n";
-                    $rules .= "    RewriteRule .* - [E=W3TC_BLOGNAME:%1.]\n";
-                    
-                    $replacement = '/w3tc-%{ENV:W3TC_BLOGNAME}%{ENV:W3TC_DOMAIN}/';
-                }
-            }
-            
-            $cache_dir = preg_replace('~/w3tc.*/~U', $replacement, $cache_dir, 1);
-        }
-        
-        /**
-         * Check mobile groups
-         */
-        if ($this->_config->get_boolean('mobile.enabled')) {
-            $mobile_groups = array_reverse($this->_config->get_array('mobile.rgroups'));
-            
-            foreach ($mobile_groups as $mobile_group => $mobile_config) {
-                $mobile_enabled = (isset($mobile_config['enabled']) ? (boolean) $mobile_config['enabled'] : false);
-                $mobile_agents = (isset($mobile_config['agents']) ? (array) $mobile_config['agents'] : '');
-                $mobile_redirect = (isset($mobile_config['redirect']) ? $mobile_config['redirect'] : '');
-                
-                if ($mobile_enabled && count($mobile_agents) && !$mobile_redirect) {
-                    $rules .= "    RewriteCond %{HTTP_USER_AGENT} (" . implode('|', $mobile_agents) . ") [NC]\n";
-                    $rules .= "    RewriteRule .* - [E=W3TC_UA:_" . $mobile_group . "]\n";
-                }
-            }
-        }
-        
-        /**
-         * Check HTTPS
-         */
-        $rules .= "    RewriteCond %{HTTPS} =on\n";
-        $rules .= "    RewriteRule .* - [E=W3TC_SSL:_ssl]\n";
-        $rules .= "    RewriteCond %{SERVER_PORT} =443\n";
-        $rules .= "    RewriteRule .* - [E=W3TC_SSL:_ssl]\n";
-        
-        /**
-         * Check Accept-Encoding
-         */
-        if ($this->_config->get_boolean('browsercache.enabled') && $this->_config->get_boolean('browsercache.html.compression')) {
-            $rules .= "    RewriteCond %{HTTP:Accept-Encoding} gzip\n";
-            $rules .= "    RewriteRule .* - [E=W3TC_ENC:.gzip]\n";
         }
         
         /**

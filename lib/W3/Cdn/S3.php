@@ -128,7 +128,7 @@ class W3_Cdn_S3 extends W3_Cdn_Base
                 $s3_hash = (isset($info['hash']) ? $info['hash'] : '');
                 
                 if ($hash === $s3_hash) {
-                    return $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Object already exists');
+                    return $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'Object already exists');
                 }
             }
         }
@@ -173,7 +173,7 @@ class W3_Cdn_S3 extends W3_Cdn_Base
                 $s3_hash = (isset($info['hash']) ? $info['hash'] : '');
                 
                 if ($hash === $s3_hash) {
-                    return $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Object already exists');
+                    return $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'Object already exists');
                 }
             }
         }

@@ -238,6 +238,10 @@ Install the plugin to read the full FAQ.
 
 == Press: Mentions, Tutorials &amp; Reviews ==
 
+**November 2010:**
+
+* [W3 Total Cache Plugin](http://www.xenritech.com/w3-total-cache-plugin.html/)
+
 **October 2010:**
 
 * [20 Wordpress Plugins for Successful Internet Marketers](http://www.incomediary.com/20-wordpress-plugins-for-successful-internet-marketers/), Michael Dunlop
@@ -375,9 +379,6 @@ It's quite difficult to recall all of the innovators that have shared their thou
 Please reach out to all of these people and support their projects if you're so inclined.
 
 == Changelog ==
-
-= 0.9.1.4 =
-* 
 
 = 0.9.1.3 =
 * Improved error messages with AWS S3 CDN

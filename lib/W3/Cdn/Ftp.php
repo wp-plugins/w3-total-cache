@@ -146,7 +146,7 @@ class W3_Cdn_Ftp extends W3_Cdn_Base
                 $ftp_mtime = @ftp_mdtm($this->_ftp, $remote_file);
                 
                 if ($size === $ftp_size && $mtime === $ftp_mtime) {
-                    $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'File already exists');
+                    $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'File already exists');
                     continue;
                 }
             }

@@ -136,7 +136,7 @@ class W3_Cdn_Rscf extends W3_Cdn_Base
                     $hash = @md5_file($local_path);
                     
                     if ($hash === $etag) {
-                        $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Object already exists');
+                        $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'Object already exists');
                         continue;
                     }
                 }

@@ -46,6 +46,13 @@ minify_templates['<?php echo addslashes($theme_key); ?>']['<?php echo addslashes
     				<span class="description">If <acronym title="Content Delivery Network">CDN</acronym> is enabled (and not using the origin pull method), your minified files will be automatically uploaded.</span>
         		</th>
         	</tr>
+            <tr>
+                <th colspan="2">
+                    <input type="hidden" name="minify.reject.logged" value="0" />
+                    <label><input type="checkbox" name="minify.reject.logged" value="1"<?php checked($this->_config->get_boolean('minify.reject.logged'), true); ?> /> Don't minify for logged in users</label>
+                    <br /><span class="description">Users that have signed in to WordPress (e.g. administrators) will never view minified pages if enabled.</span>
+                </th>
+            </tr>
         	<tr>
         		<th valign="top">
         			<label for="minify_error_notification">Minify error notification:</label>
