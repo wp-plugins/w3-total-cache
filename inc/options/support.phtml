@@ -2,9 +2,9 @@
 <p>
     Request professional services, suggest a feature or submit a bug using the form below:
 </p>
-<?php endif; ?>
 
 <div id="support_container">
+<?php endif; ?>
     <form action="admin.php?page=<?php echo $this->_page; ?>" method="post" enctype="multipart/form-data" id="support_form">
     	<?php include W3TC_DIR . '/inc/options/support/' . $request_type . '.phtml'; ?>
     
@@ -26,6 +26,7 @@
     		<input id="support_cancel" type="button" value="Cancel" class="button-primary" />
         </p>
     </form>
+<?php if (! $ajax): ?>
 </div>
 
-<?php if (! $ajax) include W3TC_DIR . '/inc/options/common/footer.phtml'; ?>
+<?php include W3TC_DIR . '/inc/options/common/footer.phtml'; endif; ?>

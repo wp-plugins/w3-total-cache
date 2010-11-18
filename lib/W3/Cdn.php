@@ -31,8 +31,7 @@ if (!defined('W3_CDN_RSCF')) {
 /**
  * Class W3_Cdn
  */
-class W3_Cdn
-{
+class W3_Cdn {
     /**
      * Returns W3_Cdn_Base instance
      *
@@ -40,44 +39,43 @@ class W3_Cdn
      * @param array $config
      * @return W3_Cdn_Base
      */
-    function &instance($engine, $config = array())
-    {
+    function &instance($engine, $config = array()) {
         static $instances = array();
-        
+
         $instance_key = sprintf('%s_%s', $engine, md5(serialize($config)));
-        
+
         if (!isset($instances[$instance_key])) {
             switch (true) {
                 case ($engine == W3_CDN_FTP) :
                     require_once W3TC_LIB_W3_DIR . '/Cdn/Ftp.php';
                     $instances[$instance_key] = & new W3_Cdn_Ftp($config);
                     break;
-                
+
                 case (W3TC_PHP5 && $engine == W3_CDN_S3) :
                     require_once W3TC_LIB_W3_DIR . '/Cdn/S3.php';
                     $instances[$instance_key] = & new W3_Cdn_S3($config);
                     break;
-                
+
                 case (W3TC_PHP5 && $engine == W3_CDN_CF) :
                     require_once W3TC_LIB_W3_DIR . '/Cdn/Cf.php';
                     $instances[$instance_key] = & new W3_Cdn_Cf($config);
                     break;
-                
+
                 case (W3TC_PHP5 && $engine == W3_CDN_RSCF) :
                     require_once W3TC_LIB_W3_DIR . '/Cdn/Rscf.php';
                     $instances[$instance_key] = & new W3_Cdn_Rscf($config);
                     break;
-                
+
                 case ($engine == W3_CDN_MIRROR) :
                     require_once W3TC_LIB_W3_DIR . '/Cdn/Mirror.php';
                     $instances[$instance_key] = & new W3_Cdn_Mirror($config);
                     break;
-                
+
                 case ($engine == W3_CDN_NETDNA) :
                     require_once W3TC_LIB_W3_DIR . '/Cdn/Netdna.php';
                     $instances[$instance_key] = & new W3_Cdn_Netdna($config);
                     break;
-                
+
                 default :
                     trigger_error('Incorrect CDN engine', E_USER_WARNING);
                     require_once W3TC_LIB_W3_DIR . '/Cdn/Base.php';
@@ -85,7 +83,7 @@ class W3_Cdn
                     break;
             }
         }
-        
+
         return $instances[$instance_key];
     }
 }

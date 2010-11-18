@@ -46,8 +46,8 @@ class W3_Plugin_TotalCache extends W3_Plugin {
     var $_request_types = array(
         'bug_report' => 'Submit a Bug Report',
         'new_feature' => 'Suggest a New Feature',
-        'email_support' => '<15 Minute Email Support Response (M-F 9AM - 5PM EDT): $75 USD',
-        'phone_support' => '<15 Minute Phone Support Response (M-F 9AM - 5PM EDT): $150 USD',
+        'email_support' => 'Less than 15 Minute Email Support Response (M-F 9AM - 5PM EDT): $75 USD',
+        'phone_support' => 'Less than 15 Minute Phone Support Response (M-F 9AM - 5PM EDT): $150 USD',
         'plugin_config' => 'Professional Plugin Configuration: Starting @ $100 USD',
         'theme_config' => 'Theme Performance Optimization & Plugin Configuration: Starting @ $150 USD',
         'linux_config' => 'Linux Server Optimization & Plugin Configuration: Starting @ $200 USD'
@@ -1814,6 +1814,15 @@ class W3_Plugin_TotalCache extends W3_Plugin {
      */
     function options_pgcache() {
         $pgcache_enabled = $this->_config->get_boolean('pgcache.enabled');
+
+        $feed_types = array(
+            'rss' => 'RSS 0.92 feed',
+            'rdf' => 'RDF/RSS 1.0 feed',
+            'rss2' => 'RSS 2.0 feed',
+            'atom' => 'Atom feed'
+        );
+
+        $default_feed = get_default_feed();
 
         include W3TC_DIR . '/inc/options/pgcache.phtml';
     }

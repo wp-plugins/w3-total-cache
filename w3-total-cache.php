@@ -35,12 +35,12 @@ if (!defined('W3TC_IN_MINIFY')) {
      * Require plugin configuration
      */
     require_once dirname(__FILE__) . '/inc/define.php';
-    
+
     /**
      * Load plugins
      */
     w3_load_plugins();
-    
+
     /**
      * Run plugin
      */

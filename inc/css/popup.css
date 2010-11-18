@@ -4,7 +4,7 @@
     color: #464646;
 }
 
-html,body {
+html, body {
     height: 100%;
 }
 
@@ -15,7 +15,7 @@ body {
     margin: 0;
 }
 
-body,td,textarea,input,select {
+body, td, textarea, input, select {
     font-family: "Lucida Grande", Verdana, Arial;
     font-size: 13px;
 }
@@ -50,7 +50,7 @@ a:hover {
     clear: both;
 }
 
-.button,input[type="button"],input[type="submit"] {
+.button, input[type="button"], input[type="submit"] {
     font-size: 11px;
     line-height: 16px;
     background: #f2f2f2 url(../../../../../wp-admin/images/white-grad.png) repeat-x scroll left top;
@@ -64,12 +64,12 @@ a:hover {
     -moz-border-radius: 11px;
 }
 
-.button:hover,input[type="button"]:hover,input[type="submit"]:hover {
+.button:hover, input[type="button"]:hover, input[type="submit"]:hover {
     border-color: #666;
     color: #000;
 }
 
-.button:active,input[type="button"]:active,input[type="submit"]:active {
+.button:active, input[type="button"]:active, input[type="submit"]:active {
     background: #F2F2F2 url(../../../../../wp-admin/images/white-grad-active.png) repeat-x scroll left top;
 }
 
@@ -127,7 +127,7 @@ a:hover {
     border-collapse: collapse;
 }
 
-.table td,th {
+.table td, th {
     border: 1px solid #ccc;
     padding: 3px 2px;
 }
@@ -140,7 +140,7 @@ a:hover {
     font-size: 10px;
 }
 
-.updated,.error {
+.updated, .error {
     -moz-border-radius-bottomleft: 3px;
     -moz-border-radius-bottomright: 3px;
     -moz-border-radius-topleft: 3px;
@@ -161,7 +161,7 @@ a:hover {
     border-color: #cc0000;
 }
 
-.updated p,.error p {
+.updated p, .error p {
     line-height: 1;
     margin: 0.5em 0;
     padding: 2px;

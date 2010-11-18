@@ -23,7 +23,7 @@ function w3tc_input_enable(input, enabled) {
         } else {
             var t = me.attr('type');
             if ((t != 'radio' && t != 'checkbox') || me.is(':checked')) {
-                me.after(jQuery('<input />').attr( {
+                me.after(jQuery('<input />').attr({
                     type: 'hidden',
                     name: me.attr('name')
                 }).val(me.val()));
@@ -60,7 +60,7 @@ function w3tc_minify_js_file_add(theme, template, location, file) {
     var append = jQuery('<li><table><tr><th>&nbsp;</th><th>File URI:</th><th>Template:</th><th colspan="3">Embed Location:</th></tr><tr><td>' + (jQuery('#js_files li').size() + 1) + '.</td><td><input class="js_enabled" type="text" name="js_files[' + theme + '][' + template + '][' + location + '][]" value="" size="70" \/></td><td><select class="js_file_template js_enabled"></select></td><td><select class="js_file_location js_enabled"><optgroup label="Blocking:"><option value="include">Embed in &lt;head&gt;</option><option value="include-body">Embed after &lt;body&gt;</option><option value="include-footer">Embed before &lt;/body&gt;</option></optgroup><optgroup label="Non-Blocking:"><option value="include-nb">Embed in &lt;head&gt;</option><option value="include-body-nb">Embed after &lt;body&gt;</option><option value="include-footer-nb">Embed before &lt;/body&gt;</option></optgroup></select></td><td><input class="js_file_delete js_enabled button" type="button" value="Delete" /> <input class="js_file_verify js_enabled button" type="button" value="Verify URI" /></td></tr></table><\/li>');
     append.find('input:text').val(file);
     var select = append.find('.js_file_template');
-    for ( var i in minify_templates[theme]) {
+    for (var i in minify_templates[theme]) {
         select.append(jQuery('<option />').val(i).html(minify_templates[theme][i]));
     }
     select.val(template);
@@ -73,7 +73,7 @@ function w3tc_minify_css_file_add(theme, template, file) {
     var append = jQuery('<li><table><tr><th>&nbsp;</th><th>File URI:</th><th colspan="2">Template:</th></tr><tr><td>' + (jQuery('#css_files li').size() + 1) + '.</td><td><input class="css_enabled" type="text" name="css_files[' + theme + '][' + template + '][include][]" value="" size="70" \/></td><td><select class="css_file_template css_enabled"></select></td><td><input class="css_file_delete css_enabled button" type="button" value="Delete" /></td><td><input class="css_file_verify css_enabled button" type="button" value="Verify URI" /></td></tr></table><\/li>');
     append.find('input:text').val(file);
     var select = append.find('.css_file_template');
-    for ( var i in minify_templates[theme]) {
+    for (var i in minify_templates[theme]) {
         select.append(jQuery('<option />').val(i).html(minify_templates[theme][i]));
     }
     select.val(template);
@@ -118,7 +118,7 @@ function w3tc_cdn_get_cnames() {
 
             if (match) {
                 cnames = [];
-                for ( var i = 1; i <= 10; i++) {
+                for (var i = 1; i <= 10; i++) {
                     cnames.push('cdn' + i + '.' + match[1]);
                 }
                 return false;
@@ -314,7 +314,7 @@ jQuery(function() {
                 g = '[' + jQuery('#js_themes option[value=' + match[1] + ']').text() + '] ' + v;
             }
             if (v != '') {
-                for ( var i = 0; i < js.length; i++) {
+                for (var i = 0; i < js.length; i++) {
                     if (js[i] == c) {
                         duplicate = true;
                         break;
@@ -342,7 +342,7 @@ jQuery(function() {
                 g = '[' + jQuery('#css_themes option[value=' + match[1] + ']').text() + '] ' + v;
             }
             if (v != '') {
-                for ( var i = 0; i < css.length; i++) {
+                for (var i = 0; i < css.length; i++) {
                     if (css[i] == c) {
                         duplicate = true;
                         break;
@@ -625,7 +625,7 @@ jQuery(function() {
             return false;
         }
 
-        if (phone.size() && !/^[0-9\-\.\ \(\)\+]+$/.test(phone.val())) {
+        if (phone.size() && !/^[0-9\-\. \(\)\+]+$/.test(phone.val())) {
             alert('Please enter your phone in the phone field.');
             phone.focus();
             return false;
@@ -814,7 +814,7 @@ jQuery(function() {
 
     // add sortable
     if (jQuery.ui && jQuery.ui.sortable) {
-        jQuery('#js_files,#css_files').sortable( {
+        jQuery('#js_files,#css_files').sortable({
             axis: 'y',
             stop: function() {
                 jQuery(this).find('li').each(function(index) {
@@ -823,12 +823,12 @@ jQuery(function() {
             }
         });
 
-        jQuery('#cdn_cnames').sortable( {
+        jQuery('#cdn_cnames').sortable({
             axis: 'y',
             stop: w3tc_cdn_cnames_assign
         });
 
-        jQuery('#mobile_groups').sortable( {
+        jQuery('#mobile_groups').sortable({
             axis: 'y',
             stop: function() {
                 jQuery('#mobile_groups .mobile_group_number').each(function(index) {

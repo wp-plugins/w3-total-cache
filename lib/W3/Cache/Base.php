@@ -7,8 +7,7 @@
 /**
  * Class W3_Cache_Base
  */
-class W3_Cache_Base
-{
+class W3_Cache_Base {
     /**
      * Adds data
      *
@@ -18,11 +17,10 @@ class W3_Cache_Base
      * @param integer $expire
      * @return boolean
      */
-    function add($key, &$data, $expire = 0)
-    {
+    function add($key, &$data, $expire = 0) {
         return false;
     }
-    
+
     /**
      * Sets data
      *
@@ -32,11 +30,10 @@ class W3_Cache_Base
      * @param integer $expire
      * @return boolean
      */
-    function set($key, &$data, $expire = 0)
-    {
+    function set($key, &$data, $expire = 0) {
         return false;
     }
-    
+
     /**
      * Returns data
      *
@@ -44,22 +41,20 @@ class W3_Cache_Base
      * @param string $key
      * @return mixed
      */
-    function get($key)
-    {
+    function get($key) {
         return false;
     }
-    
+
     /**
      * Alias for get for minify cache
      *
      * @param string $key
      * @return mixed
      */
-    function fetch($key)
-    {
+    function fetch($key) {
         return $this->get($key);
     }
-    
+
     /**
      * Replaces data
      *
@@ -69,11 +64,10 @@ class W3_Cache_Base
      * @param integer $expire
      * @return boolean
      */
-    function replace($key, &$data, $expire = 0)
-    {
+    function replace($key, &$data, $expire = 0) {
         return false;
     }
-    
+
     /**
      * Deletes data
      *
@@ -81,19 +75,17 @@ class W3_Cache_Base
      * @param string $key
      * @return boolean
      */
-    function delete($key)
-    {
+    function delete($key) {
         return false;
     }
-    
+
     /**
      * Flushes all data
      *
      * @abstract
      * @return boolean
      */
-    function flush()
-    {
+    function flush() {
         return false;
     }
 }

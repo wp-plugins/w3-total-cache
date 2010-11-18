@@ -32,7 +32,7 @@
     padding: 5px
 }
 
-.w3tc-test-ok,.w3tc-test-warn,.w3tc-test-error {
+.w3tc-test-ok, .w3tc-test-warn, .w3tc-test-error {
     font-weight: bold;
 }
 
@@ -129,11 +129,11 @@
     list-style-position: inside
 }
 
-#w3tc #toc a,#qa a {
+#w3tc #toc a, #qa a {
     text-decoration: none
 }
 
-#w3tc #toc a:hover,#qa a:hover {
+#w3tc #toc a:hover, #qa a:hover {
     text-decoration: underline
 }
 
@@ -167,7 +167,7 @@
     padding: 10px;
 }
 
-#w3tc #qa,#w3tc #about,#w3tc #install {
+#w3tc #qa, #w3tc #about, #w3tc #install {
     width: 760px;
 }
 
@@ -253,7 +253,7 @@
     font-weight: bold;
 }
 
-#recom_container,#self_test_container {
+#recom_container, #self_test_container {
     overflow: auto;
 }
 
@@ -282,7 +282,7 @@
     background: #f9f9f9;
 }
 
-.minify-files th,.minify-files td {
+.minify-files th, .minify-files td {
     line-height: normal;
     border: 0;
     padding: 0;
@@ -301,12 +301,12 @@
     font-size: 13px;
 }
 
-th.minify-files-add,td.minify-files-add {
+th.minify-files-add, td.minify-files-add {
     width: 40px;
     text-align: center;
 }
 
-.minify-files-exists input,.minify-files-exists select {
+.minify-files-exists input, .minify-files-exists select {
     color: red;
 }
 

@@ -2,9 +2,9 @@
 <p>
     Request professional services, suggest a feature or submit a bug using the form below:
 </p>
-<?php endif; ?>
 
 <div id="support_container">
+<?php endif; ?>
     <form action="<?php echo W3TC_PAYPAL_URL; ?>" method="get">
         <fieldset>
         	<legend>Request payment</legend>
@@ -28,6 +28,7 @@
     		</p>
     	</fieldset>
     </form>
+<?php if (! $ajax): ?>
 </div>
 
-<?php if (! $ajax) include W3TC_DIR . '/inc/options/common/footer.phtml'; ?>
+<?php include W3TC_DIR . '/inc/options/common/footer.phtml'; endif; ?>
