@@ -74,6 +74,12 @@ class W3_PgCache {
     var $_mobile = null;
 
     /**
+     * Referrer object
+     * @var W3_Referrer
+     */
+    var $_referrer = null;
+
+    /**
      * Cache reject reason
      *
      * @var string
@@ -95,6 +101,11 @@ class W3_PgCache {
         if ($this->_config->get_boolean('mobile.enabled')) {
             require_once W3TC_LIB_W3_DIR . '/Mobile.php';
             $this->_mobile = & W3_Mobile::instance();
+        }
+
+        if ($this->_config->get_boolean('referrer.enabled')) {
+            require_once W3TC_LIB_W3_DIR . '/Referrer.php';
+            $this->_referrer = & W3_Referrer::instance();
         }
     }
 
@@ -125,13 +136,16 @@ class W3_PgCache {
             }
 
             /**
-             * Handle mobile redirects
+             * Handle mobile or referrer redirects
              */
-            if ($this->_mobile) {
+            if ($this->_mobile || $this->_referrer) {
                 $mobile_redirect = $this->_mobile->get_redirect();
+                $referrer_redirect = $this->_referrer->get_redirect();
 
-                if ($mobile_redirect) {
-                    w3_redirect($mobile_redirect);
+                $redirect = ($mobile_redirect ? $mobile_redirect : $referrer_redirect);
+
+                if ($redirect) {
+                    w3_redirect($redirect);
                     exit();
                 }
             }
@@ -1135,6 +1149,15 @@ class W3_PgCache {
         }
 
         /**
+         * Append referrer group
+         */
+        $referrer_group = ($this->_referrer ? $this->_referrer->get_group() : '');
+
+        if ($referrer_group) {
+            $key .= '_' . $referrer_group;
+        }
+
+        /**
          * Append SSL
          */
         if (w3_is_https()) {
@@ -1610,29 +1633,4 @@ class W3_PgCache {
 
         return $count;
     }
-}
-
-/**
- * Alias for page cache flush cached
- *
- * @return boolean
- */
-function w3tc_pgcache_flush() {
-    require_once W3TC_DIR . '/lib/W3/PgCache.php';
-    $w3_pgcache = & W3_PgCache::instance();
-
-    return $w3_pgcache->flush();
-}
-
-/**
- * Alias for page cache flush post by ID
- *
- * @param integer $post_id
- * @return boolean
- */
-function w3tc_pgcache_flush_post($post_id) {
-    require_once W3TC_DIR . '/lib/W3/PgCache.php';
-    $w3_pgcache = & W3_PgCache::instance();
-
-    return $w3_pgcache->flush_post($post_id);
 }

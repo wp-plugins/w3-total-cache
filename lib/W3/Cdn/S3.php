@@ -358,7 +358,15 @@ class W3_Cdn_S3 extends W3_Cdn_Base {
             return false;
         }
 
-        if (!@$this->_s3->putBucket($this->_config['bucket'], S3::ACL_PUBLIC_READ)) {
+        if (empty($this->_config['bucket_acl'])) {
+            $this->_config['bucket_acl'] = S3::ACL_PUBLIC_READ;
+        }
+
+        if (!isset($this->_config['bucket_location'])) {
+            $this->_config['bucket_location'] = S3::LOCATION_US;
+        }
+
+        if (!@$this->_s3->putBucket($this->_config['bucket'], $this->_config['bucket_acl'], $this->_config['bucket_location'])) {
             $error = sprintf('Unable to create bucket: %s (%s).', $this->_config['bucket'], $this->get_last_error());
 
             $this->restore_error_handler();

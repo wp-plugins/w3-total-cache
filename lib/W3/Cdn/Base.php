@@ -38,7 +38,7 @@ class W3_Cdn_Base {
      *
      * @param array $config
      */
-    function __construct($config) {
+    function __construct($config = array()) {
         $this->_config = $config;
     }
 
@@ -47,7 +47,7 @@ class W3_Cdn_Base {
      *
      * @param array $config
      */
-    function W3_Cdn_Base($config) {
+    function W3_Cdn_Base($config = array()) {
         $this->__construct($config);
     }
 

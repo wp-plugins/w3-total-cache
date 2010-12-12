@@ -171,40 +171,53 @@
             <tr>
                 <th colspan="2">
                     <p>Specify the pages and feeds to purge when posts are created, edited, or comments posted. The defaults are recommended because additional options may reduce server performance:</p>
-                    <input type="hidden" name="pgcache.purge.home" value="0" />
-                    <input type="hidden" name="pgcache.purge.post" value="0" />
-                    <input type="hidden" name="pgcache.purge.comments" value="0" />
-                    <input type="hidden" name="pgcache.purge.author" value="0" />
-                    <input type="hidden" name="pgcache.purge.terms" value="0" />
-                    <input type="hidden" name="pgcache.purge.archive.daily" value="0" />
-                    <input type="hidden" name="pgcache.purge.archive.monthly" value="0" />
-                    <input type="hidden" name="pgcache.purge.archive.yearly" value="0" />
-                    <input type="hidden" name="pgcache.purge.feed.blog" value="0" />
-                    <input type="hidden" name="pgcache.purge.feed.comments" value="0" />
-                    <input type="hidden" name="pgcache.purge.feed.author" value="0" />
-                    <input type="hidden" name="pgcache.purge.feed.terms" value="0" />
-                    <label><input type="checkbox" name="pgcache.purge.home" value="1"<?php checked($this->_config->get_boolean('pgcache.purge.home'), true); ?> /> Home page</label><br />
-                    <label><input type="checkbox" name="pgcache.purge.post" value="1"<?php checked($this->_config->get_boolean('pgcache.purge.post'), true); ?> /> Post page</label><br />
-                    <label><input type="checkbox" name="pgcache.purge.comments" value="1"<?php checked($this->_config->get_boolean('pgcache.purge.comments'), true); ?> /> Post comments pages</label><br />
-                    <label><input type="checkbox" name="pgcache.purge.author" value="1"<?php checked($this->_config->get_boolean('pgcache.purge.author'), true); ?> /> Post author pages</label><br />
-                    <label><input type="checkbox" name="pgcache.purge.terms" value="1"<?php checked($this->_config->get_boolean('pgcache.purge.terms'), true); ?> /> Post terms pages</label><br />
-                    <label><input type="checkbox" name="pgcache.purge.archive.daily" value="1"<?php checked($this->_config->get_boolean('pgcache.purge.archive.daily'), true); ?> /> Daily archive pages</label><br />
-                    <label><input type="checkbox" name="pgcache.purge.archive.monthly" value="1"<?php checked($this->_config->get_boolean('pgcache.purge.archive.monthly'), true); ?> /> Monthly archive pages</label><br />
-                    <label><input type="checkbox" name="pgcache.purge.archive.yearly" value="1"<?php checked($this->_config->get_boolean('pgcache.purge.archive.yearly'), true); ?> /> Yearly archive pages</label><br />
-                    <label><input type="checkbox" name="pgcache.purge.feed.blog" value="1"<?php checked($this->_config->get_boolean('pgcache.purge.feed.blog'), true); ?> /> Blog feed</label><br />
-                    <label><input type="checkbox" name="pgcache.purge.feed.comments" value="1"<?php checked($this->_config->get_boolean('pgcache.purge.feed.comments'), true); ?> /> Post comments feed</label><br />
-                    <label><input type="checkbox" name="pgcache.purge.feed.author" value="1"<?php checked($this->_config->get_boolean('pgcache.purge.feed.author'), true); ?> /> Post author feed</label><br />
-                    <label><input type="checkbox" name="pgcache.purge.feed.terms" value="1"<?php checked($this->_config->get_boolean('pgcache.purge.feed.terms'), true); ?> /> Post terms feeds</label>
+
+                    <table>
+                        <tr>
+                            <td valign="top">
+                                <input type="hidden" name="pgcache.purge.home" value="0" />
+                                <input type="hidden" name="pgcache.purge.post" value="0" />
+                                <input type="hidden" name="pgcache.purge.feed.blog" value="0" />
+                                <label><input type="checkbox" name="pgcache.purge.home" value="1"<?php checked($this->_config->get_boolean('pgcache.purge.home'), true); ?> /> Home page</label><br />
+                                <label><input type="checkbox" name="pgcache.purge.post" value="1"<?php checked($this->_config->get_boolean('pgcache.purge.post'), true); ?> /> Post page</label><br />
+                                <label><input type="checkbox" name="pgcache.purge.feed.blog" value="1"<?php checked($this->_config->get_boolean('pgcache.purge.feed.blog'), true); ?> /> Blog feed</label><br />
+                            </td>
+                            <td valign="top">
+                                <input type="hidden" name="pgcache.purge.comments" value="0" />
+                                <input type="hidden" name="pgcache.purge.author" value="0" />
+                                <input type="hidden" name="pgcache.purge.terms" value="0" />
+                                <label><input type="checkbox" name="pgcache.purge.comments" value="1"<?php checked($this->_config->get_boolean('pgcache.purge.comments'), true); ?> /> Post comments pages</label><br />
+                                <label><input type="checkbox" name="pgcache.purge.author" value="1"<?php checked($this->_config->get_boolean('pgcache.purge.author'), true); ?> /> Post author pages</label><br />
+                                <label><input type="checkbox" name="pgcache.purge.terms" value="1"<?php checked($this->_config->get_boolean('pgcache.purge.terms'), true); ?> /> Post terms pages</label><br />
+                            </td>
+                            <td valign="top">
+                                <input type="hidden" name="pgcache.purge.feed.comments" value="0" />
+                                <input type="hidden" name="pgcache.purge.feed.author" value="0" />
+                                <input type="hidden" name="pgcache.purge.feed.terms" value="0" />
+                                <label><input type="checkbox" name="pgcache.purge.feed.comments" value="1"<?php checked($this->_config->get_boolean('pgcache.purge.feed.comments'), true); ?> /> Post comments feed</label><br />
+                                <label><input type="checkbox" name="pgcache.purge.feed.author" value="1"<?php checked($this->_config->get_boolean('pgcache.purge.feed.author'), true); ?> /> Post author feed</label><br />
+                                <label><input type="checkbox" name="pgcache.purge.feed.terms" value="1"<?php checked($this->_config->get_boolean('pgcache.purge.feed.terms'), true); ?> /> Post terms feeds</label>
+                            </td>
+                            <td valign="top">
+                                <input type="hidden" name="pgcache.purge.archive.daily" value="0" />
+                                <input type="hidden" name="pgcache.purge.archive.monthly" value="0" />
+                                <input type="hidden" name="pgcache.purge.archive.yearly" value="0" />
+                                <label><input type="checkbox" name="pgcache.purge.archive.daily" value="1"<?php checked($this->_config->get_boolean('pgcache.purge.archive.daily'), true); ?> /> Daily archive pages</label><br />
+                                <label><input type="checkbox" name="pgcache.purge.archive.monthly" value="1"<?php checked($this->_config->get_boolean('pgcache.purge.archive.monthly'), true); ?> /> Monthly archive pages</label><br />
+                                <label><input type="checkbox" name="pgcache.purge.archive.yearly" value="1"<?php checked($this->_config->get_boolean('pgcache.purge.archive.yearly'), true); ?> /> Yearly archive pages</label><br />
+                            </td>
+                        </tr>
+                    </table>
                 </th>
             </tr>
             <tr>
                 <th colspan="2">
                     <p>Specify the feed types to purge:</p>
                     <input type="hidden" name="pgcache.purge.feed.types" value="" /> 
-                    <?php foreach($feed_types as $feed_type => $feed_label): ?>
-                        <label><input type="checkbox" name="pgcache.purge.feed.types[]" value="<?php echo $feed_type; ?>"<?php checked(in_array($feed_type, $this->_config->get_array('pgcache.purge.feed.types')), true); ?> />
-                        <?php echo htmlspecialchars($feed_label); ?>
-                        <?php if ($feed_type == $default_feed): ?>(default)<?php endif; ?></label><br />
+                    <?php foreach($feeds as $feed): ?>
+                        <label><input type="checkbox" name="pgcache.purge.feed.types[]" value="<?php echo $feed; ?>"<?php checked(in_array($feed, $this->_config->get_array('pgcache.purge.feed.types')), true); ?> />
+                        <?php echo $feed; ?>
+                        <?php if ($feed == $default_feed): ?>(default)<?php endif; ?></label><br />
                     <?php endforeach; ?>
                 </th>
             </tr>
@@ -242,7 +255,6 @@
         	</tr>
         </table>
 	</fieldset>
-	
 </form>
 
 <?php include W3TC_DIR . '/inc/options/common/footer.phtml'; ?>

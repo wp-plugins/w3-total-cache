@@ -369,39 +369,80 @@ class W3_Plugin_Minify extends W3_Plugin {
     /**
      * Minifies HTML
      *
-     * @param string $content
+     * @param string $html
      * @return string
      */
-    function minify_html(&$content) {
-        require_once W3TC_LIB_MINIFY_DIR . '/Minify/HTML.php';
-        require_once W3TC_LIB_MINIFY_DIR . '/Minify/CSS.php';
-        require_once W3TC_LIB_MINIFY_DIR . '/JSMin.php';
+    function minify_html(&$html) {
+        require_once W3TC_LIB_W3_DIR . '/Minifier.php';
+        $w3_minifier =& W3_Minifier::instance();
 
-        $options = array(
-            'xhtml' => true,
-            'stripCrlf' => $this->_config->get_boolean('minify.html.strip.crlf'),
-            'cssStripCrlf' => $this->_config->get_boolean('minify.css.strip.crlf'),
-            'cssStripComments' => $this->_config->get_boolean('minify.css.strip.comments'),
-            'jsStripCrlf' => $this->_config->get_boolean('minify.js.strip.crlf'),
-            'jsStripComments' => $this->_config->get_boolean('minify.js.strip.comments'),
-            'ignoredComments' => $this->_config->get_array('minify.html.comments.ignore')
-        );
+        $ignored_comments = $this->_config->get_array('minify.html.comments.ignore');
 
-        if ($this->_config->get_boolean('minify.html.inline.css')) {
-            $options['cssMinifier'] = array(
-                'Minify_CSS',
-                'minify'
-            );
+        if (count($ignored_comments)) {
+            require_once W3TC_LIB_MINIFY_DIR . '/Minify/IgnoredCommentPreserver.php';
+
+            $ignored_comments_preserver =& new Minify_IgnoredCommentPreserver();
+            $ignored_comments_preserver->setIgnoredComments($ignored_comments);
+
+            $ignored_comments_preserver->search($html);
         }
 
         if ($this->_config->get_boolean('minify.html.inline.js')) {
-            $options['jsMinifier'] = array(
-                'JSMin',
-                'minify'
-            );
+            $js_engine = $this->_config->get_string('minify.js.engine');
+
+            if (!$w3_minifier->exists($js_engine) || !$w3_minifier->available($js_engine)) {
+                $css_engine = 'js';
+            }
+
+            $js_minifier = $w3_minifier->get_minifier($js_engine);
+            $js_options = $w3_minifier->get_options($js_engine);
+
+            $w3_minifier->init($js_engine);
+
+            require_once W3TC_LIB_MINIFY_DIR . '/Minify/Inline.php';
+            require_once W3TC_LIB_MINIFY_DIR . '/Minify/Inline/JavaScript.php';
+
+            $html = Minify_Inline_JavaScript::minify($html, $js_minifier, $js_options);
         }
 
-        $content = Minify_HTML::minify($content, $options);
+        if ($this->_config->get_boolean('minify.html.inline.css')) {
+            $css_engine = $this->_config->get_string('minify.css.engine');
+
+            if (!$w3_minifier->exists($css_engine) || !$w3_minifier->available($css_engine)) {
+                $css_engine = 'css';
+            }
+
+            $css_minifier = $w3_minifier->get_minifier($css_engine);
+            $css_options = $w3_minifier->get_options($css_engine);
+
+            $w3_minifier->init($css_engine);
+
+            require_once W3TC_LIB_MINIFY_DIR . '/Minify/Inline.php';
+            require_once W3TC_LIB_MINIFY_DIR . '/Minify/Inline/CSS.php';
+
+            $html = Minify_Inline_CSS::minify($html, $css_minifier, $css_options);
+        }
+
+        $engine = $this->_config->get_string('minify.html.engine');
+
+        if (!$w3_minifier->exists($engine) || !$w3_minifier->available($engine)) {
+            $engine = 'html';
+        }
+
+        if (function_exists('is_feed') && is_feed()) {
+            $engine .= 'xml';
+        }
+
+        $minifier = $w3_minifier->get_minifier($engine);
+        $options = $w3_minifier->get_options($engine);
+
+        $w3_minifier->init($engine);
+
+        $html = call_user_func($minifier, $html, $options);
+
+        if (isset($ignored_comments_preserver)) {
+            $ignored_comments_preserver->replace($html);
+        }
     }
 
     /**
@@ -489,10 +530,10 @@ class W3_Plugin_Minify extends W3_Plugin {
 
             if (!$non_blocking_function) {
                 $non_blocking_function = true;
-                $script = "<script type=\"text/javascript\">function w3tc_load_js(u){var d=document,p=d.getElementsByTagName('HEAD')[0],c=d.createElement('script');c.type='text/javascript';c.src=u;p.appendChild(c);}</script>";
+                $script = '<script type="text/javascript" src="' . plugins_url('inc/js/head.min.js', W3TC_FILE) . '"></script>';
             }
 
-            $script .= "<script type=\"text/javascript\">w3tc_load_js('" . $url . "');</script>";
+            $script .= '<script type="text/javascript">head.js(\'' . $url . '\');</script>';
 
             return $script;
         }
@@ -1393,30 +1434,4 @@ class W3_Plugin_Minify extends W3_Plugin {
 
         return (($data = @file_get_contents($path)) && strstr(w3_clean_rules($data), w3_clean_rules($search)) !== false);
     }
-}
-
-/**
- * Prints script link for scripts group
- *
- * @param string $location
- * @param string $group
- */
-function w3tc_scripts($location, $group = null) {
-    $w3_plugin_minify = & W3_Plugin_Minify::instance();
-    $w3_plugin_minify->printed_scripts[] = $location;
-
-    echo $w3_plugin_minify->get_scripts($location, $group);
-}
-
-/**
- * Prints style link for styles group
- *
- * @param string $location
- * @param string $group
- */
-function w3tc_styles($location, $group = null) {
-    $w3_plugin_minify = & W3_Plugin_Minify::instance();
-    $w3_plugin_minify->printed_styles[] = $location;
-
-    echo $w3_plugin_minify->get_styles($location, $group);
 }

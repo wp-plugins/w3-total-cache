@@ -1,6 +1,6 @@
 <?php
 
-define('W3TC_VERSION', '0.9.1.4');
+define('W3TC_VERSION', '0.9.1.4b');
 define('W3TC_POWERED_BY', 'W3 Total Cache/' . W3TC_VERSION);
 define('W3TC_EMAIL', 'w3tc@w3-edge.com');
 define('W3TC_PAYPAL_URL', 'https://www.paypal.com/cgi-bin/webscr');
@@ -21,6 +21,7 @@ define('W3TC_LIB_DIR', W3TC_DIR . '/lib');
 define('W3TC_LIB_W3_DIR', W3TC_LIB_DIR . '/W3');
 define('W3TC_LIB_MINIFY_DIR', W3TC_LIB_DIR . '/Minify');
 define('W3TC_LIB_CF_DIR', W3TC_LIB_DIR . '/CF');
+define('W3TC_LIB_CSSTIDY_DIR', W3TC_LIB_DIR . '/CSSTidy');
 define('W3TC_PLUGINS_DIR', W3TC_DIR . '/plugins');
 define('W3TC_INSTALL_DIR', W3TC_DIR . '/wp-content');
 define('W3TC_INSTALL_MINIFY_DIR', W3TC_INSTALL_DIR . '/w3tc/min');
@@ -75,6 +76,8 @@ define('W3TC_INSTALL_FILE_OBJECT_CACHE', W3TC_INSTALL_DIR . '/object-cache.php')
 define('W3TC_ADDIN_FILE_ADVANCED_CACHE', WP_CONTENT_DIR . '/advanced-cache.php');
 define('W3TC_ADDIN_FILE_DB', WP_CONTENT_DIR . '/db.php');
 define('W3TC_ADDIN_FILE_OBJECT_CACHE', WP_CONTENT_DIR . '/object-cache.php');
+
+require_once W3TC_DIR . '/inc/plugin.php';
 
 @ini_set('pcre.backtrack_limit', 4194304);
 @ini_set('pcre.recursion_limit', 4194304);
@@ -359,7 +362,7 @@ function w3_is_preview_config() {
  * @return boolean
  */
 function w3_is_preview_mode() {
-    return (w3_is_preview_config() && (defined('WP_ADMIN') || isset($_REQUEST['w3tc_preview']) || strstr($_SERVER['HTTP_REFERER'], 'w3tc_preview') !== false));
+    return (w3_is_preview_config() && (defined('WP_ADMIN') || isset($_REQUEST['w3tc_preview']) || (isset($_SERVER['HTTP_REFERER']) && strstr($_SERVER['HTTP_REFERER'], 'w3tc_preview') !== false)));
 }
 
 /**
@@ -414,6 +417,16 @@ function w3_is_apache() {
  */
 function w3_is_nginx() {
     return (isset($_SERVER['SERVER_SOFTWARE']) && stristr($_SERVER['SERVER_SOFTWARE'], 'nginx') !== false);
+}
+
+/**
+ * Returns true if CDN engine is mirror
+ *
+ * @param string $engine
+ * @return bool
+ */
+function w3_is_cdn_mirror($engine) {
+    return in_array($engine, array('mirror', 'netdna', 'cfl', 'cf2'));
 }
 
 /**
@@ -1255,6 +1268,8 @@ function w3_http_request($method, $url, $data = '', $auth = '', $check_status = 
         curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
         curl_setopt($ch, CURLOPT_TIMEOUT, 180);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
         switch ($method) {
             case 'POST':
@@ -1548,11 +1563,19 @@ function w3_get_engine_name($engine) {
             break;
 
         case 'cf':
-            $engine_name = 'amazon cloudfront';
+            $engine_name = 'amazon cloudfront (s3 origin)';
+            break;
+
+        case 'cf2':
+            $engine_name = 'amazon cloudfront (custom origin)';
             break;
 
         case 'rscf':
             $engine_name = 'rackspace cloud files';
+            break;
+
+        case 'cfl':
+            $engine_name = 'cloudflare';
             break;
 
         default:
@@ -1801,6 +1824,69 @@ function w3_erase_text($text, $start, $end) {
 }
 
 /**
+ * Extracts JS files from content
+ *
+ * @param string $content
+ * @return array
+ */
+function w3_extract_js($content) {
+    $matches = null;
+    $files = array();
+
+    $content = preg_replace('~<!--\[if.*\]-->~sU', '', $content);
+
+    if (preg_match_all('~<script\s+[^<>]*src=["\']?([^"\']+)["\']?[^<>]*>\s*</script>~is', $content, $matches)) {
+        $files = $matches[1];
+    }
+
+    $files = array_filter($files, create_function('$el', 'return (strstr($el, W3TC_CONTENT_MINIFY_DIR_NAME) ? false : true);'));
+    $files = array_map('w3_normalize_file_minify', $files);
+    $files = array_unique($files);
+
+    return $files;
+}
+
+/**
+ * Extract CSS files from content
+ *
+ * @param string $content
+ * @return array
+ */
+function w3_extract_css($content) {
+    $matches = null;
+    $files = array();
+
+    $content = preg_replace('~<!--\[if.*\]-->~sU', '', $content);
+
+    if (preg_match_all('~<link\s+([^>]+)/?>(.*</link>)?~Uis', $content, $matches, PREG_SET_ORDER)) {
+        foreach ($matches as $match) {
+            $attrs = array();
+            $attr_matches = null;
+
+            if (preg_match_all('~(\w+)=["\']([^"\']*)["\']~', $match[1], $attr_matches, PREG_SET_ORDER)) {
+                foreach ($attr_matches as $attr_match) {
+                    $attrs[$attr_match[1]] = trim($attr_match[2]);
+                }
+            }
+
+            if (isset($attrs['href']) && isset($attrs['rel']) && stristr($attrs['rel'], 'stylesheet') !== false && (!isset($attrs['media']) || stristr($attrs['media'], 'print') === false)) {
+                $files[] = $attrs['href'];
+            }
+        }
+    }
+
+    if (preg_match_all('~@import\s+(url\s*)?\(?["\']?\s*([^"\'\)\s]+)\s*["\']?\)?[^;]*;?~is', $content, $matches)) {
+        $files = array_merge($files, $matches[2]);
+    }
+
+    $files = array_filter($files, create_function('$el', 'return (strstr($el, W3TC_CONTENT_MINIFY_DIR_NAME) ? false : true);'));
+    $files = array_map('w3_normalize_file_minify', $files);
+    $files = array_unique($files);
+
+    return $files;
+}
+
+/**
  * Loads plugins
  *
  * @return void
@@ -1816,34 +1902,4 @@ function w3_load_plugins() {
         }
         @closedir($dir);
     }
-}
-
-/**
- * Add W3TC action callback
- *
- * @param string $action
- * @param mixed $callback
- * @return void
- */
-function w3tc_add_action($action, $callback) {
-    $GLOBALS['_w3tc_actions'][$action][] = $callback;
-}
-
-/**
- * Do W3TC action
- *
- * @param string $action
- * @param mixed $value
- * @return mixed
- */
-function w3tc_do_action($action, $value = null) {
-    if (isset($GLOBALS['_w3tc_actions'][$action])) {
-        foreach ((array) $GLOBALS['_w3tc_actions'][$action] as $callback) {
-            if (is_callable($callback)) {
-                $value = call_user_func($callback, $value);
-            }
-        }
-    }
-
-    return $value;
 }

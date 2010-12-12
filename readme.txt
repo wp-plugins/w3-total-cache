@@ -2,7 +2,7 @@
 Contributors: fredericktownes
 Tags: user experience, cache, caching, page cache, css cache, js cache, db cache, disk cache, disk caching, database cache, http compression, gzip, deflate, minify, CDN, content delivery network, media library, performance, speed, multiple hosts, CSS, merge, combine, unobtrusive javascript, compress, optimize, optimizer, JavaScript, JS, cascading style sheet, plugin, yslow, YUI, google, google rank, google page speed, S3, CloudFront, AWS, Amazon Web Services, cloud files, rackspace, batcache, wp cache, wp super cache, w3 total cache, buddypress
 Requires at least: 2.8
-Tested up to: 3.0.2
+Tested up to: 3.0.3
 Stable tag: 0.9.1.3
 
 Easily optimize the speed and user experience of your site with caching: browser, page, object, database, minify and content delivery network support.
@@ -120,11 +120,11 @@ That depends on how you use your site and where most of your readers read your s
 * [Amazon Cloudfront](http://bit.ly/ao1sGt)
 * [Rackspace Cloud Files](http://bit.ly/9hpX8T)
 * [MaxCDN](http://bit.ly/acaXXt)
-* [Cotendo](http://bit.ly/bnVs0a)
-* [VPS NET](http://bit.ly/d5hfFt)
-* [Akamai](http://bit.ly/a5GBLV)
+* [VPS NET (Level 3)](http://bit.ly/d5hfFt)
 * [EdgeCast](http://bit.ly/bIjSWC)
+* [Cotendo](http://bit.ly/bnVs0a)
 * [Limelight Networks](http://bit.ly/aCW04j)
+* [Akamai](http://bit.ly/a5GBLV)
 * [SimpleCDN](http://bit.ly/93EAKK)
 
 = What if I don't want to work with a CDN right now, is there any other use for this feature? =
@@ -240,6 +240,8 @@ Install the plugin to read the full FAQ.
 
 **November 2010:**
 
+* [10 WordPress Plugins I’m Thankful For (And Cannot Live Without)](http://wpmu.org/10-wordpress-plugins-im-thankful-for-and-cannot-live-without/), Sarah Gooding
+* [Subjective Results of Installing W3 Total Cache Plugin](http://www.codyhatch.com/administriva/subjective-results-of-installing-w3-total-cache-plugin/), Cody Hatch
 * [W3 Total Cache Plugin](http://www.xenritech.com/w3-total-cache-plugin.html/)
 
 **October 2010:**

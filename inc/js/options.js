@@ -56,6 +56,14 @@ function w3tc_mobile_groups_clear() {
     }
 }
 
+function w3tc_referrer_groups_clear() {
+    if (!jQuery('#referrer_groups li').size()) {
+        jQuery('#referrer_groups_empty').show();
+    } else {
+        jQuery('#referrer_groups_empty').hide();
+    }
+}
+
 function w3tc_minify_js_file_add(theme, template, location, file) {
     var append = jQuery('<li><table><tr><th>&nbsp;</th><th>File URI:</th><th>Template:</th><th colspan="3">Embed Location:</th></tr><tr><td>' + (jQuery('#js_files li').size() + 1) + '.</td><td><input class="js_enabled" type="text" name="js_files[' + theme + '][' + template + '][' + location + '][]" value="" size="70" \/></td><td><select class="js_file_template js_enabled"></select></td><td><select class="js_file_location js_enabled"><optgroup label="Blocking:"><option value="include">Embed in &lt;head&gt;</option><option value="include-body">Embed after &lt;body&gt;</option><option value="include-footer">Embed before &lt;/body&gt;</option></optgroup><optgroup label="Non-Blocking:"><option value="include-nb">Embed in &lt;head&gt;</option><option value="include-body-nb">Embed after &lt;body&gt;</option><option value="include-footer-nb">Embed before &lt;/body&gt;</option></optgroup></select></td><td><input class="js_file_delete js_enabled button" type="button" value="Delete" /> <input class="js_file_verify js_enabled button" type="button" value="Verify URI" /></td></tr></table><\/li>');
     append.find('input:text').val(file);
@@ -167,6 +175,18 @@ function w3tc_cdn_cnames_assign() {
     });
 }
 
+function w3tc_cdn_cfl_api_request(action, value) {
+    jQuery.post('admin.php?page=w3tc_general', {
+        w3tc_action: 'cdn_cfl_api_request',
+        email: jQuery('#cdn_cfl_email').val(),
+        key: jQuery('#cdn_cfl_key').val(),
+        action: action,
+        value: value
+    }, function(data) {
+        alert(data.result ? 'OK' : 'Request failed. Error: ' + data.error);
+    }, 'json');
+}
+
 function w3tc_toggle(name, check) {
     if (check === undefined) {
         check = true;
@@ -206,9 +226,13 @@ function w3tc_toggle(name, check) {
     });
 }
 
+function w3tc_beforeunload() {
+    return 'Are you sure you wish to navigate away from this page without saving your changes?';
+}
+
 jQuery(function() {
     // general page
-    w3tc_toggle('enabled', false);
+    w3tc_toggle('enabled');
 
     jQuery('.button-rating').click(function() {
         window.open('http://wordpress.org/extend/plugins/w3-total-cache/', '_blank');
@@ -474,6 +498,17 @@ jQuery(function() {
                 });
                 break;
 
+            case me.hasClass('cdn_cf2'):
+                jQuery.extend(params, {
+                    engine: 'cf2',
+                    'config[key]': jQuery('#cdn_cf2_key').val(),
+                    'config[secret]': jQuery('#cdn_cf2_secret').val(),
+                    'config[origin]': jQuery('#cdn_cf2_origin').val(),
+                    'config[id]': jQuery('#cdn_cf2_id').val(),
+                    'config[cname][]': cnames
+                });
+                break;
+
             case me.hasClass('cdn_rscf'):
                 jQuery.extend(params, {
                     engine: 'rscf',
@@ -498,7 +533,7 @@ jQuery(function() {
         }, 'json');
     });
 
-    jQuery('#cdn_create_container').click(function() {
+    jQuery('#cdn_create_container').live('click', function() {
         var me = jQuery(this);
         var cnames = w3tc_cdn_get_cnames();
         var container_id = null;
@@ -513,6 +548,7 @@ jQuery(function() {
                     'config[key]': jQuery('#cdn_s3_key').val(),
                     'config[secret]': jQuery('#cdn_s3_secret').val(),
                     'config[bucket]': jQuery('#cdn_s3_bucket').val(),
+                    'config[bucket_location]': jQuery('#cdn_s3_bucket_location').val(),
                     'config[cname][]': cnames
                 });
                 break;
@@ -525,6 +561,20 @@ jQuery(function() {
                     'config[key]': jQuery('#cdn_cf_key').val(),
                     'config[secret]': jQuery('#cdn_cf_secret').val(),
                     'config[bucket]': jQuery('#cdn_cf_bucket').val(),
+                    'config[bucket_location]': jQuery('#cdn_cf_bucket_location').val(),
+                    'config[cname][]': cnames
+                });
+                break;
+
+            case me.hasClass('cdn_cf2'):
+                container_id = jQuery('#cdn_cf2_id');
+
+                jQuery.extend(params, {
+                    engine: 'cf2',
+                    'config[key]': jQuery('#cdn_cf2_key').val(),
+                    'config[secret]': jQuery('#cdn_cf2_secret').val(),
+                    'config[origin]': jQuery('#cdn_cf2_origin').val(),
+                    'config[bucket_location]': jQuery('#cdn_cf2_bucket_location').val(),
                     'config[cname][]': cnames
                 });
                 break;
@@ -558,6 +608,22 @@ jQuery(function() {
         }, 'json');
     });
 
+    jQuery('#cdn_cfl_set_devmode_on').click(function() {
+        w3tc_cdn_cfl_api_request('devmode', 1);
+    });
+
+    jQuery('#cdn_cfl_set_devmode_off').click(function() {
+        w3tc_cdn_cfl_api_request('devmode', 0);
+    });
+
+    jQuery('#cdn_cfl_set_seclevel').click(function() {
+        w3tc_cdn_cfl_api_request('sec_lvl', jQuery('#cdn_cfl_seclevel').val());
+    });
+
+    jQuery('#cdn_cfl_purge_cache').click(function() {
+        w3tc_cdn_cfl_api_request('fpurge_ts', 1);
+    });
+
     jQuery('#memcached_test').click(function() {
         var status = jQuery('#memcached_test_status');
         status.removeClass('w3tc-error');
@@ -568,6 +634,50 @@ jQuery(function() {
             w3tc_action: 'test_memcached',
             servers: jQuery('#memcached_servers').val()
         }, function(data) {
+            status.addClass(data.result ? 'w3tc-success' : 'w3tc-error');
+            status.html(data.error);
+        }, 'json');
+    });
+
+    jQuery('.minifier_test').click(function() {
+        var me = jQuery(this);
+        var params = {
+            w3tc_action: 'test_minifier'
+        };
+
+        switch (true) {
+            case me.hasClass('minifier_yuijs'):
+                jQuery.extend(params, {
+                    engine: 'yuijs',
+                    path_java: jQuery('#minify_yuijs_path_java').val(),
+                    path_jar: jQuery('#minify_yuijs_path_jar').val()
+                });
+                break;
+
+            case me.hasClass('minifier_yuicss'):
+                jQuery.extend(params, {
+                    engine: 'yuicss',
+                    path_java: jQuery('#minify_yuicss_path_java').val(),
+                    path_jar: jQuery('#minify_yuicss_path_jar').val()
+                });
+                break;
+
+            case me.hasClass('minifier_ccjs'):
+                jQuery.extend(params, {
+                    engine: 'ccjs',
+                    path_java: jQuery('#minify_ccjs_path_java').val(),
+                    path_jar: jQuery('#minify_ccjs_path_jar').val()
+                });
+                break;
+        }
+
+        var status = me.next();
+        status.removeClass('w3tc-error');
+        status.removeClass('w3tc-success');
+        status.addClass('w3tc-process');
+        status.html('Testing...');
+
+        jQuery.post('admin.php?page=w3tc_general', params, function(data) {
             status.addClass(data.result ? 'w3tc-success' : 'w3tc-error');
             status.html(data.error);
         }, 'json');
@@ -779,24 +889,29 @@ jQuery(function() {
             group = group.replace(/_+$/, '');
 
             if (group) {
+                var exists = false;
+
                 jQuery('.mobile_group').each(function() {
                     if (jQuery(this).html() == group) {
                         alert('Group already exists!');
+                        exists = true;
                         return false;
                     }
                 });
 
-                var li = jQuery('<li id="mobile_group_' + group + '"><table class="form-table"><tr><th valign="top">Group name:</th><td><span class="mobile_group_number">' + (jQuery('#mobile_groups li').size() + 1) + '.</span> <span class="mobile_group">' + group + '</span> <input type="button" class="button mobile_delete" value="Delete group" /></td></tr><tr><th><label for="mobile_groups_' + group + '_enabled">Enabled:</label></th><td><input type="hidden" name="mobile_groups[' + group + '][enabled]" value="0" /><input id="mobile_groups_' + group + '_enabled" type="checkbox" name="mobile_groups[' + group + '][enabled]" value="1" checked="checked" /></td></tr><tr><th valign="top"><label for="mobile_groups_' + group + '_theme">Theme:</label></th><td><select id="mobile_groups_' + group + '_theme" name="mobile_groups[' + group + '][theme]"><option value="">-- Pass-through --</option></select><br /><span class="description">Assign this group of user agents to a specific them. Leaving this option "Active Theme" allows any plugins you have (e.g. mobile plugins) to properly handle requests for these user agents. If the "redirect users to" field is not empty, this setting is ignored.</span></td></tr><tr><th valign="top"><label for="mobile_groups_' + group + '_redirect">Redirect users to:</label></th><td><input id="mobile_groups_' + group + '_redirect" type="text" name="mobile_groups[' + group + '][redirect]" value="" size="60" /><br /><span class="description">A 302 redirect is used to send this group of users to another hostname (domain); recommended if a 3rd party service provides a mobile version of your site.</span></td></tr><tr><th valign="top"><label for="mobile_groups_' + group + '_agents">User agents:</label></th><td><textarea id="mobile_groups_' + group + '_agents" name="mobile_groups[' + group + '][agents]" rows="10" cols="50"></textarea><br /><span class="description">Specify the user agents for this group.</span></td></tr></table></li>');
-                var select = li.find('select');
+                if (!exists) {
+                    var li = jQuery('<li id="mobile_group_' + group + '"><table class="form-table"><tr><th valign="top">Group name:</th><td><span class="mobile_group_number">' + (jQuery('#mobile_groups li').size() + 1) + '.</span> <span class="mobile_group">' + group + '</span> <input type="button" class="button mobile_delete" value="Delete group" /></td></tr><tr><th><label for="mobile_groups_' + group + '_enabled">Enabled:</label></th><td><input type="hidden" name="mobile_groups[' + group + '][enabled]" value="0" /><input id="mobile_groups_' + group + '_enabled" type="checkbox" name="mobile_groups[' + group + '][enabled]" value="1" checked="checked" /></td></tr><tr><th valign="top"><label for="mobile_groups_' + group + '_theme">Theme:</label></th><td><select id="mobile_groups_' + group + '_theme" name="mobile_groups[' + group + '][theme]"><option value="">-- Pass-through --</option></select><br /><span class="description">Assign this group of user agents to a specific them. Leaving this option "Active Theme" allows any plugins you have (e.g. mobile plugins) to properly handle requests for these user agents. If the "redirect users to" field is not empty, this setting is ignored.</span></td></tr><tr><th valign="top"><label for="mobile_groups_' + group + '_redirect">Redirect users to:</label></th><td><input id="mobile_groups_' + group + '_redirect" type="text" name="mobile_groups[' + group + '][redirect]" value="" size="60" /><br /><span class="description">A 302 redirect is used to send this group of users to another hostname (domain); recommended if a 3rd party service provides a mobile version of your site.</span></td></tr><tr><th valign="top"><label for="mobile_groups_' + group + '_agents">User agents:</label></th><td><textarea id="mobile_groups_' + group + '_agents" name="mobile_groups[' + group + '][agents]" rows="10" cols="50"></textarea><br /><span class="description">Specify the user agents for this group.</span></td></tr></table></li>');
+                    var select = li.find('select');
 
-                jQuery.each(mobile_themes, function(index, value) {
-                    select.append(jQuery('<option />').val(index).html(value));
-                });
+                    jQuery.each(mobile_themes, function(index, value) {
+                        select.append(jQuery('<option />').val(index).html(value));
+                    });
 
-                jQuery('#mobile_groups').append(li);
-                w3tc_mobile_groups_clear();
+                    jQuery('#mobile_groups').append(li);
+                    w3tc_mobile_groups_clear();
 
-                window.location.hash = '#mobile_group_' + group;
+                    window.location.hash = '#mobile_group_' + group;
+                }
             } else {
                 alert('Empty group name!');
             }
@@ -811,6 +926,107 @@ jQuery(function() {
     });
 
     w3tc_mobile_groups_clear();
+
+    // referrer tab
+    jQuery('#referrer_form').submit(function() {
+        var error = false;
+
+        jQuery('#referrer_groups li').each(function() {
+            if (jQuery(this).find(':checked').size()) {
+                var group = jQuery(this).find('.referrer_group').text();
+                var theme = jQuery(this).find(':selected').val();
+                var redirect = jQuery(this).find('input[type=text]').val();
+                var agents = jQuery.trim(jQuery(this).find('textarea').val()).split("\n");
+
+                jQuery('#referrer_groups li').each(function() {
+                    if (jQuery(this).find(':checked').size()) {
+                        var compare_group = jQuery(this).find('.referrer_group').text();
+                        if (compare_group != group) {
+                            var compare_theme = jQuery(this).find(':selected').val();
+                            var compare_redirect = jQuery(this).find('input[type=text]').val();
+                            var compare_agents = jQuery.trim(jQuery(this).find('textarea').val()).split("\n");
+
+                            if (compare_redirect == '' && redirect == '' && compare_theme != '' && compare_theme == theme) {
+                                alert('Duplicate theme "' + compare_theme + '" found in the group "' + group + '".');
+                                error = true;
+                                return false;
+                            }
+
+                            if (compare_redirect != '' && compare_redirect == redirect) {
+                                alert('Duplicate redirect "' + compare_redirect + '" found in the group "' + group + '".');
+                                error = true;
+                                return false;
+                            }
+
+                            jQuery.each(compare_agents, function(index, value) {
+                                if (jQuery.inArray(value, agents) != -1) {
+                                    alert('Duplicate stem "' + value + '" found in the group "' + compare_group + '".');
+                                    error = true;
+                                    return false;
+                                }
+                            });
+                        }
+                    }
+                });
+
+                if (error) {
+                    return false;
+                }
+            }
+        });
+
+        if (error) {
+            return false;
+        }
+    });
+
+    jQuery('#referrer_add').click(function() {
+        var group = prompt('Enter group name (only "0-9", "a-z", "_" symbols are allowed).');
+
+        if (group !== null) {
+            group = group.toLowerCase();
+            group = group.replace(/[^0-9a-z_]+/g, '_');
+            group = group.replace(/^_+/, '');
+            group = group.replace(/_+$/, '');
+
+            if (group) {
+                var exists = false;
+
+                jQuery('.referrer_group').each(function() {
+                    if (jQuery(this).html() == group) {
+                        alert('Group already exists!');
+                        exists = true;
+                        return false;
+                    }
+                });
+
+                if (!exists) {
+                    var li = jQuery('<li id="referrer_group_' + group + '"><table class="form-table"><tr><th valign="top">Group name:</th><td><span class="referrer_group_number">' + (jQuery('#referrer_groups li').size() + 1) + '.</span> <span class="referrer_group">' + group + '</span> <input type="button" class="button referrer_delete" value="Delete group" /></td></tr><tr><th><label for="referrer_groups_' + group + '_enabled">Enabled:</label></th><td><input type="hidden" name="referrer_groups[' + group + '][enabled]" value="0" /><input id="referrer_groups_' + group + '_enabled" type="checkbox" name="referrer_groups[' + group + '][enabled]" value="1" checked="checked" /></td></tr><tr><th valign="top"><label for="referrer_groups_' + group + '_theme">Theme:</label></th><td><select id="referrer_groups_' + group + '_theme" name="referrer_groups[' + group + '][theme]"><option value="">-- Pass-through --</option></select><br /><span class="description">Assign this group of referrers to a specific them. Leaving this option "Active Theme" allows any plugins you have (e.g. referrer plugins) to properly handle requests for these referrers. If the "redirect users to" field is not empty, this setting is ignored.</span></td></tr><tr><th valign="top"><label for="referrer_groups_' + group + '_redirect">Redirect users to:</label></th><td><input id="referrer_groups_' + group + '_redirect" type="text" name="referrer_groups[' + group + '][redirect]" value="" size="60" /><br /><span class="description">A 302 redirect is used to send this group of users to another hostname (domain); recommended if a 3rd party service provides a referrer version of your site.</span></td></tr><tr><th valign="top"><label for="referrer_groups_' + group + '_referrers">Referrers:</label></th><td><textarea id="referrer_groups_' + group + '_referrers" name="referrer_groups[' + group + '][referrers]" rows="10" cols="50"></textarea><br /><span class="description">Specify the referrers for this group.</span></td></tr></table></li>');
+                    var select = li.find('select');
+
+                    jQuery.each(referrer_themes, function(index, value) {
+                        select.append(jQuery('<option />').val(index).html(value));
+                    });
+
+                    jQuery('#referrer_groups').append(li);
+                    w3tc_referrer_groups_clear();
+
+                    window.location.hash = '#referrer_group_' + group;
+                }
+            } else {
+                alert('Empty group name!');
+            }
+        }
+    });
+
+    jQuery('.referrer_delete').live('click', function() {
+        if (confirm('Are you sure want to delete this group?')) {
+            jQuery(this).parents('#referrer_groups li').remove();
+            w3tc_referrer_groups_clear();
+        }
+    });
+
+    w3tc_referrer_groups_clear();
 
     // add sortable
     if (jQuery.ui && jQuery.ui.sortable) {
@@ -836,6 +1052,15 @@ jQuery(function() {
                 });
             }
         });
+
+        jQuery('#referrer_groups').sortable({
+            axis: 'y',
+            stop: function() {
+                jQuery('#referrer_groups .referrer_group_number').each(function(index) {
+                    jQuery(this).html((index + 1) + '.');
+                });
+            }
+        });
     }
 
     // show hide rules
@@ -854,5 +1079,14 @@ jQuery(function() {
     // nav
     jQuery('#w3tc-nav select').change(function() {
         document.location.href = 'admin.php?page=' + jQuery(this).val();
+    });
+
+    // check for unsaved changes
+    jQuery('#w3tc input,#w3tc select,#w3tc textarea').live('change', function() {
+        jQuery(window).bind('beforeunload', w3tc_beforeunload);
+    });
+
+    jQuery('#w3tc form').submit(function() {
+        jQuery(window).unbind('beforeunload', w3tc_beforeunload);
     });
 });

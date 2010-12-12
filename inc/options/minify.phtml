@@ -18,12 +18,14 @@ minify_templates['<?php echo addslashes($theme_key); ?>']['<?php echo addslashes
     </p>
     <p>
 		To rebuild the minify cache use the 
+        <input type="hidden" name="page" value="<?php echo $this->_page; ?>" />
         <input type="submit" name="flush_minify" value="empty cache"<?php if (! $minify_enabled): ?> disabled="disabled"<?php endif; ?> class="button" />
 		operation.
+        <?php if (!$auto): ?>
 		Get minify hints using the
         <input type="button" class="button button-minify-recommendations" value="help" />
 		wizard.
-        <input type="hidden" name="page" value="<?php echo $this->_page; ?>" />
+        <?php endif; ?>
     </p>
 </form>
 
@@ -76,31 +78,57 @@ minify_templates['<?php echo addslashes($theme_key); ?>']['<?php echo addslashes
 	</fieldset>
 
 	<fieldset>
-		<legend><acronym title="Hypertext Markup Language">HTML</acronym></legend>
+		<legend><acronym title="Hypertext Markup Language">HTML</acronym> &amp; <acronym title="eXtensible Markup Language">XML</acronym></legend>
 
         <table class="form-table">
         	<tr>
         		<th valign="top"><acronym title="Hypertext Markup Language">HTML</acronym> minify settings:</th>
         		<td>
         			<input type="hidden" name="minify.html.enable" value="0" />
+                    <input type="hidden" name="minify.html.inline.css" value="0" />
+                    <input type="hidden" name="minify.html.inline.js" value="0" />
         			<input type="hidden" name="minify.html.reject.feed" value="0" />
-        			<input type="hidden" name="minify.html.inline.css" value="0" />
-        			<input type="hidden" name="minify.html.inline.js" value="0" />
-        			<input type="hidden" name="minify.html.strip.crlf" value="0" />
         			<label><input id="html_enabled" type="checkbox" name="minify.html.enable" value="1"<?php checked($this->_config->get_boolean('minify.html.enable'), true); ?> /> Enable</label><br />
+                    <label><input class="html_enabled" type="checkbox" name="minify.html.inline.css" value="1"<?php checked($this->_config->get_boolean('minify.html.inline.css'), true); ?> /> Inline <acronym title="Cascading Style Sheet">CSS</acronym> minification</label><br />
+                    <label><input class="html_enabled" type="checkbox" name="minify.html.inline.js" value="1"<?php checked($this->_config->get_boolean('minify.html.inline.js'), true); ?> /> Inline <acronym title="JavaScript">JS</acronym> minification</label><br />
         			<label><input class="html_enabled" type="checkbox" name="minify.html.reject.feed" value="1"<?php checked($this->_config->get_boolean('minify.html.reject.feed'), true); ?> /> Don't minify feeds</label><br />
-        			<label><input class="html_enabled" type="checkbox" name="minify.html.inline.css" value="1"<?php checked($this->_config->get_boolean('minify.html.inline.css'), true); ?> /> Inline <acronym title="Cascading Style Sheet">CSS</acronym> minification</label><br />
-        			<label><input class="html_enabled" type="checkbox" name="minify.html.inline.js" value="1"<?php checked($this->_config->get_boolean('minify.html.inline.js'), true); ?> /> Inline <acronym title="JavaScript">JS</acronym> minification</label><br />
-        			<label><input class="html_enabled" type="checkbox" name="minify.html.strip.crlf" value="1"<?php checked($this->_config->get_boolean('minify.html.strip.crlf'), true); ?> /> Line break removal</label><br />
+                    <?php
+                        $html_engine_file = '';
+
+                        switch ($html_engine) {
+                            case 'html':
+                            case 'htmltidy':
+                                $html_engine_file = W3TC_DIR . '/inc/options/minify/' . $html_engine . '.phtml';
+                                break;
+                        }
+
+                        if (file_exists($html_engine_file)) {
+                            include $html_engine_file;
+                        }
+                    ?>
         		</td>
         	</tr>
-        	<tr>
-        		<th valign="top"><label for="minify_html_comments_ignore">Ignored comment stems:</label></th>
-        		<td>
-        			<textarea id="minify_html_comments_ignore" name="minify.html.comments.ignore" cols="40" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('minify.html.comments.ignore'))); ?></textarea><br />
-        			<span class="description">Do not remove comments that contain these terms.</span>
-        		</td>
-        	</tr>
+            <tr>
+                <th valign="top"><label for="minify_html_comments_ignore">Ignored comment stems:</label></th>
+                <td>
+                    <textarea id="minify_html_comments_ignore" name="minify.html.comments.ignore" cols="40" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('minify.html.comments.ignore'))); ?></textarea><br />
+                    <span class="description">Do not remove comments that contain these terms.</span>
+                </td>
+            </tr>
+            <?php
+                $html_engine_file2 = '';
+
+                switch ($html_engine_file2) {
+                    case 'html':
+                    case 'htmltidy':
+                        $html_engine_file = W3TC_DIR . '/inc/options/minify/' . $html_engine . '2.phtml';
+                        break;
+                }
+
+                if (file_exists($html_engine_file2)) {
+                    include $html_engine_file2;
+                }
+            ?>
         </table>
 
         <p class="submit">
@@ -112,23 +140,50 @@ minify_templates['<?php echo addslashes($theme_key); ?>']['<?php echo addslashes
 		<legend>JavaScript</legend>
 
         <table class="form-table">
-        	<tr>
-        		<th valign="top"><acronym title="JavaScript">JS</acronym> minify settings:</th>
-        		<td>
-        			<input type="hidden" name="minify.js.enable" value="0" />
-        			<input type="hidden" name="minify.js.combine.header" value="0" />
+            <tr>
+                <th valign="top"><acronym title="JavaScript">JS</acronym> minify settings:</th>
+                <td>
+                    <input type="hidden" name="minify.js.enable" value="0" />
+                    <input type="hidden" name="minify.js.combine.header" value="0" />
                     <input type="hidden" name="minify.js.combine.body" value="0" />
-        			<input type="hidden" name="minify.js.combine.footer" value="0" />
-        			<input type="hidden" name="minify.js.strip.comments" value="0" />
-        			<input type="hidden" name="minify.js.strip.crlf" value="0" />
-        			<label><input id="js_enabled" type="checkbox" name="minify.js.enable" value="1"<?php checked($this->_config->get_boolean('minify.js.enable'), true); ?> /> Enable</label><br />
-        			<label><input class="js_enabled" type="checkbox" name="minify.js.combine.header" value="1"<?php checked($this->_config->get_boolean('minify.js.combine.header'), true); ?> /> Combine only after &lt;head&gt;</label><br />
-        			<label><input class="js_enabled" type="checkbox" name="minify.js.combine.body" value="1"<?php checked($this->_config->get_boolean('minify.js.combine.body'), true); ?> /> Combine only after &lt;body&gt;</label><br />
-        			<label><input class="js_enabled" type="checkbox" name="minify.js.combine.footer" value="1"<?php checked($this->_config->get_boolean('minify.js.combine.footer'), true); ?> /> Combine only before &lt;/body&gt;</label><br />
-        			<label><input class="js_enabled" type="checkbox" name="minify.js.strip.comments" value="1"<?php checked($this->_config->get_boolean('minify.js.strip.comments'), true); ?> /> Comment removal (not applied when combine only is active)</label><br />
-        			<label><input class="js_enabled" type="checkbox" name="minify.js.strip.crlf" value="1"<?php checked($this->_config->get_boolean('minify.js.strip.crlf'), true); ?> /> Line break removal (not applied when combine only is active)</label><br />
-        		</td>
-        	</tr>
+                    <input type="hidden" name="minify.js.combine.footer" value="0" />
+                    <label><input id="js_enabled" type="checkbox" name="minify.js.enable" value="1"<?php checked($this->_config->get_boolean('minify.js.enable'), true); ?> /> Enable</label><br />
+                    <label><input class="js_enabled" type="checkbox" name="minify.js.combine.header" value="1"<?php checked($this->_config->get_boolean('minify.js.combine.header'), true); ?> /> Combine only after &lt;head&gt;</label><br />
+                    <label><input class="js_enabled" type="checkbox" name="minify.js.combine.body" value="1"<?php checked($this->_config->get_boolean('minify.js.combine.body'), true); ?> /> Combine only after &lt;body&gt;</label><br />
+                    <label><input class="js_enabled" type="checkbox" name="minify.js.combine.footer" value="1"<?php checked($this->_config->get_boolean('minify.js.combine.footer'), true); ?> /> Combine only before &lt;/body&gt;</label><br />
+                    <?php
+                        $js_engine_file = '';
+
+                        switch ($js_engine) {
+                            case 'js':
+                            case 'yuijs':
+                            case 'ccjs':
+                                $js_engine_file = W3TC_DIR . '/inc/options/minify/' . $js_engine . '.phtml';
+                                break;
+                        }
+
+                        if (file_exists($js_engine_file)) {
+                            include $js_engine_file;
+                        }
+                    ?>
+                </td>
+            </tr>
+            <?php
+                $js_engine_file2 = '';
+
+                switch ($js_engine) {
+                    case 'js':
+                    case 'yuijs':
+                    case 'ccjs':
+                        $js_engine_file2 = W3TC_DIR . '/inc/options/minify/' . $js_engine . '2.phtml';
+                        break;
+                }
+
+                if (file_exists($js_engine_file2)) {
+                    include $js_engine_file2;
+                }
+            ?>
+            <?php if (!$auto): ?>
         	<tr>
         		<th valign="top"><acronym title="JavaScript">JS</acronym> file management:</th>
         		<td>
@@ -198,6 +253,7 @@ minify_templates['<?php echo addslashes($theme_key); ?>']['<?php echo addslashes
                     <input id="js_file_add" class="js_enabled button" type="button" value="Add a script" />
         		</td>
         	</tr>
+            <?php endif; ?>
         </table>
 
         <p class="submit">
@@ -214,14 +270,51 @@ minify_templates['<?php echo addslashes($theme_key); ?>']['<?php echo addslashes
         		<td>
         			<input type="hidden" name="minify.css.enable" value="0" />
         			<input type="hidden" name="minify.css.combine" value="0" />
-        			<input type="hidden" name="minify.css.strip.comments" value="0" />
-        			<input type="hidden" name="minify.css.strip.crlf" value="0" />
         			<label><input id="css_enabled" type="checkbox" name="minify.css.enable" value="1"<?php checked($this->_config->get_boolean('minify.css.enable'), true); ?> /> Enable</label><br />
         			<label><input class="css_enabled" type="checkbox" name="minify.css.combine" value="1"<?php checked($this->_config->get_boolean('minify.css.combine'), true); ?> /> Combine only</label><br />
-        			<label><input class="css_enabled" type="checkbox" name="minify.css.strip.comments" value="1"<?php checked($this->_config->get_boolean('minify.css.strip.comments'), true); ?> /> Comment removal (not applied when combine only is active)</label><br />
-        			<label><input class="css_enabled" type="checkbox" name="minify.css.strip.crlf" value="1"<?php checked($this->_config->get_boolean('minify.css.strip.crlf'), true); ?> /> Line break removal (not applied when combine only is active)</label><br />
+                    <?php
+                        $css_engine_file = '';    
+
+                        switch ($css_engine) {
+                            case 'css':
+                            case 'yuicss':
+                            case 'csstidy':
+                                $css_engine_file = W3TC_DIR . '/inc/options/minify/' . $css_engine . '.phtml';
+                                break;
+                        }
+
+                        if (file_exists($css_engine_file)) {
+                            include $css_engine_file;
+                        }
+                    ?>
         		</td>
         	</tr>
+            <tr>
+                <th><label for="minify_css_import">@import handling:</label></th>
+                <td>
+                    <select id="minify_css_import" class="css_enabled" name="minify.css.imports">
+                        <?php foreach ($css_imports_values as $css_imports_key => $css_imports_value): ?>
+                        <option value="<?php echo $css_imports_key; ?>"<?php selected($css_imports, $css_imports_key); ?>><?php echo $css_imports_value; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </td>
+            </tr>
+            <?php
+                $css_engine_file2 = '';
+
+                switch ($css_engine) {
+                    case 'css':
+                    case 'yuicss':
+                    case 'csstidy':
+                        $css_engine_file2 = W3TC_DIR . '/inc/options/minify/' . $css_engine . '2.phtml';
+                        break;
+                }
+
+                if (file_exists($css_engine_file2)) {
+                    include $css_engine_file2;
+                }
+            ?>
+            <?php if (!$auto): ?>
         	<tr>
         		<th valign="top"><acronym title="Cascading Style Sheet">CSS</acronym> file management:</th>
         		<td>
@@ -276,6 +369,7 @@ minify_templates['<?php echo addslashes($theme_key); ?>']['<?php echo addslashes
         			<input id="css_file_add" class="css_enabled button" type="button" value="Add a style sheet" />
         		</td>
         	</tr>
+            <?php endif; ?>
         </table>
 
         <p class="submit">

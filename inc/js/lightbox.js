@@ -32,8 +32,6 @@ var W3tc_Lightbox = {
     },
 
     open: function(options) {
-        var me = this;
-
         this.options = jQuery.extend({
             width: 400,
             height: 300,
@@ -387,6 +385,87 @@ function w3tc_lightbox_self_test() {
     });
 }
 
+function w3tc_lightbox_cdn_cfl_new_account() {
+    W3tc_Lightbox.open({
+        width: 650,
+        height: 400,
+        url: 'admin.php?page=w3tc_general&w3tc_action=cdn_cfl_new_account',
+        callback: function(lightbox) {
+            jQuery('form', lightbox.container).submit(function() {
+                var email = jQuery('#cfl_new_account_email').val();
+                var password = jQuery('#cfl_new_account_password').val();
+                var password2 = jQuery('#cfl_new_account_password2').val();
+                var username = jQuery('#cfl_new_account_username').val();
+                var zone_name = jQuery('#cfl_new_account_zone_name').val();
+                var resolve_to = jQuery('#cfl_new_account_resolve_to').val();
+                var subdomains = jQuery('#cfl_new_account_subdomains').val();
+
+                if (!/[a-z0-9-\._]+@[a-z0-9-\.]+\.[a-z]+/i.test(email)) {
+                    alert('Plase enter valid E-mail address.');
+                    return false;
+                }
+
+                if (!password) {
+                    alert('Please enter your password.');
+                    return false;
+                } else if (!/[a-z]+/.test(password) || !/[0-9]+/.test(password)) {
+                    alert('Password is too simple.');
+                    return false;
+                } else if (!password2) {
+                    alert('Please repeat your password.');
+                    return false;
+                } else if (password != password2) {
+                    alert('Passwords don\'t match.');
+                    return false;
+                }
+
+                if (!zone_name) {
+                    alert('Please enter zone name.');
+                    return false;
+                }
+
+                if (!resolve_to) {
+                    alert('Please enter resolve name.');
+                    return false;
+                }
+
+                jQuery.post('admin.php?page=w3tc_general', {
+                    w3tc_action: 'cdn_cfl_create_account',
+                    email: email,
+                    password: password,
+                    username: username,
+                    zone_name: zone_name,
+                    resolve_to: resolve_to,
+                    subdomains: subdomains
+                }, function(data) {
+                    if (data.result) {
+                        alert('OK');
+                        jQuery('#cdn_cfl_email').val(data.response.cloudflare_email);
+                        jQuery('#cdn_cfl_key').val(data.response.user_key);
+                    } else {
+                        alert('Request failed. Error: ' + data.error);
+                    }
+                }, 'json');
+
+                return false;
+            });
+        }
+    });
+}
+
+function w3tc_lightbox_cdn_s3_bucket_location(type) {
+    W3tc_Lightbox.open({
+        width: 500,
+        height: 150,
+        url: 'admin.php?page=w3tc_general&w3tc_action=cdn_s3_bucket_location&type=' + type,
+        callback: function(lightbox) {
+            jQuery('.button', lightbox.container).click(function() {
+                lightbox.close();
+            });
+        }
+    });
+}
+
 jQuery(function() {
     jQuery('.button-tweet').click(function() {
         w3tc_lightbox_tweet();
@@ -400,6 +479,24 @@ jQuery(function() {
 
     jQuery('.button-self-test').click(function() {
         w3tc_lightbox_self_test();
+        return false;
+    });
+
+    jQuery('.button-cdn-cfl-new-account').click(function() {
+        w3tc_lightbox_cdn_cfl_new_account();
+        return false;
+    });
+
+    jQuery('.button-cdn-s3-bucket-location,.button-cdn-cf-bucket-location').click(function() {
+        var type = '';
+
+        if (jQuery(this).hasClass('cdn_s3')) {
+            type = 's3';
+        } else if (jQuery(this).hasClass('cdn_cf')) {
+            type = 'cf';
+        }
+
+        w3tc_lightbox_cdn_s3_bucket_location(type);
         return false;
     });
 });

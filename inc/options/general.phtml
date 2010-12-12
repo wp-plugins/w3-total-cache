@@ -24,8 +24,8 @@
         	<tr>
         		<th colspan="2">
                 	<label>
-                		<input id="enabled" type="checkbox" name="enabled" value="1"<?php checked($enabled, true); ?> />
-                		Deselect this option to disable all caching functionality.
+                		<input id="enabled" type="checkbox" name="enabled" value="1"<?php checked($enabled_checkbox, true); ?> />
+                		Toggle all caching types on or off at once.
                 	</label>
         		</th>
         	</tr>
@@ -112,6 +112,13 @@
             	</td>
             </tr>
             <tr>
+            	<th valign="top">Minify mode:</th>
+            	<td>
+            		<label><input class="enabled" type="radio" name="minify.auto" value="1"<?php checked($this->_config->get_boolean('minify.auto'), true); ?><?php if (! W3TC_PHP5): ?> disabled="disabled"<?php endif; ?> /> Auto</label>
+            		<label><input class="enabled" type="radio" name="minify.auto" value="0"<?php checked($this->_config->get_boolean('minify.auto'), false); ?><?php if (! W3TC_PHP5): ?> disabled="disabled"<?php endif; ?> /> Manual</label>
+            	</td>
+            </tr>
+            <tr>
             	<th valign="top">Minify Cache Method:</th>
             	<td>
             		<select name="minify.engine"<?php if (! W3TC_PHP5): ?> disabled="disabled"<?php endif; ?>>
@@ -128,6 +135,35 @@
                 		</optgroup>
             		</select>
             	</td>
+            </tr>
+            <tr>
+                <th valign="top"><acronym title="Hypertext Markup Language">HTML</acronym> minifier:</th>
+                <td>
+                    <select name="minify.html.engine">
+                        <option value="html"<?php selected($this->_config->get_string('minify.html.engine'), 'html'); ?>>Default</option>
+                        <option value="htmltidy"<?php selected($this->_config->get_string('minify.html.engine'), 'htmltidy'); ?><?php if (! $check_tidy): ?> disabled="disabled"<?php endif; ?>>HTML Tidy</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th valign="top"><acronym title="JavaScript">JS</acronym> minifier:</th>
+                <td>
+                    <select name="minify.js.engine">
+                        <option value="js"<?php selected($this->_config->get_string('minify.js.engine'), 'js'); ?>>JSMin (default)</option>
+                        <option value="yuijs"<?php selected($this->_config->get_string('minify.js.engine'), 'yuijs'); ?>>YUI Compressor</option>
+                        <option value="ccjs"<?php selected($this->_config->get_string('minify.js.engine'), 'ccjs'); ?>>Closure Compiler</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th valign="top"><acronym title="Cascading Style Sheets">CSS</acronym> minifier:</th>
+                <td>
+                    <select name="minify.css.engine">
+                        <option value="css"<?php selected($this->_config->get_string('minify.css.engine'), 'css'); ?>>Default</option>
+                        <option value="yuicss"<?php selected($this->_config->get_string('minify.css.engine'), 'yuicss'); ?>>YUI Compressor</option>
+                        <option value="csstidy"<?php selected($this->_config->get_string('minify.css.engine'), 'csstidy'); ?>>CSS Tidy</option>
+                    </select>
+                </td>
             </tr>
         </table>
 
@@ -236,10 +272,12 @@
             			<optgroup label="Origin Pull (mirror is best):">
 							<option value="mirror"<?php selected($this->_config->get_string('cdn.engine'), 'mirror'); ?>>Mirror</option>
                             <option value="netdna"<?php selected($this->_config->get_string('cdn.engine'), 'netdna'); ?>>Mirror: NetDNA / MaxCDN</option>
+                            <option value="cfl"<?php selected($this->_config->get_string('cdn.engine'), 'cfl'); ?><?php if (! W3TC_PHP5 || ! $check_curl): ?> disabled="disabled"<?php endif; ?>>CloudFlare</option>
                 		</optgroup>
             			<optgroup label="Origin Push:">
 							<option value="rscf"<?php selected($this->_config->get_string('cdn.engine'), 'rscf'); ?><?php if (! W3TC_PHP5 || ! $check_curl): ?> disabled="disabled"<?php endif; ?>>Rackspace Cloud Files</option>
-							<option value="cf"<?php selected($this->_config->get_string('cdn.engine'), 'cf'); ?><?php if (! W3TC_PHP5 || ! $check_curl): ?> disabled="disabled"<?php endif; ?>>Amazon CloudFront</option>
+							<option value="cf"<?php selected($this->_config->get_string('cdn.engine'), 'cf'); ?><?php if (! W3TC_PHP5 || ! $check_curl): ?> disabled="disabled"<?php endif; ?>>Amazon CloudFront (S3 origin)</option>
+							<option value="cf2"<?php selected($this->_config->get_string('cdn.engine'), 'cf2'); ?><?php if (! W3TC_PHP5 || ! $check_curl): ?> disabled="disabled"<?php endif; ?>>Amazon CloudFront (Custom origin)</option>
 							<option value="s3"<?php selected($this->_config->get_string('cdn.engine'), 's3'); ?><?php if (! W3TC_PHP5 || ! $check_curl): ?> disabled="disabled"<?php endif; ?>>Amazon Simple Storage Service (S3)</option>
 							<option value="ftp"<?php selected($this->_config->get_string('cdn.engine'), 'ftp'); ?><?php if (! $check_ftp): ?> disabled="disabled"<?php endif; ?>>Self-hosted / File Transfer Protocol Upload</option>
                 		</optgroup>

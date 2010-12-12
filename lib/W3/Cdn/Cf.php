@@ -1,8 +1,117 @@
 <?php
 
+if (!defined('W3TC_CDN_CF_TYPE_S3')) {
+    define('W3TC_CDN_CF_TYPE_S3', 's3');
+}
+
+if (!defined('W3TC_CDN_CF_TYPE_CUSTOM')) {
+    define('W3TC_CDN_CF_TYPE_CUSTOM', 'custom');
+}
+
 require_once W3TC_LIB_W3_DIR . '/Cdn/S3.php';
 
 class W3_Cdn_Cf extends W3_Cdn_S3 {
+    /**
+     * Type
+     *
+     * @var string
+     */
+    var $type = '';
+
+    /**
+     * Initializes S3 object
+     *
+     * @param string $error
+     * @return bool
+     */
+    function _init(&$error) {
+        if (empty($this->type)) {
+            $error = 'Empty type';
+
+            return false;
+        } elseif (!in_array($this->type, array(W3TC_CDN_CF_TYPE_S3, W3TC_CDN_CF_TYPE_CUSTOM))) {
+            $error = 'Wrong type';
+
+            return false;
+        }
+
+        if (empty($this->_config['key'])) {
+            $error = 'Empty access key';
+
+            return false;
+        }
+
+        if (empty($this->_config['secret'])) {
+            $error = 'Empty secret key';
+
+            return false;
+        }
+
+        if ($this->type == W3TC_CDN_CF_TYPE_S3 && empty($this->_config['bucket'])) {
+            $error = 'Empty bucket';
+
+            return false;
+        } elseif ($this->type == W3TC_CDN_CF_TYPE_CUSTOM && empty($this->_config['origin'])) {
+            $error = 'Empty origin';
+
+            return false;
+        }
+
+        $this->_s3 = & new S3($this->_config['key'], $this->_config['secret'], false);
+
+        return true;
+    }
+
+    /**
+     * Returns origin
+     *
+     * @return string
+     */
+    function _get_origin() {
+        if ($this->type == W3TC_CDN_CF_TYPE_S3) {
+            $origin = sprintf('%s.s3.amazonaws.com', $this->_config['bucket']);
+        } else {
+            $origin = $this->_config['origin'];
+        }
+
+        return $origin;
+    }
+
+    /**
+     * Uploads files
+     *
+     * @param array $files
+     * @param array $results
+     * @param boolean $force_rewrite
+     * @return boolean
+     */
+    function upload($files, &$results, $force_rewrite = false) {
+        if ($this->type == W3TC_CDN_CF_TYPE_S3) {
+            return parent::upload($files, $results, $force_rewrite);
+        }
+
+        $results = $this->get_results($files, W3TC_CDN_RESULT_OK, 'OK');
+
+        return count($files);
+    }
+
+    /**
+     * Deletes files
+     *
+     * @param array $files
+     * @param array $results
+     * @return boolean
+     */
+    function delete($files, &$results) {
+        if ($this->type == W3TC_CDN_CF_TYPE_S3) {
+            return parent::delete($files, $results);
+        }
+
+        $results = $this->get_results($files, W3TC_CDN_RESULT_OK, 'OK');
+
+        return count($files);
+    }
+
     /**
      * Returns array of CDN domains
      *
@@ -29,11 +138,14 @@ class W3_Cdn_Cf extends W3_Cdn_S3 {
      * @return boolean
      */
     function test(&$error) {
-        /**
-         * Test S3 first
-         */
-        if (!parent::test($error)) {
-            return false;
+        if ($this->type == W3TC_CDN_CF_TYPE_S3) {
+            if (!parent::test($error)) {
+                return false;
+            }
+        } elseif ($this->type == W3TC_CDN_CF_TYPE_CUSTOM) {
+            if (!$this->_init($error)) {
+                return false;
+            }
         }
 
         /**
@@ -45,18 +157,24 @@ class W3_Cdn_Cf extends W3_Cdn_S3 {
 
         $this->restore_error_handler();
 
-        if (!$dists) {
+        if ($dists === false) {
             $error = sprintf('Unable to list distributions (%s).', $this->get_last_error());
 
             return false;
         }
 
-        $search = sprintf('%s.s3.amazonaws.com', $this->_config['bucket']);
+        if (!count($dists)) {
+            $error = 'No distributions found.';
+
+            return false;
+        }
+
         $dist = false;
+        $origin = $this->_get_origin();
 
         if ($dists) {
             foreach ((array) $dists as $_dist) {
-                if (isset($_dist['origin']) && $_dist['origin'] == $search) {
+                if (isset($_dist['origin']) && $_dist['origin'] == $origin) {
                     $dist = $_dist;
                     break;
                 }
@@ -64,13 +182,13 @@ class W3_Cdn_Cf extends W3_Cdn_S3 {
         }
 
         if (!$dist) {
-            $error = sprintf('Distribution for bucket "%s" not found.', $this->_config['bucket']);
+            $error = sprintf('Distribution for origin "%s" not found.', $origin);
 
             return false;
         }
 
         if (!$dist['enabled']) {
-            $error = sprintf('Distribution for bucket "%s" is disabled.', $this->_config['bucket']);
+            $error = sprintf('Distribution for origin "%s" is disabled.', $origin);
 
             return false;
         }
@@ -111,43 +229,51 @@ class W3_Cdn_Cf extends W3_Cdn_S3 {
      * @return boolean
      */
     function create_container(&$container_id, &$error) {
-        if (parent::create_container($container_id, $error)) {
-            $cnames = array();
-
-            if (!empty($this->_config['cname'])) {
-                $domains = (array) $this->_config['cname'];
-
-                foreach ($domains as $domain) {
-                    $_domains = array_map('trim', explode(',', $domain));
-
-                    foreach ($_domains as $_domain) {
-                        $cnames[] = $_domain;
-                    }
-                }
-            }
-
-            $this->set_error_handler();
-
-            $dist = @$this->_s3->createDistribution($this->_config['bucket'], true, $cnames);
-
-            $this->restore_error_handler();
-
-            if (!$dist) {
-                $error = sprintf('Unable to create distribution for bucket %s (%s).', $this->_config['bucket'], $this->get_last_error());
-
+        if ($this->type == W3TC_CDN_CF_TYPE_S3) {
+            if (!parent::create_container($container_id, $error)) {
                 return false;
             }
-
-            $matches = null;
-
-            if (preg_match('~^(.+)\.cloudfront\.net$~', $dist['domain'], $matches)) {
-                $container_id = $matches[1];
+        } elseif ($this->type == W3TC_CDN_CF_TYPE_CUSTOM) {
+            if (!$this->_init($error)) {
+                return false;
             }
-
-            return true;
         }
 
-        return false;
+        $cnames = array();
+
+        if (!empty($this->_config['cname'])) {
+            $domains = (array) $this->_config['cname'];
+
+            foreach ($domains as $domain) {
+                $_domains = array_map('trim', explode(',', $domain));
+
+                foreach ($_domains as $_domain) {
+                    $cnames[] = $_domain;
+                }
+            }
+        }
+
+        $origin = $this->_get_origin();
+
+        $this->set_error_handler();
+
+        $dist = @$this->_s3->createDistribution($origin, $this->type, true, $cnames);
+
+        $this->restore_error_handler();
+
+        if (!$dist) {
+            $error = sprintf('Unable to create distribution for origin %s (%s).', $origin, $this->get_last_error());
+
+            return false;
+        }
+
+        $matches = null;
+
+        if (preg_match('~^(.+)\.cloudfront\.net$~', $dist['domain'], $matches)) {
+            $container_id = $matches[1];
+        }
+
+        return true;
     }
 
     /**
@@ -156,6 +282,10 @@ class W3_Cdn_Cf extends W3_Cdn_S3 {
      * @return string
      */
     function get_via() {
-        return sprintf('Amazon Web Services: CloudFront: %s', parent::get_via());
+        $domain = $this->get_domain();
+
+        $via = ($domain ? $domain : 'N/A');
+
+        return sprintf('Amazon Web Services: CloudFront: %s', $via);
     }
 }

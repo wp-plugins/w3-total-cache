@@ -99,7 +99,7 @@
 }
 
 #w3tc blockquote cite {
-    font-style: 400
+    font-style: 400;
 }
 
 #w3tc optgroup {
@@ -231,7 +231,8 @@
     color: #999;
 }
 
-#mobile_groups li {
+#mobile_groups li,
+#referrer_groups li {
     cursor: ns-resize;
     list-style: none;
     background: #f9f9f9;
@@ -241,15 +242,18 @@
     -moz-border-radius: 8px;
 }
 
-#mobile_groups li:hover {
+#mobile_groups li:hover,
+#referrer_groups li:hover {
     background: #f3f3f3;
 }
 
-#mobile_groups li table {
+#mobile_groups li table,
+#referrer_groups li table {
     margin: 0;
 }
 
-.mobile_group {
+.mobile_group,
+.referrer_group {
     font-weight: bold;
 }
 

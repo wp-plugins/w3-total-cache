@@ -232,7 +232,9 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
             $rules .= "    <IfModule mod_headers.c>\n";
             $rules .= "        Header append Vary User-Agent env=!dont-vary\n";
             $rules .= "    </IfModule>\n";
-            $rules .= "    AddOutputFilterByType DEFLATE " . implode(' ', $compression_types) . "\n";
+            $rules .= "    <IfModule mod_filter.c>\n";
+            $rules .= "        AddOutputFilterByType DEFLATE " . implode(' ', $compression_types) . "\n";
+            $rules .= "    </IfModule>\n";
             $rules .= "</IfModule>\n";
         }
 
@@ -258,7 +260,11 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
         $etag = $this->_config->get_boolean('browsercache.' . $section . '.etag');
         $w3tc = $this->_config->get_boolean('browsercache.' . $section . '.w3tc');
 
-        $rules .= "<FilesMatch \"\\.(" . implode('|', array_keys($mime_types)) . ")$\">\n";
+        $extensions = array_keys($mime_types);
+        $extensions_lowercase = array_map('strtolower', $extensions);
+        $extensions_uppercase = array_map('strtoupper', $extensions);
+
+        $rules .= "<FilesMatch \"\\.(" . implode('|', array_merge($extensions_lowercase, $extensions_uppercase)) . ")$\">\n";
 
         if ($cache_control) {
             $cache_policy = $this->_config->get_string('browsercache.' . $section . '.cache.policy');

@@ -583,6 +583,24 @@ class W3_Plugin_PgCache extends W3_Plugin {
         }
 
         /**
+         * Check for referrer redirect
+         */
+        if ($this->_config->get_boolean('referrer.enabled')) {
+            $referrer_groups = $this->_config->get_array('referrer.rgroups');
+
+            foreach ($referrer_groups as $referrer_group => $referrer_config) {
+                $referrer_enabled = (isset($referrer_config['enabled']) ? (boolean) $referrer_config['enabled'] : false);
+                $referrer_referrers = (isset($referrer_config['referrers']) ? (array) $referrer_config['referrers'] : '');
+                $referrer_redirect = (isset($referrer_config['redirect']) ? $referrer_config['redirect'] : '');
+
+                if ($referrer_enabled && count($referrer_referrers) && $referrer_redirect) {
+                    $rules .= "    RewriteCond %{HTTP_COOKIE} w3tc_referrer=.*(" . implode('|', $referrer_referrers) . ") [NC]\n";
+                    $rules .= "    RewriteRule .* " . $referrer_redirect . " [R,L]\n";
+                }
+            }
+        }
+
+        /**
          * Network mode rules
          */
         if ($is_multisite) {
@@ -625,6 +643,24 @@ class W3_Plugin_PgCache extends W3_Plugin {
                 if ($mobile_enabled && count($mobile_agents) && !$mobile_redirect) {
                     $rules .= "    RewriteCond %{HTTP_USER_AGENT} (" . implode('|', $mobile_agents) . ") [NC]\n";
                     $rules .= "    RewriteRule .* - [E=W3TC_UA:_" . $mobile_group . "]\n";
+                }
+            }
+        }
+
+        /**
+         * Set referrer groups
+         */
+        if ($this->_config->get_boolean('referrer.enabled')) {
+            $referrer_groups = array_reverse($this->_config->get_array('referrer.rgroups'));
+
+            foreach ($referrer_groups as $referrer_group => $referrer_config) {
+                $referrer_enabled = (isset($referrer_config['enabled']) ? (boolean) $referrer_config['enabled'] : false);
+                $referrer_referrers = (isset($referrer_config['referrers']) ? (array) $referrer_config['referrers'] : '');
+                $referrer_redirect = (isset($referrer_config['redirect']) ? $referrer_config['redirect'] : '');
+
+                if ($referrer_enabled && count($referrer_referrers) && !$referrer_redirect) {
+                    $rules .= "    RewriteCond %{HTTP_COOKIE} w3tc_referrer=.*(" . implode('|', $referrer_referrers) . ") [NC]\n";
+                    $rules .= "    RewriteRule .* - [E=W3TC_REF:_" . $referrer_group . "]\n";
                 }
             }
         }
@@ -689,12 +725,12 @@ class W3_Plugin_PgCache extends W3_Plugin {
         /**
          * Check if cache file exists
          */
-        $rules .= "    RewriteCond \"" . $cache_dir . $home_path . "$1/_index%{ENV:W3TC_UA}%{ENV:W3TC_SSL}.html%{ENV:W3TC_ENC}\" -f\n";
+        $rules .= "    RewriteCond \"" . $cache_dir . $home_path . "$1/_index%{ENV:W3TC_UA}%{ENV:W3TC_REF}%{ENV:W3TC_SSL}.html%{ENV:W3TC_ENC}\" -f\n";
 
         /**
          * Make final rewrite
          */
-        $rules .= "    RewriteRule (.*) \"" . $base_path . ltrim(str_replace(w3_get_site_root(), '', $cache_dir), '/') . $home_path . "$1/_index%{ENV:W3TC_UA}%{ENV:W3TC_SSL}.html%{ENV:W3TC_ENC}\" [L]\n";
+        $rules .= "    RewriteRule (.*) \"" . $base_path . ltrim(str_replace(w3_get_site_root(), '', $cache_dir), '/') . $home_path . "$1/_index%{ENV:W3TC_UA}%{ENV:W3TC_REF}%{ENV:W3TC_SSL}.html%{ENV:W3TC_ENC}\" [L]\n";
         $rules .= "</IfModule>\n";
         $rules .= W3TC_MARKER_END_PGCACHE_CORE . "\n";
 
@@ -787,6 +823,25 @@ class W3_Plugin_PgCache extends W3_Plugin {
             }
         }
 
+        /**
+         * Check for referrer redirect
+         */
+        if ($this->_config->get_boolean('referrer.enabled')) {
+            $referrer_groups = $this->_config->get_array('referrer.rgroups');
+
+            foreach ($referrer_groups as $referrer_group => $referrer_config) {
+                $referrer_enabled = (isset($referrer_config['enabled']) ? (boolean) $referrer_config['enabled'] : false);
+                $referrer_referrers = (isset($referrer_config['referrers']) ? (array) $referrer_config['referrers'] : '');
+                $referrer_redirect = (isset($referrer_config['redirect']) ? $referrer_config['redirect'] : '');
+
+                if ($referrer_enabled && count($referrer_referrers) && $referrer_redirect) {
+                    $rules .= "if (\$http_cookie ~* \"w3tc_referrer=.*(" . implode('|', $referrer_referrers) . ")\") {\n";
+                    $rules .= "    rewrite .* " . $referrer_redirect . " last;\n";
+                    $rules .= "}\n";
+                }
+            }
+        }
+
         $rules .= "set \$w3tc_rewrite 1;\n";
         $rules .= "if (\$request_method = POST) {\n";
         $rules .= "    set \$w3tc_rewrite 0;\n";
@@ -822,6 +877,15 @@ class W3_Plugin_PgCache extends W3_Plugin {
         $rules .= "if (\$http_cookie ~* \"(" . implode('|', array_map('w3_preg_quote', $reject_cookies)) . ")\") {\n";
         $rules .= "    set \$w3tc_rewrite 0;\n";
         $rules .= "}\n";
+
+        /**
+         * Check for rejected user agents
+         */
+        if (count($reject_user_agents)) {
+            $rules .= "if (\$http_user_agent ~* \"(" . implode('|', array_map('w3_preg_quote', $reject_user_agents)) . ")\") {\n";
+            $rules .= "    set \$w3tc_rewrite 0;\n";
+            $rules .= "}\n";
+        }
 
         /**
          * Network mode rules
@@ -877,6 +941,27 @@ class W3_Plugin_PgCache extends W3_Plugin {
             }
         }
 
+        /**
+         * Check referrer groups
+         */
+        $rules .= "set \$w3tc_ref \"\";\n";
+
+        if ($this->_config->get_boolean('referrer.enabled')) {
+            $referrer_groups = array_reverse($this->_config->get_array('referrer.rgroups'));
+
+            foreach ($referrer_groups as $referrer_group => $referrer_config) {
+                $referrer_enabled = (isset($referrer_config['enabled']) ? (boolean) $referrer_config['enabled'] : false);
+                $referrer_referrers = (isset($referrer_config['referrers']) ? (array) $referrer_config['referrers'] : '');
+                $referrer_redirect = (isset($referrer_config['redirect']) ? $referrer_config['redirect'] : '');
+
+                if ($referrer_enabled && count($referrer_referrers) && !$referrer_redirect) {
+                    $rules .= "if (\$http_cookie ~* \"w3tc_referrer=.*(" . implode('|', $referrer_referrers) . ")\") {\n";
+                    $rules .= "    set \$w3tc_ref _" . $referrer_group . ";\n";
+                    $rules .= "}\n";
+                }
+            }
+        }
+
         $rules .= "set \$w3tc_ssl \"\";\n";
         $rules .= "if (\$scheme = https) {\n";
         $rules .= "    set \$w3tc_ssl _ssl;\n";
@@ -889,12 +974,12 @@ class W3_Plugin_PgCache extends W3_Plugin {
             $rules .= "}\n";
         }
 
-        $rules .= "if (!-f \"" . $cache_dir . "/\$request_uri/_index\$w3tc_ua\$w3tc_ssl.html\$w3tc_enc\") {\n";
+        $rules .= "if (!-f \"" . $cache_dir . "/\$request_uri/_index\$w3tc_ua\$w3tc_ref\$w3tc_ssl.html\$w3tc_enc\") {\n";
         $rules .= "    set \$w3tc_rewrite 0;\n";
         $rules .= "}\n";
 
         $rules .= "if (\$w3tc_rewrite = 1) {\n";
-        $rules .= "    rewrite (.*) \"" . $base_path . ltrim(str_replace(w3_get_site_root(), '', $cache_dir), '/') . "/$1/_index\$w3tc_ua\$w3tc_ssl.html\$w3tc_enc\" last;\n";
+        $rules .= "    rewrite (.*) \"" . $base_path . ltrim(str_replace(w3_get_site_root(), '', $cache_dir), '/') . "/$1/_index\$w3tc_ua\$w3tc_ref\$w3tc_ssl.html\$w3tc_enc\" last;\n";
         $rules .= "}\n";
         $rules .= W3TC_MARKER_END_PGCACHE_CORE . "\n";
 

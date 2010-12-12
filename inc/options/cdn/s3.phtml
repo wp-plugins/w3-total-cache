@@ -14,8 +14,7 @@
 	<th><label for="cdn_s3_bucket">Bucket:</label></th>
 	<td>
 		<input id="cdn_s3_bucket" type="text" name="cdn.s3.bucket" value="<?php echo htmlspecialchars($this->_config->get_string('cdn.s3.bucket')); ?>" size="30" />
-		<input id="cdn_create_container" class="button cdn_s3" type="button" value="Create bucket" /> 
-		<span id="cdn_create_container_status" class="w3tc-status w3tc-process"></span>
+		<input class="button button-cdn-s3-bucket-location cdn_s3" type="button" value="Create bucket" /> 
 	</td>
 </tr>
 <tr>
@@ -30,7 +29,7 @@
 	</td>
 </tr>
 <tr>
-	<th><label for="cdn_cnames">Replace site's hostname with:</label></th>
+	<th>Replace site's hostname with:</th>
 	<td>
 		<?php if (($cdn_s3_bucket = $this->_config->get_string('cdn.s3.bucket')) != ''): ?>
 		    <?php echo htmlspecialchars($cdn_s3_bucket); ?>.s3.amazonaws.com

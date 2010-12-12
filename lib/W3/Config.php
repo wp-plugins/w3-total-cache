@@ -91,6 +91,7 @@ class W3_Config {
         'pgcache.prime.sitemap' => 'string',
 
         'minify.enabled' => 'boolean',
+        'minify.auto' => 'boolean',
         'minify.debug' => 'boolean',
         'minify.engine' => 'string',
         'minify.file.gc' => 'integer',
@@ -98,29 +99,63 @@ class W3_Config {
         'minify.memcached.servers' => 'array',
         'minify.memcached.persistant' => 'boolean',
         'minify.rewrite' => 'boolean',
-        'minify.fixtime' => 'integer',
         'minify.options' => 'array',
         'minify.symlinks' => 'array',
         'minify.lifetime' => 'integer',
         'minify.upload' => 'boolean',
         'minify.html.enable' => 'boolean',
+        'minify.html.engine' => 'string',
         'minify.html.reject.feed' => 'boolean',
         'minify.html.inline.css' => 'boolean',
         'minify.html.inline.js' => 'boolean',
         'minify.html.strip.crlf' => 'boolean',
         'minify.html.comments.ignore' => 'array',
         'minify.css.enable' => 'boolean',
+        'minify.css.engine' => 'string',
         'minify.css.combine' => 'boolean',
         'minify.css.strip.comments' => 'boolean',
         'minify.css.strip.crlf' => 'boolean',
+        'minify.css.imports' => 'string',
         'minify.css.groups' => 'array',
         'minify.js.enable' => 'boolean',
+        'minify.js.engine' => 'string',
         'minify.js.combine.header' => 'boolean',
         'minify.js.combine.body' => 'boolean',
         'minify.js.combine.footer' => 'boolean',
         'minify.js.strip.comments' => 'boolean',
         'minify.js.strip.crlf' => 'boolean',
         'minify.js.groups' => 'array',
+        'minify.yuijs.path.java' => 'string',
+        'minify.yuijs.path.jar' => 'string',
+        'minify.yuijs.options.line-break' => 'integer',
+        'minify.yuijs.options.nomunge' => 'boolean',
+        'minify.yuijs.options.preserve-semi' => 'boolean',
+        'minify.yuijs.options.disable-optimizations' => 'boolean',
+        'minify.yuicss.path.java' => 'string',
+        'minify.yuicss.path.jar' => 'string',
+        'minify.yuicss.options.line-break' => 'integer',
+        'minify.ccjs.path.java' => 'string',
+        'minify.ccjs.path.jar' => 'string',
+        'minify.ccjs.options.compilation_level' => 'string',
+        'minify.ccjs.options.formatting' => 'string',
+        'minify.csstidy.options.remove_bslash' => 'boolean',
+        'minify.csstidy.options.compress_colors' => 'boolean',
+        'minify.csstidy.options.compress_font-weight' => 'boolean',
+        'minify.csstidy.options.lowercase_s' => 'boolean',
+        'minify.csstidy.options.optimise_shorthands' => 'integer',
+        'minify.csstidy.options.remove_last_;' => 'boolean',
+        'minify.csstidy.options.case_properties' => 'integer',
+        'minify.csstidy.options.sort_properties' => 'boolean',
+        'minify.csstidy.options.sort_selectors' => 'boolean',
+        'minify.csstidy.options.merge_selectors' => 'integer',
+        'minify.csstidy.options.discard_invalid_properties' => 'boolean',
+        'minify.csstidy.options.css_level' => 'string',
+        'minify.csstidy.options.preserve_css' => 'boolean',
+        'minify.csstidy.options.timestamp' => 'boolean',
+        'minify.csstidy.options.template' => 'string',
+        'minify.htmltidy.options.clean' => 'boolean',
+        'minify.htmltidy.options.hide-comments' => 'boolean',
+        'minify.htmltidy.options.wrap' => 'integer',
         'minify.reject.logged' => 'boolean',
         'minify.reject.ua' => 'array',
         'minify.reject.uri' => 'array',
@@ -168,12 +203,20 @@ class W3_Config {
         'cdn.cf.id' => 'string',
         'cdn.cf.cname' => 'array',
         'cdn.cf.ssl' => 'string',
+        'cdn.cf2.key' => 'string',
+        'cdn.cf2.secret' => 'string',
+        'cdn.cf2.origin' => 'string',
+        'cdn.cf2.id' => 'string',
+        'cdn.cf2.cname' => 'array',
+        'cdn.cf2.ssl' => 'string',
         'cdn.rscf.user' => 'string',
         'cdn.rscf.key' => 'string',
         'cdn.rscf.container' => 'string',
         'cdn.rscf.id' => 'string',
         'cdn.rscf.cname' => 'array',
         'cdn.rscf.ssl' => 'string',
+        'cdn.cfl.email' => 'string',
+        'cdn.cfl.key' => 'string',
         'cdn.reject.ua' => 'array',
         'cdn.reject.uri' => 'array',
         'cdn.reject.files' => 'array',
@@ -205,6 +248,9 @@ class W3_Config {
 
         'mobile.enabled' => 'boolean',
         'mobile.rgroups' => 'array',
+
+        'referrer.enabled' => 'boolean',
+        'referrer.rgroups' => 'array',
 
         'common.support' => 'string',
         'common.install' => 'integer',
@@ -322,8 +368,8 @@ class W3_Config {
         'pgcache.purge.archive.monthly' => false,
         'pgcache.purge.archive.yearly' => false,
         'pgcache.purge.feed.blog' => true,
-        'pgcache.purge.feed.comments' => true,
-        'pgcache.purge.feed.author' => true,
+        'pgcache.purge.feed.comments' => false,
+        'pgcache.purge.feed.author' => false,
         'pgcache.purge.feed.terms' => false,
         'pgcache.purge.feed.types' => array(
             'rss2'
@@ -336,6 +382,7 @@ class W3_Config {
         'pgcache.prime.sitemap' => '',
 
         'minify.enabled' => false,
+        'minify.auto' => false,
         'minify.debug' => false,
         'minify.engine' => 'file',
         'minify.file.gc' => 86400,
@@ -345,18 +392,12 @@ class W3_Config {
         ),
         'minify.memcached.persistant' => true,
         'minify.rewrite' => true,
-        'minify.fixtime' => 0,
-        'minify.options' => array(
-            'bubbleCssImports' => true,
-            'minApp' => array(
-                'groupsOnly' => false,
-                'maxFiles' => 20
-            )
-        ),
+        'minify.options' => array(),
         'minify.symlinks' => array(),
         'minify.lifetime' => 86400,
         'minify.upload' => true,
         'minify.html.enable' => false,
+        'minify.html.engine' => 'html',
         'minify.html.reject.feed' => false,
         'minify.html.inline.css' => false,
         'minify.html.inline.js' => false,
@@ -366,17 +407,51 @@ class W3_Config {
             'RSPEAK_'
         ),
         'minify.css.enable' => true,
+        'minify.css.engine' => 'css',
         'minify.css.combine' => false,
         'minify.css.strip.comments' => false,
         'minify.css.strip.crlf' => false,
+        'minify.css.imports' => 'process',
         'minify.css.groups' => array(),
         'minify.js.enable' => true,
+        'minify.js.engine' => 'js',
         'minify.js.combine.header' => false,
         'minify.js.combine.body' => false,
         'minify.js.combine.footer' => false,
         'minify.js.strip.comments' => false,
         'minify.js.strip.crlf' => false,
         'minify.js.groups' => array(),
+        'minify.yuijs.path.java' => 'java',
+        'minify.yuijs.path.jar' => 'yuicompressor.jar',
+        'minify.yuijs.options.line-break' => 5000,
+        'minify.yuijs.options.nomunge' => false,
+        'minify.yuijs.options.preserve-semi' => false,
+        'minify.yuijs.options.disable-optimizations' => false,
+        'minify.yuicss.path.java' => 'java',
+        'minify.yuicss.path.jar' => 'yuicompressor.jar',
+        'minify.yuicss.options.line-break' => 5000,
+        'minify.ccjs.path.java' => 'java',
+        'minify.ccjs.path.jar' => 'compiler.jar',
+        'minify.ccjs.options.compilation_level' => 'SIMPLE_OPTIMIZATIONS',
+        'minify.ccjs.options.formatting' => '',
+        'minify.csstidy.options.remove_bslash' => true,
+        'minify.csstidy.options.compress_colors' => true,
+        'minify.csstidy.options.compress_font-weight' => true,
+        'minify.csstidy.options.lowercase_s' => false,
+        'minify.csstidy.options.optimise_shorthands' => 1,
+        'minify.csstidy.options.remove_last_;' => false,
+        'minify.csstidy.options.case_properties' => 1,
+        'minify.csstidy.options.sort_properties' => false,
+        'minify.csstidy.options.sort_selectors' => false,
+        'minify.csstidy.options.merge_selectors' => 2,
+        'minify.csstidy.options.discard_invalid_properties' => false,
+        'minify.csstidy.options.css_level' => 'CSS2.1',
+        'minify.csstidy.options.preserve_css' => false,
+        'minify.csstidy.options.timestamp' => false,
+        'minify.csstidy.options.template' => 'default',
+        'minify.htmltidy.options.clean' => false,
+        'minify.htmltidy.options.hide-comments' => true,
+        'minify.htmltidy.options.wrap' => 0,
         'minify.reject.logged' => true,
         'minify.reject.ua' => array(),
         'minify.reject.uri' => array(),
@@ -428,12 +503,20 @@ class W3_Config {
         'cdn.cf.id' => '',
         'cdn.cf.cname' => array(),
         'cdn.cf.ssl' => 'auto',
+        'cdn.cf2.key' => '',
+        'cdn.cf2.secret' => '',
+        'cdn.cf2.origin' => '',
+        'cdn.cf2.id' => '',
+        'cdn.cf2.cname' => array(),
+        'cdn.cf2.ssl' => 'auto',
         'cdn.rscf.user' => '',
         'cdn.rscf.key' => '',
         'cdn.rscf.container' => '',
         'cdn.rscf.id' => '',
         'cdn.rscf.cname' => array(),
         'cdn.rscf.ssl' => 'auto',
+        'cdn.cfl.email' => '',
+        'cdn.cfl.key' => '',
         'cdn.reject.ua' => array(),
         'cdn.reject.uri' => array(),
         'cdn.reject.files' => array(
@@ -625,6 +708,9 @@ class W3_Config {
             )
         ),
 
+        'referrer.enabled' => true,
+        'referrer.rgroups' => array(),
+
         'common.support' => '',
         'common.install' => 0,
         'common.tweeted' => 0,
@@ -710,6 +796,15 @@ class W3_Config {
                 break;
 
             /**
+             * Check HTML minifier
+             */
+            case 'minify.html.engine':
+                if ($value == 'htmltidy' && !class_exists('tidy')) {
+                    return 'html';
+                }
+                break;
+
+            /**
              * Disabled some page cache options when enhanced mode enabled
              */
             case 'pgcache.cache.query':
@@ -746,7 +841,7 @@ class W3_Config {
                 break;
 
             /**
-             * Legacy support
+             * Minify groups legacy support
              */
             case 'minify.js.groups':
             case 'minify.css.groups':
@@ -811,7 +906,7 @@ class W3_Config {
              * Check CDN engines
              */
             case 'cdn.engine':
-                if (($value == 's3' || $value == 'cf' || $value == 'rscf') && (!W3TC_PHP5 || !function_exists('curl_init'))) {
+                if (($value == 's3' || $value == 'cf' || $value == 'cf2' || $value == 'rscf') && (!W3TC_PHP5 || !function_exists('curl_init'))) {
                     return 'mirror';
                 }
                 if ($value == 'ftp' && !function_exists('ftp_connect')) {

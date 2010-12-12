@@ -46,163 +46,144 @@ class W3_Minify {
         /**
          * Request variables:
          *
+         * f - files
          * tt - theme name in format template:stylesheet
          * gg - template
          * g - location (include, include-footer, etc...)
          * t - type (js or css)
          */
-        if (isset($_GET['tt']) && isset($_GET['gg']) && isset($_GET['g']) && isset($_GET['t'])) {
-            require_once W3TC_LIB_MINIFY_DIR . '/Minify.php';
-            require_once W3TC_LIB_MINIFY_DIR . '/HTTP/Encoder.php';
+        require_once W3TC_LIB_W3_DIR . '/Request.php';
 
-            /**
-             * Fix DOCUMENT_ROOT for minify
-             */
-            $_SERVER['DOCUMENT_ROOT'] = w3_get_document_root();
+        $files = W3_Request::get_array('f');
+        $theme = W3_Request::get_string('tt');
+        $template = W3_Request::get_string('gg');
+        $location = W3_Request::get_string('g');
+        $type = W3_Request::get_string('t');
 
-            HTTP_Encoder::$encodeToIe6 = true;
+        if (!$files && !$theme && !$template && !$location && !$type) {
+            die('Params (f, tt, gg, g, t) are missed.');
+        } elseif (!$files) {
+            if (!$theme) {
+                die('Theme param (tt) is missed.');
+            }
 
-            Minify::$uploaderHoursBehind = $this->_config->get_integer('minify.fixtime');
-            Minify::setCache($this->_get_cache());
+            if (!$template) {
+                die('Template param (gg) is missed.');
+            }
 
-            $browsercache = $this->_config->get_boolean('browsercache.enabled');
+            if (!$location) {
+                die('Location param (g) is missed.');
+            }
 
-            $serve_options = $this->_config->get_array('minify.options');
-            $serve_options['maxAge'] = $this->_config->get_integer('browsercache.cssjs.lifetime');
-            $serve_options['encodeOutput'] = ($browsercache && $this->_config->get_boolean('browsercache.cssjs.compression'));
-            $serve_options['cacheHeaders'] = array(
+            if (!$type) {
+                die('Type param (t) is missed.');
+            }
+        } else {
+            $type = 'css';
+        }
+
+        require_once W3TC_LIB_MINIFY_DIR . '/Minify.php';
+        require_once W3TC_LIB_MINIFY_DIR . '/HTTP/Encoder.php';
+
+        /**
+         * Fix DOCUMENT_ROOT for minify
+         */
+        $_SERVER['DOCUMENT_ROOT'] = w3_get_document_root();
+
+        Minify::setCache($this->_get_cache());
+
+        if ($this->_config->get_boolean('minify.debug')) {
+            require_once W3TC_LIB_MINIFY_DIR . '/Minify/Logger.php';
+            Minify_Logger::setLogger($this);
+        }
+
+        $browsercache = $this->_config->get_boolean('browsercache.enabled');
+
+        $serve_options = array_merge($this->_config->get_array('minify.options'), array(
+            'debug' => $this->_config->get_boolean('minify.debug'),
+            'maxAge' => $this->_config->get_integer('browsercache.cssjs.lifetime'),
+            'encodeOutput' => ($browsercache && $this->_config->get_boolean('browsercache.cssjs.compression')),
+            'bubbleCssImports' => ($this->_config->get_string('minify.css.imports') == 'bubble'),
+            'processCssImports' => ($this->_config->get_string('minify.css.imports') == 'process'),
+            'cacheHeaders' => array(
                 'use_etag' => ($browsercache && $this->_config->get_boolean('browsercache.cssjs.etag')),
                 'expires_enabled' => ($browsercache && $this->_config->get_boolean('browsercache.cssjs.expires')),
                 'cacheheaders_enabled' => ($browsercache && $this->_config->get_boolean('browsercache.cssjs.cache.control')),
                 'cacheheaders' => $this->_config->get_string('browsercache.cssjs.cache.policy')
-            );
-            $serve_options['minApp']['groups'] = $this->get_groups($_GET['tt'], $_GET['gg'], $_GET['t']);
+            )
+        ));
 
-            if (stripos(PHP_OS, 'win') === 0) {
-                Minify::setDocRoot();
-            }
+        if (!$files) {
+            $serve_options['minApp']['groups'] = $this->get_groups($theme, $template, $type);
+        }
 
-            foreach ($this->_config->get_array('minify.symlinks') as $link => $target) {
-                $link = str_replace('//', realpath($_SERVER['DOCUMENT_ROOT']), $link);
-                $link = strtr($link, '/', DIRECTORY_SEPARATOR);
-                $serve_options['minifierOptions']['text/css']['symlinks'][$link] = realpath($target);
-            }
+        require_once W3TC_LIB_W3_DIR . '/Minifier.php';
+        $w3_minifier =& W3_Minifier::instance();
 
-            if ($this->_config->get_boolean('minify.debug')) {
-                $serve_options['debug'] = true;
-            }
+        if ($type == 'js') {
+            $minifier_type = 'application/x-javascript';
 
-            if ($this->_config->get('minify.debug')) {
-                require_once W3TC_LIB_MINIFY_DIR . '/Minify/Logger.php';
-                Minify_Logger::setLogger($this);
-            }
-
-            /**
-             * Handle combine option
-             */
             switch (true) {
-                case ($_GET['t'] == 'js' && $_GET['g'] == 'include') && $this->_config->get_boolean('minify.js.combine.header'):
-                case ($_GET['t'] == 'js' && $_GET['g'] == 'include-nb') && $this->_config->get_boolean('minify.js.combine.header'):
-                case ($_GET['t'] == 'js' && $_GET['g'] == 'include-body') && $this->_config->get_boolean('minify.js.combine.body'):
-                case ($_GET['t'] == 'js' && $_GET['g'] == 'include-body-nb') && $this->_config->get_boolean('minify.js.combine.body'):
-                case ($_GET['t'] == 'js' && $_GET['g'] == 'include-footer') && $this->_config->get_boolean('minify.js.combine.footer'):
-                case ($_GET['t'] == 'js' && $_GET['g'] == 'include-footer-nb') && $this->_config->get_boolean('minify.js.combine.footer'):
-                    $serve_options['minifiers']['application/x-javascript'] = array(
-                        'Minify_CombineOnly',
-                        'minify'
-                    );
-                    break;
-
-                case ($_GET['t'] == 'css' && $_GET['g'] == 'include') && $this->_config->get_boolean('minify.css.combine'):
-                    $serve_options['minifiers']['text/css'] = array(
-                        'Minify_CombineOnly',
-                        'minify'
-                    );
+                case (($files || $location == 'include' || $location == 'include-nb') && $this->_config->get_boolean('minify.js.combine.header')):
+                case (($location == 'include-body' || $location == 'include-body-nb') && $this->_config->get_boolean('minify.js.combine.body')):
+                case (($location == 'include-footer' || $location == 'include-footer-nb') && $this->_config->get_boolean('minify.js.combine.footer')):
+                    $engine = 'combinejs';
                     break;
 
                 default:
-                    $serve_options['postprocessor'] = array(
-                        &$this,
-                        'postprocessor'
-                    );
+                    $engine = $this->_config->get_string('minify.js.engine');
+
+                    if (!$w3_minifier->exists($engine) || !$w3_minifier->available($engine)) {
+                        $engine = 'js';
+                    }
+                    break;
             }
 
-            /**
-             * Setup user-friendly cache ID for disk cache
-             */
-            if ($this->_config->get_string('minify.engine') == 'file') {
-                $id = $this->get_id($_GET['tt'], $_GET['gg'], $_GET['g'], $_GET['t']);
-                $cacheId = sprintf('%s/%s.%s.%s.%s', $_GET['tt'], $_GET['gg'], $_GET['g'], $id, $_GET['t']);
+        } elseif ($type == 'css') {
+            $minifier_type = 'text/css';
 
-                Minify::setCacheId($cacheId);
-            }
+            if (($files || $location == 'include') && $this->_config->get_boolean('minify.css.combine')) {
+                $engine = 'combinecss';
+            } else {
+                $engine = $this->_config->get_string('minify.css.engine');
 
-            if ($this->_config->get_boolean('browsercache.enabled') && $this->_config->get_boolean('browsercache.cssjs.w3tc')) {
-                @header('X-Powered-By: ' . W3TC_POWERED_BY);
-            }
+                if (!$w3_minifier->exists($engine) || !$w3_minifier->available($engine)) {
+                    $engine = 'css';
+                }
 
-            try {
-                Minify::serve('MinApp', $serve_options);
-            } catch (Exception $exception) {
-                printf('<strong>W3 Total Cache Error:</strong> Minify error: %s', $exception->getMessage());
             }
-        } else {
-            die('This file cannot be accessed directly');
         }
-    }
 
-    /**
-     * Minify postprocessor
-     *
-     * @param string $content
-     * @param string $type
-     * @return string
-     */
-    function postprocessor($content, $type) {
-        switch ($type) {
-            case 'text/css':
-                if ($this->_config->get_boolean('minify.css.strip.comments')) {
-                    $content = preg_replace('~/\*.*\*/~Us', '', $content);
-                }
+        $w3_minifier->init($engine);
 
-                if ($this->_config->get_boolean('minify.css.strip.crlf')) {
-                    $content = preg_replace("~[\r\n]+~", ' ', $content);
-                } else {
-                    $content = preg_replace("~[\r\n]+~", "\n", $content);
-                }
-                break;
-
-            case 'application/x-javascript':
-                if ($this->_config->get_boolean('minify.js.strip.comments')) {
-                    $content = preg_replace('~^//.*$~m', '', $content);
-                    $content = preg_replace('~/\*.*\*/~Us', '', $content);
-                }
-
-                if ($this->_config->get_boolean('minify.js.strip.crlf')) {
-                    $content = preg_replace("~[\r\n]+~", '', $content);
-                } else {
-                    $content = preg_replace("~[\r\n]+~", "\n", $content);
-                }
-                break;
-        }
+        $serve_options['minifiers'][$minifier_type] = $w3_minifier->get_minifier($engine);
+        $serve_options['minifierOptions'][$minifier_type] = $w3_minifier->get_options($engine);
 
         /**
-         * Regenerate ID
+         * Setup user-friendly cache ID for disk cache
          */
-        if (isset($_GET['tt']) && isset($_GET['gg']) && isset($_GET['g']) && isset($_GET['t'])) {
-            $id = $this->_generate_id($_GET['tt'], $_GET['gg'], $_GET['g'], $_GET['t']);
-            $this->_save_id($id, $_GET['tt'], $_GET['gg'], $_GET['g'], $_GET['t']);
+        if (!$files && $this->_config->get_string('minify.engine') == 'file') {
+            $id = $this->get_id($theme, $template, $location, $type);
+            $cacheId = sprintf('%s/%s.%s.%s.%s', $theme, $template, $location, $id, $type);
+
+            Minify::setCacheId($cacheId);
         }
 
-        return trim($content);
+        if ($browsercache && $this->_config->get_boolean('browsercache.cssjs.w3tc')) {
+            @header('X-Powered-By: ' . W3TC_POWERED_BY);
+        }
+
+        try {
+            Minify::serve('MinApp', $serve_options);
+        } catch (Exception $exception) {
+            printf('<strong>W3 Total Cache Error:</strong> Minify error: %s', $exception->getMessage());
+        }
     }
 
     /**
      * Flushes cache
      */
     function flush() {
-        static $cache_path = null;
-
         $cache = & $this->_get_cache();
 
         if (is_a($cache, 'W3_Cache_Memcached') && class_exists('Memcache')) {

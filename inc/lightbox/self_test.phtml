@@ -94,6 +94,14 @@
     	<?php endif; ?>
         <br />
 
+    	HTML Tidy extension:
+    	<?php if (class_exists('tidy')): ?>
+    	<span class="w3tc-test-ok">OK</span>
+    	<?php else: ?>
+    	<span class="w3tc-test-error">Not installed</span>
+    	<?php endif; ?>
+        <br />
+
     	Mime type detection:
     	<?php if (function_exists('finfo_open')): ?>
     	<span class="w3tc-test-ok">Fileinfo</span>
