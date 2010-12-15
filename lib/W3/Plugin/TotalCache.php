@@ -107,6 +107,11 @@ class W3_Plugin_TotalCache extends W3_Plugin {
             'admin_menu'
         ));
 
+        add_action('admin_bar_menu', array(
+            &$this,
+            'admin_bar_menu'
+        ), 150);
+
         add_filter('contextual_help_list', array(
             &$this,
             'contextual_help_list'
@@ -944,6 +949,45 @@ class W3_Plugin_TotalCache extends W3_Plugin {
     }
 
     /**
+     * Admin bar menu
+     */
+    function admin_bar_menu() {
+        global $wp_admin_bar;
+
+        if (current_user_can('manage_options')) {
+            $menu_items = array(
+                array(
+                    'id' => 'w3tc',
+                    'title' => 'Perfomance',
+                    'href' => admin_url('admin.php?page=w3tc_general')
+                ),
+                array(
+                    'id' => 'w3tc-empty-caches',
+                    'parent' => 'w3tc',
+                    'title' => 'Empty All Caches',
+                    'href' => admin_url('admin.php?page=w3tc_general&amp;flush_all')
+                ),
+                array(
+                    'id' => 'w3tc-faq',
+                    'parent' => 'w3tc',
+                    'title' => 'FAQ',
+                    'href' => admin_url('admin.php?page=w3tc_faq')
+                ),
+                array(
+                    'id' => 'w3tc-support',
+                    'parent' => 'w3tc',
+                    'title' => '<div style="color: red;">Support</div>',
+                    'href' => admin_url('admin.php?page=w3tc_support')
+                )
+            );
+
+            foreach ($menu_items as $menu_item) {
+                $wp_admin_bar->add_menu($menu_item);
+            }
+        }
+    }
+
+    /**
      * Print styles
      */
     function admin_print_styles() {
@@ -1746,8 +1790,8 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                     $this->_errors[] = 'Content Delivery Network Error: The <strong>"Access key", "Secret key", "Bucket" and "Replace default hostname with"</strong> fields must be populated.';
                     break;
 
-                case ($cdn_engine == 'cf2' && ($this->_config->get_string('cdn.cf2.key') == '' || $this->_config->get_string('cdn.cf2.secret') == '' || $this->_config->get_string('cdn.cf2.origin') == '' || ($this->_config->get_string('cdn.cf2.id') == '' && !count($this->_config->get_array('cdn.cf2.cname'))))):
-                    $this->_errors[] = 'Content Delivery Network Error: The <strong>"Access key", "Secret key", "Origin" and "Replace default hostname with"</strong> fields must be populated.';
+                case ($cdn_engine == 'cf2' && ($this->_config->get_string('cdn.cf2.key') == '' || $this->_config->get_string('cdn.cf2.secret') == '' || ($this->_config->get_string('cdn.cf2.id') == '' && !count($this->_config->get_array('cdn.cf2.cname'))))):
+                    $this->_errors[] = 'Content Delivery Network Error: The <strong>"Access key", "Secret key" and "Replace default hostname with"</strong> fields must be populated.';
                     break;
 
                 case ($cdn_engine == 'rscf' && ($this->_config->get_string('cdn.rscf.user') == '' || $this->_config->get_string('cdn.rscf.key') == '' || $this->_config->get_string('cdn.rscf.container') == '' || ($this->_config->get_string('cdn.rscf.id') == '' && !count($this->_config->get_array('cdn.rscf.cname'))))):
@@ -3260,6 +3304,20 @@ class W3_Plugin_TotalCache extends W3_Plugin {
 
         if (@file_put_contents($php_info_path, $php_info)) {
             $attachments[] = $php_info_path;
+        }
+
+        /**
+         * Attach self-test
+         */
+        ob_start();
+        $this->self_test();
+        $self_test = ob_get_contents();
+        ob_end_clean();
+
+        $self_test_path = W3TC_TMP_DIR . '/self_test.html';
+
+        if (@file_put_contents($self_test_path, $self_test)) {
+            $attachments[] = $self_test_path;
         }
 
         /**
@@ -4994,7 +5052,12 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                      * Handle 404.php
                      */
                     case ($template == '404'):
-                        $link = sprintf('%s/%s/', $home_url, '404_test');
+                        $permalink = get_option('permalink_structure');
+                        if ($permalink) {
+                            $link = sprintf('%s/%s/', $home_url, '404_test');
+                        } else {
+                            $link = sprintf('%s/?p=%d', $home_url, 999999999);
+                        }
                         break;
 
                     /**
@@ -5023,9 +5086,9 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                      * Handle author.php
                      */
                     case ($template == 'author'):
-                        $author_ids = get_author_user_ids();
-                        if (is_array($author_ids) && count($author_ids)) {
-                            $link = get_author_posts_url($author_ids[0]);
+                        $users = get_users();
+                        if (is_array($users) && count($users)) {
+                            $link = get_author_posts_url(current($users)->ID);
                         }
                         break;
 

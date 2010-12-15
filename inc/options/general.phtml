@@ -270,17 +270,17 @@
             	<td>
             		<select name="cdn.engine">
             			<optgroup label="Origin Pull (mirror is best):">
-							<option value="mirror"<?php selected($this->_config->get_string('cdn.engine'), 'mirror'); ?>>Mirror</option>
-                            <option value="netdna"<?php selected($this->_config->get_string('cdn.engine'), 'netdna'); ?>>Mirror: NetDNA / MaxCDN</option>
-                            <option value="cfl"<?php selected($this->_config->get_string('cdn.engine'), 'cfl'); ?><?php if (! W3TC_PHP5 || ! $check_curl): ?> disabled="disabled"<?php endif; ?>>CloudFlare</option>
-                		</optgroup>
-            			<optgroup label="Origin Push:">
-							<option value="rscf"<?php selected($this->_config->get_string('cdn.engine'), 'rscf'); ?><?php if (! W3TC_PHP5 || ! $check_curl): ?> disabled="disabled"<?php endif; ?>>Rackspace Cloud Files</option>
-							<option value="cf"<?php selected($this->_config->get_string('cdn.engine'), 'cf'); ?><?php if (! W3TC_PHP5 || ! $check_curl): ?> disabled="disabled"<?php endif; ?>>Amazon CloudFront (S3 origin)</option>
-							<option value="cf2"<?php selected($this->_config->get_string('cdn.engine'), 'cf2'); ?><?php if (! W3TC_PHP5 || ! $check_curl): ?> disabled="disabled"<?php endif; ?>>Amazon CloudFront (Custom origin)</option>
-							<option value="s3"<?php selected($this->_config->get_string('cdn.engine'), 's3'); ?><?php if (! W3TC_PHP5 || ! $check_curl): ?> disabled="disabled"<?php endif; ?>>Amazon Simple Storage Service (S3)</option>
-							<option value="ftp"<?php selected($this->_config->get_string('cdn.engine'), 'ftp'); ?><?php if (! $check_ftp): ?> disabled="disabled"<?php endif; ?>>Self-hosted / File Transfer Protocol Upload</option>
-                		</optgroup>
+					<option value="mirror"<?php selected($this->_config->get_string('cdn.engine'), 'mirror'); ?>>Mirror</option>
+					<option value="netdna"<?php selected($this->_config->get_string('cdn.engine'), 'netdna'); ?>>NetDNA / MaxCDN</option>
+					<option value="cf2"<?php selected($this->_config->get_string('cdn.engine'), 'cf2'); ?><?php if (! W3TC_PHP5 || ! $check_curl): ?> disabled="disabled"<?php endif; ?>>Amazon CloudFront</option>
+				<option value="cfl"<?php selected($this->_config->get_string('cdn.engine'), 'cfl'); ?><?php if (! W3TC_PHP5 || ! $check_curl): ?> disabled="disabled"<?php endif; ?>>CloudFlare</option>
+				</optgroup>
+				<optgroup label="Origin Push:">
+					<option value="rscf"<?php selected($this->_config->get_string('cdn.engine'), 'rscf'); ?><?php if (! W3TC_PHP5 || ! $check_curl): ?> disabled="disabled"<?php endif; ?>>Rackspace Cloud Files</option>
+					<option value="cf"<?php selected($this->_config->get_string('cdn.engine'), 'cf'); ?><?php if (! W3TC_PHP5 || ! $check_curl): ?> disabled="disabled"<?php endif; ?>>Amazon CloudFront</option>
+					<option value="s3"<?php selected($this->_config->get_string('cdn.engine'), 's3'); ?><?php if (! W3TC_PHP5 || ! $check_curl): ?> disabled="disabled"<?php endif; ?>>Amazon Simple Storage Service (S3)</option>
+					<option value="ftp"<?php selected($this->_config->get_string('cdn.engine'), 'ftp'); ?><?php if (! $check_ftp): ?> disabled="disabled"<?php endif; ?>>Self-hosted / File Transfer Protocol Upload</option>
+	               		</optgroup>
             		</select><br />
             		<span class="description">Select the <acronym title="Content Delivery Network">CDN</acronym> type you wish to use.</span>
             	</td>

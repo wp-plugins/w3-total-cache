@@ -1551,7 +1551,7 @@ function w3_get_engine_name($engine) {
             break;
 
         case 'netdna':
-            $engine_name = 'mirror: netdna / maxcdn';
+            $engine_name = 'netdna / maxcdn';
             break;
 
         case 'ftp':
@@ -1563,11 +1563,11 @@ function w3_get_engine_name($engine) {
             break;
 
         case 'cf':
-            $engine_name = 'amazon cloudfront (s3 origin)';
+            $engine_name = 'amazon cloudfront';
             break;
 
         case 'cf2':
-            $engine_name = 'amazon cloudfront (custom origin)';
+            $engine_name = 'amazon cloudfront';
             break;
 
         case 'rscf':
@@ -1791,7 +1791,7 @@ if (!function_exists('file_put_contents')) {
 }
 
 /**
- * Cleanup .htaccess rules
+ * Cleanup rewrite rules
  *
  * @param string $rules
  * @return string

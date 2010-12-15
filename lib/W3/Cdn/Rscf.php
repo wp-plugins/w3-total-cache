@@ -189,7 +189,7 @@ class W3_Cdn_Rscf extends W3_Cdn_Base {
      * @return boolean
      */
     function test(&$error) {
-        if (!parent::test(&$error)) {
+        if (!parent::test($error)) {
             return false;
         }
 

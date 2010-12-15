@@ -101,7 +101,7 @@ function w3tc_objectcache_flush() {
 }
 
 /**
- * Prints script link for scripts group
+ * Prints script tag for scripts group
  *
  * @param string $location
  * @param string $group
@@ -116,7 +116,7 @@ function w3tc_scripts($location, $group = null) {
 }
 
 /**
- * Prints style link for styles group
+ * Prints style tag for styles group
  *
  * @param string $location
  * @param string $group
@@ -128,4 +128,32 @@ function w3tc_styles($location, $group = null) {
     $w3_plugin_minify->printed_styles[] = $location;
 
     echo $w3_plugin_minify->get_styles($location, $group);
+}
+
+/**
+ * Prints script tag for custom scripts
+ *
+ * @param string|array $files
+ * @param boolean $blocking
+ */
+function w3tc_custom_script($files, $blocking = true) {
+    require_once W3TC_LIB_W3_DIR . '/Plugin/Minify.php';
+
+    $w3_plugin_minify = & W3_Plugin_Minify::instance();
+
+    echo $w3_plugin_minify->get_custom_script($files, $blocking);
+}
+
+/**
+ * Prints style tag for custom styles
+ *
+ * @param string|array $files
+ * @param boolean $import
+ */
+function w3tc_custom_style($files, $import = false) {
+    require_once W3TC_LIB_W3_DIR . '/Plugin/Minify.php';
+
+    $w3_plugin_minify = & W3_Plugin_Minify::instance();
+
+    echo $w3_plugin_minify->get_custom_style($files, $import);
 }

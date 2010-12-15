@@ -147,32 +147,34 @@
     	<?php endif; ?>
         <br />
         
-        <?php 
-        $apache_modules = (function_exists('apache_get_modules') ? apache_get_modules() : false); 
-        
-        $modules = array(
-            'mod_mime',
-            'mod_expires',
-            'mod_deflate',
-            'mod_headers',
-            'mod_env',
-            'mod_setenvif',
-            'mod_rewrite'
-        );
+        <?php
+        if (w3_is_apache()):
+            $apache_modules = (function_exists('apache_get_modules') ? apache_get_modules() : false); 
+
+            $modules = array(
+                'mod_mime',
+                'mod_expires',
+                'mod_deflate',
+                'mod_headers',
+                'mod_env',
+                'mod_setenvif',
+                'mod_rewrite'
+            );
         ?>
-		<?php foreach ($modules as $module): ?>
-    		<?php echo $module; ?>:
-	    	<?php if ($apache_modules): ?>
-            	<?php if (in_array($module, $apache_modules)): ?>
-            	<span class="w3tc-test-ok">OK</span>
-            	<?php else: ?>
-            	<span class="w3tc-test-error">Not installed</span>
-            	<?php endif; ?>
-            <?php else: ?>
-        	<span class="w3tc-test-warn">Not detected</span>
-            <?php endif; ?>
-            <br />
-        <?php endforeach; ?>
+            <?php foreach ($modules as $module): ?>
+                <?php echo $module; ?>:
+                <?php if ($apache_modules): ?>
+                    <?php if (in_array($module, $apache_modules)): ?>
+                    <span class="w3tc-test-ok">OK</span>
+                    <?php else: ?>
+                    <span class="w3tc-test-error">Not installed</span>
+                    <?php endif; ?>
+                <?php else: ?>
+                <span class="w3tc-test-warn">Not detected</span>
+                <?php endif; ?>
+                <br />
+            <?php endforeach; ?>
+        <?php endif; ?>
 	</div>
 	    
     <h4>WordPress Resources</h4>

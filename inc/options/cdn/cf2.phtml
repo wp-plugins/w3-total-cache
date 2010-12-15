@@ -13,7 +13,7 @@
 <tr>
 	<th><label for="cdn_cf2_origin">Origin:</label></th>
 	<td>
-		<input id="cdn_cf2_origin" type="text" name="cdn.cf2.origin" value="<?php echo htmlspecialchars($this->_config->get_string('cdn.cf2.origin')); ?>" size="30" />
+		<?php echo w3_get_host(); ?>
 		<input id="cdn_create_container" class="button cdn_cf2" type="button" value="Create distribution" />
         <span id="cdn_create_container_status" class="w3tc-status w3tc-process"></span>
 	</td>

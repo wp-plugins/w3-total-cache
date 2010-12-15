@@ -51,10 +51,6 @@ class W3_Cdn_Cf extends W3_Cdn_S3 {
             $error = 'Empty bucket';
 
             return false;
-        } elseif ($this->type == W3TC_CDN_CF_TYPE_CUSTOM && empty($this->_config['origin'])) {
-            $error = 'Empty origin';
-
-            return false;
         }
 
         $this->_s3 = & new S3($this->_config['key'], $this->_config['secret'], false);
@@ -71,7 +67,7 @@ class W3_Cdn_Cf extends W3_Cdn_S3 {
         if ($this->type == W3TC_CDN_CF_TYPE_S3) {
             $origin = sprintf('%s.s3.amazonaws.com', $this->_config['bucket']);
         } else {
-            $origin = $this->_config['origin'];
+            $origin = w3_get_host();
         }
 
         return $origin;

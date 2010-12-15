@@ -971,7 +971,17 @@ class W3_Plugin_Cdn extends W3_Plugin {
                                 /**
                                  * Check file extension
                                  */
-                                if (preg_match($regexp, $src)) {
+                                $check_src = $src;
+
+                                if (w3_is_url($check_src)) {
+                                    $qpos = strpos($check_src, '?');
+
+                                    if ($qpos !== false) {
+                                        $check_src = substr($check_src, 0, $qpos);
+                                    }
+                                }
+
+                                if (preg_match($regexp, $check_src)) {
                                     /**
                                      * Check for alredy uploaded attachment
                                      */
@@ -1357,8 +1367,6 @@ class W3_Plugin_Cdn extends W3_Plugin {
 
                 $files = $this->search_files($minify_root, $minify_path, '*.css;*.js');
             } else {
-                $domain_url_regexp = '~' . w3_get_domain_url_regexp() . '~';
-
                 foreach ($urls as $url) {
                     $file = w3_normalize_file_minify($url);
                     $file = w3_translate_file($file);
@@ -1642,7 +1650,6 @@ class W3_Plugin_Cdn extends W3_Plugin {
                     $engine_config = array(
                         'key' => $this->_config->get_string('cdn.cf2.key'),
                         'secret' => $this->_config->get_string('cdn.cf2.secret'),
-                        'origin' => $this->_config->get_string('cdn.cf2.origin'),
                         'id' => $this->_config->get_string('cdn.cf2.id'),
                         'cname' => $this->_config->get_array('cdn.cf2.cname'),
                         'compression' => ($this->_config->get_boolean('browsercache.enabled') && $this->_config->get_boolean('browsercache.html.compression')),

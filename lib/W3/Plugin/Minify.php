@@ -608,6 +608,26 @@ class W3_Plugin_Minify extends W3_Plugin {
     }
 
     /**
+     * Returns link for custom script files
+     *
+     * @param string|array $files
+     * @param boolean $blocking
+     */
+    function get_custom_script($files, $blocking = true) {
+        return $this->get_script($this->format_custom_url($files), $blocking);
+    }
+
+    /**
+     * Returns link for custom style files
+     *
+     * @param string|array $files
+     * @param boolean $import
+     */
+    function get_custom_style($files, $import = false) {
+        return $this->get_style($this->format_custom_url($files), $import);
+    }
+
+    /**
      * Formats URL
      *
      * @param string $theme
@@ -629,6 +649,41 @@ class W3_Plugin_Minify extends W3_Plugin {
         }
 
         return sprintf('%s/%s/index.php?tt=%s&gg=%s&g=%s&t=%s', $site_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $theme, $template, $location, $type);
+    }
+
+    /**
+     * Formats custom URL
+     *
+     * @param string|array $files
+     * @return string
+     */
+    function format_custom_url($files) {
+        if (!is_array($files)) {
+            $files = array(
+                (string) $files
+            );
+        }
+
+        $base = false;
+        foreach ($files as &$file) {
+            $current_base = dirname($file);
+            if ($base && $base != $current_base) {
+                $base = false;
+                break;
+            } else {
+                $file = basename($file);
+                $base = $current_base;
+            }
+        }
+
+        $site_url_ssl = w3_get_site_url_ssl();
+        $url = sprintf('%s/%s/minify.php?f=%s', $site_url_ssl, W3TC_CONTENT_DIR_NAME, implode(',', $files));
+
+        if ($base) {
+            $url .= sprintf('&b=%s', $base);
+        }
+
+        return $url;
     }
 
     /**
