@@ -1498,7 +1498,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                     $pgcache_rules_core_path = w3_get_pgcache_rules_core_path();
 
                     if (w3_can_modify_rules($pgcache_rules_core_path)) {
-                        $this->_errors[] = sprintf('Disk caching with enhanced mode is selected, however the .htaccess file is not properly configured. Please %srun <strong>chmod 777 %s</strong>, then %s. To manually modify the server configuration for enhanced mode append the following code: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> and %s.', (file_exists($pgcache_rules_core_path) ? '' : sprintf('create an empty file in <strong>%s</strong> and ', $pgcache_rules_core_path)), $pgcache_rules_core_path, $this->button_link('try again', sprintf('admin.php?page=%s&pgcache_write_rules_core', $this->_page)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_pgcache->generate_rules_core()), $this->button_hide_note('hide this message', 'pgcache_rules_core'));
+                        $this->_errors[] = sprintf('Disk caching with enhanced mode is selected, however the server configuration is incorrect. Please %srun <strong>chmod 777 %s</strong>, then %s. To manually modify the server configuration for enhanced mode append the following code: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> and %s.', (file_exists($pgcache_rules_core_path) ? '' : sprintf('create an empty file in <strong>%s</strong> and ', $pgcache_rules_core_path)), $pgcache_rules_core_path, $this->button_link('try again', sprintf('admin.php?page=%s&pgcache_write_rules_core', $this->_page)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_pgcache->generate_rules_core()), $this->button_hide_note('hide this message', 'pgcache_rules_core'));
                     } else {
                         $this->_errors[] = sprintf('Enhanced mode page cache is not operational. The .htaccess rules could not be modified. Please verify <strong>%s</strong> has the following rules: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> %s', $pgcache_rules_core_path, $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_pgcache->generate_rules_core()), $this->button_hide_note('Hide this message', 'pgcache_rules_core'));
                     }
@@ -1508,7 +1508,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                     $pgcache_rules_cache_path = w3_get_pgcache_rules_cache_path();
 
                     if (w3_can_modify_rules($pgcache_rules_cache_path)) {
-                        $this->_errors[] = sprintf('Disk caching with enhanced mode is selected, however the .htaccess file is not properly configured. Please run <strong>chmod 777 %s</strong>, then %s. To manually modify the server configuration for enhanced mode append the following code: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> and %s.', (file_exists($pgcache_rules_cache_path) ? $pgcache_rules_cache_path : dirname($pgcache_rules_cache_path)), $this->button_link('try again', sprintf('admin.php?page=%s&pgcache_write_rules_cache', $this->_page)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_pgcache->generate_rules_cache()), $this->button_hide_note('hide this message', 'pgcache_rules_cache'));
+                        $this->_errors[] = sprintf('Disk caching with enhanced mode is selected, however the server configuration is incorrect. Please run <strong>chmod 777 %s</strong>, then %s. To manually modify the server configuration for enhanced mode append the following code: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> and %s.', (file_exists($pgcache_rules_cache_path) ? $pgcache_rules_cache_path : dirname($pgcache_rules_cache_path)), $this->button_link('try again', sprintf('admin.php?page=%s&pgcache_write_rules_cache', $this->_page)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_pgcache->generate_rules_cache()), $this->button_hide_note('hide this message', 'pgcache_rules_cache'));
                     } else {
                         $this->_errors[] = sprintf('Enhanced mode page cache is not operational. The .htaccess rules could not be modified. Please verify <strong>%s</strong> has the following rules: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> %s', $pgcache_rules_cache_path, $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_pgcache->generate_rules_cache()), $this->button_hide_note('Hide this message', 'pgcache_rules_cache'));
                     }
@@ -1527,7 +1527,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                 $browsercache_rules_cache_path = w3_get_browsercache_rules_cache_path();
 
                 if (w3_can_modify_rules($browsercache_rules_cache_path)) {
-                    $this->_errors[] = sprintf('The browser cache is enabled, however the .htaccess file is not properly configured. Please %srun <strong>chmod 777 %s</strong>, then %s. To manually modify these settings use the following code: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> and %s.', (file_exists($browsercache_rules_cache_path) ? '' : sprintf('create an empty file in <strong>%s</strong> and ', $browsercache_rules_cache_path)), $browsercache_rules_cache_path, $this->button_link('try again', sprintf('admin.php?page=%s&browsercache_write_rules_cache', $this->_page)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_browsercache->generate_rules_cache()), $this->button_hide_note('hide this message', 'browsercache_rules_cache'));
+                    $this->_errors[] = sprintf('The browser cache is enabled, however the server configuration is incorrect. Please %srun <strong>chmod 777 %s</strong>, then %s. To manually modify these settings use the following code: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> and %s.', (file_exists($browsercache_rules_cache_path) ? '' : sprintf('create an empty file in <strong>%s</strong> and ', $browsercache_rules_cache_path)), $browsercache_rules_cache_path, $this->button_link('try again', sprintf('admin.php?page=%s&browsercache_write_rules_cache', $this->_page)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_browsercache->generate_rules_cache()), $this->button_hide_note('hide this message', 'browsercache_rules_cache'));
                 } else {
                     $this->_errors[] = sprintf('The browser cache is not operational. The .htaccess rules could not be modified. Please verify <strong>%s</strong> has the following rules: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> %s', $browsercache_rules_cache_path, $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_browsercache->generate_rules_cache()), $this->button_hide_note('Hide this message', 'browsercache_rules_cache'));
                 }
@@ -1537,7 +1537,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                 $browsercache_rules_no404wp_path = w3_get_browsercache_rules_no404wp_path();
 
                 if (w3_can_modify_rules($browsercache_rules_no404wp_path)) {
-                    $this->_errors[] = sprintf('The browser cache is enabled, however the .htaccess file is not properly configured. Please %srun <strong>chmod 777 %s</strong>, then %s. To manually modify these settings use the following code: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> and %s.', (file_exists($browsercache_rules_no404wp_path) ? '' : sprintf('create an empty file in <strong>%s</strong> and ', $browsercache_rules_no404wp_path)), $browsercache_rules_no404wp_path, $this->button_link('try again', sprintf('admin.php?page=%s&browsercache_write_rules_no404wp', $this->_page)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_browsercache->generate_rules_no404wp()), $this->button_hide_note('hide this message', 'browsercache_rules_no404wp'));
+                    $this->_errors[] = sprintf('The browser cache is enabled, however the server configuration is incorrect. Please %srun <strong>chmod 777 %s</strong>, then %s. To manually modify these settings use the following code: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> and %s.', (file_exists($browsercache_rules_no404wp_path) ? '' : sprintf('create an empty file in <strong>%s</strong> and ', $browsercache_rules_no404wp_path)), $browsercache_rules_no404wp_path, $this->button_link('try again', sprintf('admin.php?page=%s&browsercache_write_rules_no404wp', $this->_page)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_browsercache->generate_rules_no404wp()), $this->button_hide_note('hide this message', 'browsercache_rules_no404wp'));
                 } else {
                     $this->_errors[] = sprintf('The browser cache feature is not operational. The .htaccess rules could not be modified. Please verify <strong>%s</strong> has the following rules: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> %s', $browsercache_rules_no404wp_path, $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_browsercache->generate_rules_no404wp()), $this->button_hide_note('Hide this message', 'browsercache_rules_no404wp'));
                 }
@@ -4621,13 +4621,6 @@ class W3_Plugin_TotalCache extends W3_Plugin {
         }
 
         /**
-         * Check request URI
-         */
-        if (!$this->check_request_uri()) {
-            return false;
-        }
-
-        /**
          * Skip if debug mode is enabled
          */
         $debug = ($this->_config->get_boolean('pgcache.enabled') && $this->_config->get_boolean('pgcache.debug'));
@@ -4638,26 +4631,6 @@ class W3_Plugin_TotalCache extends W3_Plugin {
 
         if ($debug) {
             return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Checks request URI
-     *
-     * @return boolean
-     */
-    function check_request_uri() {
-        $reject_uri = array(
-            'wp-login',
-            'wp-register'
-        );
-
-        foreach ($reject_uri as $uri) {
-            if (strstr($_SERVER['REQUEST_URI'], $uri) !== false) {
-                return false;
-            }
         }
 
         return true;
@@ -4678,7 +4651,6 @@ class W3_Plugin_TotalCache extends W3_Plugin {
             }
         }
 
-        $w3tc_config = (array) @include W3TC_CONFIG_PATH;
         $mysql_version = $wpdb->get_var('SELECT VERSION()');
         $mysql_variables_result = (array) $wpdb->get_results('SHOW VARIABLES', ARRAY_N);
         $mysql_variables = array();
