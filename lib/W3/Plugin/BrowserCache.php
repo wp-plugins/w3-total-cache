@@ -111,15 +111,16 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
     /**
      * Returns cache rules
      *
+     * @param bool $cdn
      * @return string
      */
-    function generate_rules_cache() {
+    function generate_rules_cache($cdn = false) {
         switch (true) {
             case w3_is_apache():
-                return $this->generate_rules_cache_apache();
+                return $this->generate_rules_cache_apache($cdn);
 
             case w3_is_nginx():
-                return $this->generate_rules_cache_nginx();
+                return $this->generate_rules_cache_nginx($cdn);
         }
 
         return false;
@@ -128,9 +129,10 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
     /**
      * Returns cache rules
      *
+     * @param bool $cdn
      * @return string
      */
-    function generate_rules_cache_apache() {
+    function generate_rules_cache_apache($cdn = false) {
         $cssjs_types = $this->get_cssjs_types();
         $html_types = $this->get_html_types();
         $other_types = $this->get_other_types();
@@ -159,6 +161,12 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
 
         $rules = '';
         $rules .= W3TC_MARKER_BEGIN_BROWSERCACHE_CACHE . "\n";
+
+        if ($cdn) {
+            $rules .= "<IfModule mod_headers.c>\n";
+            $rules .= "    Header set Access-Control-Allow-Origin *\n";
+            $rules .= "</IfModule>\n";
+        }
 
         if (count($mime_types)) {
             $rules .= "<IfModule mod_mime.c>\n";
@@ -336,15 +344,20 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
     /**
      * Returns cache rules
      *
+     * @param bool $cdn
      * @return string
      */
-    function generate_rules_cache_nginx() {
+    function generate_rules_cache_nginx($cdn = false) {
         $cssjs_types = $this->get_cssjs_types();
         $html_types = $this->get_html_types();
         $other_types = $this->get_other_types();
 
         $rules = '';
         $rules .= W3TC_MARKER_BEGIN_BROWSERCACHE_CACHE . "\n";
+
+        if ($cdn) {
+            $rules .= "add_header Access-Control-Allow-Origin \"*\"\n";
+        }
 
         $cssjs_compression = $this->_config->get_boolean('browsercache.cssjs.compression');
         $html_compression = $this->_config->get_boolean('browsercache.html.compression');

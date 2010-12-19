@@ -97,6 +97,14 @@ class W3_Plugin_Cdn extends W3_Plugin {
                     &$this,
                     'cfl_set_comment_status'
                 ), 1, 2);
+
+                /**
+                 * Fix CloudFlare IP-address
+                 */
+                require_once W3TC_LIB_W3_DIR . '/Cdn.php';
+                $w3_cdn_cfl = & W3_Cdn::instance(W3_CDN_CFL);
+
+                $w3_cdn_cfl->fix_remote_addr();
             } else {
                 /**
                  * Start rewrite engine

@@ -5,7 +5,7 @@
 
 <div id="support_container">
 <?php endif; ?>
-    <form action="admin.php?page=<?php echo $this->_page; ?>" method="post" enctype="multipart/form-data" id="support_form">
+    <form id="support_form" class="w3tc-ignore-change" action="admin.php?page=<?php echo $this->_page; ?>" method="post" enctype="multipart/form-data">
     	<?php include W3TC_DIR . '/inc/options/support/' . $request_type . '.phtml'; ?>
     
         <fieldset>

@@ -106,13 +106,13 @@ function w3tc_objectcache_flush() {
  * @param string $location
  * @param string $group
  */
-function w3tc_scripts($location, $group = null) {
+function w3tc_minify_script_group($location, $group = null) {
     require_once W3TC_LIB_W3_DIR . '/Plugin/Minify.php';
 
     $w3_plugin_minify = & W3_Plugin_Minify::instance();
     $w3_plugin_minify->printed_scripts[] = $location;
 
-    echo $w3_plugin_minify->get_scripts($location, $group);
+    echo $w3_plugin_minify->get_script_group($location, $group);
 }
 
 /**
@@ -121,13 +121,13 @@ function w3tc_scripts($location, $group = null) {
  * @param string $location
  * @param string $group
  */
-function w3tc_styles($location, $group = null) {
+function w3tc_minify_style_group($location, $group = null) {
     require_once W3TC_LIB_W3_DIR . '/Plugin/Minify.php';
 
     $w3_plugin_minify = & W3_Plugin_Minify::instance();
     $w3_plugin_minify->printed_styles[] = $location;
 
-    echo $w3_plugin_minify->get_styles($location, $group);
+    echo $w3_plugin_minify->get_style_group($location, $group);
 }
 
 /**
@@ -136,12 +136,12 @@ function w3tc_styles($location, $group = null) {
  * @param string|array $files
  * @param boolean $blocking
  */
-function w3tc_custom_script($files, $blocking = true) {
+function w3tc_minify_script_custom($files, $blocking = true) {
     require_once W3TC_LIB_W3_DIR . '/Plugin/Minify.php';
 
     $w3_plugin_minify = & W3_Plugin_Minify::instance();
 
-    echo $w3_plugin_minify->get_custom_script($files, $blocking);
+    echo $w3_plugin_minify->get_script_custom($files, $blocking);
 }
 
 /**
@@ -150,10 +150,10 @@ function w3tc_custom_script($files, $blocking = true) {
  * @param string|array $files
  * @param boolean $import
  */
-function w3tc_custom_style($files, $import = false) {
+function w3tc_minify_style_custom($files, $import = false) {
     require_once W3TC_LIB_W3_DIR . '/Plugin/Minify.php';
 
     $w3_plugin_minify = & W3_Plugin_Minify::instance();
 
-    echo $w3_plugin_minify->get_custom_style($files, $import);
+    echo $w3_plugin_minify->get_style_custom($files, $import);
 }

@@ -14,6 +14,18 @@ define('W3TC_CDN_CFL_EXTERNAL_EVENT_URL', 'https://www.cloudflare.com/ajax/exter
  */
 class W3_Cdn_Cfl extends W3_Cdn_Base {
     /**
+     * CloudFlare IP ranges
+     *
+     * @var array
+     */
+    var $_ip_ranges = array(
+        '204.93.240.0/24',
+        '204.93.177.0/24',
+        '204.93.173.0/24',
+        '199.27.128.0/21'
+    );
+
+    /**
      * Uploads files stub
      *
      * @param array $files
@@ -111,15 +123,6 @@ class W3_Cdn_Cfl extends W3_Cdn_Base {
     }
 
     /**
-     * Returns host key
-     *
-     * @return string
-     */
-    function _get_host_key() {
-        return '8afbe6dea02407989af4dd4c97bb6e25';
-    }
-
-    /**
      * Makes external event request
      *
      * @param string $type
@@ -135,5 +138,85 @@ class W3_Cdn_Cfl extends W3_Cdn_Base {
         }
 
         return false;
+    }
+
+    /**
+     * Fix client's IP-address
+     *
+     * @return void
+     */
+    function fix_remote_addr() {
+        if (!empty($_SERVER['HTTP_CF_CONNECTING_IP'])) {
+            foreach ($this->_ip_ranges as $range) {
+                if ($this->_ip_in_range($_SERVER['REMOTE_ADDR'], $range)) {
+                    $_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_CF_CONNECTING_IP'];
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns host key
+     *
+     * @todo
+     * @return string
+     */
+    function _get_host_key() {
+        return '8afbe6dea02407989af4dd4c97bb6e25';
+    }
+
+    /**
+     * Check if IP address is in range
+     *
+     * @param string $ip
+     * @param string $range
+     * @return bool
+     */
+    function _ip_in_range($ip, $range) {
+        if (strpos($range, '/') !== false) {
+            list($range, $netmask) = explode('/', $range, 2);
+
+            if (strpos($netmask, '.') !== false) {
+                $netmask = str_replace('*', '0', $netmask);
+                $netmask_dec = ip2long($netmask);
+
+                return ((ip2long($ip) & $netmask_dec) == (ip2long($range) & $netmask_dec));
+            } else {
+                $x = explode('.', $range);
+
+                while (count($x) < 4) {
+                    $x[] = '0';
+                }
+
+                list($a, $b, $c, $d) = $x;
+
+                $range = sprintf('%u.%u.%u.%u', empty($a) ? '0' : $a, empty($b) ? '0' : $b, empty($c) ? '0' : $c, empty($d) ? '0' : $d);
+                $range_dec = ip2long($range);
+                $ip_dec = ip2long($ip);
+                $wildcard_dec = pow(2, (32 - $netmask)) - 1;
+                $netmask_dec = ~$wildcard_dec;
+
+                return (($ip_dec & $netmask_dec) == ($range_dec & $netmask_dec));
+            }
+        } else {
+            if (strpos($range, '*') !== false) {
+                $lower = str_replace('*', '0', $range);
+                $upper = str_replace('*', '255', $range);
+                $range = sprintf('%s-%s', $lower, $upper);
+            }
+
+            if (strpos($range, '-') !== false) {
+                list($lower, $upper) = explode('-', $range, 2);
+
+                $lower_dec = (float) sprintf('%u', ip2long($lower));
+                $upper_dec = (float) sprintf('%u', ip2long($upper));
+                $ip_dec = (float) sprintf('%u', ip2long($ip));
+
+                return (($ip_dec >= $lower_dec) && ($ip_dec <= $upper_dec));
+            }
+
+            return false;
+        }
     }
 }

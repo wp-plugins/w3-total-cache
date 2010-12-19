@@ -1129,7 +1129,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
             'support_request' => 'Unable to send the support request.',
             'config_import_no_file' => 'Please select config file.',
             'config_import_upload' => 'Unable to upload config file.',
-            'config_import_import' => sprintf('Configuration file could not be imported. Please run <strong>chmod 777 %s</strong> to make the configuration file write-able, then try again.', (file_exists($config_path) ? $config_path : dirname($config_path))),
+            'config_import_import' => 'Configuration file could not be imported.',
             'config_reset' => sprintf('Default settings could not be restored. Please run <strong>chmod 777 %s</strong> to make the configuration file write-able, then try again.', (file_exists(W3TC_CONFIG_PREVIEW_PATH) ? W3TC_CONFIG_PREVIEW_PATH : W3TC_CONFIG_PREVIEW_PATH)),
             'preview_enable' => sprintf('Preview mode could not be enabled. Please run <strong>chmod 777 %s</strong> to make the configuration file write-able, then try again.', (file_exists(W3TC_CONFIG_PREVIEW_PATH) ? W3TC_CONFIG_PREVIEW_PATH : dirname(W3TC_CONFIG_PREVIEW_PATH))),
             'preview_disable' => sprintf('Preview mode could not be disabled. Please run <strong>chmod 777 %s</strong> to make the configuration file write-able, then try again.', (file_exists($config_path) ? $config_path : dirname($config_path))),
@@ -1500,7 +1500,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                     if (w3_can_modify_rules($pgcache_rules_core_path)) {
                         $this->_errors[] = sprintf('Disk caching with enhanced mode is selected, however the server configuration is incorrect. Please %srun <strong>chmod 777 %s</strong>, then %s. To manually modify the server configuration for enhanced mode append the following code: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> and %s.', (file_exists($pgcache_rules_core_path) ? '' : sprintf('create an empty file in <strong>%s</strong> and ', $pgcache_rules_core_path)), $pgcache_rules_core_path, $this->button_link('try again', sprintf('admin.php?page=%s&pgcache_write_rules_core', $this->_page)), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_pgcache->generate_rules_core()), $this->button_hide_note('hide this message', 'pgcache_rules_core'));
                     } else {
-                        $this->_errors[] = sprintf('Enhanced mode page cache is not operational. The .htaccess rules could not be modified. Please verify <strong>%s</strong> has the following rules: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> %s', $pgcache_rules_core_path, $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_pgcache->generate_rules_core()), $this->button_hide_note('Hide this message', 'pgcache_rules_core'));
+                        $this->_errors[] = sprintf('Enhanced mode page cache is not operational. The server configuration could not be modified. Please verify <strong>%s</strong> has the following rules: %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea> %s', $pgcache_rules_core_path, $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_pgcache->generate_rules_core()), $this->button_hide_note('Hide this message', 'pgcache_rules_core'));
                     }
                 }
 
@@ -2979,8 +2979,14 @@ class W3_Plugin_TotalCache extends W3_Plugin {
             $error = 'config_import_no_file';
         } elseif ($_FILES['config_file']['error'] != UPLOAD_ERR_OK) {
             $error = 'config_import_upload';
-        } elseif (!$config->read($_FILES['config_file']['tmp_name'])) {
-            $error = 'config_import_import';
+        } else {
+            ob_start();
+            $imported = $config->read($_FILES['config_file']['tmp_name']);
+            ob_end_clean();
+
+            if (!$imported) {
+                $error = 'config_import_import';
+            }
         }
 
         if ($error) {
@@ -3778,7 +3784,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
         $w3_plugin_cdn = & W3_Plugin_Cdn::instance();
         $w3_plugin_browsercache = & W3_Plugin_BrowserCache::instance();
 
-        $rules = $w3_plugin_browsercache->generate_rules_cache();
+        $rules = $w3_plugin_browsercache->generate_rules_cache(true);
 
         $cdn_path = w3_get_cdn_rules_path();
         $tmp_path = W3TC_TMP_DIR . '/' . $cdn_path;

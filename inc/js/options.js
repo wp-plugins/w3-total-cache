@@ -226,6 +226,14 @@ function w3tc_toggle(name, check) {
     });
 }
 
+function w3tc_beforeupload_bind() {
+    jQuery(window).bind('beforeunload', w3tc_beforeunload);
+}
+
+function w3tc_beforeupload_unbind() {
+    jQuery(window).unbind('beforeunload', w3tc_beforeunload);
+}
+
 function w3tc_beforeunload() {
     return 'Are you sure you wish to navigate away from this page without saving your changes?';
 }
@@ -297,6 +305,7 @@ jQuery(function() {
         if (parent.find('input[type=text]').val() == '' || confirm('Are you sure you want to delete JS file?')) {
             parent.remove();
             w3tc_minify_js_file_clear();
+            w3tc_beforeupload_bind();
         }
 
         return false;
@@ -307,6 +316,7 @@ jQuery(function() {
         if (parent.find('input[type=text]').val() == '' || confirm('Are you sure you want to delete CSS file?')) {
             parent.remove();
             w3tc_minify_css_file_clear();
+            w3tc_beforeupload_bind();
         }
 
         return false;
@@ -694,6 +704,7 @@ jQuery(function() {
         if (p.find('input[type=text]').val() == '' || confirm('Are you sure you want to delete JS file?')) {
             p.remove();
             w3tc_cdn_cnames_assign();
+            w3tc_beforeupload_bind();
         }
     });
 
@@ -922,6 +933,7 @@ jQuery(function() {
         if (confirm('Are you sure want to delete this group?')) {
             jQuery(this).parents('#mobile_groups li').remove();
             w3tc_mobile_groups_clear();
+            w3tc_beforeupload_bind();
         }
     });
 
@@ -1023,6 +1035,7 @@ jQuery(function() {
         if (confirm('Are you sure want to delete this group?')) {
             jQuery(this).parents('#referrer_groups li').remove();
             w3tc_referrer_groups_clear();
+            w3tc_beforeupload_bind();
         }
     });
 
@@ -1083,10 +1096,18 @@ jQuery(function() {
 
     // check for unsaved changes
     jQuery('#w3tc input,#w3tc select,#w3tc textarea').live('change', function() {
-        jQuery(window).bind('beforeunload', w3tc_beforeunload);
+        var ignore = false;
+        jQuery(this).parents().andSelf().each(function() {
+            if (jQuery(this).hasClass('w3tc-ignore-change') || jQuery(this).hasClass('lightbox')) {
+                ignore = true;
+                return false;
+            }
+        });
+
+        if (!ignore) {
+            w3tc_beforeupload_bind();
+        }
     });
 
-    jQuery('#w3tc form').submit(function() {
-        jQuery(window).unbind('beforeunload', w3tc_beforeunload);
-    });
+    jQuery('.w3tc-button-save').click(w3tc_beforeupload_unbind);
 });

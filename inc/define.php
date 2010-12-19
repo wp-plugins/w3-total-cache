@@ -245,8 +245,18 @@ function w3_emptydir($path, $exclude = array()) {
  * @param string $content
  * @return boolean
  */
-function w3_is_xml(&$content) {
-    return (stristr($content, '<?xml') !== false || stristr($content, '<html') !== false);
+function w3_is_xml($content) {
+    if (strlen($content) > 1000) {
+        $content = substr($content, 0, 1000);
+    }
+
+    if (strstr($content, '<!--') !== false) {
+        $content = preg_replace('~<!--.*?-->~s', '', $content);
+    }
+
+    $content = ltrim($content);
+
+    return (stripos($content, '<?xml') === 0 || stripos($content, '<html') === 0 || stripos($content, '<!DOCTYPE') === 0);
 }
 
 /**

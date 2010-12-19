@@ -278,7 +278,8 @@ class W3_Cdn_Base {
 
         $headers = array(
             'Content-Type' => $mime_type,
-            'Last-Modified' => w3_http_date($last_modified)
+            'Last-Modified' => w3_http_date($last_modified),
+            'Access-Control-Allow-Origin' => '*'
         );
 
         if (isset($this->cache_config[$mime_type])) {
@@ -288,10 +289,6 @@ class W3_Cdn_Base {
 
             if ($this->cache_config[$mime_type]['w3tc']) {
                 $headers['X-Powered-By'] = W3TC_POWERED_BY;
-            }
-
-            if ($this->cache_config[$mime_type]['lifetime']) {
-                $headers['Expires'] = w3_http_date($last_modified + $this->cache_config[$mime_type]['lifetime']);
             }
 
             switch ($this->cache_config[$mime_type]['cache_control']) {
