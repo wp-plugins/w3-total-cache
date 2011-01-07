@@ -1,8 +1,8 @@
 <?php
 
 class Minify_ClosureCompiler {
-    public static $jarFile = '';
-    public static $javaExecutable = 'java';
+    protected static $_pathJava = 'java';
+    protected static $_pathJar = 'compiler.jar';
 
     public static function minify($js, $options = array()) {
         $output = null;
@@ -10,6 +10,27 @@ class Minify_ClosureCompiler {
         self::_execute($options, $js, $output);
 
         return $output;
+    }
+
+    public static function test(&$error) {
+        try {
+            Minify_ClosureCompiler::minify('alert("ok");');
+            $error = 'OK';
+
+            return true;
+        } catch (Exception $exception) {
+            $error = $exception->getMessage();
+
+            return false;
+        }
+    }
+
+    public static function setPathJava($pathJava) {
+        self::$_pathJava = $pathJava;
+    }
+
+    public static function setPathJar($pathJar) {
+        self::$_pathJar = $pathJar;
     }
 
     protected static function _execute($options, $input, &$output) {
@@ -20,12 +41,12 @@ class Minify_ClosureCompiler {
     }
 
     protected static function _getCmd($options) {
-        if (!is_file(self::$jarFile)) {
-            throw new Exception(sprintf('JAR file (%s) is not a valid file.', self::$jarFile));
+        if (!is_file(self::$_pathJava)) {
+            throw new Exception(sprintf('JAVA executable (%s) is not a valid file.', self::$_pathJava));
         }
 
-        if (!is_file(self::$javaExecutable)) {
-            throw new Exception(sprintf('JAVA executable (%s) is not a valid file.', self::$javaExecutable));
+        if (!is_file(self::$_pathJar)) {
+            throw new Exception(sprintf('JAR file (%s) is not a valid file.', self::$_pathJar));
         }
 
         $options = array_merge(array(
@@ -41,7 +62,7 @@ class Minify_ClosureCompiler {
             }
         }
 
-        $cmd = sprintf('%s -jar %s %s', self::$javaExecutable, escapeshellarg(self::$jarFile), $optionsString);
+        $cmd = sprintf('%s -jar %s %s', self::$_pathJava, escapeshellarg(self::$_pathJar), $optionsString);
 
         return $cmd;
     }

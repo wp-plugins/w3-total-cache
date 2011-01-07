@@ -21,13 +21,6 @@ class W3_Cdn_S3 extends W3_Cdn_Base {
     var $_s3 = null;
 
     /**
-     * gzip extension
-     *
-     * @var string
-     */
-    var $_gzip_extension = '.gzip';
-
-    /**
      * Last error
      *
      * @var string
@@ -185,7 +178,7 @@ class W3_Cdn_S3 extends W3_Cdn_Base {
     }
 
     /**
-     * Deletes files from FTP
+     * Deletes files from S3
      *
      * @param array $files
      * @param array $results

@@ -5,10 +5,9 @@
 <?php endif; ?>
 
 <div id="support_container">
-    <form id="support_select_form" action="admin.php" method="get">
-        <fieldset>
-        	<legend>Choose request type</legend>
-    
+    <form id="support_select_form" class="w3tc-ignore-change" action="admin.php" method="get">
+        <div class="metabox-holder">
+        	<?php echo $this->postbox_header('Choose request type'); ?>
             <table class="form-table">
             	<tr>
                     <th valign="top"><label for="support_request_type">Request type:</label></th>
@@ -27,7 +26,8 @@
                     </td>
             	</tr>
             </table>
-    	</fieldset>
+        	<?php echo $this->postbox_footer(); ?>
+        </div>
     </form>
 </div>
 

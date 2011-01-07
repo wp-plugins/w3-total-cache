@@ -12,8 +12,8 @@ mobile_themes['<?php echo addslashes($theme_key); ?>'] = '<?php echo addslashes(
 </p>
 
 <form id="mobile_form" action="admin.php?page=<?php echo $this->_page; ?>" method="post">
-	<fieldset>
-		<legend>Manage User Agent Groups</legend>
+    <div class="metabox-holder">
+		<?php echo $this->postbox_header('Manage User Agent Groups'); ?>
 		<p>
 			<input id="mobile_add" type="button" class="button" value="Create a group" /> of user agents by specifying names in the user agents field. Assign a set of user agents to use a specific theme, redirect them to another domain or if an existing mobile plugin is active, create user agent groups to ensure that a unique cache is created for each user agent group. Drag and drop groups into order (if needed) to determine their priority (top -&gt; down).
 		</p>
@@ -80,7 +80,8 @@ mobile_themes['<?php echo addslashes($theme_key); ?>'] = '<?php echo addslashes(
         <p class="submit">
         	<input type="submit" name="options_save" class="w3tc-button-save button-primary" value="Save changes" />
         </p>
-	</fieldset>
+    	<?php echo $this->postbox_footer(); ?>
+    </div>
 </form>
 
 <?php include W3TC_DIR . '/inc/options/common/footer.phtml'; ?>

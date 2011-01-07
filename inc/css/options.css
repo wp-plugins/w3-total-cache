@@ -5,6 +5,10 @@
     width: 36px
 }
 
+.w3tc-options-menu-selected {
+	font-weight: 700
+}
+
 .w3tc-enabled {
     color: #090;
     font-weight: 700
@@ -67,24 +71,6 @@
     text-decoration: underline;
 }
 
-#w3tc-nav select {
-    background: #f9f9f9 !important;
-    border: 0;
-    color: #333;
-    font-size: 1em;
-    font-weight: bold;
-}
-
-#w3tc-nav optgroup {
-    background: #fff;
-    font-style: normal;
-    padding: 3px;
-}
-
-#w3tc-nav option {
-    background: #fff;
-}
-
 #w3tc acronym {
     border-bottom: 1px dotted #666
 }
@@ -99,7 +85,7 @@
 }
 
 #w3tc blockquote cite {
-    font-style: 400;
+    font-weight: 400;
 }
 
 #w3tc optgroup {
@@ -321,4 +307,8 @@ th.minify-files-add, td.minify-files-add {
     line-height: 32px;
     margin: 1em 0;
     font-weight: bold;
+}
+
+#w3tc .postbox .inside {
+    padding: 0 10px;
 }

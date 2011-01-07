@@ -40,6 +40,10 @@ if (!defined('W3_CDN_CFL')) {
     define('W3_CDN_CFL', 'cfl');
 }
 
+if (!defined('W3_CDN_AZURE')) {
+    define('W3_CDN_AZURE', 'azure');
+}
+
 /**
  * Class W3_Cdn
  */
@@ -83,6 +87,16 @@ class W3_Cdn {
                     $instances[$instance_key] = & new W3_Cdn_Rscf($config);
                     break;
 
+                case (W3TC_PHP5 && $engine == W3_CDN_AZURE):
+                    require_once W3TC_LIB_W3_DIR . '/Cdn/Azure.php';
+                    $instances[$instance_key] = & new W3_Cdn_Azure($config);
+                    break;
+
+                case ($engine == W3_CDN_CFL):
+                    require_once W3TC_LIB_W3_DIR . '/Cdn/Cfl.php';
+                    $instances[$instance_key] = & new W3_Cdn_Cfl($config);
+                    break;
+
                 case ($engine == W3_CDN_MIRROR):
                     require_once W3TC_LIB_W3_DIR . '/Cdn/Mirror.php';
                     $instances[$instance_key] = & new W3_Cdn_Mirror($config);
@@ -91,11 +105,6 @@ class W3_Cdn {
                 case ($engine == W3_CDN_NETDNA):
                     require_once W3TC_LIB_W3_DIR . '/Cdn/Netdna.php';
                     $instances[$instance_key] = & new W3_Cdn_Netdna($config);
-                    break;
-
-                case ($engine == W3_CDN_CFL):
-                    require_once W3TC_LIB_W3_DIR . '/Cdn/Cfl.php';
-                    $instances[$instance_key] = & new W3_Cdn_Cfl($config);
                     break;
 
                 default :

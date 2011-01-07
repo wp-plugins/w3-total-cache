@@ -23,6 +23,10 @@ if (!defined('W3_CACHE_XCACHE')) {
     define('W3_CACHE_XCACHE', 'xcache');
 }
 
+if (!defined('W3_CACHE_WINCACHE')) {
+    define('W3_CACHE_WINCACHE', 'wincache');
+}
+
 if (!defined('W3_CACHE_FILE')) {
     define('W3_CACHE_FILE', 'file');
 }
@@ -67,6 +71,11 @@ class W3_Cache {
                 case W3_CACHE_XCACHE:
                     require_once W3TC_LIB_W3_DIR . '/Cache/Xcache.php';
                     $instances[$instance_key] = & new W3_Cache_Xcache();
+                    break;
+
+                case W3_CACHE_WINCACHE:
+                    require_once W3TC_LIB_W3_DIR . '/Cache/Wincache.php';
+                    $instances[$instance_key] = & new W3_Cache_Wincache();
                     break;
 
                 case W3_CACHE_FILE:

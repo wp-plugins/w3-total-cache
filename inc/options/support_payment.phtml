@@ -6,8 +6,8 @@
 <div id="support_container">
 <?php endif; ?>
     <form action="<?php echo W3TC_PAYPAL_URL; ?>" method="get">
-        <fieldset>
-        	<legend>Request payment</legend>
+        <div class="metabox-holder">
+        	<?php echo $this->postbox_header('Request payment'); ?>
     
     		<p><?php echo htmlspecialchars($this->_request_types[$request_type]); ?></p>
     
@@ -26,7 +26,8 @@
     			<input type="submit" class="button-primary" value="Buy now" />
 	    		<input id="support_cancel" type="button" value="Cancel" class="button-primary" />
     		</p>
-    	</fieldset>
+        	<?php echo $this->postbox_footer(); ?>
+        </div>
     </form>
 <?php if (! $ajax): ?>
 </div>

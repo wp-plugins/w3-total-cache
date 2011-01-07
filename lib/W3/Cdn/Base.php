@@ -21,7 +21,7 @@ if (!defined('W3TC_CDN_RESULT_OK')) {
  */
 class W3_Cdn_Base {
     /**
-     * CDN Configuration
+     * Engine configuration
      *
      * @var array
      */
@@ -32,6 +32,13 @@ class W3_Cdn_Base {
      * @var array
      */
     var $cache_config = array();
+
+    /**
+     * gzip extension
+     *
+     * @var string
+     */
+    var $_gzip_extension = '.gzip';
 
     /**
      * PHP5 Constructor

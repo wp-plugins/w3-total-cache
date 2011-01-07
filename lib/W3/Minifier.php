@@ -158,22 +158,22 @@ class W3_Minifier {
             case 'yuijs':
                 require_once W3TC_LIB_MINIFY_DIR . '/Minify/YUICompressor.php';
 
-                Minify_YUICompressor::$javaExecutable = $this->_config->get_string('minify.yuijs.path.java');
-                Minify_YUICompressor::$jarFile = $this->_config->get_string('minify.yuijs.path.jar');
+                Minify_YUICompressor::setPathJava($this->_config->get_string('minify.yuijs.path.java'));
+                Minify_YUICompressor::setPathJar($this->_config->get_string('minify.yuijs.path.jar'));
                 break;
 
             case 'yuicss':
                 require_once W3TC_LIB_MINIFY_DIR . '/Minify/YUICompressor.php';
 
-                Minify_YUICompressor::$javaExecutable = $this->_config->get_string('minify.yuicss.path.java');
-                Minify_YUICompressor::$jarFile = $this->_config->get_string('minify.yuicss.path.jar');
+                Minify_YUICompressor::setPathJava($this->_config->get_string('minify.yuicss.path.java'));
+                Minify_YUICompressor::setPathJar($this->_config->get_string('minify.yuicss.path.jar'));
                 break;
 
             case 'ccjs':
                 require_once W3TC_LIB_MINIFY_DIR . '/Minify/ClosureCompiler.php';
 
-                Minify_ClosureCompiler::$javaExecutable = $this->_config->get_string('minify.ccjs.path.java');
-                Minify_ClosureCompiler::$jarFile = $this->_config->get_string('minify.ccjs.path.jar');
+                Minify_ClosureCompiler::setPathJava($this->_config->get_string('minify.ccjs.path.java'));
+                Minify_ClosureCompiler::setPathJar($this->_config->get_string('minify.ccjs.path.jar'));
                 break;
 
             case 'csstidy':

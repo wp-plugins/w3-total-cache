@@ -30,21 +30,20 @@ minify_templates['<?php echo addslashes($theme_key); ?>']['<?php echo addslashes
 </form>
 
 <form id="minify_form" action="admin.php?page=<?php echo $this->_page; ?>" method="post">
-	<fieldset>
-		<legend>General</legend>
-
+    <div class="metabox-holder">
+		<?php echo $this->postbox_header('General'); ?>
         <table class="form-table">
         	<tr>
         		<th colspan="2">
-        			<input type="hidden" name="minify.rewrite" value="0" />
-        			<label><input type="checkbox" name="minify.rewrite" value="1"<?php checked($this->_config->get_boolean('minify.rewrite'), true); ?> /> Rewrite <acronym title="Uniform Resource Locator">URL</acronym> structure</label><br />
+        			<input type="hidden" name="minify.rewrite" value="0"<?php if ($auto): ?> disabled="disabled"<?php endif; ?> />
+        			<label><input type="checkbox" name="minify.rewrite" value="1"<?php checked($this->_config->get_boolean('minify.rewrite'), true); ?><?php if ($auto): ?> disabled="disabled"<?php endif; ?> /> Rewrite <acronym title="Uniform Resource Locator">URL</acronym> structure</label><br />
     				<span class="description">If disabled, <acronym title="Cascading Style Sheet">CSS</acronym> and <acronym title="JavaScript">JS</acronym> embeddings will use GET variables instead of "fancy" links.</span>
         		</th>
         	</tr>
         	<tr>
         		<th colspan="2">
-        			<input type="hidden" name="minify.upload" value="0" />
-        			<label><input type="checkbox" name="minify.upload" value="1"<?php checked($this->_config->get_boolean('minify.upload'), true); ?> /> Automatically upload modified files</label><br />
+        			<input type="hidden" name="minify.upload" value="0"<?php if ($auto): ?> disabled="disabled"<?php endif; ?> />
+        			<label><input type="checkbox" name="minify.upload" value="1"<?php checked($this->_config->get_boolean('minify.upload'), true); ?><?php if ($auto): ?> disabled="disabled"<?php endif; ?> /> Automatically upload modified files</label><br />
     				<span class="description">If <acronym title="Content Delivery Network">CDN</acronym> is enabled (and not using the origin pull method), your minified files will be automatically uploaded.</span>
         		</th>
         	</tr>
@@ -75,11 +74,9 @@ minify_templates['<?php echo addslashes($theme_key); ?>']['<?php echo addslashes
         <p class="submit">
         	<input type="submit" name="options_save" class="w3tc-button-save button-primary" value="Save changes" />
         </p>
-	</fieldset>
+    	<?php echo $this->postbox_footer(); ?>
 
-	<fieldset>
-		<legend><acronym title="Hypertext Markup Language">HTML</acronym> &amp; <acronym title="eXtensible Markup Language">XML</acronym></legend>
-
+		<?php echo $this->postbox_header('<acronym title="Hypertext Markup Language">HTML</acronym> &amp; <acronym title="eXtensible Markup Language">XML</acronym>'); ?>
         <table class="form-table">
         	<tr>
         		<th valign="top"><acronym title="Hypertext Markup Language">HTML</acronym> minify settings:</th>
@@ -134,11 +131,9 @@ minify_templates['<?php echo addslashes($theme_key); ?>']['<?php echo addslashes
         <p class="submit">
         	<input type="submit" name="options_save" class="w3tc-button-save button-primary" value="Save changes" />
         </p>
-	</fieldset>
+    	<?php echo $this->postbox_footer(); ?>
 
-	<fieldset>
-		<legend>JavaScript</legend>
-
+		<?php echo $this->postbox_header('JavaScript'); ?>
         <table class="form-table">
             <tr>
                 <th valign="top"><acronym title="JavaScript">JS</acronym> minify settings:</th>
@@ -259,11 +254,9 @@ minify_templates['<?php echo addslashes($theme_key); ?>']['<?php echo addslashes
         <p class="submit">
         	<input type="submit" name="options_save" class="w3tc-button-save button-primary" value="Save changes" />
         </p>
-	</fieldset>
+    	<?php echo $this->postbox_footer(); ?>
 
-	<fieldset>
-		<legend>Cascading Style Sheets</legend>
-
+		<?php echo $this->postbox_header('Cascading Style Sheets'); ?>
         <table class="form-table">
         	<tr>
         		<th valign="top"><acronym title="Cascading Style Sheet">CSS</acronym> minify settings:</th>
@@ -375,11 +368,9 @@ minify_templates['<?php echo addslashes($theme_key); ?>']['<?php echo addslashes
         <p class="submit">
         	<input type="submit" name="options_save" class="w3tc-button-save button-primary" value="Save changes" />
         </p>
-    </fieldset>
+        <?php echo $this->postbox_footer(); ?>
 
-	<fieldset>
-		<legend>Advanced</legend>
-
+		<?php echo $this->postbox_header('Advanced'); ?>
         <table class="form-table">
     	<?php if ($this->_config->get_string('minify.engine') == 'memcached'): ?>
         	<tr>
@@ -415,11 +406,9 @@ minify_templates['<?php echo addslashes($theme_key); ?>']['<?php echo addslashes
         <p class="submit">
         	<input type="submit" name="options_save" class="w3tc-button-save button-primary" value="Save changes" />
         </p>
-	</fieldset>
+    	<?php echo $this->postbox_footer(); ?>
 
-	<fieldset>
-		<legend>Note(s):</legend>
-
+		<?php echo $this->postbox_header('Note(s):'); ?>
         <table class="form-table">
         	<tr>
         		<th valign="top" colspan="2">
@@ -430,8 +419,8 @@ minify_templates['<?php echo addslashes($theme_key); ?>']['<?php echo addslashes
         		</th>
         	</tr>
         </table>
-	</fieldset>
-
+    	<?php echo $this->postbox_footer(); ?>
+    </div>
 </form>
 
 <?php include W3TC_DIR . '/inc/options/common/footer.phtml'; ?>

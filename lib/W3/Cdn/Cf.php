@@ -168,12 +168,10 @@ class W3_Cdn_Cf extends W3_Cdn_S3 {
         $dist = false;
         $origin = $this->_get_origin();
 
-        if ($dists) {
-            foreach ((array) $dists as $_dist) {
-                if (isset($_dist['origin']) && $_dist['origin'] == $origin) {
-                    $dist = $_dist;
-                    break;
-                }
+        foreach ((array) $dists as $_dist) {
+            if (isset($_dist['origin']) && $_dist['origin'] == $origin) {
+                $dist = $_dist;
+                break;
             }
         }
 
@@ -283,5 +281,71 @@ class W3_Cdn_Cf extends W3_Cdn_S3 {
         $via = ($domain ? $domain : 'N/A');
 
         return sprintf('Amazon Web Services: CloudFront: %s', $via);
+    }
+
+    /**
+     * Update distribution CNAMEs
+     *
+     * @param string $error
+     * @return bool
+     */
+    function update_cnames(&$error) {
+        if (!$this->_init($error)) {
+            return false;
+        }
+
+        $this->set_error_handler();
+
+        $dists = @$this->_s3->listDistributions();
+
+        $this->restore_error_handler();
+
+        if ($dists === false) {
+            $error = sprintf('Unable to list distributions (%s)', $this->get_last_error());
+
+            return false;
+        }
+
+        $dist_id = false;
+        $origin = $this->_get_origin();
+
+        foreach ((array) $dists as $dist) {
+            if (isset($dist['origin']) && $dist['origin'] == $origin) {
+                $dist_id = $dist['id'];
+                break;
+            }
+        }
+
+        if (!$dist_id) {
+            $error = sprintf('Distribution ID for origin "%s" not found.', $origin);
+
+            return false;
+        }
+
+        $this->set_error_handler();
+
+        $dist = @$this->_s3->getDistribution($dist_id);
+
+        $this->restore_error_handler();
+
+        if (!$dist) {
+            $error = sprintf('Unable to get distribution by ID %s (%s)', $dist_id, $this->get_last_error());
+        }
+
+        $dist['cnames'] = (isset($this->_config['cname']) ? (array) $this->_config['cname'] : array());
+
+        $this->set_error_handler();
+
+        $dist = @$this->_s3->updateDistribution($dist);
+
+        $this->restore_error_handler();
+
+        if (!$dist) {
+            $error = sprintf('Unable to update distribution %s (%s)', json_encode($dist), $this->get_last_error());
+
+            return false;
+        }
+
+        return true;
     }
 }

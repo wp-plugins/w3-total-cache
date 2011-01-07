@@ -475,7 +475,7 @@ class W3_PgCache {
             if ($this->_config->get_boolean('pgcache.purge.comments') && function_exists('get_comments_pagenum_link')) {
                 $comments_number = get_comments_number($post_id);
                 $comments_per_page = get_option('comments_per_page');
-                $comments_pages_number = ceil($comments_number / $comments_per_page);
+                $comments_pages_number = @ceil($comments_number / $comments_per_page);
 
                 for ($pagenum = 1; $pagenum <= $comments_pages_number; $pagenum++) {
                     $comments_pagenum_link = $this->_get_comments_pagenum_link($post_id, $pagenum);
@@ -513,7 +513,7 @@ class W3_PgCache {
                 foreach ($terms as $term) {
                     $term_link = get_term_link($term, $term->taxonomy);
                     $term_uri = str_replace($domain_url, '', $term_link);
-                    $posts_pages_number = ceil($term->count / $posts_per_page);
+                    $posts_pages_number = @ceil($term->count / $posts_per_page);
 
                     for ($pagenum = 1; $pagenum <= $posts_pages_number; $pagenum++) {
                         $term_pagenum_link = $this->_get_pagenum_link($term_uri, $pagenum);
@@ -558,7 +558,7 @@ class W3_PgCache {
 
                 $posts_per_page = get_option('posts_per_page');
                 $posts_number = $this->_get_archive_posts_count($post_year, $post_month);
-                $posts_pages_number = ceil($posts_number / $posts_per_page);
+                $posts_pages_number = @ceil($posts_number / $posts_per_page);
 
                 $month_link = get_month_link($post_year, $post_month);
                 $month_uri = str_replace($domain_url, '', $month_link);
@@ -580,7 +580,7 @@ class W3_PgCache {
 
                 $posts_per_page = get_option('posts_per_page');
                 $posts_number = $this->_get_archive_posts_count($post_year);
-                $posts_pages_number = ceil($posts_number / $posts_per_page);
+                $posts_pages_number = @ceil($posts_number / $posts_per_page);
 
                 $year_link = get_year_link($post_year);
                 $year_uri = str_replace($domain_url, '', $year_link);

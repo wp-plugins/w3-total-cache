@@ -216,6 +216,10 @@ class W3_Config {
         'cdn.rscf.ssl' => 'string',
         'cdn.cfl.email' => 'string',
         'cdn.cfl.key' => 'string',
+        'cdn.azure.user' => 'string',
+        'cdn.azure.key' => 'string',
+        'cdn.azure.container' => 'string',
+        'cdn.azure.ssl' => 'string',
         'cdn.reject.ua' => 'array',
         'cdn.reject.uri' => 'array',
         'cdn.reject.files' => 'array',
@@ -253,7 +257,10 @@ class W3_Config {
 
         'common.support' => 'string',
         'common.install' => 'integer',
-        'common.tweeted' => 'integer',
+        'common.tweeted' => 'boolean',
+
+        'config.check' => 'boolean',
+        'config.path' => 'string',
 
         'widget.latest.enabled' => 'boolean',
         'widget.latest.items' => 'integer',
@@ -381,7 +388,7 @@ class W3_Config {
         'pgcache.prime.sitemap' => '',
 
         'minify.enabled' => false,
-        'minify.auto' => false,
+        'minify.auto' => true,
         'minify.debug' => false,
         'minify.engine' => 'file',
         'minify.file.gc' => 86400,
@@ -515,6 +522,10 @@ class W3_Config {
         'cdn.rscf.ssl' => 'auto',
         'cdn.cfl.email' => '',
         'cdn.cfl.key' => '',
+        'cdn.azure.user' => '',
+        'cdn.azure.key' => '',
+        'cdn.azure.container' => '',
+        'cdn.azure.ssl' => 'auto',
         'cdn.reject.ua' => array(),
         'cdn.reject.uri' => array(),
         'cdn.reject.files' => array(
@@ -707,11 +718,27 @@ class W3_Config {
         ),
 
         'referrer.enabled' => true,
-        'referrer.rgroups' => array(),
+        'referrer.rgroups' => array(
+            'search_engines' => array(
+                'theme' => '',
+                'enabled' => true,
+                'redirect' => '',
+                'referrers' => array(
+                    'google\.com',
+                    'yahoo\.com',
+                    'bing\.com',
+                    'ask\.com',
+                    'msn\.com'
+                )
+            )
+        ),
 
         'common.support' => '',
         'common.install' => 0,
-        'common.tweeted' => 0,
+        'common.tweeted' => false,
+
+        'config.check' => true,
+        'config.path' => '',
 
         'widget.latest.enabled' => true,
         'widget.latest.items' => 3,
@@ -784,10 +811,12 @@ class W3_Config {
             case 'pgcache.engine':
             case 'dbcache.engine':
             case 'minify.engine':
+            case 'objectcache.engine':
                 switch (true) {
                     case ($value == 'apc' && !function_exists('apc_store')):
                     case ($value == 'eaccelerator' && !function_exists('eaccelerator_put')):
                     case ($value == 'xcache' && !function_exists('xcache_set')):
+                    case ($value == 'wincache' && !function_exists('wincache_ucache_set')):
                     case ($value == 'memcached' && !class_exists('Memcache')):
                         return 'file';
                 }
@@ -836,6 +865,14 @@ class W3_Config {
                 if (!W3TC_PHP5) {
                     return false;
                 }
+                break;
+
+            /**
+             * Disable minify options for auto mode
+             */
+            case 'minify.rewrite':
+            case 'minify.upload':
+                return !$this->get_boolean('minify.auto');
                 break;
 
             /**
@@ -905,6 +942,9 @@ class W3_Config {
              */
             case 'cdn.engine':
                 if (($value == 's3' || $value == 'cf' || $value == 'cf2' || $value == 'rscf') && (!W3TC_PHP5 || !function_exists('curl_init'))) {
+                    return 'mirror';
+                }
+                if ($value == 'azure' && !W3TC_PHP5) {
                     return 'mirror';
                 }
                 if ($value == 'ftp' && !function_exists('ftp_connect')) {

@@ -15,9 +15,8 @@
 </form>
 
 <form action="admin.php?page=<?php echo $this->_page; ?>" method="post">
-	<fieldset>
-		<legend>General</legend>
-
+    <div class="metabox-holder">
+		<?php echo $this->postbox_header('General'); ?>
         <table class="form-table">
         	<tr>
         		<th>
@@ -31,11 +30,9 @@
         <p class="submit">
         	<input type="submit" name="options_save" class="w3tc-button-save button-primary" value="Save changes" />
         </p>
-	</fieldset>
+	    <?php echo $this->postbox_footer(); ?>
 
-	<fieldset>
-		<legend>Advanced</legend>
-
+		<?php echo $this->postbox_header('Advanced'); ?>
         <table class="form-table">
         	<?php if ($this->_config->get_string('dbcache.engine') == 'memcached'): ?>
         	<tr>
@@ -79,7 +76,8 @@
         <p class="submit">
         	<input type="submit" name="options_save" class="w3tc-button-save button-primary" value="Save changes" />
         </p>
-	</fieldset>
+    	<?php echo $this->postbox_footer(); ?>
+    </div>
 </form>
 
 <?php include W3TC_DIR . '/inc/options/common/footer.phtml'; ?>

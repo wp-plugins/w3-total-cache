@@ -722,15 +722,17 @@ class W3_Plugin_PgCache extends W3_Plugin {
             $rules .= "    RewriteCond %{HTTP_USER_AGENT} !(" . implode('|', array_map('w3_preg_quote', $reject_user_agents)) . ") [NC]\n";
         }
 
+        $cache_path = $base_path . ltrim(str_replace(w3_get_site_root(), '', $cache_dir), '/') . $home_path;
+
         /**
          * Check if cache file exists
          */
-        $rules .= "    RewriteCond \"" . $cache_dir . $home_path . "$1/_index%{ENV:W3TC_UA}%{ENV:W3TC_REF}%{ENV:W3TC_SSL}.html%{ENV:W3TC_ENC}\" -f\n";
+        $rules .= "    RewriteCond \"%{DOCUMENT_ROOT}" . $cache_path . "$1/_index%{ENV:W3TC_UA}%{ENV:W3TC_REF}%{ENV:W3TC_SSL}.html%{ENV:W3TC_ENC}\" -f\n";
 
         /**
          * Make final rewrite
          */
-        $rules .= "    RewriteRule (.*) \"" . $base_path . ltrim(str_replace(w3_get_site_root(), '', $cache_dir), '/') . $home_path . "$1/_index%{ENV:W3TC_UA}%{ENV:W3TC_REF}%{ENV:W3TC_SSL}.html%{ENV:W3TC_ENC}\" [L]\n";
+        $rules .= "    RewriteRule (.*) \"" . $cache_path . "$1/_index%{ENV:W3TC_UA}%{ENV:W3TC_REF}%{ENV:W3TC_SSL}.html%{ENV:W3TC_ENC}\" [L]\n";
         $rules .= "</IfModule>\n";
         $rules .= W3TC_MARKER_END_PGCACHE_CORE . "\n";
 
@@ -747,6 +749,7 @@ class W3_Plugin_PgCache extends W3_Plugin {
         $is_vhost = w3_is_subdomain_install();
 
         $base_path = w3_get_base_path();
+        $home_path = ($is_multisite ? $base_path : w3_get_home_path());
         $cache_dir = w3_path(W3TC_CACHE_FILE_PGCACHE_DIR);
 
         /**
@@ -974,12 +977,14 @@ class W3_Plugin_PgCache extends W3_Plugin {
             $rules .= "}\n";
         }
 
-        $rules .= "if (!-f \"" . $cache_dir . "/\$request_uri/_index\$w3tc_ua\$w3tc_ref\$w3tc_ssl.html\$w3tc_enc\") {\n";
+        $cache_path = $base_path . ltrim(str_replace(w3_get_site_root(), '', $cache_dir), '/') . $home_path;
+
+        $rules .= "if (!-f \"\$document_root" . $cache_path . "\$request_uri/_index\$w3tc_ua\$w3tc_ref\$w3tc_ssl.html\$w3tc_enc\") {\n";
         $rules .= "    set \$w3tc_rewrite 0;\n";
         $rules .= "}\n";
 
         $rules .= "if (\$w3tc_rewrite = 1) {\n";
-        $rules .= "    rewrite (.*) \"" . $base_path . ltrim(str_replace(w3_get_site_root(), '', $cache_dir), '/') . "/$1/_index\$w3tc_ua\$w3tc_ref\$w3tc_ssl.html\$w3tc_enc\" last;\n";
+        $rules .= "    rewrite (.*) \"" . $cache_path . "\$1/_index\$w3tc_ua\$w3tc_ref\$w3tc_ssl.html\$w3tc_enc\" last;\n";
         $rules .= "}\n";
         $rules .= W3TC_MARKER_END_PGCACHE_CORE . "\n";
 

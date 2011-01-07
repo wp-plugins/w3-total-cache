@@ -162,7 +162,7 @@ class Minify_CSS_Compressor {
         );
 
         if (isset($this->_options['stripCrlf']) && $this->_options['stripCrlf']) {
-            $css = preg_replace("~[\r\n]+~", '', $css);
+            $css = preg_replace("~[\r\n]+~", ' ', $css);
         } else {
             $css = preg_replace("~[\r\n]+~", "\n", $css);
         }

@@ -856,7 +856,7 @@ class S3 {
 	*/
 	public static function getDistribution($distributionId) {
 		self::$useSSL = true; // CloudFront requires SSL
-		$rest = new S3Request('GET', '', '2008-06-30/distribution/'.$distributionId, 'cloudfront.amazonaws.com');
+		$rest = new S3Request('GET', '', '2010-11-01/distribution/'.$distributionId, 'cloudfront.amazonaws.com');
 		$rest = self::__getCloudFrontResponse($rest);
 
 		if ($rest->error === false && $rest->code !== 200)
@@ -882,8 +882,8 @@ class S3 {
 	*/
 	public static function updateDistribution($dist) {
 		self::$useSSL = true; // CloudFront requires SSL
-		$rest = new S3Request('PUT', '', '2008-06-30/distribution/'.$dist['id'].'/config', 'cloudfront.amazonaws.com');
-		$rest->data = self::__getCloudFrontDistributionConfigXML($dist['origin'], $dist['enabled'], $dist['comment'], $dist['callerReference'], $dist['cnames']);
+		$rest = new S3Request('PUT', '', '2010-11-01/distribution/'.$dist['id'].'/config', 'cloudfront.amazonaws.com');
+		$rest->data = self::__getCloudFrontDistributionConfigXML($dist['origin'], $dist['type'], $dist['enabled'], $dist['comment'], $dist['callerReference'], $dist['cnames']);
 		$rest->size = strlen($rest->data);
 		$rest->setHeader('If-Match', $dist['hash']);
 		$rest = self::__getCloudFrontResponse($rest);
@@ -891,7 +891,7 @@ class S3 {
 		if ($rest->error === false && $rest->code !== 200)
 			$rest->error = array('code' => $rest->code, 'message' => 'Unexpected HTTP status');
 		if ($rest->error !== false) {
-			trigger_error(sprintf("S3::updateDistribution({$dist['id']}, ".(int)$enabled.", '$comment'): [%s] %s",
+			trigger_error(sprintf("S3::updateDistribution({$dist['id']}, ".(int)$dist['enabled'].", '".$dist['comment']."'): [%s] %s",
 			$rest->error['code'], $rest->error['message']), E_USER_WARNING);
 			return false;
 		} else {
@@ -911,7 +911,7 @@ class S3 {
 	*/
 	public static function deleteDistribution($dist) {
 		self::$useSSL = true; // CloudFront requires SSL
-		$rest = new S3Request('DELETE', '', '2008-06-30/distribution/'.$dist['id'], 'cloudfront.amazonaws.com');
+		$rest = new S3Request('DELETE', '', '2010-11-01/distribution/'.$dist['id'], 'cloudfront.amazonaws.com');
 		$rest->setHeader('If-Match', $dist['hash']);
 		$rest = self::__getCloudFrontResponse($rest);
 
@@ -933,7 +933,7 @@ class S3 {
 	*/
 	public static function listDistributions() {
 		self::$useSSL = true; // CloudFront requires SSL
-		$rest = new S3Request('GET', '', '2008-06-30/distribution', 'cloudfront.amazonaws.com');
+		$rest = new S3Request('GET', '', '2010-11-01/distribution', 'cloudfront.amazonaws.com');
 		$rest = self::__getCloudFrontResponse($rest);
 
 		if ($rest->error === false && $rest->code !== 200)
@@ -1005,26 +1005,61 @@ class S3 {
 	*/
 	private static function __parseCloudFrontDistributionConfig(&$node) {
 		$dist = array();
-		if (isset($node->Id, $node->Status, $node->LastModifiedTime, $node->DomainName)) {
-			$dist['id'] = (string)$node->Id;
-			$dist['status'] = (string)$node->Status;
-			$dist['time'] = strtotime((string)$node->LastModifiedTime);
-			$dist['domain'] = (string)$node->DomainName;
-		}
-		if (isset($node->CallerReference))
-			$dist['callerReference'] = (string)$node->CallerReference;
-		if (isset($node->Comment))
-			$dist['comment'] = (string)$node->Comment;
-		if (isset($node->Enabled, $node->Origin)) {
-			$dist['origin'] = (string)$node->Origin;
-			$dist['enabled'] = (string)$node->Enabled == 'true' ? true : false;
-		} elseif (isset($node->DistributionConfig)) {
-			$dist = array_merge($dist, self::__parseCloudFrontDistributionConfig($node->DistributionConfig));
-		}
-		if (isset($node->CNAME)) {
-			$dist['cnames'] = array();
-			foreach ($node->CNAME as $cname) $dist['cnames'][(string)$cname] = (string)$cname;
-		}
+
+        if (isset($node->Id)) {
+            $dist['id'] = (string) $node->Id;
+        }
+
+        if (isset($node->Status)) {
+            $dist['status'] = (string) $node->Status;
+        }
+
+        if (isset($node->LastModifiedTime)) {
+            $dist['time'] = strtotime((string) $node->LastModifiedTime);
+        }
+
+        if (isset($node->DomainName)) {
+            $dist['domain'] = (string) $node->DomainName;
+        }
+
+        if (isset($node->S3Origin)) {
+            $dist['type'] = 's3';
+
+            if (isset($node->S3Origin->DNSName)) {
+                $dist['origin'] = (string) $node->S3Origin->DNSName;
+            }
+        } elseif (isset($node->CustomOrigin)) {
+            $dist['type'] = 'custom';
+
+            if (isset($node->CustomOrigin->DNSName)) {
+                $dist['origin'] = (string) $node->CustomOrigin->DNSName;
+            }
+        }
+
+        if (isset($node->CallerReference)) {
+            $dist['callerReference'] = (string) $node->CallerReference;
+        }
+
+        if (isset($node->CNAME)) {
+            $dist['cnames'] = array();
+
+            foreach ($node->CNAME as $cname) {
+                $dist['cnames'][] = (string) $cname;
+            }
+        }
+
+        if (isset($node->Comment)) {
+            $dist['comment'] = (string) $node->Comment;
+        }
+
+        if (isset($node->Enabled)) {
+            $dist['enabled'] = ((string) $node->Enabled == 'true' ? true : false);
+        }
+
+        if (isset($node->DistributionConfig)) {
+            $dist = array_merge($dist, self::__parseCloudFrontDistributionConfig($node->DistributionConfig));
+        }
+
 		return $dist;
 	}
 
@@ -1347,5 +1382,4 @@ final class S3Request {
 		}
 		return $strlen;
 	}
-
 }

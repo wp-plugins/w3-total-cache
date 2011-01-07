@@ -168,70 +168,9 @@ var W3tc_Overlay = {
 
 function w3tc_lightbox_support_us() {
     W3tc_Lightbox.open({
-        width: 590,
-        height: 200,
-        url: 'admin.php?page=w3tc_general&w3tc_action=support_us',
-        callback: function(lightbox) {
-            jQuery('.button-tweet', lightbox.container).click(function(event) {
-                lightbox.close();
-                w3tc_lightbox_tweet();
-                return false;
-            });
-
-            jQuery('.button-rating', lightbox.container).click(function() {
-                window.open('http://wordpress.org/extend/plugins/w3-total-cache/', '_blank');
-            });
-
-            jQuery('form').submit(function() {
-                if (jQuery('select :selected', this).val() == '') {
-                    alert('Please select link location!');
-                    return false;
-                }
-            });
-        }
-    });
-
-}
-
-function w3tc_lightbox_tweet() {
-    W3tc_Lightbox.open({
-        width: 550,
-        height: 340,
-        url: 'admin.php?page=w3tc_general&w3tc_action=tweet',
-        callback: function(lightbox) {
-            jQuery('form', lightbox.container).submit(function() {
-                var me = this, username = jQuery('#tweet_username').val(), password = jQuery('#tweet_password').val();
-
-                if (username == '') {
-                    alert('Please enter your twitter.com username.');
-                    return false;
-                }
-
-                if (password == '') {
-                    alert('Please enter your twitter.com password.');
-                    return false;
-                }
-
-                jQuery('input', this).attr('disabled', 'disabled');
-
-                jQuery.post('admin.php?page=w3tc_general', {
-                    w3tc_action: 'twitter_status_update',
-                    username: username,
-                    password: password
-                }, function(data) {
-                    jQuery('input', me).attr('disabled', '');
-
-                    if (data.result) {
-                        lightbox.close();
-                        alert('Nice! Thanks for telling your friends about us!');
-                    } else {
-                        alert('Uh oh, seems that that #failed. Please try again.');
-                    }
-                }, 'json');
-
-                return false;
-            });
-        }
+        width: 500,
+        height: 230,
+        url: 'admin.php?page=w3tc_general&w3tc_action=support_us'
     });
 }
 
@@ -467,11 +406,6 @@ function w3tc_lightbox_cdn_s3_bucket_location(type) {
 }
 
 jQuery(function() {
-    jQuery('.button-tweet').click(function() {
-        w3tc_lightbox_tweet();
-        return false;
-    });
-
     jQuery('.button-minify-recommendations').click(function() {
         w3tc_lightbox_minify_recommendations();
         return false;

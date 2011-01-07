@@ -238,6 +238,14 @@ Install the plugin to read the full FAQ.
 
 == Press: Mentions, Tutorials &amp; Reviews ==
 
+**January 2011:**
+
+* [How to Make Your Blog Load Faster than ProBlogger](http://www.problogger.net/archives/2011/01/04/how-to-make-your-blog-load-faster-than-problogger/), Pro Blogger
+
+**December 2010:**
+
+* [Rackspace Cloud Files for WordPress](http://sporkmarketing.com/blog/1095/rackspace-cloud-files-wordpress/), Jason Lancaster
+
 **November 2010:**
 
 * [10 WordPress Plugins I’m Thankful For (And Cannot Live Without)](http://wpmu.org/10-wordpress-plugins-im-thankful-for-and-cannot-live-without/), Sarah Gooding

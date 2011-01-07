@@ -5,9 +5,8 @@
 </p>
 
 <form action="admin.php?page=<?php echo $this->_page; ?>" method="post">
-    <fieldset>
-        <legend>General</legend>
-        
+    <div class="metabox-holder">
+        <?php echo $this->postbox_header('General'); ?>
         <p>Specify global browser cache policy.</p>
 
         <table class="form-table">
@@ -60,11 +59,9 @@
         <p class="submit">
             <input type="submit" name="options_save" class="w3tc-button-save button-primary" value="Save changes" />
         </p>
-    </fieldset>
+        <?php echo $this->postbox_footer(); ?>
     
-    <fieldset>
-        <legend>Cascading Style Sheets &amp; JavaScript</legend>
-        
+        <?php echo $this->postbox_header('Cascading Style Sheets &amp; JavaScript'); ?>
         <p>Specify browser cache policy for cascading style sheets and JavaScript files.</p>
         
         <table class="form-table">
@@ -131,11 +128,9 @@
         <p class="submit">
             <input type="submit" name="options_save" class="w3tc-button-save button-primary" value="Save changes" />
         </p>
-    </fieldset>
+        <?php echo $this->postbox_footer(); ?>
     
-    <fieldset>
-        <legend><acronym title="Hypertext Markup Language">HTML</acronym></legend>
-        
+        <?php echo $this->postbox_header('<acronym title="Hypertext Markup Language">HTML</acronym>'); ?>
         <p>Specify browser cache policy for posts, pages, feeds and text-based files.</p>
         
         <table class="form-table">
@@ -202,11 +197,9 @@
         <p class="submit">
             <input type="submit" name="options_save" class="w3tc-button-save button-primary" value="Save changes" />
         </p>
-    </fieldset>
+        <?php echo $this->postbox_footer(); ?>
     
-    <fieldset>
-        <legend>Media &amp; Other Files</legend>
-        
+        <?php echo $this->postbox_header('Media &amp; Other Files'); ?>
         <table class="form-table">
             <tr>
                 <th colspan="2">
@@ -271,7 +264,8 @@
         <p class="submit">
             <input type="submit" name="options_save" class="w3tc-button-save button-primary" value="Save changes" />
         </p>
-    </fieldset>
+        <?php echo $this->postbox_footer(); ?>
+    </div>
 </form>
 
 <?php include W3TC_DIR . '/inc/options/common/footer.phtml'; ?>

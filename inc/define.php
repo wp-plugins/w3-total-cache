@@ -9,7 +9,6 @@ define('W3TC_LINK_URL', 'http://www.w3-edge.com/wordpress-plugins/');
 define('W3TC_LINK_NAME', 'WordPress Plugins');
 define('W3TC_FEED_URL', 'http://feeds.feedburner.com/W3TOTALCACHE');
 define('W3TC_README_URL', 'http://plugins.trac.wordpress.org/browser/w3-total-cache/trunk/readme.txt?format=txt');
-define('W3TC_TWITTER_STATUS', 'YES! I optimized my #wordpress site\'s #performance using the W3 Total Cache #plugin by @w3edge. Check it out! http://j.mp/A69xX');
 define('W3TC_SUPPORT_US_TIMEOUT', 2592000);
 
 define('W3TC_PHP5', PHP_VERSION >= 5);
@@ -22,6 +21,7 @@ define('W3TC_LIB_W3_DIR', W3TC_LIB_DIR . '/W3');
 define('W3TC_LIB_MINIFY_DIR', W3TC_LIB_DIR . '/Minify');
 define('W3TC_LIB_CF_DIR', W3TC_LIB_DIR . '/CF');
 define('W3TC_LIB_CSSTIDY_DIR', W3TC_LIB_DIR . '/CSSTidy');
+define('W3TC_LIB_MICROSOFT_DIR', W3TC_LIB_DIR . '/Microsoft');
 define('W3TC_PLUGINS_DIR', W3TC_DIR . '/plugins');
 define('W3TC_INSTALL_DIR', W3TC_DIR . '/wp-content');
 define('W3TC_INSTALL_MINIFY_DIR', W3TC_INSTALL_DIR . '/w3tc/min');
@@ -915,6 +915,24 @@ function w3_get_host() {
 }
 
 /**
+ * Returns nginx rules path
+ *
+ * @return string
+ */
+function w3_get_nginx_rules_path() {
+    require_once W3TC_LIB_W3_DIR . '/Config.php';
+    $config =& W3_Config::instance();
+
+    $path = $config->get_string('config.path');
+
+    if (!$path) {
+        $path = w3_get_document_root() . '/nginx.conf';
+    }
+
+    return $path;
+}
+
+/**
  * Returns path of pagecache core rules file
  *
  * @return string
@@ -925,7 +943,7 @@ function w3_get_pgcache_rules_core_path() {
             return w3_get_home_root() . '/.htaccess';
 
         case w3_is_nginx():
-            return w3_get_document_root() . '/nginx.conf';
+            return w3_get_nginx_rules_path();
     }
 
     return false;
@@ -942,7 +960,7 @@ function w3_get_pgcache_rules_cache_path() {
             return W3TC_CACHE_FILE_PGCACHE_DIR . '/.htaccess';
 
         case w3_is_nginx():
-            return w3_get_document_root() . '/nginx.conf';
+            return w3_get_nginx_rules_path();
     }
 
     return false;
@@ -959,7 +977,7 @@ function w3_get_browsercache_rules_cache_path() {
             return w3_get_home_root() . '/.htaccess';
 
         case w3_is_nginx():
-            return w3_get_document_root() . '/nginx.conf';
+            return w3_get_nginx_rules_path();
     }
 
     return false;
@@ -976,7 +994,7 @@ function w3_get_browsercache_rules_no404wp_path() {
             return w3_get_home_root() . '/.htaccess';
 
         case w3_is_nginx():
-            return w3_get_document_root() . '/nginx.conf';
+            return w3_get_nginx_rules_path();
     }
 
     return false;
@@ -993,7 +1011,7 @@ function w3_get_minify_rules_core_path() {
             return W3TC_CACHE_FILE_MINIFY_DIR . '/.htaccess';
 
         case w3_is_nginx():
-            return w3_get_document_root() . '/nginx.conf';
+            return w3_get_nginx_rules_path();
     }
 
     return false;
@@ -1010,7 +1028,7 @@ function w3_get_minify_rules_cache_path() {
             return W3TC_CACHE_FILE_MINIFY_DIR . '/.htaccess';
 
         case w3_is_nginx():
-            return w3_get_document_root() . '/nginx.conf';
+            return w3_get_nginx_rules_path();
     }
 
     return false;
@@ -1136,6 +1154,22 @@ function w3_normalize_file_minify($file) {
         $file = str_replace(w3_get_document_root(), '', $file);
         $file = ltrim($file, '/');
     }
+
+    return $file;
+}
+
+/**
+ * Normalizes file name for minify
+ *
+ * Relative to document root!
+ *
+ * @param string $file
+ * @return string
+ */
+function w3_normalize_file_minify2($file) {
+    $file = preg_replace('~\?ver=[^&]+$~', '', $file);
+    $file = w3_normalize_file_minify($file);
+    $file = w3_translate_file($file);
 
     return $file;
 }
@@ -1548,6 +1582,10 @@ function w3_get_engine_name($engine) {
             $engine_name = 'xcache';
             break;
 
+        case 'wincache':
+            $engine_name = 'wincache';
+            break;
+
         case 'file':
             $engine_name = 'disk';
             break;
@@ -1586,6 +1624,10 @@ function w3_get_engine_name($engine) {
 
         case 'cfl':
             $engine_name = 'cloudflare';
+            break;
+
+        case 'azure':
+            $engine_name = 'microsoft azure storage';
             break;
 
         default:
@@ -1699,38 +1741,6 @@ function w3_get_mime_type($file) {
     }
 
     return $cache[$file];
-}
-
-/**
- * Send twitter update status request
- *
- * @param string $username
- * @param string $password
- * @param string $status
- * @param string $error
- * @return string
- */
-function w3_twitter_status_update($username, $password, $status, &$error) {
-    $data = sprintf('status=%s', urlencode($status));
-    $auth = sprintf('%s:%s', $username, $password);
-
-    $xml = w3_http_post('http://twitter.com/statuses/update.xml', $data, $auth);
-
-    if ($xml) {
-        $matches = null;
-
-        if (preg_match('~<id>(\d+)</id>~', $xml, $matches)) {
-            return $matches[1];
-        } elseif (preg_match('~<error>([^<]+)</error>~', $xml, $matches)) {
-            $error = $matches[1];
-        } else {
-            $error = 'Unknown error.';
-        }
-    } else {
-        $error = 'Unable to send request.';
-    }
-
-    return false;
 }
 
 /**
@@ -1850,8 +1860,7 @@ function w3_extract_js($content) {
     }
 
     $files = array_filter($files, create_function('$el', 'return (strstr($el, W3TC_CONTENT_MINIFY_DIR_NAME) ? false : true);'));
-    $files = array_map('w3_normalize_file_minify', $files);
-    $files = array_unique($files);
+    $files = array_values(array_unique($files));
 
     return $files;
 }
@@ -1890,8 +1899,7 @@ function w3_extract_css($content) {
     }
 
     $files = array_filter($files, create_function('$el', 'return (strstr($el, W3TC_CONTENT_MINIFY_DIR_NAME) ? false : true);'));
-    $files = array_map('w3_normalize_file_minify', $files);
-    $files = array_unique($files);
+    $files = array_values(array_unique($files));
 
     return $files;
 }

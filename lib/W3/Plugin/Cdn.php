@@ -141,45 +141,23 @@ class W3_Plugin_Cdn extends W3_Plugin {
     function activate() {
         global $wpdb;
 
-        $sql = sprintf('DROP TABLE IF EXISTS `%s%s`', $wpdb->prefix, W3TC_CDN_TABLE_QUEUE);
+        $this->schedule();
+        $this->schedule_upload();
 
-        $wpdb->query($sql);
-
-        $sql = sprintf("CREATE TABLE IF NOT EXISTS `%s%s` (
-            `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-            `local_path` varchar(150) NOT NULL DEFAULT '',
-            `remote_path` varchar(150) NOT NULL DEFAULT '',
-            `command` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '1 - Upload, 2 - Delete',
-            `last_error` varchar(150) NOT NULL DEFAULT '',
-            `date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-            PRIMARY KEY (`id`),
-            UNIQUE KEY `path` (`local_path`, `remote_path`),
-            KEY `date` (`date`)
-        ) /*!40100 CHARACTER SET latin1 */", $wpdb->prefix, W3TC_CDN_TABLE_QUEUE);
-
-        $wpdb->query($sql);
-
-        if (!$wpdb->result) {
+        if ($this->_config->get_boolean('cdn.enabled') && !w3_is_cdn_mirror($this->_config->get_string('cdn.engine')) && !$this->table_create(true)) {
             $error = sprintf('Unable to create table <strong>%s%s</strong>: %s', $wpdb->prefix, W3TC_CDN_TABLE_QUEUE, $wpdb->last_error);
 
             w3_activate_error($error);
         }
-
-        $this->schedule();
-        $this->schedule_upload();
     }
 
     /**
      * Deactivation action
      */
     function deactivate() {
-        global $wpdb;
-
+        $this->table_delete();
         $this->unschedule_upload();
         $this->unschedule();
-
-        $sql = sprintf('DROP TABLE IF EXISTS `%s%s`', $wpdb->prefix, W3TC_CDN_TABLE_QUEUE);
-        $wpdb->query($sql);
     }
 
     /**
@@ -224,6 +202,51 @@ class W3_Plugin_Cdn extends W3_Plugin {
         if (wp_next_scheduled('w3_cdn_cron_upload')) {
             wp_clear_scheduled_hook('w3_cdn_cron_upload');
         }
+    }
+
+    /**
+     * Create queue table
+     *
+     * @param bool $drop
+     * @return int
+     */
+    function table_create($drop = false) {
+        global $wpdb;
+
+        if ($drop) {
+            $sql = sprintf('DROP TABLE IF EXISTS `%s%s`', $wpdb->prefix, W3TC_CDN_TABLE_QUEUE);
+
+            $wpdb->query($sql);
+        }
+
+        $sql = sprintf("CREATE TABLE IF NOT EXISTS `%s%s` (
+            `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+            `local_path` varchar(150) NOT NULL DEFAULT '',
+            `remote_path` varchar(150) NOT NULL DEFAULT '',
+            `command` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '1 - Upload, 2 - Delete',
+            `last_error` varchar(150) NOT NULL DEFAULT '',
+            `date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `path` (`local_path`, `remote_path`),
+            KEY `date` (`date`)
+        ) /*!40100 CHARACTER SET latin1 */", $wpdb->prefix, W3TC_CDN_TABLE_QUEUE);
+
+        $wpdb->query($sql);
+
+        return $wpdb->result;
+    }
+
+    /**
+     * Delete queue table
+     *
+     * @return int
+     */
+    function table_delete() {
+        global $wpdb;
+
+        $sql = sprintf('DROP TABLE IF EXISTS `%s%s`', $wpdb->prefix, W3TC_CDN_TABLE_QUEUE);
+
+        return $wpdb->query($sql);
     }
 
     /**
@@ -1682,6 +1705,15 @@ class W3_Plugin_Cdn extends W3_Plugin {
                         'key' => $this->_config->get_string('cdn.cfl.key')
                     );
                     break;
+
+                case 'azure':
+                    $engine_config = array(
+                        'user' => $this->_config->get_string('cdn.azure.user'),
+                        'key' => $this->_config->get_string('cdn.azure.key'),
+                        'container' => $this->_config->get_string('cdn.azure.container'),
+                        'compression' => ($this->_config->get_boolean('browsercache.enabled') && $this->_config->get_boolean('browsercache.html.compression')),
+                        'ssl' => $this->_config->get_string('cdn.azure.ssl')
+                    );
             }
 
             require_once W3TC_LIB_W3_DIR . '/Cdn.php';
@@ -1715,7 +1747,7 @@ class W3_Plugin_Cdn extends W3_Plugin {
         }
 
         if (count($this->replaced_urls)) {
-            $debug_info .= "Replaced URLs:\r\n";
+            $debug_info .= "\r\nReplaced URLs:\r\n";
 
             foreach ($this->replaced_urls as $old_url => $new_url) {
                 $debug_info .= sprintf("%s => %s\r\n", $old_url, $new_url);

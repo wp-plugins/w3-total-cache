@@ -269,7 +269,7 @@ class W3_Minify {
         foreach ($locations as $location => $config) {
             if (!empty($config['files'])) {
                 foreach ((array) $config['files'] as $file) {
-                    $file = $this->_normalize_file($file);
+                    $file = w3_normalize_file_minify2($file);
 
                     if (w3_is_url($file)) {
                         $precached_file = $this->_precache_file($file, $type);
@@ -346,19 +346,6 @@ class W3_Minify {
     }
 
     /**
-     * Normalizes URL
-     * @param string $url
-     * @return string
-     */
-    function _normalize_file($file) {
-        $file = preg_replace('~\?ver=[^&]+$~', '', $file);
-        $file = w3_normalize_file_minify($file);
-        $file = w3_translate_file($file);
-
-        return $file;
-    }
-
-    /**
      * Returns minify source
      * @param $file_path
      * @param $url
@@ -408,6 +395,11 @@ class W3_Minify {
                 case 'xcache':
                     require_once W3TC_LIB_MINIFY_DIR . '/Minify/Cache/XCache.php';
                     $cache[0] = & new Minify_Cache_XCache();
+                    break;
+
+                case 'wincache':
+                    require_once W3TC_LIB_MINIFY_DIR . '/Minify/Cache/Wincache.php';
+                    $cache[0] = & new Minify_Cache_Wincache();
                     break;
 
                 case 'file':

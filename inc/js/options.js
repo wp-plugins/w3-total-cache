@@ -242,7 +242,11 @@ jQuery(function() {
     // general page
     w3tc_toggle('enabled');
 
-    jQuery('.button-rating').click(function() {
+    jQuery('.button-tweet').live('click', function() {
+        window.open('http://twitter.com/?status=' + encodeURIComponent('YES! I optimized my #wordpress site\'s #performance using the W3 Total Cache #plugin by @w3edge. Check it out! http://j.mp/A69xX'), '_blank');
+    });
+
+    jQuery('.button-rating').live('click', function() {
         window.open('http://wordpress.org/extend/plugins/w3-total-cache/', '_blank');
     });
 
@@ -529,6 +533,16 @@ jQuery(function() {
                     'config[cname][]': cnames
                 });
                 break;
+
+            case me.hasClass('cdn_azure'):
+                jQuery.extend(params, {
+                    engine: 'azure',
+                    'config[user]': jQuery('#cdn_azure_user').val(),
+                    'config[key]': jQuery('#cdn_azure_key').val(),
+                    'config[container]': jQuery('#cdn_azure_container').val(),
+                    'config[cname][]': cnames
+                });
+                break;
         }
 
         var status = jQuery('#cdn_test_status');
@@ -597,6 +611,16 @@ jQuery(function() {
                     'config[user]': jQuery('#cdn_rscf_user').val(),
                     'config[key]': jQuery('#cdn_rscf_key').val(),
                     'config[container]': jQuery('#cdn_rscf_container').val(),
+                    'config[cname][]': cnames
+                });
+                break;
+
+            case me.hasClass('cdn_azure'):
+                jQuery.extend(params, {
+                    engine: 'azure',
+                    'config[user]': jQuery('#cdn_azure_user').val(),
+                    'config[key]': jQuery('#cdn_azure_key').val(),
+                    'config[container]': jQuery('#cdn_azure_container').val(),
                     'config[cname][]': cnames
                 });
                 break;
@@ -1087,11 +1111,6 @@ jQuery(function() {
             rules.css('display', 'block');
             btn.val('hide code');
         }
-    });
-
-    // nav
-    jQuery('#w3tc-nav select').change(function() {
-        document.location.href = 'admin.php?page=' + jQuery(this).val();
     });
 
     // check for unsaved changes

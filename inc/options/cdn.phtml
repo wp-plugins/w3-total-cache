@@ -22,12 +22,11 @@
 <?php endif; ?>
 
 <form action="admin.php?page=<?php echo $this->_page; ?>" method="post">
-	<fieldset id="w3tc-cdn-general">
-		<legend>General</legend>
-
+    <div class="metabox-holder">
+		<?php echo $this->postbox_header('General'); ?>
         <table class="form-table">
         	<tr>
-        		<th<?php if ($cdn_mirror): ?> colspan="2"<?php endif; ?>>
+        		<th<?php if ($cdn_mirror): ?> colspan="2"<?php else: ?> style="width: 300px;"<?php endif; ?>>
         			<input type="hidden" name="cdn.includes.enable" value="0" />
         			<label><input type="checkbox" name="cdn.includes.enable" value="1"<?php checked($this->_config->get_boolean('cdn.includes.enable'), true); ?> /> Host wp-includes/ files</label><br />
     				<span class="description">If checked, WordPress static core file types specified in the "wp-includes file types to upload" field below will be hosted with the <acronym title="Content Delivery Network">CDN</acronym>.</span>
@@ -95,11 +94,9 @@
         <p class="submit">
         	<input type="submit" name="options_save" class="w3tc-button-save button-primary" value="Save changes" />
         </p>
-	</fieldset>
+	    <?php echo $this->postbox_footer(); ?>
 
-	<fieldset>
-		<legend>Configuration</legend>
-
+		<?php echo $this->postbox_header('Configuration'); ?>
         <table class="form-table">
     		<?php
     			switch ($cdn_engine) {
@@ -111,6 +108,7 @@
     				case 'cf2':
     				case 'rscf':
     				case 'cfl':
+    				case 'azure':
     					include W3TC_DIR . '/inc/options/cdn/' . $cdn_engine . '.phtml';
     					break;
     			}
@@ -120,11 +118,9 @@
         <p class="submit">
         	<input type="submit" name="options_save" class="w3tc-button-save button-primary" value="Save changes" />
         </p>
-	</fieldset>
+	    <?php echo $this->postbox_footer(); ?>
 
-	<fieldset>
-		<legend>Advanced</legend>
-
+		<?php echo $this->postbox_header('Advanced'); ?>
         <table class="form-table">
         	<?php if (! $cdn_mirror): ?>
         	<tr>
@@ -202,11 +198,9 @@
         <p class="submit">
         	<input type="submit" name="options_save" class="w3tc-button-save button-primary" value="Save changes" />
         </p>
-	</fieldset>
+	    <?php echo $this->postbox_footer(); ?>
 
-	<fieldset>
-		<legend>Note(s):</legend>
-
+		<?php echo $this->postbox_header('Note(s):'); ?>
         <table class="form-table">
         	<tr>
         		<th valign="top" colspan="2">
@@ -216,8 +210,8 @@
         		</th>
         	</tr>
         </table>
-		
-	</fieldset>
+    	<?php echo $this->postbox_footer(); ?>
+    </div>
 </form>
 
 <?php include W3TC_DIR . '/inc/options/common/footer.phtml'; ?>
