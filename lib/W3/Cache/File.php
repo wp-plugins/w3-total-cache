@@ -1,7 +1,7 @@
 <?php
 
-if (!defined('W3_CACHE_FILE_EXPIRE_MAX')) {
-    define('W3_CACHE_FILE_EXPIRE_MAX', 2592000);
+if (!defined('W3TC_CACHE_FILE_EXPIRE_MAX')) {
+    define('W3TC_CACHE_FILE_EXPIRE_MAX', 2592000);
 }
 
 /**
@@ -28,6 +28,13 @@ class W3_Cache_File extends W3_Cache_Base {
     var $_locking = false;
 
     /**
+     * Flush timelimit
+     *
+     * @var int
+     */
+    var $_flush_timelimit = 0;
+
+    /**
      * PHP5 constructor
      *
      * @param array $config
@@ -35,6 +42,7 @@ class W3_Cache_File extends W3_Cache_Base {
     function __construct($config = array()) {
         $this->_cache_dir = isset($config['cache_dir']) ? trim($config['cache_dir']) : 'cache';
         $this->_locking = isset($config['locking']) ? (boolean) $config['locking'] : false;
+        $this->_flush_timelimit = isset($config['flush_timelimit']) ? (int) $config['flush_timelimit'] : 180;
     }
 
     /**
@@ -126,7 +134,7 @@ class W3_Cache_File extends W3_Cache_Base {
 
                     if ($expires !== false) {
                         list(, $expire) = @unpack('L', $expires);
-                        $expire = ($expire && $expire <= W3_CACHE_FILE_EXPIRE_MAX ? $expire : W3_CACHE_FILE_EXPIRE_MAX);
+                        $expire = ($expire && $expire <= W3TC_CACHE_FILE_EXPIRE_MAX ? $expire : W3TC_CACHE_FILE_EXPIRE_MAX);
 
                         if ($ftime > time() - $expire) {
                             $data = '';
@@ -189,7 +197,7 @@ class W3_Cache_File extends W3_Cache_Base {
      * @return boolean
      */
     function flush() {
-        @set_time_limit(180);
+        @set_time_limit($this->_flush_timelimit);
 
         w3_emptydir($this->_cache_dir);
 

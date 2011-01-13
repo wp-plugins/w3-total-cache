@@ -160,11 +160,12 @@ function w3_network_activate_error() {
 /**
  * Returns current microtime
  *
- * @return float
+ * @return double
  */
 function w3_microtime() {
-    list ($usec, $sec) = explode(" ", microtime());
-    return ((float) $usec + (float) $sec);
+    list ($usec, $sec) = explode(' ', microtime());
+
+    return ((double) $usec + (double) $sec);
 }
 
 /**
@@ -436,7 +437,7 @@ function w3_is_nginx() {
  * @return bool
  */
 function w3_is_cdn_mirror($engine) {
-    return in_array($engine, array('mirror', 'netdna', 'cfl', 'cf2'));
+    return in_array($engine, array('mirror', 'netdna', 'cf2'));
 }
 
 /**
@@ -1109,6 +1110,16 @@ function w3_can_modify_rules($path) {
 }
 
 /**
+ * Returns true if CDN engine is supporting purge
+ *
+ * @param string $engine
+ * @return bool
+ */
+function w3_can_cdn_purge($engine) {
+    return in_array($engine, array('mirror'));
+}
+
+/**
  * Normalizes file name
  *
  * Relative to site root!
@@ -1620,10 +1631,6 @@ function w3_get_engine_name($engine) {
 
         case 'rscf':
             $engine_name = 'rackspace cloud files';
-            break;
-
-        case 'cfl':
-            $engine_name = 'cloudflare';
             break;
 
         case 'azure':

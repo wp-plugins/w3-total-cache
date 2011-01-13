@@ -214,8 +214,6 @@ class W3_Config {
         'cdn.rscf.id' => 'string',
         'cdn.rscf.cname' => 'array',
         'cdn.rscf.ssl' => 'string',
-        'cdn.cfl.email' => 'string',
-        'cdn.cfl.key' => 'string',
         'cdn.azure.user' => 'string',
         'cdn.azure.key' => 'string',
         'cdn.azure.container' => 'string',
@@ -223,6 +221,11 @@ class W3_Config {
         'cdn.reject.ua' => 'array',
         'cdn.reject.uri' => 'array',
         'cdn.reject.files' => 'array',
+
+        'cloudflare.enabled' => 'boolean',
+        'cloudflare.email' => 'string',
+        'cloudflare.key' => 'string',
+        'cloudflare.zone' => 'string',
 
         'browsercache.enabled' => 'boolean',
         'browsercache.no404wp' => 'boolean',
@@ -284,7 +287,21 @@ class W3_Config {
         'notes.no_permalink_rules' => 'boolean',
         'notes.browsercache_rules_cache' => 'boolean',
         'notes.browsercache_rules_no404wp' => 'boolean',
-        'notes.minify_error' => 'boolean'
+        'notes.minify_error' => 'boolean',
+
+        'timelimit.email_send' => 'integer',
+        'timelimit.varnish_purge' => 'integer',
+        'timelimit.cache_flush' => 'integer',
+        'timelimit.cache_gc' => 'integer',
+        'timelimit.cdn_upload' => 'integer',
+        'timelimit.cdn_delete' => 'integer',
+        'timelimit.cdn_purge' => 'integer',
+        'timelimit.cdn_import' => 'integer',
+        'timelimit.cdn_test' => 'integer',
+        'timelimit.cdn_container_create' => 'integer',
+        'timelimit.cloudflare_api_request' => 'integer',
+        'timelimit.domain_rename' => 'integer',
+        'timelimit.minify_recommendations' => 'integer'
     );
 
     var $_defaults = array(
@@ -520,8 +537,6 @@ class W3_Config {
         'cdn.rscf.id' => '',
         'cdn.rscf.cname' => array(),
         'cdn.rscf.ssl' => 'auto',
-        'cdn.cfl.email' => '',
-        'cdn.cfl.key' => '',
         'cdn.azure.user' => '',
         'cdn.azure.key' => '',
         'cdn.azure.container' => '',
@@ -532,6 +547,11 @@ class W3_Config {
             'wp-content/uploads/wpcf7_captcha/*',
             'wp-content/uploads/imagerotator.swf'
         ),
+
+        'cloudflare.enabled' => false,
+        'cloudflare.email' => '',
+        'cloudflare.key' => '',
+        'cloudflare.zone' => '',
 
         'browsercache.enabled' => true,
         'browsercache.no404wp' => false,
@@ -762,7 +782,21 @@ class W3_Config {
         'notes.no_permalink_rules' => true,
         'notes.browsercache_rules_cache' => true,
         'notes.browsercache_rules_no404wp' => true,
-        'notes.minify_error' => false
+        'notes.minify_error' => false,
+
+        'timelimit.email_send' => 180,
+        'timelimit.varnish_purge' => 300,
+        'timelimit.cache_flush' => 600,
+        'timelimit.cache_gc' => 600,
+        'timelimit.cdn_upload' => 600,
+        'timelimit.cdn_delete' => 300,
+        'timelimit.cdn_purge' => 300,
+        'timelimit.cdn_import' => 600,
+        'timelimit.cdn_test' => 300,
+        'timelimit.cdn_container_create' => 300,
+        'timelimit.cloudflare_api_request' => 180,
+        'timelimit.domain_rename' => 120,
+        'timelimit.minify_recommendations' => 600
     );
 
     /**
@@ -872,7 +906,9 @@ class W3_Config {
              */
             case 'minify.rewrite':
             case 'minify.upload':
-                return !$this->get_boolean('minify.auto');
+                if ($this->get_boolean('minify.auto')) {
+                    return false;
+                }
                 break;
 
             /**

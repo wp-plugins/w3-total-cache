@@ -240,6 +240,64 @@
         </p>
         <?php echo $this->postbox_footer(); ?>
 
+        <?php echo $this->postbox_header('Network Security powered by Cloudflare'); ?>
+        <p>
+            CloudFlare protects and accelerates websites. <a href="https://www.cloudflare.com/sign-up.html?affiliate=w3edge&amp;seed_domain=<?php echo w3_get_host(); ?>&amp;email=<?php echo htmlspecialchars($cloudflare_email); ?>&amp;username=<?php echo htmlspecialchars($cloudflare_user); ?>" target="_blank">Sign up now for free</a> to get started, or if you have an account simply <a href="https://www.cloudflare.com/my-websites.html" target="_blank">log in</a> to obtain your API key to enter it below.
+            Contact the CloudFlare <a href="http://www.cloudflare.com/help.html" target="_blank">support team</a> with any questions.
+        </p>
+
+        <table class="form-table">
+            <tr>
+                <th valign="top">CloudFlare:</th>
+                <td>
+                    <input type="hidden" name="cloudflare.enabled" value="0" />
+                    <label><input class="enabled" type="checkbox" name="cloudflare.enabled" value="1"<?php checked($cloudflare_enabled, true); ?> />&nbsp;<strong>Enable</strong></label>
+                </td>
+            </tr>
+            <tr>
+                <th><label for="cloudflare_email">E-mail:</label></th>
+                <td>
+                    <input id="cloudflare_email" class="w3tc-ignore-change" type="text" name="cloudflare.email" value="<?php echo htmlspecialchars($this->_config->get_string('cloudflare.email')); ?>" size="60" />
+                </td>
+            </tr>
+            <tr>
+                <th><label for="cloudflare_key">API key:</label></th>
+                <td>
+                    <input id="cloudflare_key" class="w3tc-ignore-change" type="password" name="cloudflare.key" value="<?php echo htmlspecialchars($this->_config->get_string('cloudflare.key')); ?>" size="60" />
+                </td>
+            </tr>
+            <tr>
+                <th>Zone:</th>
+                <td>
+                    <input id="cloudflare_zone" type="text" name="cloudflare.zone" value="<?php echo htmlspecialchars($cloudflare_zone); ?>" size="40" />
+                    <input id="cloudflare_purge_cache" class="button" type="button" value="Purge cache" />
+                </td>
+            </tr>
+            <tr>
+                <th>Development mode:</th>
+                <td>
+                    <input id="cloudflare_set_devmode_on" class="button" type="button" value="Set On" /> /
+                    <input id="cloudflare_set_devmode_off" class="button" type="button" value="Set Off" />
+                </td>
+            </tr>
+            <tr>
+                <th>Security level:</th>
+                <td>
+                    <select id="cloudflare_seclevel">
+                        <option value="high" selected="selected">High</option>
+                        <option value="med">Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                    <input id="cloudflare_set_seclevel" class="button" type="button" value="Set" />
+                </td>
+            </tr>
+        </table>
+
+        <p class="submit">
+            <input type="submit" name="options_save" class="w3tc-button-save button-primary" value="Save changes" />
+        </p>
+        <?php echo $this->postbox_footer(); ?>
+
         <?php echo $this->postbox_header('Content Delivery Network'); ?>
         <p>Host static files with your content delivery network provider to reduce page load time.</p>
 
@@ -260,7 +318,6 @@
                     <option value="mirror"<?php selected($this->_config->get_string('cdn.engine'), 'mirror'); ?>>Mirror</option>
                     <option value="netdna"<?php selected($this->_config->get_string('cdn.engine'), 'netdna'); ?>>NetDNA / MaxCDN</option>
                     <option value="cf2"<?php selected($this->_config->get_string('cdn.engine'), 'cf2'); ?><?php if (!W3TC_PHP5 || !$check_curl): ?> disabled="disabled"<?php endif; ?>>Amazon CloudFront</option>
-                    <option value="cfl"<?php selected($this->_config->get_string('cdn.engine'), 'cfl'); ?>>CloudFlare</option>
                 </optgroup>
                 <optgroup label="Origin Push:">
                     <option value="rscf"<?php selected($this->_config->get_string('cdn.engine'), 'rscf'); ?><?php if (!W3TC_PHP5 || !$check_curl): ?> disabled="disabled"<?php endif; ?>>Rackspace Cloud Files</option>

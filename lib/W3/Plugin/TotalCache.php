@@ -151,7 +151,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
             ));
         }
 
-        if ($this->_config->get_boolean('cdn.enabled') && !in_array($this->_config->get_string('cdn.engine'), array('mirror', 'cfl'))) {
+        if ($this->_config->get_boolean('cdn.enabled') && w3_can_cdn_purge($this->_config->get_string('cdn.engine'))) {
             add_filter('media_row_actions', array(
                 &$this,
                 'media_row_actions'
@@ -185,6 +185,21 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                 &$this,
                 'stylesheet'
             ));
+        }
+
+        /**
+         * CloudFlare support
+         */
+        if ($this->_config->get_boolean('cloudflare.enabled')) {
+            add_action('wp_set_comment_status', array(
+                &$this,
+                'cloudflare_set_comment_status'
+            ), 1, 2);
+
+            require_once W3TC_LIB_W3_DIR . '/CloudFlare.php';
+            $w3_cloudflare =& new W3_CloudFlare();
+
+            $w3_cloudflare->fix_remote_addr();
         }
 
         if ($this->_config->get_string('common.support') == 'footer') {
@@ -982,6 +997,28 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                     'href' => admin_url('admin.php?page=w3tc_support')
                 )
             );
+
+            if (w3_is_network() && $this->_config->get_boolean('cloudflare.enabled')) {
+                $menu_items = array_merge($menu_items, array(
+                    array(
+                        'id' => 'cloudflare',
+                        'title' => 'Network Security',
+                        'href' => 'https://www.cloudflare.com'
+                    ),
+                    array(
+                        'id' => 'cloudflare-account',
+                        'parent' => 'cloudflare',
+                        'title' => 'My Account',
+                        'href' => 'https://www.cloudflare.com/my-websites.html'
+                    ),
+                    array(
+                        'id' => 'cloudflare-analytics',
+                        'parent' => 'cloudflare',
+                        'title' => 'Analytics',
+                        'href' => 'https://www.cloudflare.com/analytics.html'
+                    ),
+                ));
+            }
 
             foreach ($menu_items as $menu_item) {
                 $wp_admin_bar->add_menu($menu_item);
@@ -1895,6 +1932,8 @@ class W3_Plugin_TotalCache extends W3_Plugin {
      * General tab
      */
     function options_general() {
+        global $current_user;
+
         $preview = w3_is_preview_config();
 
         $pgcache_enabled = $this->_config->get_boolean('pgcache.enabled');
@@ -1903,9 +1942,10 @@ class W3_Plugin_TotalCache extends W3_Plugin {
         $browsercache_enabled = $this->_config->get_boolean('browsercache.enabled');
         $minify_enabled = $this->_config->get_boolean('minify.enabled');
         $cdn_enabled = $this->_config->get_boolean('cdn.enabled');
+        $cloudflare_enabled = $this->_config->get_boolean('cloudflare.enabled');
 
-        $enabled = ($pgcache_enabled || $minify_enabled || $dbcache_enabled || $objectcache_enabled || $browsercache_enabled || $cdn_enabled);
-        $enabled_checkbox = ($pgcache_enabled && $minify_enabled && $dbcache_enabled && $objectcache_enabled && $browsercache_enabled && $cdn_enabled);
+        $enabled = ($pgcache_enabled || $minify_enabled || $dbcache_enabled || $objectcache_enabled || $browsercache_enabled || $cdn_enabled || $cloudflare_enabled);
+        $enabled_checkbox = ($pgcache_enabled && $minify_enabled && $dbcache_enabled && $objectcache_enabled && $browsercache_enabled && $cdn_enabled && $cloudflare_enabled);
 
         $check_apc = function_exists('apc_store');
         $check_eaccelerator = function_exists('eaccelerator_put');
@@ -1948,6 +1988,24 @@ class W3_Plugin_TotalCache extends W3_Plugin {
         $can_empty_file = $can_empty_file || ($dbcache_enabled && in_array($dbcache_engine, $file_engines));
         $can_empty_file = $can_empty_file || ($objectcache_enabled && in_array($objectcache_engine, $file_engines));
         $can_empty_file = $can_empty_file || ($minify_enabled && in_array($minify_engine, $file_engines));
+
+        $cloudflare_email = '';
+        $cloudflare_user = '';
+        $cloudflare_zone = $this->_config->get_string('cloudflare.zone');
+
+        if (is_a($current_user, 'WP_User')) {
+            if ($current_user->user_email) {
+                $cloudflare_email = $current_user->user_email;
+            }
+
+            if ($current_user->user_login && $current_user->user_login != 'admin') {
+                $cloudflare_user = $current_user->user_login;
+            }
+        }
+
+        if (!$cloudflare_zone) {
+            $cloudflare_zone = w3_get_host();
+        }
 
         $debug = ($this->_config->get_boolean('dbcache.debug') || $this->_config->get_boolean('objectcache.debug') || $this->_config->get_boolean('pgcache.debug') || $this->_config->get_boolean('minify.debug') || $this->_config->get_boolean('cdn.debug'));
         $file_locking = ($this->_config->get_boolean('dbcache.file.locking') || $this->_config->get_boolean('objectcache.file.locking') || $this->_config->get_boolean('pgcache.file.locking') || $this->_config->get_boolean('minify.file.locking'));
@@ -2121,7 +2179,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                 $name .= ($name != '' ? ' ' : '') . $current_user->last_name;
             }
 
-            if (strcmp($name, 'admin') == 0) {
+            if ($name == 'admin') {
                 $name = '';
             }
 
@@ -3451,7 +3509,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
             'phpmailer_init'
         ));
 
-        @set_time_limit(120);
+        @set_time_limit($this->_config->get_integer('timelimit.email_send'));
 
         $result = @wp_mail(W3TC_EMAIL, $subject, $body, implode("\n", $headers), $attachments);
 
@@ -3909,7 +3967,6 @@ class W3_Plugin_TotalCache extends W3_Plugin {
             case 'cf':
             case 'cf2':
             case 'rscf':
-            case 'cfl':
             case 'azure':
                 $result = true;
                 break;
@@ -3923,7 +3980,8 @@ class W3_Plugin_TotalCache extends W3_Plugin {
         if ($result) {
             $w3_cdn = & W3_Cdn::instance($engine, $config);
             $error = null;
-            @set_time_limit(120);
+
+            @set_time_limit($this->_config->get_integer('timelimit.cdn_test'));
 
             if ($w3_cdn->test($error)) {
                 $result = true;
@@ -3969,7 +4027,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
         if ($result) {
             $w3_cdn = & W3_Cdn::instance($engine, $config);
 
-            @set_time_limit(120);
+            @set_time_limit($this->_config->get_integer('timelimit.cdn_container_create'));
 
             if ($w3_cdn->create_container($container_id, $error)) {
                 $result = true;
@@ -4030,150 +4088,6 @@ class W3_Plugin_TotalCache extends W3_Plugin {
         );
 
         include W3TC_DIR . '/inc/lightbox/cdn_s3_bucket_location.phtml';
-    }
-
-    /**
-     * Send CloudFlare API request
-     *
-     * @return void
-     */
-    function cdn_cfl_api_request() {
-        $result = false;
-        $error = '';
-        $response = null;
-
-        $actions = array(
-            'devmode',
-            'sec_lvl',
-            'fpurge_ts'
-        );
-
-        require_once W3TC_LIB_W3_DIR . '/Request.php';
-
-        $email = W3_Request::get_string('email');
-        $key = W3_Request::get_string('key');
-        $action = W3_Request::get_string('action');
-        $value = W3_Request::get_string('value');
-
-        if (!$email) {
-            $error = 'Empty email.';
-        } elseif (!$key) {
-            $error = 'Empty key.';
-        } elseif (!in_array($action, $actions)) {
-            $error = 'Invalid action.';
-        } else {
-            $config = array(
-                'email' => $email,
-                'key' => $key
-            );
-
-            require_once W3TC_LIB_W3_DIR . '/Cdn.php';
-            $w3_cdn_cfl = & W3_Cdn::instance(W3_CDN_CFL, $config);
-
-            @set_time_limit(120);
-
-            $response = $w3_cdn_cfl->api_request($action, $value);
-
-            if ($response) {
-                if ($response->result == 'success') {
-                    $result = true;
-                    $error = 'OK';
-                } else {
-                    $error = $response->msg;
-                }
-            } else {
-                $error = 'Unable to make CloudFlare API request.';
-            }
-        }
-
-        $return = array(
-            'result' => $result,
-            'error' => $error,
-            'response' => $response
-        );
-
-        echo json_encode($return);
-    }
-
-    /**
-     * CloudFlare new account action
-     *
-     * @return void
-     */
-    function cdn_cfl_new_account() {
-        include W3TC_DIR . '/inc/lightbox/cdn_cfl_new_account.phtml';
-    }
-
-    /**
-     * CloudFlare create account action
-     *
-     * @return void
-     */
-    function cdn_cfl_create_account() {
-        $result = false;
-        $error = '';
-        $user_created = false;
-        $response_user_create = null;
-        $response_zone_set = null;
-
-        require_once W3TC_LIB_W3_DIR . '/Request.php';
-
-        $email = W3_Request::get_string('email');
-        $password = W3_Request::get_string('password');
-        $username = W3_Request::get_string('username');
-        $zone_name = W3_Request::get_string('zone_name');
-        $resolve_to = W3_Request::get_string('resolve_to');
-        $subdomains = W3_Request::get_string('subdomains');
-
-        if (!$email) {
-            $error = 'Empty email.';
-        } elseif (!$password) {
-            $error = 'Empty password.';
-        } elseif (!$zone_name) {
-            $error = 'Empty zone name.';
-        } elseif (!$resolve_to) {
-            $error = 'Empty resolve to.';
-        } else {
-            @set_time_limit(120);
-
-            require_once W3TC_LIB_W3_DIR . '/Cdn.php';
-            $w3_cdn_cfl = & W3_Cdn::instance(W3_CDN_CFL);
-
-            $response_user_create = $w3_cdn_cfl->user_create($email, $password, $username);
-
-            if ($response_user_create) {
-                if ($response_user_create->result == 'success') {
-                    $user_created = true;
-                    $user_key = $response_user_create->response->user_key;
-
-                    $response_zone_set = $w3_cdn_cfl->zone_set($user_key, $zone_name, $resolve_to, $subdomains);
-
-                    if ($response_zone_set) {
-                        if ($response_zone_set->result == 'success') {
-                            $result = true;
-                        } else {
-                            $error = $response_zone_set->msg;
-                        }
-                    } else {
-                        $error = 'Unable to make CloudFlare API request.';
-                    }
-                } else {
-                    $error = $response_user_create->msg;
-                }
-            } else {
-                $error = 'Unable to make CloudFlare API request.';
-            }
-        }
-
-        $return = array(
-            'result' => $result,
-            'error' => $error,
-            'user_created' => $user_created,
-            'response_user_create' => $response_user_create,
-            'response_user_set' => $response_zone_set
-        );
-
-        echo json_encode($return);
     }
 
     /**
@@ -5344,10 +5258,10 @@ class W3_Plugin_TotalCache extends W3_Plugin {
     function get_theme_recommendations($theme_name) {
         $urls = $this->get_theme_urls($theme_name);
 
-        @set_time_limit(600);
-
         $js_groups = array();
         $css_groups = array();
+
+        @set_time_limit($this->_config->get_integer('timelimit.minify_recommendations'));
 
         foreach ($urls as $template => $url) {
             /**
@@ -5621,5 +5535,104 @@ class W3_Plugin_TotalCache extends W3_Plugin {
         }
 
         return $faq;
+    }
+
+    /**
+     * Now actually allow CF to see when a comment is approved/not-approved.
+     *
+     * @param int $id
+     * @param string $status
+     * @return void
+     */
+    function cloudflare_set_comment_status($id, $status) {
+        if ($status == 'spam') {
+            $email = $this->_config->get_string('cloudflare.email');
+            $key = $this->_config->get_string('cloudflare.key');
+
+            if ($email && $key) {
+                require_once W3TC_LIB_W3_DIR . '/CloudFlare.php';
+                $w3_cloudflare =& new W3_CloudFlare(array(
+                    'email' => $email,
+                    'key' => $key
+                ));
+
+                $comment = get_comment($id);
+
+                $value = array('a' => $comment->comment_author,
+                    'am' => $comment->comment_author_email,
+                    'ip' => $comment->comment_author_IP,
+                    'con' => substr($comment->comment_content, 0, 100)
+                );
+
+                $w3_cloudflare->external_event('WP_SPAM', json_encode($value));
+            }
+        }
+    }
+
+    /**
+     * Send CloudFlare API request
+     *
+     * @return void
+     */
+    function cloudflare_api_request() {
+        $result = false;
+        $error = '';
+        $response = null;
+
+        $actions = array(
+            'devmode',
+            'sec_lvl',
+            'fpurge_ts'
+        );
+
+        require_once W3TC_LIB_W3_DIR . '/Request.php';
+
+        $email = W3_Request::get_string('email');
+        $key = W3_Request::get_string('key');
+        $zone = W3_Request::get_string('zone');
+        $action = W3_Request::get_string('action');
+        $value = W3_Request::get_string('value');
+
+        if (!$email) {
+            $error = 'Empty email.';
+        } elseif (!$key) {
+            $error = 'Empty key.';
+        } elseif (!$zone) {
+            $error = 'Empty zone.';
+        } elseif (!in_array($action, $actions)) {
+            $error = 'Invalid action.';
+        } else {
+            $config = array(
+                'email' => $email,
+                'key' => $key,
+                'zone' => $zone
+            );
+
+            require_once W3TC_LIB_W3_DIR . '/CloudFlare.php';
+            $w3_cloudflare =& new W3_CloudFlare($config);
+
+            @set_time_limit($this->_config->get_integer('timelimit.cloudflare_api_request'));
+
+            $response = $w3_cloudflare->api_request($action, $value);
+
+            if ($response) {
+                if ($response->result == 'success') {
+                    $result = true;
+                    $error = 'OK';
+                } else {
+                    $error = $response->msg;
+                }
+            } else {
+                $error = 'Unable to make CloudFlare API request.';
+            }
+        }
+
+        $return = array(
+            'result' => $result,
+            'error' => $error,
+            'response' => $response
+        );
+
+        echo json_encode($return);
     }
 }

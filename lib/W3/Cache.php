@@ -7,32 +7,32 @@
 /**
  * W3 Cache engine types
  */
-if (!defined('W3_CACHE_MEMCACHED')) {
-    define('W3_CACHE_MEMCACHED', 'memcached');
+if (!defined('W3TC_CACHE_MEMCACHED')) {
+    define('W3TC_CACHE_MEMCACHED', 'memcached');
 }
 
-if (!defined('W3_CACHE_APC')) {
-    define('W3_CACHE_APC', 'apc');
+if (!defined('W3TC_CACHE_APC')) {
+    define('W3TC_CACHE_APC', 'apc');
 }
 
-if (!defined('W3_CACHE_EACCELERATOR')) {
-    define('W3_CACHE_EACCELERATOR', 'eaccelerator');
+if (!defined('W3TC_CACHE_EACCELERATOR')) {
+    define('W3TC_CACHE_EACCELERATOR', 'eaccelerator');
 }
 
-if (!defined('W3_CACHE_XCACHE')) {
-    define('W3_CACHE_XCACHE', 'xcache');
+if (!defined('W3TC_CACHE_XCACHE')) {
+    define('W3TC_CACHE_XCACHE', 'xcache');
 }
 
-if (!defined('W3_CACHE_WINCACHE')) {
-    define('W3_CACHE_WINCACHE', 'wincache');
+if (!defined('W3TC_CACHE_WINCACHE')) {
+    define('W3TC_CACHE_WINCACHE', 'wincache');
 }
 
-if (!defined('W3_CACHE_FILE')) {
-    define('W3_CACHE_FILE', 'file');
+if (!defined('W3TC_CACHE_FILE')) {
+    define('W3TC_CACHE_FILE', 'file');
 }
 
-if (!defined('W3_CACHE_FILE_PGCACHE')) {
-    define('W3_CACHE_FILE_PGCACHE', 'file_pgcache');
+if (!defined('W3TC_CACHE_FILE_PGCACHE')) {
+    define('W3TC_CACHE_FILE_PGCACHE', 'file_pgcache');
 }
 
 /**
@@ -53,37 +53,37 @@ class W3_Cache {
 
         if (!isset($instances[$instance_key])) {
             switch ($engine) {
-                case W3_CACHE_MEMCACHED:
+                case W3TC_CACHE_MEMCACHED:
                     require_once W3TC_LIB_W3_DIR . '/Cache/Memcached.php';
                     $instances[$instance_key] = & new W3_Cache_Memcached($config);
                     break;
 
-                case W3_CACHE_APC:
+                case W3TC_CACHE_APC:
                     require_once W3TC_LIB_W3_DIR . '/Cache/Apc.php';
                     $instances[$instance_key] = & new W3_Cache_Apc();
                     break;
 
-                case W3_CACHE_EACCELERATOR:
+                case W3TC_CACHE_EACCELERATOR:
                     require_once W3TC_LIB_W3_DIR . '/Cache/Eaccelerator.php';
                     $instances[$instance_key] = & new W3_Cache_Eaccelerator();
                     break;
 
-                case W3_CACHE_XCACHE:
+                case W3TC_CACHE_XCACHE:
                     require_once W3TC_LIB_W3_DIR . '/Cache/Xcache.php';
                     $instances[$instance_key] = & new W3_Cache_Xcache();
                     break;
 
-                case W3_CACHE_WINCACHE:
+                case W3TC_CACHE_WINCACHE:
                     require_once W3TC_LIB_W3_DIR . '/Cache/Wincache.php';
                     $instances[$instance_key] = & new W3_Cache_Wincache();
                     break;
 
-                case W3_CACHE_FILE:
+                case W3TC_CACHE_FILE:
                     require_once W3TC_LIB_W3_DIR . '/Cache/File.php';
                     $instances[$instance_key] = & new W3_Cache_File($config);
                     break;
 
-                case W3_CACHE_FILE_PGCACHE:
+                case W3TC_CACHE_FILE_PGCACHE:
                     require_once W3TC_LIB_W3_DIR . '/Cache/File/PgCache.php';
                     $instances[$instance_key] = & new W3_Cache_File_PgCache($config);
                     break;

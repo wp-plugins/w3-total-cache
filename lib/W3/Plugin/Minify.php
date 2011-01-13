@@ -175,7 +175,8 @@ class W3_Plugin_Minify extends W3_Plugin {
 
         $w3_cache_file_minify_manager = & new W3_Cache_File_Minify_Manager(array(
             'cache_dir' => W3TC_CACHE_FILE_MINIFY_DIR,
-            'expire' => $this->_config->get_integer('minify.file.gc')
+            'expire' => $this->_config->get_integer('minify.file.gc'),
+            'clean_timelimit' => $this->_config->get_integer('timelimit.cache_gc')
         ));
 
         $w3_cache_file_minify_manager->clean();
@@ -743,18 +744,20 @@ class W3_Plugin_Minify extends W3_Plugin {
      * @return string
      */
     function format_url_group($theme, $template, $location, $type) {
+        require_once W3TC_LIB_W3_DIR . '/Minify.php';
+        $w3_minify = & W3_Minify::instance();
+
+        $key = $w3_minify->get_id_key_group($theme, $template, $location, $type);
+        $sources = $w3_minify->get_sources_group($theme, $template, $location, $type);
+        $id = $w3_minify->get_id($key, $sources);
+
         $site_url_ssl = w3_get_site_url_ssl();
 
         if ($this->_config->get_boolean('minify.rewrite')) {
-            require_once W3TC_LIB_W3_DIR . '/Minify.php';
-            $w3_minify = & W3_Minify::instance();
-
-            $id = $w3_minify->get_id($theme, $template, $location, $type);
-
             return sprintf('%s/%s/%s/%s.%s.%s.%s', $site_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $theme, $template, $location, $id, $type);
         }
 
-        return sprintf('%s/%s/?tt=%s&gg=%s&g=%s&t=%s', $site_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $theme, $template, $location, $type);
+        return sprintf('%s/%s/?tt=%s&gg=%s&g=%s&t=%s&m=%d', $site_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $theme, $template, $location, $type, $id);
     }
 
     /**
@@ -792,12 +795,21 @@ class W3_Plugin_Minify extends W3_Plugin {
             }
         }
 
+        require_once W3TC_LIB_W3_DIR . '/Minify.php';
+        $w3_minify = & W3_Minify::instance();
+
+        $key = $w3_minify->get_id_key_custom($files, $base);
+        $sources = $w3_minify->get_sources_custom($files, $base);
+        $id = $w3_minify->get_id($key, $sources);
+
         $site_url_ssl = w3_get_site_url_ssl();
         $url = sprintf('%s/%s/?f=%s', $site_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, implode(',', $files));
 
         if ($base) {
             $url .= sprintf('&b=%s', $base);
         }
+
+        $url .= sprintf('&m=%d', $id);
 
         return $url;
     }

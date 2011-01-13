@@ -56,6 +56,12 @@ class W3_PgCache {
     var $_request_uri = '';
 
     /**
+     * Page key
+     * @var string
+     */
+    var $_page_key = '';
+
+    /**
      * Shutdown buffer
      * @var string
      */
@@ -162,23 +168,26 @@ class W3_PgCache {
             if ($this->_caching && !$this->_enhanced_mode) {
                 $cache = & $this->_get_cache();
 
+                $mobile_group = $this->_get_mobile_group();
+                $referrer_group = $this->_get_referrer_group();
+                $encryption = $this->_get_encryption();
                 $compression = $this->_get_compression();
                 $raw = !$compression;
-                $page_key = $this->_get_page_key($this->_request_uri, $compression);
+                $this->_page_key = $this->_get_page_key($this->_request_uri, $mobile_group, $referrer_group, $encryption, $compression);
 
                 /**
                  * Check if page is cached
                  */
-                $data = $cache->get($page_key);
+                $data = $cache->get($this->_page_key);
 
                 /**
                  * Try to get uncompressed version of cache
                  */
                 if ($compression && !$data) {
                     $raw = true;
-                    $page_key = $this->_get_page_key($this->_request_uri, false);
+                    $this->_page_key = $this->_get_page_key($this->_request_uri, $mobile_group, $referrer_group, $encryption, false);
 
-                    $data = $cache->get($page_key);
+                    $data = $cache->get($this->_page_key);
                 }
 
                 /**
@@ -193,7 +202,7 @@ class W3_PgCache {
                     if ($this->_enhanced_mode) {
                         $is_404 = false;
                         $headers = array();
-                        $time = $cache->mtime($page_key);
+                        $time = $cache->mtime($this->_page_key);
                         $content = & $data;
                     } else {
                         $is_404 = $data['404'];
@@ -258,12 +267,17 @@ class W3_PgCache {
      * @return string
      */
     function ob_callback(&$buffer) {
+        $this->flush_post();
+
         if ($buffer != '' && w3_is_xml($buffer)) {
             $compression = false;
             $has_dynamic = $this->_has_dynamic($buffer);
             $can_cache = $this->_can_cache2($buffer);
 
             if ($can_cache) {
+                $mobile_group = $this->_get_mobile_group();
+                $referrer_group = $this->_get_referrer_group();
+                $encryption = $this->_get_encryption();
                 $compression = $this->_get_compression();
 
                 /**
@@ -297,7 +311,7 @@ class W3_PgCache {
                 $buffers = array();
 
                 foreach ($compressions as $_compression) {
-                    $_page_key = $this->_get_page_key($this->_request_uri, $_compression);
+                    $_page_key = $this->_get_page_key($this->_request_uri, $mobile_group, $referrer_group, $encryption, $_compression);
 
                     /**
                      * Compress content
@@ -341,10 +355,15 @@ class W3_PgCache {
                 $this->_send_headers($is_404, $time, $etag, $compression, $headers);
 
                 if ($raw) {
-                    /**
-                     * Append debug info
-                     */
                     if ($this->_debug) {
+                        /**
+                         * Set page key for debug
+                         */
+                        $this->_page_key = $this->_get_page_key($this->_request_uri, $mobile_group, $referrer_group, $encryption, $compression);
+
+                        /**
+                         * Append debug info
+                         */
                         $time_total = w3_microtime() - $this->_time_start;
                         $debug_info = $this->_get_debug_info(true, '', false, $time_total);
                         $buffer .= "\r\n\r\n" . $debug_info;
@@ -358,6 +377,15 @@ class W3_PgCache {
                     }
                 }
             } elseif ($this->_debug) {
+                $mobile_group = $this->_get_mobile_group();
+                $referrer_group = $this->_get_referrer_group();
+                $encryption = $this->_get_encryption();
+
+                /**
+                 * Set page key for debug
+                 */
+                $this->_page_key = $this->_get_page_key($this->_request_uri, $mobile_group, $referrer_group, $encryption, $compression);
+
                 /**
                  * Append debug info
                  */
@@ -421,7 +449,7 @@ class W3_PgCache {
      * @param integer $post_id
      * @return boolean
      */
-    function flush_post($post_id) {
+    function flush_post($post_id = null) {
         if (!$post_id) {
             $post_id = $this->_detect_post_id();
         }
@@ -639,13 +667,22 @@ class W3_PgCache {
              */
             if (count($uris)) {
                 $cache = & $this->_get_cache();
+                $mobile_groups = $this->_get_mobile_groups();
+                $referrer_groups = $this->_get_referrer_groups();
+                $encryptions = $this->_get_encryptions();
                 $compressions = $this->_get_compressions();
 
                 foreach ($uris as $uri) {
-                    foreach ($compressions as $compression) {
-                        $page_key = $this->_get_page_key($uri, $compression);
+                    foreach ($mobile_groups as $mobile_group) {
+                        foreach ($referrer_groups as $referrer_group) {
+                            foreach ($encryptions as $encryption) {
+                                foreach ($compressions as $compression) {
+                                    $page_key = $this->_get_page_key($uri, $mobile_group, $referrer_group, $encryption, $compression);
 
-                        $cache->delete($page_key);
+                                    $cache->delete($page_key);
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -653,7 +690,7 @@ class W3_PgCache {
                  * Purge varnish servers
                  */
                 if ($this->_config->get_boolean('pgcache.varnish.enabled')) {
-                    @set_time_limit(300);
+                    @set_time_limit($this->_config->get_integer('timelimit.varnish_purge'));
 
                     $servers = $this->_config->get_array('pgcache.varnish.servers');
 
@@ -872,7 +909,8 @@ class W3_PgCache {
                 case 'file':
                     $engineConfig = array(
                         'cache_dir' => W3TC_CACHE_FILE_PGCACHE_DIR,
-                        'locking' => $this->_config->get_boolean('pgcache.file.locking')
+                        'locking' => $this->_config->get_boolean('pgcache.file.locking'),
+                        'flush_timelimit' => $this->_config->get_integer('timelimit.cache_flush')
                     );
                     break;
 
@@ -880,7 +918,8 @@ class W3_PgCache {
                     $engineConfig = array(
                         'cache_dir' => W3TC_CACHE_FILE_PGCACHE_DIR,
                         'locking' => $this->_config->get_boolean('pgcache.file.locking'),
-                        'expire' => $this->_lifetime
+                        'expire' => $this->_lifetime,
+                        'flush_timelimit' => $this->_config->get_integer('timelimit.cache_flush')
                     );
                     break;
 
@@ -1001,7 +1040,46 @@ class W3_PgCache {
     }
 
     /**
-     * Checks gzip availability
+     * Returns current mobile group
+     *
+     * @return string
+     */
+    function _get_mobile_group() {
+        if ($this->_mobile) {
+            return $this->_mobile->get_group();
+        }
+
+        return '';
+    }
+
+    /**
+     * Returns current referrer group
+     *
+     * @return string
+     */
+    function _get_referrer_group() {
+        if ($this->_referrer) {
+            return $this->_referrer->get_group();
+        }
+
+        return '';
+    }
+
+    /**
+     * Returns current encryption
+     *
+     * @return string
+     */
+    function _get_encryption() {
+        if (w3_is_https()) {
+            return 'ssl';
+        }
+
+        return '';
+    }
+
+    /**
+     * Returns current compression
      *
      * @return boolean
      */
@@ -1020,7 +1098,42 @@ class W3_PgCache {
     }
 
     /**
-     * Returns array of supported compressions
+     * Returns array of mobile groups
+     *
+     * @return array
+     */
+    function _get_mobile_groups() {
+        if ($this->_mobile) {
+            return array_keys($this->_mobile->groups);
+        }
+
+        return array();
+    }
+
+    /**
+     * Returns array of referrer groups
+     *
+     * @return array
+     */
+    function _get_referrer_groups() {
+        if ($this->_referrer) {
+            return array_keys($this->_referrer->groups);
+        }
+
+        return array();
+    }
+
+    /**
+     * Returns array of encryptions
+     *
+     * @return array
+     */
+    function _get_encryptions() {
+        return array(false, 'ssl');
+    }
+
+    /**
+     * Returns array of compressions
      *
      * @return array
      */
@@ -1101,10 +1214,13 @@ class W3_PgCache {
      * Returns page key
      *
      * @param string $request_uri
+     * @param string $mobile_group
+     * @param string $referrer_group
+     * @param string $encryption
      * @param string $compression
      * @return string
      */
-    function _get_page_key($request_uri, $compression) {
+    function _get_page_key($request_uri, $mobile_group = '', $referrer_group = '', $encryption = false, $compression = false) {
         // replace fragment
         $key = preg_replace('~#.*$~', '', $request_uri);
 
@@ -1142,8 +1258,6 @@ class W3_PgCache {
         /**
          * Append mobile group
          */
-        $mobile_group = ($this->_mobile ? $this->_mobile->get_group() : '');
-
         if ($mobile_group) {
             $key .= '_' . $mobile_group;
         }
@@ -1151,17 +1265,15 @@ class W3_PgCache {
         /**
          * Append referrer group
          */
-        $referrer_group = ($this->_referrer ? $this->_referrer->get_group() : '');
-
         if ($referrer_group) {
             $key .= '_' . $referrer_group;
         }
 
         /**
-         * Append SSL
+         * Append encryption
          */
-        if (w3_is_https()) {
-            $key .= '_ssl';
+        if ($encryption) {
+            $key .= '_' . $encryption;
         }
 
         if ($this->_enhanced_mode) {
@@ -1226,7 +1338,7 @@ class W3_PgCache {
     function _get_debug_info($cache, $reason, $status, $time) {
         $debug_info = "<!-- W3 Total Cache: Page cache debug info:\r\n";
         $debug_info .= sprintf("%s%s\r\n", str_pad('Engine: ', 20), w3_get_engine_name($this->_config->get_string('pgcache.engine')));
-        $debug_info .= sprintf("%s%s\r\n", str_pad('Key: ', 20), $this->_get_page_key($this->_request_uri, false));
+        $debug_info .= sprintf("%s%s\r\n", str_pad('Cache key: ', 20), $this->_page_key);
         $debug_info .= sprintf("%s%s\r\n", str_pad('Caching: ', 20), ($cache ? 'enabled' : 'disabled'));
 
         if (!$cache) {

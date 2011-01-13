@@ -5,8 +5,8 @@
  */
 require_once W3TC_LIB_W3_DIR . '/Cdn/Base.php';
 
-if (!defined('W3_CDN_FTP_CONNECT_TIMEOUT')) {
-    define('W3_CDN_FTP_CONNECT_TIMEOUT', 30);
+if (!defined('W3TC_CDN_FTP_CONNECT_TIMEOUT')) {
+    define('W3TC_CDN_FTP_CONNECT_TIMEOUT', 30);
 }
 
 /**
@@ -37,7 +37,7 @@ class W3_Cdn_Ftp extends W3_Cdn_Base {
             $this->_config['port'] = 21;
         }
 
-        $this->_ftp = @ftp_connect($this->_config['host'], $this->_config['port'], W3_CDN_FTP_CONNECT_TIMEOUT);
+        $this->_ftp = @ftp_connect($this->_config['host'], $this->_config['port'], W3TC_CDN_FTP_CONNECT_TIMEOUT);
 
         if (!$this->_ftp) {
             $error = sprintf('Unable to connect to %s:%d.', $this->_config['host'], $this->_config['port']);

@@ -92,29 +92,14 @@ class W3_Plugin_Cdn extends W3_Plugin {
                 ));
             }
 
-            if ($cdn_engine == 'cfl') {
-                add_action('wp_set_comment_status', array(
+            /**
+             * Start rewrite engine
+             */
+            if ($this->can_cdn()) {
+                ob_start(array(
                     &$this,
-                    'cfl_set_comment_status'
-                ), 1, 2);
-
-                /**
-                 * Fix CloudFlare IP-address
-                 */
-                require_once W3TC_LIB_W3_DIR . '/Cdn.php';
-                $w3_cdn_cfl = & W3_Cdn::instance(W3_CDN_CFL);
-
-                $w3_cdn_cfl->fix_remote_addr();
-            } else {
-                /**
-                 * Start rewrite engine
-                 */
-                if ($this->can_cdn()) {
-                    ob_start(array(
-                        &$this,
-                        'ob_callback'
-                    ));
-                }
+                    'ob_callback'
+                ));
             }
         }
     }
@@ -762,7 +747,7 @@ class W3_Plugin_Cdn extends W3_Plugin {
         $cdn = & $this->get_cdn();
         $force_rewrite = $this->_config->get_boolean('cdn.force.rewrite');
 
-        @set_time_limit(600);
+        @set_time_limit($this->_config->get_integer('timelimit.cdn_upload'));
 
         if (!$cdn->upload($files, $results, $force_rewrite)) {
             if ($queue_failed) {
@@ -790,7 +775,7 @@ class W3_Plugin_Cdn extends W3_Plugin {
     function delete($files, $queue_failed, &$results) {
         $cdn = & $this->get_cdn();
 
-        @set_time_limit(600);
+        @set_time_limit($this->_config->get_integer('timelimit.cdn_delete'));
 
         if (!$cdn->delete($files, $results)) {
             if ($queue_failed) {
@@ -818,7 +803,7 @@ class W3_Plugin_Cdn extends W3_Plugin {
     function purge($files, $queue_failed, &$results) {
         $cdn = & $this->get_cdn();
 
-        @set_time_limit(600);
+        @set_time_limit($this->_config->get_integer('timelimit.cdn_purge'));
 
         if (!$cdn->purge($files, $results)) {
             if ($queue_failed) {
@@ -934,7 +919,7 @@ class W3_Plugin_Cdn extends W3_Plugin {
         $uploads_use_yearmonth_folders = get_option('uploads_use_yearmonth_folders');
         $document_root = w3_get_document_root();
 
-        @set_time_limit(300);
+        @set_time_limit($this->_config->get_integer('timelimit.cdn_import'));
 
         if ($upload_info) {
             /**
@@ -1189,7 +1174,7 @@ class W3_Plugin_Cdn extends W3_Plugin {
     function rename_domain($names, $limit, $offset, &$count, &$total, &$results) {
         global $wpdb;
 
-        @set_time_limit(300);
+        @set_time_limit($this->_config->get_integer('timelimit.domain_rename'));
 
         $count = 0;
         $total = 0;
@@ -1699,13 +1684,6 @@ class W3_Plugin_Cdn extends W3_Plugin {
                     );
                     break;
 
-                case 'cfl':
-                    $engine_config = array(
-                        'email' => $this->_config->get_string('cdn.cfl.email'),
-                        'key' => $this->_config->get_string('cdn.cfl.key')
-                    );
-                    break;
-
                 case 'azure':
                     $engine_config = array(
                         'user' => $this->_config->get_string('cdn.azure.user'),
@@ -1873,36 +1851,26 @@ class W3_Plugin_Cdn extends W3_Plugin {
         return true;
     }
 
-    /**
-     * Now actually allow CF to see when a comment is approved/not-approved.
-     *
-     * @param int $id
-     * @param string $status
-     * @return void
-     */
-    function cfl_set_comment_status($id, $status) {
-        if ($status == 'spam') {
-            $email = $this->_config->get_string('cdn.cfl.email');
-            $key = $this->_config->get_string('cdn.cfl.key');
+    function write_cookie_domain() {
+        $config_path = ABSPATH . 'wp-config.php';
+        $config_data = @file_get_contents($config_path);
 
-            if ($email != '' && $key != '') {
-                require_once W3TC_LIB_W3_DIR . '/Cdn.php';
+        if ($config_data !== false) {
+            if ($this->is_wp_cache_define($config_data)) {
+                $new_config_data = preg_replace(W3TC_PLUGIN_PGCACHE_REGEXP_WPCACHE, "define('WP_CACHE', true)", $config_data, 1);
+            } else {
+                $new_config_data = preg_replace('~<\?(php)?~', "\\0\r\n/** Enable W3 Total Cache **/\r\ndefine('WP_CACHE', true); // Added by W3 Total Cache\r\n", $config_data, 1);
+            }
 
-                $w3_cdn_cfl = & W3_Cdn::instance(W3_CDN_CFL, array(
-                    'email' => $email,
-                    'key' => $key
-                ));
-
-                $comment = get_comment($id);
-
-                $value = array('a' => $comment->comment_author,
-                    'am' => $comment->comment_author_email,
-                    'ip' => $comment->comment_author_IP,
-                    'con' => substr($comment->comment_content, 0, 100)
-                );
-
-                $w3_cdn_cfl->external_event('WP_SPAM', json_encode($value));
+            if ($new_config_data != $config_data && @file_put_contents($config_path, $new_config_data)) {
+                return true;
             }
         }
+
+        return true;
+    }
+
+    function remove_cookie_domain() {
+
     }
 }

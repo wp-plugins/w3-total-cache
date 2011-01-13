@@ -175,16 +175,41 @@ function w3tc_cdn_cnames_assign() {
     });
 }
 
-function w3tc_cdn_cfl_api_request(action, value) {
+function w3tc_cloudflare_api_request(action, value) {
+    var email = jQuery('#cloudflare_email');
+    var key = jQuery('#cloudflare_key');
+    var zone = jQuery('#cloudflare_zone');
+
+    if (!email.val()) {
+        alert('Please enter CloudFlare E-Mail.');
+        email.focus();
+        return false;
+    }
+
+    if (!key.val()) {
+        alert('Please enter CloudFlare API key.');
+        key.focus();
+        return false;
+    }
+
+    if (!zone.val()) {
+        alert('Please enter CloudFlare zone.');
+        zone.focus();
+        return false;
+    }
+
     jQuery.post('admin.php?page=w3tc_general', {
-        w3tc_action: 'cdn_cfl_api_request',
-        email: jQuery('#cdn_cfl_email').val(),
-        key: jQuery('#cdn_cfl_key').val(),
+        w3tc_action: 'cloudflare_api_request',
+        email: email.val(),
+        key: key.val(),
+        zone: zone.val(),
         action: action,
         value: value
     }, function(data) {
         alert(data.result ? 'OK' : 'Request failed. Error: ' + data.error);
     }, 'json');
+
+    return true;
 }
 
 function w3tc_toggle(name, check) {
@@ -642,20 +667,20 @@ jQuery(function() {
         }, 'json');
     });
 
-    jQuery('#cdn_cfl_set_devmode_on').click(function() {
-        w3tc_cdn_cfl_api_request('devmode', 1);
+    jQuery('#cloudflare_set_devmode_on').click(function() {
+        w3tc_cloudflare_api_request('devmode', 1);
     });
 
-    jQuery('#cdn_cfl_set_devmode_off').click(function() {
-        w3tc_cdn_cfl_api_request('devmode', 0);
+    jQuery('#cloudflare_set_devmode_off').click(function() {
+        w3tc_cloudflare_api_request('devmode', 0);
     });
 
-    jQuery('#cdn_cfl_set_seclevel').click(function() {
-        w3tc_cdn_cfl_api_request('sec_lvl', jQuery('#cdn_cfl_seclevel').val());
+    jQuery('#cloudflare_set_seclevel').click(function() {
+        w3tc_cloudflare_api_request('sec_lvl', jQuery('#cloudflare_seclevel').val());
     });
 
-    jQuery('#cdn_cfl_purge_cache').click(function() {
-        w3tc_cdn_cfl_api_request('fpurge_ts', 1);
+    jQuery('#cloudflare_purge_cache').click(function() {
+        w3tc_cloudflare_api_request('fpurge_ts', 1);
     });
 
     jQuery('#memcached_test').click(function() {

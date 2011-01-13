@@ -27,8 +27,8 @@ class W3_Cache_File_PgCache extends W3_Cache_File {
 
         $this->_expire = (isset($config['expire']) ? (int) $config['expire'] : 0);
 
-        if (!$this->_expire || $this->_expire > W3_CACHE_FILE_EXPIRE_MAX) {
-            $this->_expire = W3_CACHE_FILE_EXPIRE_MAX;
+        if (!$this->_expire || $this->_expire > W3TC_CACHE_FILE_EXPIRE_MAX) {
+            $this->_expire = W3TC_CACHE_FILE_EXPIRE_MAX;
         }
     }
 
@@ -122,7 +122,7 @@ class W3_Cache_File_PgCache extends W3_Cache_File {
      * @return boolean
      */
     function flush() {
-        @set_time_limit(180);
+        @set_time_limit($this->_flush_timelimit);
 
         w3_emptydir($this->_cache_dir, array(
             $this->_cache_dir . '/.htaccess'

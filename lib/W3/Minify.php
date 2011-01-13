@@ -47,14 +47,17 @@ class W3_Minify {
          * Request variables:
          *
          * f - files
+         * b - base
          * tt - theme name in format template:stylesheet
          * gg - template
          * g - location (include, include-footer, etc...)
          * t - type (js or css)
+         * m - ID
          */
         require_once W3TC_LIB_W3_DIR . '/Request.php';
 
         $files = W3_Request::get_array('f');
+        $base = W3_Request::get_string('b');
         $theme = W3_Request::get_string('tt');
         $template = W3_Request::get_string('gg');
         $location = W3_Request::get_string('g');
@@ -159,15 +162,17 @@ class W3_Minify {
         $serve_options['minifiers'][$minifier_type] = $w3_minifier->get_minifier($engine);
         $serve_options['minifierOptions'][$minifier_type] = $w3_minifier->get_options($engine);
 
-        /**
-         * Setup user-friendly cache ID for disk cache
-         */
-        if (!$files && $this->_config->get_string('minify.engine') == 'file') {
-            $id = $this->get_id($theme, $template, $location, $type);
-            $cacheId = sprintf('%s/%s.%s.%s.%s', $theme, $template, $location, $id, $type);
+        if ($files) {
+            $cache_id = $this->get_cache_id_custom($files, $base);
+        } else {
+            $key = $this->get_id_key_group($theme, $template, $location, $type);
+            $sources = $this->get_sources_group($theme, $template, $location, $type);
 
-            Minify::setCacheId($cacheId);
+            $id = $this->get_id($key, $sources);
+            $cache_id = $this->get_cache_id_group($theme, $template, $location, $id, $type);
         }
+
+        Minify::setCacheId($cache_id);
 
         if ($browsercache && $this->_config->get_boolean('browsercache.cssjs.w3tc')) {
             @header('X-Powered-By: ' . W3TC_POWERED_BY);
@@ -205,7 +210,7 @@ class W3_Minify {
     }
 
     /**
-     * Returns onject instance
+     * Returns object instance
      *
      * @return W3_Minify
      */
@@ -297,20 +302,132 @@ class W3_Minify {
     }
 
     /**
-     * Returns id of file
+     * Returns cache id for group
+     *
+     * @param string $theme
+     * @param string $template
+     * @param string $location
+     * @param string $id
+     * @param string $type
+     * @return string
+     */
+    function get_cache_id_group($theme, $template, $location, $id, $type) {
+        $cache_id = sprintf('%s/%s.%s.%s.%s', $theme, $template, $location, $id, $type);
+
+        return $cache_id;
+    }
+
+    /**
+     * Returns cache id for custom files
+     *
+     * @param array $files
+     * @param string $base
+     * @return string
+     */
+    function get_cache_id_custom($files, $base) {
+        $cache_id = sprintf('%s', md5(serialize($files) . $base));
+
+        return $cache_id;
+    }
+
+    /**
+     * Returns array of group sources
      *
      * @param string $theme
      * @param string $template
      * @param string $location
      * @param string $type
+     * @return array
+     */
+    function get_sources_group($theme, $template, $location, $type) {
+        $sources = array();
+        $groups = $this->get_groups($theme, $template, $type);
+
+        if (isset($groups[$location])) {
+            $files = (array) $groups[$location];
+
+            $document_root = w3_get_document_root();
+
+            foreach ($files as $file) {
+                if (is_a($file, 'Minify_Source')) {
+                    $path = $file->filepath;
+                } else {
+                    $path = $document_root . '/' . $file;
+                }
+
+                $sources[] = $path;
+            }
+        }
+
+        return $sources;
+    }
+
+    /**
+     * Returns array of custom sources
+     *
+     * @param array $files
+     * @param string $base
+     * @return array
+     */
+    function get_sources_custom($files, $base = '') {
+        $sources = array();
+
+        if (count($files)) {
+            $document_root = w3_get_document_root();
+
+            foreach ($files as $file) {
+                if ($base) {
+                    $file = $base . '/' . $file;
+                }
+
+                $path = $document_root . '/' . $file;
+            }
+
+            $sources[] = $path;
+        }
+
+        return $sources;
+    }
+
+    /**
+     * Returns ID key for group
+     *
+     * @param  $theme
+     * @param  $template
+     * @param  $location
+     * @param  $type
      * @return string
      */
-    function get_id($theme, $template, $location, $type) {
-        $id = $this->_load_id($theme, $template, $location, $type);
+    function get_id_key_group($theme, $template, $location, $type) {
+        $id_key = sprintf('%s/%s.%s.%s.id', $theme, $template, $location, $type);
+
+        return $id_key;
+    }
+
+    /**
+     * Returns ID key for custom files
+     *
+     * @param array $files
+     * @param string $base
+     * @return string
+     */
+    function get_id_key_custom($files, $base) {
+        return sprintf('%s.id', md5(serialize($files) . $base));
+    }
+
+    /**
+     * Returns id of sources
+     *
+     * @param string $key
+     * @param array $sources
+     * @return string
+     */
+    function get_id($key, $sources) {
+        $id = $this->_load_id($key);
 
         if (!$id) {
-            $id = $this->_generate_id($theme, $template, $location, $type);
-            $this->_save_id($id, $theme, $template, $location, $type);
+            $id = $this->_generate_id($sources);
+            $this->_save_id($key, $id);
         }
 
         return $id;
@@ -463,7 +580,7 @@ class W3_Minify {
             'Content-Type: text/html; charset=UTF-8'
         );
 
-        @set_time_limit(120);
+        @set_time_limit($this->_config->get_integer('timelimit.email_send'));
 
         $result = @wp_mail($to_email, 'W3 Total Cache Error Notification', $body, implode("\n", $headers));
 
@@ -473,31 +590,20 @@ class W3_Minify {
     /**
      * Generates file ID
      *
-     * @param string $theme
-     * @param string $template
-     * @param string $location
-     * @param string $type
+     * @param array $sources
      * @return string
      */
-    function _generate_id($theme, $template, $location, $type) {
+    function _generate_id($sources) {
         $hash = '';
-        $files = array();
-        $groups = $this->get_groups($theme, $template, $type);
 
-        if (isset($groups[$location])) {
-            $files = (array) $groups[$location];
-        }
+        foreach ($sources as $source) {
+            if (file_exists($source)) {
+                $data = @file_get_contents($source);
 
-        $document_root = w3_get_document_root();
-
-        foreach ($files as $file) {
-            if (is_a($file, 'Minify_Source')) {
-                $path = $file->filepath;
-            } else {
-                $path = $document_root . '/' . $file;
+                if ($data !== false) {
+                    $hash .= $source . $data;
+                }
             }
-
-            $hash .= $path . @file_get_contents($path);
         }
 
         $id = abs(crc32($hash));
@@ -506,31 +612,12 @@ class W3_Minify {
     }
 
     /**
-     * Returns key for ID data
-     *
-     * @param string $theme
-     * @param string $template
-     * @param string $location
-     * @param string $type
-     * @return string
-     */
-    function _get_id_key($theme, $template, $location, $type) {
-        $key = sprintf('%s/%s.%s.%s.id', $theme, $template, $location, $type);
-
-        return $key;
-    }
-
-    /**
      * Returns cached ID
      *
-     * @param string $theme
-     * @param string $template
-     * @param string $location
-     * @param string $type
+     * @param string $key
      * @return string
      */
-    function _load_id($theme, $template, $location, $type) {
-        $key = $this->_get_id_key($theme, $template, $location, $type);
+    function _load_id($key) {
         $cache = & $this->_get_cache();
 
         $id = @$cache->fetch($key);
@@ -541,15 +628,11 @@ class W3_Minify {
     /**
      * Cache ID
      *
+     * @param string $key
      * @param string $id
-     * @param string $theme
-     * @param string $template
-     * @param string $location
-     * @param string $type
      * @return boolean
      */
-    function _save_id($id, $theme, $template, $location, $type) {
-        $key = $this->_get_id_key($theme, $template, $location, $type);
+    function _save_id($key, $id) {
         $cache = & $this->_get_cache();
 
         return $cache->store($key, $id);

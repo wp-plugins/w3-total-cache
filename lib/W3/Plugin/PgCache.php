@@ -5,6 +5,10 @@
  */
 require_once W3TC_LIB_W3_DIR . '/Plugin.php';
 
+if (!defined('W3TC_PLUGIN_PGCACHE_REGEXP_WPCACHE')) {
+    define('W3TC_PLUGIN_PGCACHE_REGEXP_WPCACHE', '~define\s*\(\s*[\'"]WP_CACHE[\'"]\s*,.*?\)~is');
+}
+
 /**
  * Class W3_Plugin_PgCache
  */
@@ -123,14 +127,6 @@ class W3_Plugin_PgCache extends W3_Plugin {
      * Activate plugin action
      */
     function activate() {
-        if (!$this->update_wp_config()) {
-            $activate_url = wp_nonce_url('plugins.php?action=activate&plugin=' . W3TC_FILE, 'activate-plugin_' . W3TC_FILE);
-            $reactivate_button = sprintf('<input type="button" value="re-activate plugin" onclick="top.location.href = \'%s\'" />', addslashes($activate_url));
-            $error = sprintf('<strong>%swp-config.php</strong> could not be written, please edit config and add:<br /><strong style="color:#f00;">define(\'WP_CACHE\', true);</strong> before <strong style="color:#f00;">require_once(ABSPATH . \'wp-settings.php\');</strong><br />then %s.', ABSPATH, $reactivate_button);
-
-            w3_activate_error($error);
-        }
-
         if ($this->_config->get_boolean('pgcache.enabled') && $this->_config->get_string('pgcache.engine') == 'file_pgcache') {
             /**
              * Disable enchanged mode if permalink structure is disabled
@@ -146,8 +142,18 @@ class W3_Plugin_PgCache extends W3_Plugin {
             }
         }
 
-        if (!$this->locked() && !@copy(W3TC_INSTALL_FILE_ADVANCED_CACHE, W3TC_ADDIN_FILE_ADVANCED_CACHE)) {
-            w3_writable_error(W3TC_ADDIN_FILE_ADVANCED_CACHE);
+        if (!$this->locked()) {
+            if (!@copy(W3TC_INSTALL_FILE_ADVANCED_CACHE, W3TC_ADDIN_FILE_ADVANCED_CACHE)) {
+                w3_writable_error(W3TC_ADDIN_FILE_ADVANCED_CACHE);
+            }
+
+            if (!$this->write_wp_cache()) {
+                $activate_url = wp_nonce_url('plugins.php?action=activate&plugin=' . W3TC_FILE, 'activate-plugin_' . W3TC_FILE);
+                $reactivate_button = sprintf('<input type="button" value="re-activate plugin" onclick="top.location.href = \'%s\'" />', addslashes($activate_url));
+                $error = sprintf('<strong>%swp-config.php</strong> could not be written, please edit config and add:<br /><strong style="color:#f00;">define(\'WP_CACHE\', true);</strong> before <strong style="color:#f00;">require_once(ABSPATH . \'wp-settings.php\');</strong><br />then %s.', ABSPATH, $reactivate_button);
+
+                w3_activate_error($error);
+            }
         }
 
         $this->schedule();
@@ -162,14 +168,12 @@ class W3_Plugin_PgCache extends W3_Plugin {
         $this->unschedule();
 
         if (!$this->locked()) {
+            $this->disable_wp_cache();
             @unlink(W3TC_ADDIN_FILE_ADVANCED_CACHE);
         }
 
         $this->remove_rules_cache();
-
-        if (!w3_is_network()) {
-            $this->remove_rules_core();
-        }
+        $this->remove_rules_core();
     }
 
     /**
@@ -217,34 +221,59 @@ class W3_Plugin_PgCache extends W3_Plugin {
     }
 
     /**
-     * Updates WP config
+     * Check WP_CACHE definition existence
+     *
+     * @param string $content
+     * @return int
+     */
+    function is_wp_cache_define($content) {
+        return preg_match(W3TC_PLUGIN_PGCACHE_REGEXP_WPCACHE, $content);
+    }
+
+    /**
+     * Writes WP_CACHE definition
      *
      * @return boolean
      */
-    function update_wp_config() {
-        static $updated = false;
-
-        // added checking WP_CACHE value for WP3.0 compatibility
-        if ((defined('WP_CACHE') && WP_CACHE) || $updated) {
-            return true;
-        }
-
+    function write_wp_cache() {
         $config_path = ABSPATH . 'wp-config.php';
         $config_data = @file_get_contents($config_path);
 
-        if (!$config_data) {
-            return false;
+        if ($config_data !== false) {
+            if ($this->is_wp_cache_define($config_data)) {
+                $new_config_data = preg_replace(W3TC_PLUGIN_PGCACHE_REGEXP_WPCACHE, "define('WP_CACHE', true)", $config_data, 1);
+            } else {
+                $new_config_data = preg_replace('~<\?(php)?~', "\\0\r\n/** Enable W3 Total Cache **/\r\ndefine('WP_CACHE', true); // Added by W3 Total Cache\r\n", $config_data, 1);
+            }
+
+            if ($new_config_data != $config_data && @file_put_contents($config_path, $new_config_data)) {
+                return true;
+            }
         }
-
-        $config_data = preg_replace('~<\?(php)?~', "\\0\r\n/** Enable W3 Total Cache **/\r\ndefine('WP_CACHE', true); // Added by W3 Total Cache\r\n", $config_data, 1);
-
-        if (!@file_put_contents($config_path, $config_data)) {
-            return false;
-        }
-
-        $updated = true;
 
         return true;
+    }
+
+    /**
+     * Disables WP_CACHE
+     *
+     * @return bool
+     */
+    function disable_wp_cache() {
+        $config_path = ABSPATH . 'wp-config.php';
+        $config_data = @file_get_contents($config_path);
+
+        if ($config_data !== false) {
+            if ($this->is_wp_cache_define($config_data)) {
+                $new_config_data = preg_replace(W3TC_PLUGIN_PGCACHE_REGEXP_WPCACHE, "define('WP_CACHE', false)", $config_data, 1);
+
+                if ($new_config_data != $config_data && @file_put_contents($config_path, $new_config_data)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -260,7 +289,8 @@ class W3_Plugin_PgCache extends W3_Plugin {
                 require_once W3TC_LIB_W3_DIR . '/Cache/File/Manager.php';
 
                 $w3_cache_file_manager = & new W3_Cache_File_Manager(array(
-                    'cache_dir' => W3TC_CACHE_FILE_PGCACHE_DIR
+                    'cache_dir' => W3TC_CACHE_FILE_PGCACHE_DIR,
+                    'clean_timelimit' => $this->_config->get_integer('timelimit.cache_gc')
                 ));
 
                 $w3_cache_file_manager->clean();
@@ -271,7 +301,8 @@ class W3_Plugin_PgCache extends W3_Plugin {
 
                 $w3_cache_file_pgcache_manager = & new W3_Cache_File_PgCache_Manager(array(
                     'cache_dir' => W3TC_CACHE_FILE_PGCACHE_DIR,
-                    'expire' => $this->_config->get_integer('browsercache.html.lifetime')
+                    'expire' => $this->_config->get_integer('browsercache.html.lifetime'),
+                    'clean_timelimit' => $this->_config->get_integer('timelimit.cache_gc')
                 ));
 
                 $w3_cache_file_pgcache_manager->clean();

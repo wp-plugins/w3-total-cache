@@ -312,3 +312,7 @@ th.minify-files-add, td.minify-files-add {
 #w3tc .postbox .inside {
     padding: 0 10px;
 }
+
+#w3tc .postbox .hndle {
+    cursor: auto;
+}

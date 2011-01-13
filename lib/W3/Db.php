@@ -304,7 +304,8 @@ class W3_Db extends wpdb {
                 case 'file':
                     $engineConfig = array(
                         'cache_dir' => W3TC_CACHE_FILE_DBCACHE_DIR,
-                        'locking' => $this->_config->get_boolean('dbcache.file.locking')
+                        'locking' => $this->_config->get_boolean('dbcache.file.locking'),
+                        'flush_timelimit' => $this->_config->get_integer('timelimit.cache_flush')
                     );
                     break;
 
