@@ -89,6 +89,13 @@
         			<span class="description">Download attachments hosted elsewhere into your media library and deliver them via <acronym title="Content Delivery Network">CDN</acronym>.</span>
         		</th>
         	</tr>
+        	<tr>
+        		<th colspan="2">
+        			<input type="hidden" name="set_cookie_domain_old" value="<?php echo (int) $set_cookie_domain; ?>" />
+        			<input type="hidden" name="set_cookie_domain_new" value="0" />
+        			<label><input type="checkbox" name="set_cookie_domain_new" value="1"<?php checked($set_cookie_domain, true); ?> /> Set Cookie Domain to &quot;<?php echo htmlspecialchars($cookie_domain); ?>&quot;</label>
+        		</th>
+        	</tr>
         </table>
 
         <p class="submit">

@@ -240,9 +240,10 @@
         </p>
         <?php echo $this->postbox_footer(); ?>
 
-        <?php echo $this->postbox_header('Network Security powered by Cloudflare'); ?>
+        <?php echo $this->postbox_header('Network Performance &amp; Security powered by CloudFlare'); ?>
         <p>
-            CloudFlare protects and accelerates websites. <a href="https://www.cloudflare.com/sign-up.html?affiliate=w3edge&amp;seed_domain=<?php echo w3_get_host(); ?>&amp;email=<?php echo htmlspecialchars($cloudflare_email); ?>&amp;username=<?php echo htmlspecialchars($cloudflare_user); ?>" target="_blank">Sign up now for free</a> to get started, or if you have an account simply <a href="https://www.cloudflare.com/my-websites.html" target="_blank">log in</a> to obtain your API key to enter it below.
+            CloudFlare protects and accelerates websites. <a href="https://www.cloudflare.com/sign-up.html?affiliate=w3edge&amp;seed_domain=<?php echo w3_get_host(); ?>&amp;email=<?php echo htmlspecialchars($cloudflare_email); ?>&amp;username=<?php echo htmlspecialchars($cloudflare_user); ?>" target="_blank">Sign up now for free</a> to get started,
+            or if you have an account simply log in to obtain your API key from the <a href="https://www.cloudflare.com/my-account.html">Account Page</a> to enter it below.
             Contact the CloudFlare <a href="http://www.cloudflare.com/help.html" target="_blank">support team</a> with any questions.
         </p>
 
@@ -255,21 +256,26 @@
                 </td>
             </tr>
             <tr>
-                <th><label for="cloudflare_email">E-mail:</label></th>
+                <th><label for="cloudflare_email">CloudFlare Account Email:</label></th>
                 <td>
                     <input id="cloudflare_email" class="w3tc-ignore-change" type="text" name="cloudflare.email" value="<?php echo htmlspecialchars($this->_config->get_string('cloudflare.email')); ?>" size="60" />
                 </td>
             </tr>
             <tr>
-                <th><label for="cloudflare_key">API key:</label></th>
+                <th><label for="cloudflare_key"><acronym title="Application Programming Interface">API</acronym> key:</label></th>
                 <td>
-                    <input id="cloudflare_key" class="w3tc-ignore-change" type="password" name="cloudflare.key" value="<?php echo htmlspecialchars($this->_config->get_string('cloudflare.key')); ?>" size="60" />
+                    <input id="cloudflare_key" class="w3tc-ignore-change" type="password" name="cloudflare.key" value="<?php echo htmlspecialchars($this->_config->get_string('cloudflare.key')); ?>" size="60" /> (<a href="https://www.cloudflare.com/my-account.html">find it here</a>)
                 </td>
             </tr>
             <tr>
                 <th>Zone:</th>
                 <td>
                     <input id="cloudflare_zone" type="text" name="cloudflare.zone" value="<?php echo htmlspecialchars($cloudflare_zone); ?>" size="40" />
+                </td>
+            </tr>
+            <tr>
+                <th>Cache purge:</th>
+                <td>
                     <input id="cloudflare_purge_cache" class="button" type="button" value="Purge cache" />
                 </td>
             </tr>

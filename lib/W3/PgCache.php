@@ -267,8 +267,6 @@ class W3_PgCache {
      * @return string
      */
     function ob_callback(&$buffer) {
-        $this->flush_post();
-
         if ($buffer != '' && w3_is_xml($buffer)) {
             $compression = false;
             $has_dynamic = $this->_has_dynamic($buffer);
@@ -1103,11 +1101,13 @@ class W3_PgCache {
      * @return array
      */
     function _get_mobile_groups() {
+        $mobile_groups = array('');
+
         if ($this->_mobile) {
-            return array_keys($this->_mobile->groups);
+            $mobile_groups = array_merge($mobile_groups, array_keys($this->_mobile->groups));
         }
 
-        return array();
+        return $mobile_groups;
     }
 
     /**
@@ -1116,11 +1116,13 @@ class W3_PgCache {
      * @return array
      */
     function _get_referrer_groups() {
+        $referrer_groups = array('');
+
         if ($this->_referrer) {
-            return array_keys($this->_referrer->groups);
+            $referrer_groups = array_merge($referrer_groups, array_keys($this->_referrer->groups));
         }
 
-        return array();
+        return $referrer_groups;
     }
 
     /**

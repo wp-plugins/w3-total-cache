@@ -1850,27 +1850,4 @@ class W3_Plugin_Cdn extends W3_Plugin {
 
         return true;
     }
-
-    function write_cookie_domain() {
-        $config_path = ABSPATH . 'wp-config.php';
-        $config_data = @file_get_contents($config_path);
-
-        if ($config_data !== false) {
-            if ($this->is_wp_cache_define($config_data)) {
-                $new_config_data = preg_replace(W3TC_PLUGIN_PGCACHE_REGEXP_WPCACHE, "define('WP_CACHE', true)", $config_data, 1);
-            } else {
-                $new_config_data = preg_replace('~<\?(php)?~', "\\0\r\n/** Enable W3 Total Cache **/\r\ndefine('WP_CACHE', true); // Added by W3 Total Cache\r\n", $config_data, 1);
-            }
-
-            if ($new_config_data != $config_data && @file_put_contents($config_path, $new_config_data)) {
-                return true;
-            }
-        }
-
-        return true;
-    }
-
-    function remove_cookie_domain() {
-
-    }
 }

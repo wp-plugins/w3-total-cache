@@ -5,6 +5,10 @@
  */
 require_once W3TC_LIB_W3_DIR . '/Plugin.php';
 
+if (!defined('W3TC_PLUGIN_TOTALCACHE_REGEXP_COOKIEDOMAIN')) {
+    define('W3TC_PLUGIN_TOTALCACHE_REGEXP_COOKIEDOMAIN', '~define\s*\(\s*[\'"]COOKIE_DOMAIN[\'"]\s*,.*?\)~is');
+}
+
 /**
  * Class W3_Plugin_TotalCache
  */
@@ -998,17 +1002,17 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                 )
             );
 
-            if (w3_is_network() && $this->_config->get_boolean('cloudflare.enabled')) {
+            if ($this->_config->get_boolean('cloudflare.enabled')) {
                 $menu_items = array_merge($menu_items, array(
                     array(
                         'id' => 'cloudflare',
-                        'title' => 'Network Security',
+                        'title' => 'CloudFlare',
                         'href' => 'https://www.cloudflare.com'
                     ),
                     array(
-                        'id' => 'cloudflare-account',
+                        'id' => 'cloudflare-my-websites',
                         'parent' => 'cloudflare',
-                        'title' => 'My Account',
+                        'title' => 'My Websites',
                         'href' => 'https://www.cloudflare.com/my-websites.html'
                     ),
                     array(
@@ -1017,6 +1021,12 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                         'title' => 'Analytics',
                         'href' => 'https://www.cloudflare.com/analytics.html'
                     ),
+                    array(
+                        'id' => 'cloudflare-account',
+                        'parent' => 'cloudflare',
+                        'title' => 'Account',
+                        'href' => 'https://www.cloudflare.com/my-account.html'
+                    )
                 ));
             }
 
@@ -1141,6 +1151,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
         $browsercache_rules_no404wp_path = w3_get_browsercache_rules_no404wp_path();
         $minify_rules_core_path = w3_get_minify_rules_core_path();
         $minify_rules_cache_path = w3_get_minify_rules_cache_path();
+        $cookie_domain = $this->get_cookie_domain();
 
         $error_messages = array(
             'config_save' => sprintf('The settings could not be saved because the configuration file is not write-able. Please run <strong>chmod 777 %s</strong> to resolve this issue.', (file_exists($config_path) ? $config_path : dirname($config_path))),
@@ -1174,7 +1185,9 @@ class W3_Plugin_TotalCache extends W3_Plugin {
             'preview_disable' => sprintf('Preview mode could not be disabled. Please run <strong>chmod 777 %s</strong> to make the configuration file write-able, then try again.', (file_exists($config_path) ? $config_path : dirname($config_path))),
             'preview_deploy' => sprintf('Preview settings could not be deployed. Please run <strong>chmod 777 %s</strong> to make the configuration file write-able, then try again.', (file_exists(W3TC_CONFIG_PATH) ? W3TC_CONFIG_PATH : dirname(W3TC_CONFIG_PATH))),
             'cdn_purge_attachment' => 'Unable to purge attachment.',
-            'pgcache_purge_post' => 'Unable to purge post.'
+            'pgcache_purge_post' => 'Unable to purge post.',
+            'enable_cookie_domain' => sprintf('<strong>%swp-config.php</strong> could not be written, please edit config and add:<br /><strong style="color:#f00;">define(\'COOKIE_DOMAIN\', \'%s\');</strong> before <strong style="color:#f00;">require_once(ABSPATH . \'wp-settings.php\');</strong>.', ABSPATH, addslashes($cookie_domain)),
+            'disable_cookie_domain' => sprintf('<strong>%swp-config.php</strong> could not be written, please edit config and add:<br /><strong style="color:#f00;">define(\'COOKIE_DOMAIN\', false);</strong> before <strong style="color:#f00;">require_once(ABSPATH . \'wp-settings.php\');</strong>.', ABSPATH)
         );
 
         $note_messages = array(
@@ -2149,6 +2162,9 @@ class W3_Plugin_TotalCache extends W3_Plugin {
 
         $minify_enabled = $this->_config->get_boolean('minify.enabled');
 
+        $cookie_domain = $this->get_cookie_domain();
+        $set_cookie_domain = $this->is_cookie_domain_enabled();
+
         include W3TC_DIR . '/inc/options/cdn.phtml';
     }
 
@@ -2688,6 +2704,30 @@ class W3_Plugin_TotalCache extends W3_Plugin {
         }
 
         if ($this->config_save($this->_config, $config)) {
+            /**
+             * Handle Set Cookie Domain
+             */
+            if ($this->_page == 'w3tc_cdn') {
+                $set_cookie_domain_old = W3_Request::get_boolean('set_cookie_domain_old');
+                $set_cookie_domain_new = W3_Request::get_boolean('set_cookie_domain_new');
+
+                if ($set_cookie_domain_old != $set_cookie_domain_new) {
+                    if ($set_cookie_domain_new) {
+                        if (!$this->enable_cookie_domain()) {
+                            $this->redirect(array_merge($params, array(
+                                'w3tc_error' => 'enable_cookie_domain'
+                            )));
+                        }
+                    } else {
+                        if (!$this->disable_cookie_domain()) {
+                            $this->redirect(array_merge($params, array(
+                                'w3tc_error' => 'disable_cookie_domain'
+                            )));
+                        }
+                    }
+                }
+            }
+
             $this->redirect(array_merge($params, array(
                 'w3tc_note' => 'config_save'
             )));
@@ -5634,5 +5674,98 @@ class W3_Plugin_TotalCache extends W3_Plugin {
         );
 
         echo json_encode($return);
+    }
+
+    /**
+     * Returns cookie domain
+     *
+     * @return string
+     */
+    function get_cookie_domain() {
+        $site_url = get_option('siteurl');
+        $parse_url = @parse_url($site_url);
+
+        if ($parse_url && !empty($parse_url['host'])) {
+            return $parse_url['host'];
+        }
+
+        return $_SERVER['HTTP_HOST'];
+    }
+
+    /**
+     * Checks COOKIE_DOMAIN definition existence
+     *
+     * @param string $content
+     * @return int
+     */
+    function is_cookie_domain_define($content) {
+        return preg_match(W3TC_PLUGIN_TOTALCACHE_REGEXP_COOKIEDOMAIN, $content);
+    }
+
+    /**
+     * Checks if COOKIE_DOMAIN is enabled
+     *
+     * @return bool
+     */
+    function is_cookie_domain_enabled() {
+        $cookie_domain = $this->get_cookie_domain();
+
+        return (defined('COOKIE_DOMAIN') && COOKIE_DOMAIN == $cookie_domain);
+    }
+
+    /**
+     * Enables COOKIE_DOMAIN
+     *
+     * @return bool
+     */
+    function enable_cookie_domain() {
+        $config_path = ABSPATH . 'wp-config.php';
+        $config_data = @file_get_contents($config_path);
+
+        if ($config_data === false) {
+            return false;
+        }
+
+        $cookie_domain = $this->get_cookie_domain();
+
+        if ($this->is_cookie_domain_define($config_data)) {
+            $new_config_data = preg_replace(W3TC_PLUGIN_TOTALCACHE_REGEXP_COOKIEDOMAIN, "define('COOKIE_DOMAIN', '" . addslashes($cookie_domain) . "')", $config_data, 1);
+        } else {
+            $new_config_data = preg_replace('~<\?(php)?~', "\\0\r\ndefine('COOKIE_DOMAIN', '" . addslashes($cookie_domain) . "'); // Added by W3 Total Cache\r\n", $config_data, 1);
+        }
+
+        if ($new_config_data != $config_data) {
+            if (!@file_put_contents($config_path, $new_config_data)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Disables COOKIE_DOMAIN
+     *
+     * @return bool
+     */
+    function disable_cookie_domain() {
+        $config_path = ABSPATH . 'wp-config.php';
+        $config_data = @file_get_contents($config_path);
+
+        if ($config_data === false) {
+            return false;
+        }
+
+        if ($this->is_cookie_domain_define($config_data)) {
+            $new_config_data = preg_replace(W3TC_PLUGIN_TOTALCACHE_REGEXP_COOKIEDOMAIN, "define('COOKIE_DOMAIN', false)", $config_data, 1);
+
+            if ($new_config_data != $config_data) {
+                if (!@file_put_contents($config_path, $new_config_data)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 }

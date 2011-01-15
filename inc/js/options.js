@@ -492,16 +492,20 @@ jQuery(function() {
         switch (true) {
             case me.hasClass('cdn_mirror'):
                 jQuery.extend(params, {
-                    engine: 'mirror',
-                    'config[domain][]': cnames
+                    engine: 'mirror'
                 });
+                if (cnames.length) {
+                    params['config[domain][]'] = cnames;
+                }
                 break;
 
             case me.hasClass('cdn_netdna'):
                 jQuery.extend(params, {
-                    engine: 'netdna',
-                    'config[domain][]': cnames
+                    engine: 'netdna'
                 });
+                if (cnames.length) {
+                    params['config[domain][]'] = cnames;
+                }
                 break;
 
             case me.hasClass('cdn_ftp'):
@@ -511,9 +515,11 @@ jQuery(function() {
                     'config[user]': jQuery('#cdn_ftp_user').val(),
                     'config[path]': jQuery('#cdn_ftp_path').val(),
                     'config[pass]': jQuery('#cdn_ftp_pass').val(),
-                    'config[pasv]': jQuery('#cdn_ftp_pasv:checked').size(),
-                    'config[domain][]': cnames
+                    'config[pasv]': jQuery('#cdn_ftp_pasv:checked').size()
                 });
+                if (cnames.length) {
+                    params['config[domain][]'] = cnames;
+                }
                 break;
 
             case me.hasClass('cdn_s3'):
@@ -521,9 +527,11 @@ jQuery(function() {
                     engine: 's3',
                     'config[key]': jQuery('#cdn_s3_key').val(),
                     'config[secret]': jQuery('#cdn_s3_secret').val(),
-                    'config[bucket]': jQuery('#cdn_s3_bucket').val(),
-                    'config[cname][]': cnames
+                    'config[bucket]': jQuery('#cdn_s3_bucket').val()
                 });
+                if (cnames.length) {
+                    params['config[cname][]'] = cnames;
+                }
                 break;
 
             case me.hasClass('cdn_cf'):
@@ -532,9 +540,11 @@ jQuery(function() {
                     'config[key]': jQuery('#cdn_cf_key').val(),
                     'config[secret]': jQuery('#cdn_cf_secret').val(),
                     'config[bucket]': jQuery('#cdn_cf_bucket').val(),
-                    'config[id]': jQuery('#cdn_cf_id').val(),
-                    'config[cname][]': cnames
+                    'config[id]': jQuery('#cdn_cf_id').val()
                 });
+                if (cnames.length) {
+                    params['config[cname][]'] = cnames;
+                }
                 break;
 
             case me.hasClass('cdn_cf2'):
@@ -543,9 +553,11 @@ jQuery(function() {
                     'config[key]': jQuery('#cdn_cf2_key').val(),
                     'config[secret]': jQuery('#cdn_cf2_secret').val(),
                     'config[origin]': jQuery('#cdn_cf2_origin').val(),
-                    'config[id]': jQuery('#cdn_cf2_id').val(),
-                    'config[cname][]': cnames
+                    'config[id]': jQuery('#cdn_cf2_id').val()
                 });
+                if (cnames.length) {
+                    params['config[cname][]'] = cnames;
+                }
                 break;
 
             case me.hasClass('cdn_rscf'):
@@ -554,9 +566,11 @@ jQuery(function() {
                     'config[user]': jQuery('#cdn_rscf_user').val(),
                     'config[key]': jQuery('#cdn_rscf_key').val(),
                     'config[container]': jQuery('#cdn_rscf_container').val(),
-                    'config[id]': jQuery('#cdn_rscf_id').val(),
-                    'config[cname][]': cnames
+                    'config[id]': jQuery('#cdn_rscf_id').val()
                 });
+                if (cnames.length) {
+                    params['config[cname][]'] = cnames;
+                }
                 break;
 
             case me.hasClass('cdn_azure'):
@@ -564,9 +578,11 @@ jQuery(function() {
                     engine: 'azure',
                     'config[user]': jQuery('#cdn_azure_user').val(),
                     'config[key]': jQuery('#cdn_azure_key').val(),
-                    'config[container]': jQuery('#cdn_azure_container').val(),
-                    'config[cname][]': cnames
+                    'config[container]': jQuery('#cdn_azure_container').val()
                 });
+                if (cnames.length) {
+                    params['config[cname][]'] = cnames;
+                }
                 break;
         }
 
@@ -680,7 +696,9 @@ jQuery(function() {
     });
 
     jQuery('#cloudflare_purge_cache').click(function() {
-        w3tc_cloudflare_api_request('fpurge_ts', 1);
+        if (confirm('Purging your site\'s cache will remove all cache files. It may take up to 48 hours for the cache to completely rebuild on CloudFlare\'s global network. Are you sure you want to purge the cache?')) {
+            w3tc_cloudflare_api_request('fpurge_ts', 1);
+        }
     });
 
     jQuery('#memcached_test').click(function() {
