@@ -59,8 +59,13 @@ class W3_CloudFlare {
      * @param string $value
      * @return array
      */
-    function api_request($action, $value) {
-        $url = sprintf('%s?email=%s&tkn=%s&z=%s&a=%s&v=%s', W3TC_CLOUDFLARE_API_URL, urlencode($this->_config['email']), urlencode($this->_config['key']), urlencode($this->_config['zone']), urlencode($action), urlencode($value));
+    function api_request($action, $value = null) {
+        $url = sprintf('%s?email=%s&tkn=%s&z=%s&a=%s', W3TC_CLOUDFLARE_API_URL, urlencode($this->_config['email']), urlencode($this->_config['key']), urlencode($this->_config['zone']), urlencode($action));
+
+        if ($value !== null) {
+            $url .= sprintf('&v=%s', urlencode($value));
+        }
+
         $response = w3_http_get($url, '', false);
 
         if ($response) {

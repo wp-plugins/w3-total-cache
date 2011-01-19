@@ -683,16 +683,12 @@ jQuery(function() {
         }, 'json');
     });
 
-    jQuery('#cloudflare_set_devmode_on').click(function() {
-        w3tc_cloudflare_api_request('devmode', 1);
+    jQuery('#cloudflare_set_devmode').click(function() {
+        w3tc_cloudflare_api_request('devmode', jQuery('#cloudflare_devmode').val());
     });
 
-    jQuery('#cloudflare_set_devmode_off').click(function() {
-        w3tc_cloudflare_api_request('devmode', 0);
-    });
-
-    jQuery('#cloudflare_set_seclevel').click(function() {
-        w3tc_cloudflare_api_request('sec_lvl', jQuery('#cloudflare_seclevel').val());
+    jQuery('#cloudflare_set_seclvl').click(function() {
+        w3tc_cloudflare_api_request('sec_lvl', jQuery('#cloudflare_seclvl').val());
     });
 
     jQuery('#cloudflare_purge_cache').click(function() {

@@ -2002,22 +2002,35 @@ class W3_Plugin_TotalCache extends W3_Plugin {
         $can_empty_file = $can_empty_file || ($objectcache_enabled && in_array($objectcache_engine, $file_engines));
         $can_empty_file = $can_empty_file || ($minify_enabled && in_array($minify_engine, $file_engines));
 
-        $cloudflare_email = '';
-        $cloudflare_user = '';
-        $cloudflare_zone = $this->_config->get_string('cloudflare.zone');
+        $cloudflare_signup_email = '';
+        $cloudflare_signup_user = '';
 
         if (is_a($current_user, 'WP_User')) {
             if ($current_user->user_email) {
-                $cloudflare_email = $current_user->user_email;
+                $cloudflare_signup_email = $current_user->user_email;
             }
 
             if ($current_user->user_login && $current_user->user_login != 'admin') {
-                $cloudflare_user = $current_user->user_login;
+                $cloudflare_signup_user = $current_user->user_login;
             }
         }
 
-        if (!$cloudflare_zone) {
-            $cloudflare_zone = w3_get_host();
+        $cloudflare_seclvls = array(
+            'high' => 'High',
+            'med' => 'Medium',
+            'low' => 'Low'
+        );
+
+        $cloudflare_devmodes = array(
+            1 => 'On',
+            0 => 'Off'
+        );
+
+        $cloudflare_seclvl = 'high';
+        $cloudflare_devmode = 0;
+
+        if ($cloudflare_enabled && $this->_config->get_string('cloudflare.email') && $this->_config->get_string('cloudflare.key')) {
+            $this->cloudflare_read($cloudflare_seclvl, $cloudflare_devmode);
         }
 
         $debug = ($this->_config->get_boolean('dbcache.debug') || $this->_config->get_boolean('objectcache.debug') || $this->_config->get_boolean('pgcache.debug') || $this->_config->get_boolean('minify.debug') || $this->_config->get_boolean('cdn.debug'));
@@ -5607,6 +5620,48 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                 $w3_cloudflare->external_event('WP_SPAM', json_encode($value));
             }
         }
+    }
+
+    /**
+     * Read CloudFlare settings
+     *
+     * @param string $seclvl
+     * @param  integer $devmode
+     * @return bool
+     */
+    function cloudflare_read(&$seclvl, &$devmode) {
+        $config = array(
+            'email' => $this->_config->get_string('cloudflare.email'),
+            'key' => $this->_config->get_string('cloudflare.key'),
+            'zone' => $this->_config->get_string('cloudflare.zone')
+        );
+
+        require_once W3TC_LIB_W3_DIR . '/CloudFlare.php';
+        $w3_cloudflare =& new W3_CloudFlare($config);
+
+        $response = $w3_cloudflare->api_request('stats');
+
+        if ($response && $response->result == 'success' && isset($response->response->result->objs[0])) {
+            switch ($response->response->result->objs[0]->userSecuritySetting) {
+                case 'High';
+                    $seclvl = 'high';
+                    break;
+
+                case 'Medium';
+                    $seclvl = 'med';
+                    break;
+
+                case 'Low';
+                    $seclvl = 'low';
+                    break;
+            }
+
+            $devmode = (int) ($response->response->result->objs[0]->dev_mode >= time());
+
+            return true;
+        }
+
+        return false;
     }
 
     /**
