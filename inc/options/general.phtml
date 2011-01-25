@@ -105,8 +105,8 @@
             <tr>
                 <th valign="top">Minify mode:</th>
                 <td>
-                    <label><input class="enabled" type="radio" name="minify.auto" value="1"<?php checked($this->_config->get_boolean('minify.auto'), true); ?><?php if (! W3TC_PHP5): ?> disabled="disabled"<?php endif; ?> /> Auto</label>
-                    <label><input class="enabled" type="radio" name="minify.auto" value="0"<?php checked($this->_config->get_boolean('minify.auto'), false); ?><?php if (! W3TC_PHP5): ?> disabled="disabled"<?php endif; ?> /> Manual</label>
+                    <label><input type="radio" name="minify.auto" value="1"<?php checked($this->_config->get_boolean('minify.auto'), true); ?><?php if (! W3TC_PHP5): ?> disabled="disabled"<?php endif; ?> /> Auto</label>
+                    <label><input type="radio" name="minify.auto" value="0"<?php checked($this->_config->get_boolean('minify.auto'), false); ?><?php if (! W3TC_PHP5): ?> disabled="disabled"<?php endif; ?> /> Manual</label>
                 </td>
             </tr>
             <tr>
@@ -286,23 +286,26 @@
             <tr>
                 <th>Security level:</th>
                 <td>
-                    <select id="cloudflare_seclvl" class="w3tc-ignore-change">
+                    <input type="hidden" name="cloudflare_seclvl_old" value="<?php echo $cloudflare_seclvl; ?>" />
+                    <select name="cloudflare_seclvl_new" class="w3tc-ignore-change">
                         <?php foreach ($cloudflare_seclvls as $cloudflare_seclvl_key => $cloudflare_seclvl_label): ?>
                         <option value="<?php echo $cloudflare_seclvl_key; ?>"<?php selected($cloudflare_seclvl, $cloudflare_seclvl_key); ?>><?php echo $cloudflare_seclvl_label; ?></option>
                         <?php endforeach; ?>
                     </select>
-                    <input id="cloudflare_set_seclvl" class="button" type="button" value="Set" />
                 </td>
             </tr>
             <tr>
                 <th>Development mode:</th>
                 <td>
-                    <select id="cloudflare_devmode" class="w3tc-ignore-change">
+                    <input type="hidden" name="cloudflare_devmode_old" value="<?php echo $cloudflare_devmode; ?>" />
+                    <select name="cloudflare_devmode_new" class="w3tc-ignore-change">
                         <?php foreach ($cloudflare_devmodes as $cloudflare_devmode_key => $cloudflare_devmode_label): ?>
                         <option value="<?php echo $cloudflare_devmode_key; ?>"<?php selected($cloudflare_devmode, $cloudflare_devmode_key); ?>><?php echo $cloudflare_devmode_label; ?></option>
                         <?php endforeach; ?>
                     </select>
-                    <input id="cloudflare_set_devmode" class="button" type="button" value="Set" />
+                    <?php if ($cloudflare_devmode_expire): ?>
+                    Will automatically turn off at <?php echo date('m/d/Y H:i:s', $cloudflare_devmode_expire); ?>
+                    <?php endif; ?>
                 </td>
             </tr>
         </table>

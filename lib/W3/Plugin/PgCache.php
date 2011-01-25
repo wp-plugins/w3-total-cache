@@ -1225,48 +1225,44 @@ class W3_Plugin_PgCache extends W3_Plugin {
     function write_rules_core() {
         $path = w3_get_pgcache_rules_core_path();
 
-        if (w3_can_modify_rules($path)) {
-            $rules = $this->generate_rules_core();
-
-            if (file_exists($path)) {
-                if (($data = @file_get_contents($path)) !== false) {
-                    $data = $this->erase_rules_core($data);
-                    $data = $this->erase_rules_wpsc($data);
-                } else {
-                    return false;
-                }
+        if (file_exists($path)) {
+            if (($data = @file_get_contents($path)) !== false) {
+                $data = $this->erase_rules_core($data);
+                $data = $this->erase_rules_wpsc($data);
             } else {
-                $data = '';
+                return false;
             }
-
-            $search = array(
-                W3TC_MARKER_BEGIN_BROWSERCACHE_NO404WP => 0,
-                W3TC_MARKER_BEGIN_WORDPRESS => 0,
-                W3TC_MARKER_END_MINIFY_CORE => strlen(W3TC_MARKER_END_MINIFY_CORE) + 1,
-                W3TC_MARKER_END_BROWSERCACHE_CACHE => strlen(W3TC_MARKER_END_BROWSERCACHE_CACHE) + 1,
-                W3TC_MARKER_END_PGCACHE_CACHE => strlen(W3TC_MARKER_END_PGCACHE_CACHE) + 1,
-                W3TC_MARKER_END_MINIFY_CACHE => strlen(W3TC_MARKER_END_MINIFY_CACHE) + 1
-            );
-
-            foreach ($search as $string => $length) {
-                $rules_pos = strpos($data, $string);
-
-                if ($rules_pos !== false) {
-                    $rules_pos += $length;
-                    break;
-                }
-            }
-
-            if ($rules_pos !== false) {
-                $data = trim(substr_replace($data, $rules, $rules_pos, 0));
-            } else {
-                $data = trim($rules . $data);
-            }
-
-            return @file_put_contents($path, $data);
+        } else {
+            $data = '';
         }
 
-        return true;
+        $search = array(
+            W3TC_MARKER_BEGIN_BROWSERCACHE_NO404WP => 0,
+            W3TC_MARKER_BEGIN_WORDPRESS => 0,
+            W3TC_MARKER_END_MINIFY_CORE => strlen(W3TC_MARKER_END_MINIFY_CORE) + 1,
+            W3TC_MARKER_END_BROWSERCACHE_CACHE => strlen(W3TC_MARKER_END_BROWSERCACHE_CACHE) + 1,
+            W3TC_MARKER_END_PGCACHE_CACHE => strlen(W3TC_MARKER_END_PGCACHE_CACHE) + 1,
+            W3TC_MARKER_END_MINIFY_CACHE => strlen(W3TC_MARKER_END_MINIFY_CACHE) + 1
+        );
+
+        foreach ($search as $string => $length) {
+            $rules_pos = strpos($data, $string);
+
+            if ($rules_pos !== false) {
+                $rules_pos += $length;
+                break;
+            }
+        }
+
+        $rules = $this->generate_rules_core();
+
+        if ($rules_pos !== false) {
+            $data = trim(substr_replace($data, $rules, $rules_pos, 0));
+        } else {
+            $data = trim($rules . $data);
+        }
+
+        return @file_put_contents($path, $data);
     }
 
     /**
@@ -1277,47 +1273,43 @@ class W3_Plugin_PgCache extends W3_Plugin {
     function write_rules_cache() {
         $path = w3_get_pgcache_rules_cache_path();
 
-        if (w3_can_modify_rules($path)) {
-            $rules = $this->generate_rules_cache();
-
-            if (file_exists($path)) {
-                if (($data = @file_get_contents($path)) !== false) {
-                    $data = $this->erase_rules_cache($data);
-                } else {
-                    return false;
-                }
+        if (file_exists($path)) {
+            if (($data = @file_get_contents($path)) !== false) {
+                $data = $this->erase_rules_cache($data);
             } else {
-                $data = '';
+                return false;
             }
-
-            $search = array(
-                W3TC_MARKER_BEGIN_BROWSERCACHE_CACHE => 0,
-                W3TC_MARKER_BEGIN_MINIFY_CORE => 0,
-                W3TC_MARKER_BEGIN_PGCACHE_CORE => 0,
-                W3TC_MARKER_BEGIN_BROWSERCACHE_NO404WP => 0,
-                W3TC_MARKER_BEGIN_WORDPRESS => 0,
-                W3TC_MARKER_END_MINIFY_CACHE => strlen(W3TC_MARKER_END_MINIFY_CACHE) + 1
-            );
-
-            foreach ($search as $string => $length) {
-                $rules_pos = strpos($data, $string);
-
-                if ($rules_pos !== false) {
-                    $rules_pos += $length;
-                    break;
-                }
-            }
-
-            if ($rules_pos !== false) {
-                $data = trim(substr_replace($data, $rules, $rules_pos, 0));
-            } else {
-                $data = trim($rules . $data);
-            }
-
-            return @file_put_contents($path, $data);
+        } else {
+            $data = '';
         }
 
-        return true;
+        $search = array(
+            W3TC_MARKER_BEGIN_BROWSERCACHE_CACHE => 0,
+            W3TC_MARKER_BEGIN_MINIFY_CORE => 0,
+            W3TC_MARKER_BEGIN_PGCACHE_CORE => 0,
+            W3TC_MARKER_BEGIN_BROWSERCACHE_NO404WP => 0,
+            W3TC_MARKER_BEGIN_WORDPRESS => 0,
+            W3TC_MARKER_END_MINIFY_CACHE => strlen(W3TC_MARKER_END_MINIFY_CACHE) + 1
+        );
+
+        foreach ($search as $string => $length) {
+            $rules_pos = strpos($data, $string);
+
+            if ($rules_pos !== false) {
+                $rules_pos += $length;
+                break;
+            }
+        }
+
+        $rules = $this->generate_rules_cache();
+
+        if ($rules_pos !== false) {
+            $data = trim(substr_replace($data, $rules, $rules_pos, 0));
+        } else {
+            $data = trim($rules . $data);
+        }
+
+        return @file_put_contents($path, $data);
     }
 
     /**
@@ -1364,7 +1356,7 @@ class W3_Plugin_PgCache extends W3_Plugin {
     function remove_rules_core() {
         $path = w3_get_pgcache_rules_core_path();
 
-        if (w3_can_modify_rules($path) && file_exists($path)) {
+        if (file_exists($path)) {
             if (($data = @file_get_contents($path)) !== false) {
                 $data = $this->erase_rules_core($data);
 
@@ -1385,7 +1377,7 @@ class W3_Plugin_PgCache extends W3_Plugin {
     function remove_rules_cache() {
         $path = w3_get_pgcache_rules_cache_path();
 
-        if (w3_can_modify_rules($path) && file_exists($path)) {
+        if (file_exists($path)) {
             if (($data = @file_get_contents($path)) !== false) {
                 $data = $this->erase_rules_cache($data);
 

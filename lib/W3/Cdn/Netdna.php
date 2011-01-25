@@ -70,7 +70,6 @@ class W3_Cdn_Netdna extends W3_Cdn_Base {
         $method = 'purge';
         $auth_string = sprintf('%s:%s:%s', $date, $this->_config['apikey'], $method);
         $auth_key = $this->sha256($auth_string);
-        $domain_url = w3_get_domain_url();
 
         $client = new IXR_Client('http://api.netdna.com/xmlrpc/cache');
         $client->timeout = 30;

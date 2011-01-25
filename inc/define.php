@@ -1087,23 +1087,12 @@ function w3_get_cdn_rules_path() {
  */
 function w3_can_modify_rules($path) {
     if (w3_is_apache()) {
-        if (w3_is_network()) {
-            switch ($path) {
-                case w3_get_pgcache_rules_cache_path():
-                case w3_get_minify_rules_core_path():
-                case w3_get_minify_rules_cache_path():
-                    return true;
-
-                case w3_get_pgcache_rules_core_path():
-                case w3_get_browsercache_rules_cache_path():
-                case w3_get_browsercache_rules_no404wp_path():
-                    return false;
-            }
-        } else {
-            return true;
+        switch ($path) {
+            case w3_get_pgcache_rules_cache_path():
+            case w3_get_minify_rules_core_path():
+            case w3_get_minify_rules_cache_path():
+                return true;
         }
-    } elseif (w3_is_nginx() && !w3_is_network()) {
-        return true;
     }
 
     return false;

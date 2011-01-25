@@ -683,14 +683,6 @@ jQuery(function() {
         }, 'json');
     });
 
-    jQuery('#cloudflare_set_devmode').click(function() {
-        w3tc_cloudflare_api_request('devmode', jQuery('#cloudflare_devmode').val());
-    });
-
-    jQuery('#cloudflare_set_seclvl').click(function() {
-        w3tc_cloudflare_api_request('sec_lvl', jQuery('#cloudflare_seclvl').val());
-    });
-
     jQuery('#cloudflare_purge_cache').click(function() {
         if (confirm('Purging your site\'s cache will remove all cache files. It may take up to 48 hours for the cache to completely rebuild on CloudFlare\'s global network. Are you sure you want to purge the cache?')) {
             w3tc_cloudflare_api_request('fpurge_ts', 1);
