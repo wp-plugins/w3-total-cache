@@ -278,12 +278,6 @@
                 </td>
             </tr>
             <tr>
-                <th>Cache purge:</th>
-                <td>
-                    <input id="cloudflare_purge_cache" class="button" type="button" value="Purge cache" />
-                </td>
-            </tr>
-            <tr>
                 <th>Security level:</th>
                 <td>
                     <input type="hidden" name="cloudflare_seclvl_old" value="<?php echo $cloudflare_seclvl; ?>" />
@@ -312,6 +306,7 @@
 
         <p class="submit">
             <input type="submit" name="options_save" class="w3tc-button-save button-primary" value="Save changes" />
+            <input id="cloudflare_purge_cache" class="button" type="button" value="Purge cache" />
         </p>
         <?php echo $this->postbox_footer(); ?>
 

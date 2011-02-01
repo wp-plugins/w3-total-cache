@@ -167,6 +167,11 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                 &$this,
                 'post_row_actions'
             ), null, 2);
+
+            add_filter('page_row_actions', array(
+                &$this,
+                'page_row_actions'
+            ), null, 2);
         }
 
         if (isset($_REQUEST['w3tc_theme']) && isset($_SERVER['HTTP_USER_AGENT']) && $_SERVER['HTTP_USER_AGENT'] == W3TC_POWERED_BY) {
@@ -780,10 +785,17 @@ class W3_Plugin_TotalCache extends W3_Plugin {
         }
 
         /**
-         * PgCache purge
+         * PgCache purge post
          */
         if (isset($_REQUEST['pgcache_purge_post'])) {
             $this->pgcache_purge_post();
+        }
+
+        /**
+         * PgCache purge page
+         */
+        if (isset($_REQUEST['pgcache_purge_page'])) {
+            $this->pgcache_purge_page();
         }
 
         $this->_support_reminder = ($this->_config->get_boolean('notes.support_us') && $this->_config->get_integer('common.install') < (time() - W3TC_SUPPORT_US_TIMEOUT) && !$this->is_supported());
@@ -1186,6 +1198,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
             'preview_deploy' => sprintf('Preview settings could not be deployed. Please run <strong>chmod 777 %s</strong> to make the configuration file write-able, then try again.', (file_exists(W3TC_CONFIG_PATH) ? W3TC_CONFIG_PATH : dirname(W3TC_CONFIG_PATH))),
             'cdn_purge_attachment' => 'Unable to purge attachment.',
             'pgcache_purge_post' => 'Unable to purge post.',
+            'pgcache_purge_page' => 'Unable to purge page.',
             'enable_cookie_domain' => sprintf('<strong>%swp-config.php</strong> could not be written, please edit config and add:<br /><strong style="color:#f00;">define(\'COOKIE_DOMAIN\', \'%s\');</strong> before <strong style="color:#f00;">require_once(ABSPATH . \'wp-settings.php\');</strong>.', ABSPATH, addslashes($cookie_domain)),
             'disable_cookie_domain' => sprintf('<strong>%swp-config.php</strong> could not be written, please edit config and add:<br /><strong style="color:#f00;">define(\'COOKIE_DOMAIN\', false);</strong> before <strong style="color:#f00;">require_once(ABSPATH . \'wp-settings.php\');</strong>.', ABSPATH),
             'cloudflare_api_request' => 'Unable to make CloudFlare API request.'
@@ -1213,7 +1226,8 @@ class W3_Plugin_TotalCache extends W3_Plugin {
             'preview_disable' => 'Preview mode was successfully disabled',
             'preview_deploy' => 'Preview settings successfully deployed.',
             'cdn_purge_attachment' => 'Attachment successfully purged.',
-            'pgcache_purge_post' => 'Post successfully purged.'
+            'pgcache_purge_post' => 'Post successfully purged.',
+            'pgcache_purge_page' => 'Page successfully purged.'
         );
 
         $errors = array();
@@ -1287,7 +1301,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                 }
 
                 if ($this->_config->get_boolean('notes.cdn_reupload')) {
-                    $notes[] = sprintf('Settings that effect Browser Cache settings for files hosted by the CDN have been changed. To apply the new settings %s and %s. %s', $this->button_popup('export the media library', 'cdn_export_library'), implode(', ', $cdn_upload_buttons), $this->button_hide_note('Hide this message', 'cdn_upload'));
+                    $notes[] = sprintf('Settings that effect Browser Cache settings for files hosted by the CDN have been changed. To apply the new settings %s and %s. %s', $this->button_popup('export the media library', 'cdn_export_library'), implode(', ', $cdn_upload_buttons), $this->button_hide_note('Hide this message', 'cdn_reupload'));
                 }
             }
 
@@ -1429,6 +1443,17 @@ class W3_Plugin_TotalCache extends W3_Plugin {
     function post_row_actions($actions, $post) {
         $actions = array_merge($actions, array(
             'pgcache_purge' => sprintf('<a href="admin.php?page=w3tc_general&pgcache_purge_post&post_id=%d">Purge from Page Cache</a>', $post->ID)
+        ));
+
+        return $actions;
+    }
+
+    /**
+     * page_row_actions filter
+     */
+    function page_row_actions($actions, $post) {
+        $actions = array_merge($actions, array(
+            'pgcache_purge' => sprintf('<a href="admin.php?page=w3tc_general&pgcache_purge_page&post_id=%d">Purge from Page Cache</a>', $post->ID)
         ));
 
         return $actions;
@@ -3111,12 +3136,10 @@ class W3_Plugin_TotalCache extends W3_Plugin {
              */
             if ($new_config->get_boolean('pgcache.enabled') && $new_config->get_string('pgcache.engine') == 'file_pgcache') {
                 if (w3_can_modify_rules(w3_get_pgcache_rules_core_path())) {
-                    $w3_plugin_pgcache->remove_rules_core();
                     $w3_plugin_pgcache->write_rules_core();
                 }
 
                 if (w3_can_modify_rules(w3_get_pgcache_rules_cache_path())) {
-                    $w3_plugin_pgcache->remove_rules_cache();
                     $w3_plugin_pgcache->write_rules_cache();
                 }
             } else {
@@ -3129,13 +3152,11 @@ class W3_Plugin_TotalCache extends W3_Plugin {
              */
             if ($new_config->get_boolean('browsercache.enabled')) {
                 if (w3_can_modify_rules(w3_get_browsercache_rules_cache_path())) {
-                    $w3_plugin_browsercache->remove_rules_cache();
                     $w3_plugin_browsercache->write_rules_cache();
                 }
 
                 if ($new_config->get_boolean('browsercache.no404wp')) {
                     if (w3_can_modify_rules(w3_get_browsercache_rules_no404wp_path())) {
-                        $w3_plugin_browsercache->remove_rules_no404wp();
                         $w3_plugin_browsercache->write_rules_no404wp();
                     }
                 } else {
@@ -3152,13 +3173,11 @@ class W3_Plugin_TotalCache extends W3_Plugin {
             if (W3TC_PHP5) {
                 if ($new_config->get_boolean('minify.enabled') && $new_config->get_boolean('minify.rewrite')) {
                     if (w3_can_modify_rules(w3_get_minify_rules_core_path())) {
-                        $w3_plugin_minify->remove_rules_core();
                         $w3_plugin_minify->write_rules_core();
                     }
 
                     if ($this->_config->get_string('minify.engine') == 'file') {
                         if (w3_can_modify_rules(w3_get_minify_rules_cache_path())) {
-                            $w3_plugin_minify->remove_rules_cache();
                             $w3_plugin_minify->write_rules_cache();
                         } else {
                             $w3_plugin_minify->remove_rules_cache();
@@ -3709,7 +3728,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
         if ($new_window) {
             $onclick = sprintf('window.open(\'%s\');', addslashes($url));
         } else {
-            $onclick = sprintf('document.location.href = \'%s\';', addslashes($url));
+            $onclick = sprintf('document.location.href=\'%s\';', addslashes($url));
         }
 
         return $this->button($text, $onclick);
@@ -4084,7 +4103,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
             $tmp_path => $cdn_path
         );
 
-        return $w3_plugin_cdn->delete($delete, true, $results);
+        return $w3_plugin_cdn->delete($delete, false, $results);
     }
 
     /**
@@ -4245,10 +4264,31 @@ class W3_Plugin_TotalCache extends W3_Plugin {
             $this->redirect(array(
                 'w3tc_note' => 'pgcache_purge_post'
             ), true);
-
         } else {
             $this->redirect(array(
                 'w3tc_error' => 'pgcache_purge_post'
+            ), true);
+        }
+    }
+
+    /**
+     * PgCache purge page
+     */
+    function pgcache_purge_page() {
+        require_once W3TC_LIB_W3_DIR . '/Request.php';
+        require_once W3TC_DIR . '/lib/W3/PgCache.php';
+
+        $post_id = W3_Request::get_integer('post_id');
+
+        $w3_pgcache = & W3_PgCache::instance();
+
+        if ($w3_pgcache->flush_post($post_id)) {
+            $this->redirect(array(
+                'w3tc_note' => 'pgcache_purge_page'
+            ), true);
+        } else {
+            $this->redirect(array(
+                'w3tc_error' => 'pgcache_purge_page'
             ), true);
         }
     }

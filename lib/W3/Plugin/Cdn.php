@@ -1464,7 +1464,7 @@ class W3_Plugin_Cdn extends W3_Plugin {
         foreach ($reject_files as $reject_file) {
             if ($reject_file != '') {
                 $reject_file = w3_normalize_file($reject_file);
-                $reject_file_regexp = '~^(' . $this->get_regexp_by_mask($reject_file) . ')$~i';
+                $reject_file_regexp = '~^(' . $this->get_regexp_by_mask($reject_file) . ')~i';
 
                 if (preg_match($reject_file_regexp, $path)) {
                     return $match;

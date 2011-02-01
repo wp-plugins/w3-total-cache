@@ -331,7 +331,7 @@ jQuery(function() {
 
     jQuery('.js_file_delete').live('click', function() {
         var parent = jQuery(this).parents('li');
-        if (parent.find('input[type=text]').val() == '' || confirm('Are you sure you want to delete JS file?')) {
+        if (parent.find('input[type=text]').val() == '' || confirm('Are you sure you want to remove this JS file?')) {
             parent.remove();
             w3tc_minify_js_file_clear();
             w3tc_beforeupload_bind();
@@ -342,7 +342,7 @@ jQuery(function() {
 
     jQuery('.css_file_delete').live('click', function() {
         var parent = jQuery(this).parents('li');
-        if (parent.find('input[type=text]').val() == '' || confirm('Are you sure you want to delete CSS file?')) {
+        if (parent.find('input[type=text]').val() == '' || confirm('Are you sure you want to remove this CSS file?')) {
             parent.remove();
             w3tc_minify_css_file_clear();
             w3tc_beforeupload_bind();
@@ -756,7 +756,7 @@ jQuery(function() {
 
     jQuery('.cdn_cname_delete').live('click', function() {
         var p = jQuery(this).parent();
-        if (p.find('input[type=text]').val() == '' || confirm('Are you sure you want to delete JS file?')) {
+        if (p.find('input[type=text]').val() == '' || confirm('Are you sure you want to remove this CNAME?')) {
             p.remove();
             w3tc_cdn_cnames_assign();
             w3tc_beforeupload_bind();

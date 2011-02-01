@@ -405,6 +405,33 @@ Please reach out to all of these people and support their projects if you're so 
 
 == Changelog ==
 
+= 0.9.2 =
+* Added support for nginx web server
+* Added support for CloudFlare
+* Added origin pull support for Amazon Cloudfront
+* Added Microsoft Azure support for CDN
+* Added WinCache opcode cache support
+* Added additional minifier engines for HTML, CSS and JS including: HTMLtidy, CSStidy, Closure Compiler, YUI Compressor
+* Added controls for page cache purging policy
+* Added auto mode for minify (not compatible with CDN)
+* Added support for set cookie domain setting
+* Added reliability improvements for Amazon Web Services
+* Added referrer group management for uniquely caching these cases
+* Added Amazon S3 bucket location selection control
+* Added support to reconfigure CNAMEs in for Amazon Cloudfront using W3TC settings
+* Improved non-blocking JS embedding implementation
+* Improved reliability of CDN export operations
+* Improved implementation of headers for all cache engines
+* Improved minify help (recommendations) tool
+* Fixed bug with emptying cache for various cache keys
+* Fixed division by zero error
+* Fixed bug with rejected CDN file support
+* Fixed bug with HTTPS mode in WP Admin
+* Fixed bug with related document root for disk enhanced page cache
+* Fixed bug with trailing slashes for disk enhanced page cache
+* Fixed bug with minify template group settings being lost upon upgrade
+* Moved browser cache rules to site root instead of document root
+
 = 0.9.1.3 =
 * Improved error messages with AWS S3 CDN
 * Added SSL support for CDN

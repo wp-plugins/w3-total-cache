@@ -1226,8 +1226,9 @@ class W3_Plugin_PgCache extends W3_Plugin {
         $path = w3_get_pgcache_rules_core_path();
 
         if (file_exists($path)) {
-            if (($data = @file_get_contents($path)) !== false) {
-                $data = $this->erase_rules_core($data);
+            $data = @file_get_contents($path);
+
+            if ($data !== false) {
                 $data = $this->erase_rules_wpsc($data);
             } else {
                 return false;
@@ -1236,30 +1237,40 @@ class W3_Plugin_PgCache extends W3_Plugin {
             $data = '';
         }
 
-        $search = array(
-            W3TC_MARKER_BEGIN_BROWSERCACHE_NO404WP => 0,
-            W3TC_MARKER_BEGIN_WORDPRESS => 0,
-            W3TC_MARKER_END_MINIFY_CORE => strlen(W3TC_MARKER_END_MINIFY_CORE) + 1,
-            W3TC_MARKER_END_BROWSERCACHE_CACHE => strlen(W3TC_MARKER_END_BROWSERCACHE_CACHE) + 1,
-            W3TC_MARKER_END_PGCACHE_CACHE => strlen(W3TC_MARKER_END_PGCACHE_CACHE) + 1,
-            W3TC_MARKER_END_MINIFY_CACHE => strlen(W3TC_MARKER_END_MINIFY_CACHE) + 1
-        );
+        $replace_start = strpos($data, W3TC_MARKER_BEGIN_PGCACHE_CORE);
+        $replace_end = strpos($data, W3TC_MARKER_END_PGCACHE_CORE);
 
-        foreach ($search as $string => $length) {
-            $rules_pos = strpos($data, $string);
+        if ($replace_start !== false && $replace_end !== false && $replace_start < $replace_end) {
+            $replace_length = $replace_end - $replace_start + strlen(W3TC_MARKER_END_PGCACHE_CORE) + 1;
+        } else {
+            $replace_start = false;
+            $replace_length = 0;
 
-            if ($rules_pos !== false) {
-                $rules_pos += $length;
-                break;
+            $search = array(
+                W3TC_MARKER_BEGIN_BROWSERCACHE_NO404WP => 0,
+                W3TC_MARKER_BEGIN_WORDPRESS => 0,
+                W3TC_MARKER_END_MINIFY_CORE => strlen(W3TC_MARKER_END_MINIFY_CORE) + 1,
+                W3TC_MARKER_END_BROWSERCACHE_CACHE => strlen(W3TC_MARKER_END_BROWSERCACHE_CACHE) + 1,
+                W3TC_MARKER_END_PGCACHE_CACHE => strlen(W3TC_MARKER_END_PGCACHE_CACHE) + 1,
+                W3TC_MARKER_END_MINIFY_CACHE => strlen(W3TC_MARKER_END_MINIFY_CACHE) + 1
+            );
+
+            foreach ($search as $string => $length) {
+                $replace_start = strpos($data, $string);
+
+                if ($replace_start !== false) {
+                    $replace_start += $length;
+                    break;
+                }
             }
         }
 
         $rules = $this->generate_rules_core();
 
-        if ($rules_pos !== false) {
-            $data = trim(substr_replace($data, $rules, $rules_pos, 0));
+        if ($replace_start !== false) {
+            $data = trim(substr_replace($data, $rules, $replace_start, $replace_length));
         } else {
-            $data = trim($rules . $data);
+            $data = trim($data . $rules);
         }
 
         return @file_put_contents($path, $data);
@@ -1274,39 +1285,49 @@ class W3_Plugin_PgCache extends W3_Plugin {
         $path = w3_get_pgcache_rules_cache_path();
 
         if (file_exists($path)) {
-            if (($data = @file_get_contents($path)) !== false) {
-                $data = $this->erase_rules_cache($data);
-            } else {
+            $data = @file_get_contents($path);
+
+            if ($data === false) {
                 return false;
             }
         } else {
             $data = '';
         }
 
-        $search = array(
-            W3TC_MARKER_BEGIN_BROWSERCACHE_CACHE => 0,
-            W3TC_MARKER_BEGIN_MINIFY_CORE => 0,
-            W3TC_MARKER_BEGIN_PGCACHE_CORE => 0,
-            W3TC_MARKER_BEGIN_BROWSERCACHE_NO404WP => 0,
-            W3TC_MARKER_BEGIN_WORDPRESS => 0,
-            W3TC_MARKER_END_MINIFY_CACHE => strlen(W3TC_MARKER_END_MINIFY_CACHE) + 1
-        );
+        $replace_start = strpos($data, W3TC_MARKER_BEGIN_PGCACHE_CACHE);
+        $replace_end = strpos($data, W3TC_MARKER_END_PGCACHE_CACHE);
 
-        foreach ($search as $string => $length) {
-            $rules_pos = strpos($data, $string);
+        if ($replace_start !== false && $replace_end !== false && $replace_start < $replace_end) {
+            $replace_length = $replace_end - $replace_start + strlen(W3TC_MARKER_END_PGCACHE_CACHE) + 1;
+        } else {
+            $replace_start = false;
+            $replace_length = 0;
 
-            if ($rules_pos !== false) {
-                $rules_pos += $length;
-                break;
+            $search = array(
+                W3TC_MARKER_BEGIN_BROWSERCACHE_CACHE => 0,
+                W3TC_MARKER_BEGIN_MINIFY_CORE => 0,
+                W3TC_MARKER_BEGIN_PGCACHE_CORE => 0,
+                W3TC_MARKER_BEGIN_BROWSERCACHE_NO404WP => 0,
+                W3TC_MARKER_BEGIN_WORDPRESS => 0,
+                W3TC_MARKER_END_MINIFY_CACHE => strlen(W3TC_MARKER_END_MINIFY_CACHE) + 1
+            );
+
+            foreach ($search as $string => $length) {
+                $replace_start = strpos($data, $string);
+
+                if ($replace_start !== false) {
+                    $replace_start += $length;
+                    break;
+                }
             }
         }
 
         $rules = $this->generate_rules_cache();
 
-        if ($rules_pos !== false) {
-            $data = trim(substr_replace($data, $rules, $rules_pos, 0));
+        if ($replace_start !== false) {
+            $data = trim(substr_replace($data, $rules, $replace_start, $replace_length));
         } else {
-            $data = trim($rules . $data);
+            $data = trim($data . $rules);
         }
 
         return @file_put_contents($path, $data);
