@@ -619,16 +619,16 @@ class W3_Plugin_Minify extends W3_Plugin {
         static $non_blocking_function = false;
 
         if ($blocking) {
-            return '<script type="text/javascript" src="' . str_replace('&', '&amp;', $url) . '"></script>';
+            return '<script src="' . str_replace('&', '&amp;', $url) . '"></script>';
         } else {
             $script = '';
 
             if (!$non_blocking_function) {
                 $non_blocking_function = true;
-                $script = '<script type="text/javascript" src="' . plugins_url('inc/js/head.min.js', W3TC_FILE) . '"></script>';
+                $script = '<script src="' . plugins_url('inc/js/head.min.js', W3TC_FILE) . '"></script>';
             }
 
-            $script .= '<script type="text/javascript">head.js(\'' . $url . '\');</script>';
+            $script .= '<script>head.js(\'' . $url . '\');</script>';
 
             return $script;
         }
@@ -660,7 +660,7 @@ class W3_Plugin_Minify extends W3_Plugin {
 
         if (!empty($groups[$theme][$template][$location]['files'])) {
             $url = $this->format_url_group($theme, $template, $location, 'css');
-            $import = (isset($groups[$theme][$template]['import']) ? (boolean) $groups[$theme][$template]['import'] : false);
+            $import = (isset($groups[$theme][$template][$location]['import']) ? (boolean) $groups[$theme][$template][$location]['import'] : false);
 
             $styles = $this->get_style($url, $import);
         }
@@ -694,7 +694,7 @@ class W3_Plugin_Minify extends W3_Plugin {
 
         if (!empty($groups[$theme][$template][$location]['files'])) {
             $url = $this->format_url_group($theme, $template, $location, 'js');
-            $blocking = (isset($groups[$theme][$template]['blocking']) ? (boolean) $groups[$theme][$template]['blocking'] : true);
+            $blocking = (isset($groups[$theme][$template][$location]['blocking']) ? (boolean) $groups[$theme][$template][$location]['blocking'] : true);
 
             $scripts = $this->get_script($url, $blocking);
         }
@@ -1061,7 +1061,10 @@ class W3_Plugin_Minify extends W3_Plugin {
             }
         }
 
-        foreach ($this->_config->get_array('minify.reject.uri') as $expr) {
+        $reject_uri = $this->_config->get_array('minify.reject.uri');
+        $reject_uri = array_map('w3_parse_path', $reject_uri);
+
+        foreach ($reject_uri as $expr) {
             $expr = trim($expr);
             if ($expr != '' && preg_match('~' . $expr . '~i', $_SERVER['REQUEST_URI'])) {
                 return false;

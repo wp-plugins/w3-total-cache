@@ -522,6 +522,7 @@ class W3_ObjectCache {
         }
 
         $reject_uri = $this->_config->get_array('objectcache.reject.uri');
+        $reject_uri = array_map('w3_parse_path', $reject_uri);
 
         foreach ($reject_uri as $expr) {
             $expr = trim($expr);

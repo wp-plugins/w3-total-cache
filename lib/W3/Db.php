@@ -560,6 +560,7 @@ class W3_Db extends wpdb {
         }
 
         $reject_uri = $this->_config->get_array('dbcache.reject.uri');
+        $reject_uri = array_map('w3_parse_path', $reject_uri);
 
         foreach ($reject_uri as $expr) {
             $expr = trim($expr);

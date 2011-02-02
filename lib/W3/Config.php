@@ -699,7 +699,7 @@ class W3_Config {
                     'phone',
                     'playstation\ portable',
                     'portalmmm',
-                    'ppc',
+                    '\bppc\b',
                     'proxinet',
                     'psp',
                     'pt',

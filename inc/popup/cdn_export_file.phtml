@@ -1,6 +1,6 @@
 <?php include W3TC_DIR . '/inc/popup/common/header.phtml'; ?>
 
-<script type="text/javascript">
+<script>
 var files = [
 <?php $files_count = count($files); foreach ($files as $index => $file): ?>
 	'<?php echo addslashes($file); ?>'<?php if ($index < $files_count - 1): ?>,<?php endif; ?>

@@ -1109,6 +1109,36 @@ function w3_can_cdn_purge($engine) {
 }
 
 /**
+ * Parses path
+ *
+ * @param string $path
+ * @return mixed
+ */
+function w3_parse_path($path) {
+    $path = str_replace(array(
+        '%BLOG_ID%',
+        '%POST_ID%',
+        '%BLOG_NAME%',
+        '%HOST%',
+        '%DOMAIN%',
+        '%SITE_PATH%',
+        '%HOME_PATH%',
+        '%BASE_PATH%'
+    ), array(
+        (isset($GLOBALS['blog_id']) ? (int) $GLOBALS['blog_id'] : 0),
+        (isset($GLOBALS['post_id']) ? (int) $GLOBALS['post_id'] : 0),
+        w3_get_blogname(),
+        w3_get_host(),
+        w3_get_domain(w3_get_host()),
+        trim(w3_get_site_path(), '/'),
+        trim(w3_get_home_path(), '/'),
+        trim(w3_get_base_path(), '/')
+    ), $path);
+
+    return $path;
+}
+
+/**
  * Normalizes file name
  *
  * Relative to site root!

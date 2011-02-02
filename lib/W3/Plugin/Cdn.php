@@ -565,6 +565,7 @@ class W3_Plugin_Cdn extends W3_Plugin {
 
                 if ($this->_config->get_boolean('cdn.custom.enable')) {
                     $masks = $this->_config->get_array('cdn.custom.files');
+                    $masks = array_map('w3_parse_path', $masks);
 
                     if (count($masks)) {
                         $mask_regexps = array();
@@ -1329,8 +1330,8 @@ class W3_Plugin_Cdn extends W3_Plugin {
      */
     function get_files_includes() {
         $includes_root = w3_path(ABSPATH . WPINC);
-        $document_root = w3_get_document_root();
-        $includes_path = ltrim(str_replace($document_root, '', $includes_root), '/');
+        $site_root = w3_get_site_root();
+        $includes_path = trim(w3_get_site_path(), '/') . str_replace($site_root, '', $includes_root);
 
         $files = $this->search_files($includes_root, $includes_path, $this->_config->get_string('cdn.includes.files'));
 
@@ -1352,8 +1353,8 @@ class W3_Plugin_Cdn extends W3_Plugin {
         }
 
         $themes_root = w3_path($themes_root);
-        $document_root = w3_get_document_root();
-        $themes_path = ltrim(str_replace($document_root, '', $themes_root), '/');
+        $site_root = w3_get_site_root();
+        $themes_path = trim(w3_get_site_path(), '/') . str_replace($site_root, '', $themes_root);
 
         $files = $this->search_files($themes_root, $themes_path, $this->_config->get_string('cdn.theme.files'));
 
@@ -1371,8 +1372,9 @@ class W3_Plugin_Cdn extends W3_Plugin {
             $minify = & W3_Plugin_Minify::instance();
 
             $document_root = w3_get_document_root();
+            $site_root = w3_get_site_root();
             $minify_root = w3_path(W3TC_CACHE_FILE_MINIFY_DIR);
-            $minify_path = ltrim(str_replace($document_root, '', $minify_root), '/');
+            $minify_path = trim(w3_get_site_path(), '/') . str_replace($site_root, '', $minify_root);
 
             $urls = $minify->get_urls();
 
@@ -1415,6 +1417,7 @@ class W3_Plugin_Cdn extends W3_Plugin {
         $files = array();
         $document_root = w3_get_document_root();
         $custom_files = $this->_config->get_array('cdn.custom.files');
+        $custom_files = array_map('w3_parse_path', $custom_files);
 
         foreach ($custom_files as $custom_file) {
             if ($custom_file != '') {
@@ -1841,7 +1844,10 @@ class W3_Plugin_Cdn extends W3_Plugin {
             }
         }
 
-        foreach ($this->_config->get_array('cdn.reject.uri') as $expr) {
+        $reject_uri = $this->_config->get_array('cdn.reject.uri');
+        $reject_uri = array_map('w3_parse_path', $reject_uri);
+
+        foreach ($reject_uri as $expr) {
             $expr = trim($expr);
             if ($expr != '' && preg_match('~' . $expr . '~i', $_SERVER['REQUEST_URI'])) {
                 return false;

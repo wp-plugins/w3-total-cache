@@ -591,6 +591,7 @@ class W3_Plugin_PgCache extends W3_Plugin {
          */
         $reject_cookies = array_merge($reject_cookies, $this->_config->get_array('pgcache.reject.cookie'));
         $reject_uris = array_merge($reject_uris, $this->_config->get_array('pgcache.reject.uri'));
+        $reject_uris = array_map('w3_parse_path', $reject_uris);
         $reject_user_agents = $this->_config->get_array('pgcache.reject.ua');
         $accept_files = $this->_config->get_array('pgcache.accept.files');
 
@@ -837,6 +838,7 @@ class W3_Plugin_PgCache extends W3_Plugin {
          */
         $reject_cookies = array_merge($reject_cookies, $this->_config->get_array('pgcache.reject.cookie'));
         $reject_uris = array_merge($reject_uris, $this->_config->get_array('pgcache.reject.uri'));
+        $reject_uris = array_map('w3_parse_path', $reject_uris);
         $reject_user_agents = $this->_config->get_array('pgcache.reject.ua');
         $accept_files = $this->_config->get_array('pgcache.accept.files');
 

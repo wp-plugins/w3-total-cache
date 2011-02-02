@@ -2277,7 +2277,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
     function options_install() {
         $rewrite_rules = array();
 
-        if ($this->_config->get_boolean('minify.enabled')) {
+        if ($this->_config->get_boolean('minify.enabled') && $this->_config->get_string('minify.engine') == 'file') {
             require_once W3TC_LIB_W3_DIR . '/Plugin/Minify.php';
             $w3_plugin_minify = & W3_Plugin_Minify::instance();
 
@@ -2373,6 +2373,9 @@ class W3_Plugin_TotalCache extends W3_Plugin {
             }
         }
 
+        ksort($rewrite_rules);
+        reset($rewrite_rules);
+
         include W3TC_DIR . '/inc/options/install.phtml';
     }
 
@@ -2448,23 +2451,23 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                                 break;
 
                             case 'include-nb':
-                                $js_groups[$theme][$template]['blocking'] = false;
+                                $js_groups[$theme][$template][$location]['blocking'] = false;
                                 break;
 
                             case 'include-body':
-                                $js_groups[$theme][$template]['blocking'] = true;
+                                $js_groups[$theme][$template][$location]['blocking'] = true;
                                 break;
 
                             case 'include-body-nb':
-                                $js_groups[$theme][$template]['blocking'] = false;
+                                $js_groups[$theme][$template][$location]['blocking'] = false;
                                 break;
 
                             case 'include-footer':
-                                $js_groups[$theme][$template]['blocking'] = true;
+                                $js_groups[$theme][$template][$location]['blocking'] = true;
                                 break;
 
                             case 'include-footer-nb':
-                                $js_groups[$theme][$template]['blocking'] = false;
+                                $js_groups[$theme][$template][$location]['blocking'] = false;
                                 break;
                         }
 
@@ -4020,8 +4023,9 @@ class W3_Plugin_TotalCache extends W3_Plugin {
         $upload = array();
         $results = array();
 
-        foreach ($files as $file) {
-            $upload[$document_root . '/' . $file] = $file;
+        foreach ($files as $remote_file) {
+            $local_file = $document_root . '/' . w3_translate_file($remote_file);
+            $upload[$local_file] = $remote_file;
         }
 
         $w3_plugin_cdn->upload($upload, false, $results);

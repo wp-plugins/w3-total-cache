@@ -949,7 +949,10 @@ class W3_PgCache {
             }
         }
 
-        foreach ($this->_config->get_array('pgcache.reject.uri') as $expr) {
+        $reject_uri = $this->_config->get_array('pgcache.reject.uri');
+        $reject_uri = array_map('w3_parse_path', $reject_uri);
+
+        foreach ($reject_uri as $expr) {
             $expr = trim($expr);
             if ($expr != '' && preg_match('~' . $expr . '~i', $this->_request_uri)) {
                 return false;
