@@ -1879,7 +1879,7 @@ function w3_extract_js($content) {
     $matches = null;
     $files = array();
 
-    $content = preg_replace('~<!--\[if.*\]-->~sU', '', $content);
+    $content = preg_replace('~<!--.*?-->~s', '', $content);
 
     if (preg_match_all('~<script\s+[^<>]*src=["\']?([^"\']+)["\']?[^<>]*>\s*</script>~is', $content, $matches)) {
         $files = $matches[1];
@@ -1901,7 +1901,7 @@ function w3_extract_css($content) {
     $matches = null;
     $files = array();
 
-    $content = preg_replace('~<!--\[if.*\]-->~sU', '', $content);
+    $content = preg_replace('~<!--.*?-->~s', '', $content);
 
     if (preg_match_all('~<link\s+([^>]+)/?>(.*</link>)?~Uis', $content, $matches, PREG_SET_ORDER)) {
         foreach ($matches as $match) {

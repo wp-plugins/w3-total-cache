@@ -63,37 +63,24 @@ class W3_Cdn_S3 extends W3_Cdn_Base {
      * @param array $files
      * @param array $results
      * @param boolean $force_rewrite
-     * @return boolean
+     * @return void
      */
     function upload($files, &$results, $force_rewrite = false) {
-        $count = 0;
         $error = null;
 
         if (!$this->_init($error)) {
             $results = $this->get_results($files, W3TC_CDN_RESULT_HALT, $error);
-            return false;
+            return;
         }
 
         foreach ($files as $local_path => $remote_path) {
-            $result = $this->_upload($local_path, $remote_path, $force_rewrite);
-            $results[] = $result;
-
-            if ($result['result'] == W3TC_CDN_RESULT_OK) {
-                $count++;
-            }
+            $results[] = $this->_upload($local_path, $remote_path, $force_rewrite);
 
             if ($this->_config['compression'] && $this->may_gzip($remote_path)) {
                 $remote_path_gzip = $remote_path . $this->_gzip_extension;
-                $result = $this->_upload_gzip($local_path, $remote_path_gzip, $force_rewrite);
-                $results[] = $result;
-
-                if ($result['result'] == W3TC_CDN_RESULT_OK) {
-                    $count++;
-                }
+                $results[] = $this->_upload_gzip($local_path, $remote_path_gzip, $force_rewrite);
             }
         }
-
-        return $count;
     }
 
     /**
@@ -125,7 +112,11 @@ class W3_Cdn_S3 extends W3_Cdn_Base {
         $headers = $this->get_headers($local_path);
         $result = @$this->_s3->putObjectFile($local_path, $this->_config['bucket'], $remote_path, S3::ACL_PUBLIC_READ, array(), $headers);
 
-        return $this->get_result($local_path, $remote_path, ($result ? W3TC_CDN_RESULT_OK : W3TC_CDN_RESULT_ERROR), ($result ? 'OK' : 'Unable to put object'));
+        if ($result) {
+            return $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'OK');
+        }
+
+        return $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Unable to put object');
     }
 
     /**
@@ -174,7 +165,11 @@ class W3_Cdn_S3 extends W3_Cdn_Base {
 
         $result = @$this->_s3->putObjectString($data, $this->_config['bucket'], $remote_path, S3::ACL_PUBLIC_READ, array(), $headers);
 
-        return $this->get_result($local_path, $remote_path, ($result ? W3TC_CDN_RESULT_OK : W3TC_CDN_RESULT_ERROR), ($result ? 'OK' : 'Unable to put object'));
+        if ($result) {
+            return $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'OK');
+        }
+
+        return $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Unable to put object');
     }
 
     /**
@@ -182,37 +177,36 @@ class W3_Cdn_S3 extends W3_Cdn_Base {
      *
      * @param array $files
      * @param array $results
-     * @return boolean
+     * @return void
      */
     function delete($files, &$results) {
         $error = null;
-        $count = 0;
 
         if (!$this->_init($error)) {
             $results = $this->get_results($files, W3TC_CDN_RESULT_HALT, $error);
-            return false;
+            return;
         }
 
         foreach ($files as $local_path => $remote_path) {
             $result = @$this->_s3->deleteObject($this->_config['bucket'], $remote_path);
-            $results[] = $this->get_result($local_path, $remote_path, ($result ? W3TC_CDN_RESULT_OK : W3TC_CDN_RESULT_ERROR), ($result ? 'OK' : 'Unable to delete object'));
 
             if ($result) {
-                $count++;
+                $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'OK');
+            } else {
+                $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Unable to delete object');
             }
 
             if ($this->_config['compression']) {
                 $remote_path_gzip = $remote_path . $this->_gzip_extension;
                 $result = @$this->_s3->deleteObject($this->_config['bucket'], $remote_path_gzip);
-                $results[] = $this->get_result($local_path, $remote_path_gzip, ($result ? W3TC_CDN_RESULT_OK : W3TC_CDN_RESULT_ERROR), ($result ? 'OK' : 'Unable to delete object'));
 
                 if ($result) {
-                    $count++;
+                    $results[] = $this->get_result($local_path, $remote_path_gzip, W3TC_CDN_RESULT_OK, 'OK');
+                } else {
+                    $results[] = $this->get_result($local_path, $remote_path_gzip, W3TC_CDN_RESULT_ERROR, 'Unable to delete object');
                 }
             }
         }
-
-        return $count;
     }
 
     /**

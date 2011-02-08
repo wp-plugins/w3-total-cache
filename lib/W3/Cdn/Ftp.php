@@ -94,15 +94,14 @@ class W3_Cdn_Ftp extends W3_Cdn_Base {
      * @param array $files
      * @param array $results
      * @param boolean $force_rewrite
-     * @return boolean
+     * @return void
      */
     function upload($files, &$results, $force_rewrite = false) {
-        $count = 0;
         $error = null;
 
         if (!$this->_connect($error)) {
             $results = $this->get_results($files, W3TC_CDN_RESULT_HALT, $error);
-            return false;
+            return;
         }
 
         $home = @ftp_pwd($this->_ftp);
@@ -151,15 +150,12 @@ class W3_Cdn_Ftp extends W3_Cdn_Base {
             if ($result) {
                 $this->_mdtm($remote_file, $mtime);
                 $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'OK');
-                $count++;
             } else {
                 $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Unable to upload file');
             }
         }
 
         $this->_disconnect();
-
-        return $count;
     }
 
     /**
@@ -167,23 +163,23 @@ class W3_Cdn_Ftp extends W3_Cdn_Base {
      *
      * @param array $files
      * @param array $results
-     * @return boolean
+     * @return void
      */
     function delete($files, &$results) {
         $error = null;
-        $count = 0;
 
         if (!$this->_connect($error)) {
             $results = $this->get_results($files, W3TC_CDN_RESULT_HALT, $error);
-            return false;
+            return;
         }
 
         foreach ($files as $local_path => $remote_path) {
             $result = @ftp_delete($this->_ftp, $remote_path);
-            $results[] = $this->get_result($local_path, $remote_path, ($result ? W3TC_CDN_RESULT_OK : W3TC_CDN_RESULT_ERROR), ($result ? 'OK' : 'Unable to delete file'));
 
             if ($result) {
-                $count++;
+                $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'OK');
+            } else {
+                $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Unable to delete file');
             }
 
             while (true) {
@@ -195,8 +191,6 @@ class W3_Cdn_Ftp extends W3_Cdn_Base {
         }
 
         $this->_disconnect();
-
-        return $count;
     }
 
     /**

@@ -15,12 +15,10 @@ class W3_Cdn_Mirror extends W3_Cdn_Base {
      * @param array $files
      * @param array $results
      * @param boolean $force_rewrite
-     * @return boolean
+     * @return void
      */
     function upload($files, &$results, $force_rewrite = false) {
         $results = $this->get_results($files, W3TC_CDN_RESULT_OK, 'OK');
-
-        return count($files);
     }
 
     /**
@@ -28,12 +26,10 @@ class W3_Cdn_Mirror extends W3_Cdn_Base {
      *
      * @param array $files
      * @param array $results
-     * @return boolean
+     * @return void
      */
     function delete($files, &$results) {
         $results = $this->get_results($files, W3TC_CDN_RESULT_OK, 'OK');
-
-        return count($files);
     }
 
     /**

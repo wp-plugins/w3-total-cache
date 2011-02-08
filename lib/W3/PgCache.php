@@ -438,7 +438,24 @@ class W3_PgCache {
     function flush() {
         $cache = & $this->_get_cache();
 
-        return $cache->flush();
+        $cache->flush();
+
+        /**
+         * Purge varnish servers
+         */
+        if ($this->_config->get_boolean('pgcache.varnish.enabled')) {
+            @set_time_limit($this->_config->get_integer('timelimit.varnish_purge'));
+
+            $servers = $this->_config->get_array('pgcache.varnish.servers');
+
+            foreach ($servers as $server) {
+                $url = sprintf('http://%s/', $server);
+
+                w3_http_purge($url);
+            }
+        }
+
+        return true;
     }
 
     /**

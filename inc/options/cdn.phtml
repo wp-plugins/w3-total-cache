@@ -130,18 +130,26 @@
         <table class="form-table">
         	<?php if (! $cdn_mirror): ?>
         	<tr>
-        		<th valign="top">
+        		<th colspan="2">
         			<input type="hidden" name="cdn.autoupload.enabled" value="0" />
-        			<label><input type="checkbox" name="cdn.autoupload.enabled" value="1"<?php checked($this->_config->get_boolean('cdn.autoupload.enabled'), true); ?> /> Enable changed files auto-upload</label>
-        		</th>
-        		<td>
-        			<label style="font-size:13px;">
-        				Auto upload interval:
-						<input id="cdn_autoupload_interval" type="text" name="cdn.autoupload.interval" value="<?php echo $this->_config->get_integer('cdn.autoupload.interval'); ?>" size="8" /> seconds
-					</label><br />
+        			<label><input type="checkbox" name="cdn.autoupload.enabled" value="1"<?php checked($this->_config->get_boolean('cdn.autoupload.enabled'), true); ?> /> Enable changed files auto-upload</label><br />
         			<span class="description">Automatically attempt to find and upload changed files.</span>
-				</td>
+        		</th>
         	</tr>
+            <tr>
+                <th colspan="2">
+                    <input type="hidden" name="minify.upload" value="0"<?php if ($this->_config->get_boolean('minify.auto')): ?> disabled="disabled"<?php endif; ?> />
+                    <label><input type="checkbox" name="minify.upload" value="1"<?php checked($this->_config->get_boolean('minify.upload'), true); ?><?php if ($this->_config->get_boolean('minify.auto')): ?> disabled="disabled"<?php endif; ?> /> Automatically upload minify files</label><br />
+                    <span class="description">If <acronym title="Content Delivery Network">CDN</acronym> is enabled (and not using the origin pull method), your minified files will be automatically uploaded.</span>
+                </th>
+            </tr>
+            <tr>
+                <th><label for="cdn_autoupload_interval">Auto upload interval:</label></th>
+                <td>
+                    <input id="cdn_autoupload_interval" type="text" name="cdn.autoupload.interval" value="<?php echo $this->_config->get_integer('cdn.autoupload.interval'); ?>" size="8" /> seconds<br />
+                    <span class="description">Specify the interval between upload of changed files.</span>
+                </td>
+            </tr>
         	<tr>
         		<th><label for="cdn_limit_interval">Re-transfer cycle interval:</label></th>
         		<td>

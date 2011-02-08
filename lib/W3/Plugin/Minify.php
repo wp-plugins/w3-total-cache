@@ -625,10 +625,10 @@ class W3_Plugin_Minify extends W3_Plugin {
 
             if (!$non_blocking_function) {
                 $non_blocking_function = true;
-                $script = '<script src="' . plugins_url('inc/js/head.min.js', W3TC_FILE) . '"></script>';
+                $script = "<script>function w3tc_load_js(u){var d=document,p=d.getElementsByTagName('HEAD')[0],c=d.createElement('script');c.type='text/javascript';c.src=u;p.appendChild(c);}</script>";
             }
 
-            $script .= '<script>head.js(\'' . $url . '\');</script>';
+            $script .= "<script>w3tc_load_js('" . $url . "');</script>";
 
             return $script;
         }

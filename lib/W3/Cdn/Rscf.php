@@ -96,15 +96,14 @@ class W3_Cdn_Rscf extends W3_Cdn_Base {
      * @param array $files
      * @param array $results
      * @param boolean $force_rewrite
-     * @return integer
+     * @return void
      */
     function upload($files, &$results, $force_rewrite = false) {
-        $count = 0;
         $error = null;
 
         if (!$this->_init($error) || !$this->_init_container($error)) {
             $results = $this->get_results($files, W3TC_CDN_RESULT_HALT, $error);
-            return false;
+            return;
         }
 
         foreach ($files as $local_path => $remote_path) {
@@ -140,17 +139,11 @@ class W3_Cdn_Rscf extends W3_Cdn_Base {
 
             try {
                 $object->load_from_filename($local_path);
-
-                $result = true;
-                $count++;
+                $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'OK');
             } catch (Exception $exception) {
-                $result = false;
+                $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Unable to put object');
             }
-
-            $results[] = $this->get_result($local_path, $remote_path, ($result ? W3TC_CDN_RESULT_OK : W3TC_CDN_RESULT_ERROR), ($result ? 'OK' : 'Unable to put object'));
         }
-
-        return $count;
     }
 
     /**
@@ -158,28 +151,24 @@ class W3_Cdn_Rscf extends W3_Cdn_Base {
      *
      * @param array $files
      * @param array $results
-     * @return integer
+     * @return void
      */
     function delete($files, &$results) {
         $error = null;
-        $count = 0;
 
         if (!$this->_init($error) || !$this->_init_container($error)) {
             $results = $this->get_results($files, W3TC_CDN_RESULT_HALT, $error);
-            return false;
+            return;
         }
 
         foreach ($files as $local_path => $remote_path) {
             try {
-                $result = $this->_container->delete_object($remote_path);
+                $this->_container->delete_object($remote_path);
                 $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'OK');
-                $count++;
             } catch (Exception $exception) {
                 $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Unable to delete object');
             }
         }
-
-        return $count;
     }
 
     /**

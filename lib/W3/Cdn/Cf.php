@@ -79,16 +79,14 @@ class W3_Cdn_Cf extends W3_Cdn_S3 {
      * @param array $files
      * @param array $results
      * @param boolean $force_rewrite
-     * @return boolean
+     * @return void
      */
     function upload($files, &$results, $force_rewrite = false) {
         if ($this->type == W3TC_CDN_CF_TYPE_S3) {
-            return parent::upload($files, $results, $force_rewrite);
+            parent::upload($files, $results, $force_rewrite);
+        } else {
+            $results = $this->get_results($files, W3TC_CDN_RESULT_OK, 'OK');
         }
-
-        $results = $this->get_results($files, W3TC_CDN_RESULT_OK, 'OK');
-
-        return count($files);
     }
 
     /**
@@ -96,16 +94,14 @@ class W3_Cdn_Cf extends W3_Cdn_S3 {
      *
      * @param array $files
      * @param array $results
-     * @return boolean
+     * @return void
      */
     function delete($files, &$results) {
         if ($this->type == W3TC_CDN_CF_TYPE_S3) {
-            return parent::delete($files, $results);
+            parent::delete($files, $results);
+        } else {
+            $results = $this->get_results($files, W3TC_CDN_RESULT_OK, 'OK');
         }
-
-        $results = $this->get_results($files, W3TC_CDN_RESULT_OK, 'OK');
-
-        return count($files);
     }
 
     /**

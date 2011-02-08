@@ -4040,7 +4040,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
     /**
      * Uploads minify files to CDN
      *
-     * @return array
+     * @return void
      */
     function cdn_upload_minify() {
         require_once W3TC_LIB_W3_DIR . '/Plugin/Cdn.php';
@@ -4057,13 +4057,13 @@ class W3_Plugin_TotalCache extends W3_Plugin {
             $upload[$document_root . '/' . $file] = $file;
         }
 
-        return $w3_plugin_cdn->upload($upload, true, $results);
+        $w3_plugin_cdn->upload($upload, true, $results);
     }
 
     /**
      * Uploads browsercache .htaccess to FTP
      *
-     * @return boolean
+     * @return void
      */
     function cdn_upload_browsercache() {
         require_once W3TC_LIB_W3_DIR . '/Plugin/Cdn.php';
@@ -4083,16 +4083,14 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                 $tmp_path => $cdn_path
             );
 
-            return $w3_plugin_cdn->upload($upload, true, $results);
+            $w3_plugin_cdn->upload($upload, true, $results);
         }
-
-        return false;
     }
 
     /**
      * Deletes browsercache .htaccess to FTP
      *
-     * @return boolean
+     * @return void
      */
     function cdn_delete_browsercache() {
         require_once W3TC_LIB_W3_DIR . '/Plugin/Cdn.php';
@@ -4107,7 +4105,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
             $tmp_path => $cdn_path
         );
 
-        return $w3_plugin_cdn->delete($delete, false, $results);
+        $w3_plugin_cdn->delete($delete, false, $results);
     }
 
     /**

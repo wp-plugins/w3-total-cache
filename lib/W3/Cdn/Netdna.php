@@ -15,12 +15,10 @@ class W3_Cdn_Netdna extends W3_Cdn_Base {
      * @param array $files
      * @param array $results
      * @param boolean $force_rewrite
-     * @return boolean
+     * @return void
      */
     function upload($files, &$results, $force_rewrite = false) {
         $results = $this->get_results($files, W3TC_CDN_RESULT_OK, 'OK');
-
-        return count($files);
     }
 
     /**
@@ -28,12 +26,10 @@ class W3_Cdn_Netdna extends W3_Cdn_Base {
      *
      * @param array $files
      * @param array $results
-     * @return boolean
+     * @return void
      */
     function delete($files, &$results) {
         $results = $this->get_results($files, W3TC_CDN_RESULT_OK, 'OK');
-
-        return count($files);
     }
 
     /**
@@ -41,25 +37,22 @@ class W3_Cdn_Netdna extends W3_Cdn_Base {
      *
      * @param array $files
      * @param array $results
-     * @return array
+     * @return void
      */
     function purge($files, &$results) {
         if (empty($this->_config['apiid'])) {
             $results = $this->get_results($files, W3TC_CDN_RESULT_HALT, 'Empty API ID.');
-
-            return false;
+            return;
         }
 
         if (empty($this->_config['apikey'])) {
             $results = $this->get_results($files, W3TC_CDN_RESULT_HALT, 'Empty API key.');
-
-            return false;
+            return;
         }
 
         if ($this->sha256('test') === false) {
             $results = $this->get_results($files, W3TC_CDN_RESULT_HALT, "hash() or mhash() function doesn't exists.");
-
-            return false;
+            return;
         }
 
         if (!class_exists('IXR_Client')) {
@@ -74,7 +67,6 @@ class W3_Cdn_Netdna extends W3_Cdn_Base {
         $client = new IXR_Client('http://api.netdna.com/xmlrpc/cache');
         $client->timeout = 30;
 
-        $count = 0;
         $results = array();
 
         foreach ($files as $local_path => $remote_path) {
@@ -87,7 +79,6 @@ class W3_Cdn_Netdna extends W3_Cdn_Base {
 
                 if ($val) {
                     $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'OK');
-                    $count++;
                 } else {
                     $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Unexpected Error');
                 }
@@ -96,8 +87,6 @@ class W3_Cdn_Netdna extends W3_Cdn_Base {
                 $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, $client->getErrorMessage());
             }
         }
-
-        return $count;
     }
 
     /**

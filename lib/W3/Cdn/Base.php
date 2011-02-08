@@ -64,12 +64,10 @@ class W3_Cdn_Base {
      * @param array $files
      * @param array $results
      * @param boolean $force_rewrite
-     * @return boolean
+     * @return void
      */
     function upload($files, &$results, $force_rewrite = false) {
         $results = $this->get_results($files, W3TC_CDN_RESULT_HALT, 'Not implemented.');
-
-        return false;
     }
 
     /**
@@ -77,12 +75,10 @@ class W3_Cdn_Base {
      *
      * @param array $files
      * @param array $results
-     * @return boolean
+     * @return void
      */
     function delete($files, &$results) {
         $results = $this->get_results($files, W3TC_CDN_RESULT_HALT, 'Not implemented.');
-
-        return false;
     }
 
     /**
@@ -90,10 +86,10 @@ class W3_Cdn_Base {
      *
      * @param array $files
      * @param array $results
-     * @return boolean
+     * @return void
      */
     function purge($files, &$results) {
-        return $this->upload($files, $results, true);
+        $this->upload($files, $results, true);
     }
 
     /**
