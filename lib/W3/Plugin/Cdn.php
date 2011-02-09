@@ -1799,6 +1799,15 @@ class W3_Plugin_Cdn extends W3_Plugin {
             return false;
         }
 
+        /**
+         * Check logged in admin
+         */
+        if ($this->_config->get_boolean('cdn.reject.admins') && current_user_can('manage_options')) {
+            $this->cdn_reject_reason = 'logged in admin is rejected';
+
+            return false;
+        }
+
         return true;
     }
 

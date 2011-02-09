@@ -218,6 +218,7 @@ class W3_Config {
         'cdn.azure.key' => 'string',
         'cdn.azure.container' => 'string',
         'cdn.azure.ssl' => 'string',
+        'cdn.reject.admins' => 'boolean',
         'cdn.reject.ua' => 'array',
         'cdn.reject.uri' => 'array',
         'cdn.reject.files' => 'array',
@@ -542,6 +543,7 @@ class W3_Config {
         'cdn.azure.key' => '',
         'cdn.azure.container' => '',
         'cdn.azure.ssl' => 'auto',
+        'cdn.reject.admins' => false,
         'cdn.reject.ua' => array(),
         'cdn.reject.uri' => array(),
         'cdn.reject.files' => array(

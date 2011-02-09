@@ -939,15 +939,11 @@ function w3_get_nginx_rules_path() {
  * @return string
  */
 function w3_get_pgcache_rules_core_path() {
-    switch (true) {
-        case w3_is_apache():
-            return w3_get_home_root() . '/.htaccess';
-
-        case w3_is_nginx():
-            return w3_get_nginx_rules_path();
+    if (w3_is_nginx()) {
+        return w3_get_nginx_rules_path();
     }
 
-    return false;
+    return w3_get_home_root() . '/.htaccess';
 }
 
 /**
@@ -956,15 +952,11 @@ function w3_get_pgcache_rules_core_path() {
  * @return string
  */
 function w3_get_pgcache_rules_cache_path() {
-    switch (true) {
-        case w3_is_apache():
-            return W3TC_CACHE_FILE_PGCACHE_DIR . '/.htaccess';
-
-        case w3_is_nginx():
-            return w3_get_nginx_rules_path();
+    if (w3_is_nginx()) {
+        return w3_get_nginx_rules_path();
     }
 
-    return false;
+    return W3TC_CACHE_FILE_PGCACHE_DIR . '/.htaccess';
 }
 
 /**
@@ -973,15 +965,11 @@ function w3_get_pgcache_rules_cache_path() {
  * @return string
  */
 function w3_get_browsercache_rules_cache_path() {
-    switch (true) {
-        case w3_is_apache():
-            return w3_get_home_root() . '/.htaccess';
-
-        case w3_is_nginx():
-            return w3_get_nginx_rules_path();
+    if (w3_is_nginx()) {
+        return w3_get_nginx_rules_path();
     }
 
-    return false;
+    return w3_get_home_root() . '/.htaccess';
 }
 
 /**
@@ -990,15 +978,11 @@ function w3_get_browsercache_rules_cache_path() {
  * @return string
  */
 function w3_get_browsercache_rules_no404wp_path() {
-    switch (true) {
-        case w3_is_apache():
-            return w3_get_home_root() . '/.htaccess';
-
-        case w3_is_nginx():
-            return w3_get_nginx_rules_path();
+    if (w3_is_nginx()) {
+        return w3_get_nginx_rules_path();
     }
 
-    return false;
+    return w3_get_home_root() . '/.htaccess';
 }
 
 /**
@@ -1007,15 +991,11 @@ function w3_get_browsercache_rules_no404wp_path() {
  * @return string
  */
 function w3_get_minify_rules_core_path() {
-    switch (true) {
-        case w3_is_apache():
-            return W3TC_CACHE_FILE_MINIFY_DIR . '/.htaccess';
-
-        case w3_is_nginx():
-            return w3_get_nginx_rules_path();
+    if (w3_is_nginx()) {
+        return w3_get_nginx_rules_path();
     }
 
-    return false;
+    return W3TC_CACHE_FILE_MINIFY_DIR . '/.htaccess';
 }
 
 /**
@@ -1024,15 +1004,11 @@ function w3_get_minify_rules_core_path() {
  * @return string
  */
 function w3_get_minify_rules_cache_path() {
-    switch (true) {
-        case w3_is_apache():
-            return W3TC_CACHE_FILE_MINIFY_DIR . '/.htaccess';
-
-        case w3_is_nginx():
-            return w3_get_nginx_rules_path();
+    if (w3_is_nginx()) {
+        return w3_get_nginx_rules_path();
     }
 
-    return false;
+    return W3TC_CACHE_FILE_MINIFY_DIR . '/.htaccess';
 }
 
 /**
