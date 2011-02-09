@@ -137,8 +137,13 @@ class W3_Plugin_PgCache extends W3_Plugin {
                 $this->_config->set('pgcache.engine', 'file');
                 $this->_config->save();
             } else {
-                $this->write_rules_core();
-                $this->write_rules_cache();
+                if (w3_can_modify_rules(w3_get_pgcache_rules_core_path())) {
+                    $this->write_rules_core();
+                }
+
+                if (w3_can_modify_rules(w3_get_pgcache_rules_cache_path())) {
+                    $this->write_rules_cache();
+                }
             }
         }
 
@@ -172,8 +177,13 @@ class W3_Plugin_PgCache extends W3_Plugin {
             @unlink(W3TC_ADDIN_FILE_ADVANCED_CACHE);
         }
 
-        $this->remove_rules_cache();
-        $this->remove_rules_core();
+        if (w3_can_modify_rules(w3_get_pgcache_rules_cache_path())) {
+            $this->remove_rules_cache();
+        }
+
+        if (w3_can_modify_rules(w3_get_pgcache_rules_core_path())) {
+            $this->remove_rules_core();
+        }
     }
 
     /**
@@ -1139,7 +1149,7 @@ class W3_Plugin_PgCache extends W3_Plugin {
         $cache_root = w3_path(W3TC_CACHE_FILE_PGCACHE_DIR);
         $cache_dir = rtrim(str_replace(w3_get_document_root(), '', $cache_root), '/');
 
-        if (w3_is_network() && !w3_is_subdomain_install()) {
+        if (w3_is_network()) {
             $cache_dir = preg_replace('~/w3tc.*?/~', '/w3tc.*?/', $cache_dir, 1);
         }
 

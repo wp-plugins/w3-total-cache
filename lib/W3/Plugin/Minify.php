@@ -121,9 +121,11 @@ class W3_Plugin_Minify extends W3_Plugin {
         }
 
         if ($this->_config->get_boolean('minify.enabled') && $this->_config->get_boolean('minify.rewrite')) {
-            $this->write_rules_core();
+            if (w3_can_modify_rules(w3_get_minify_rules_core_path())) {
+                $this->write_rules_core();
+            }
 
-            if ($this->_config->get_string('minify.engine') == 'file') {
+            if ($this->_config->get_string('minify.engine') == 'file' && w3_can_modify_rules(w3_get_minify_rules_cache_path())) {
                 $this->write_rules_cache();
             }
         }
@@ -137,8 +139,13 @@ class W3_Plugin_Minify extends W3_Plugin {
     function deactivate() {
         $this->unschedule();
 
-        $this->remove_rules_cache();
-        $this->remove_rules_core();
+        if (w3_can_modify_rules(w3_get_minify_rules_cache_path())) {
+            $this->remove_rules_cache();
+        }
+
+        if (w3_can_modify_rules(w3_get_minify_rules_core_path())) {
+            $this->remove_rules_core();
+        }
 
         @unlink(W3TC_CONTENT_MINIFY_DIR . '/index.php');
     }
@@ -1132,7 +1139,7 @@ class W3_Plugin_Minify extends W3_Plugin {
      * @return string
      */
     function generate_rules_core_nginx() {
-        $is_network = (w3_is_network() && !w3_is_subdomain_install());
+        $is_network = w3_is_network();
 
         $cache_root = w3_path(W3TC_CACHE_FILE_MINIFY_DIR);
         $cache_dir = rtrim(str_replace(w3_get_document_root(), '', $cache_root), '/');
@@ -1303,7 +1310,7 @@ class W3_Plugin_Minify extends W3_Plugin {
         $cache_root = w3_path(W3TC_CACHE_FILE_MINIFY_DIR);
         $cache_dir = rtrim(str_replace(w3_get_document_root(), '', $cache_root), '/');
 
-        if (w3_is_network() && !w3_is_subdomain_install()) {
+        if (w3_is_network()) {
             $cache_dir = preg_replace('~/w3tc.*?/~', '/w3tc.*?/', $cache_dir, 1);
         }
 

@@ -52,9 +52,11 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
      */
     function activate() {
         if ($this->_config->get_boolean('browsercache.enabled')) {
-            $this->write_rules_cache();
+            if (w3_can_modify_rules(w3_get_browsercache_rules_cache_path())) {
+                $this->write_rules_cache();
+            }
 
-            if ($this->_config->get_boolean('browsercache.no404wp')) {
+            if ($this->_config->get_boolean('browsercache.no404wp') && w3_can_modify_rules(w3_get_browsercache_rules_no404wp_path())) {
                 $this->write_rules_no404wp();
             }
         }
@@ -64,8 +66,13 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
      * Deactivate plugin action
      */
     function deactivate() {
-        $this->remove_rules_no404wp();
-        $this->remove_rules_cache();
+        if (w3_can_modify_rules(w3_get_browsercache_rules_no404wp_path())) {
+            $this->remove_rules_no404wp();
+        }
+
+        if (w3_can_modify_rules(w3_get_browsercache_rules_cache_path())) {
+            $this->remove_rules_cache();
+        }
     }
 
     /**

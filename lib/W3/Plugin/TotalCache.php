@@ -3146,8 +3146,13 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                     $w3_plugin_pgcache->write_rules_cache();
                 }
             } else {
-                $w3_plugin_pgcache->remove_rules_core();
-                $w3_plugin_pgcache->remove_rules_cache();
+                if (w3_can_modify_rules(w3_get_pgcache_rules_core_path())) {
+                    $w3_plugin_pgcache->remove_rules_core();
+                }
+
+                if (w3_can_modify_rules(w3_get_pgcache_rules_cache_path())) {
+                    $w3_plugin_pgcache->remove_rules_cache();
+                }
             }
 
             /**
@@ -3163,11 +3168,18 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                         $w3_plugin_browsercache->write_rules_no404wp();
                     }
                 } else {
-                    $w3_plugin_browsercache->remove_rules_no404wp();
+                    if (w3_can_modify_rules(w3_get_browsercache_rules_no404wp_path())) {
+                        $w3_plugin_browsercache->remove_rules_no404wp();
+                    }
                 }
             } else {
-                $w3_plugin_browsercache->remove_rules_cache();
-                $w3_plugin_browsercache->remove_rules_no404wp();
+                if (w3_can_modify_rules(w3_get_browsercache_rules_cache_path())) {
+                    $w3_plugin_browsercache->remove_rules_cache();
+                }
+
+                if (w3_can_modify_rules(w3_get_browsercache_rules_no404wp_path())) {
+                    $w3_plugin_browsercache->remove_rules_no404wp();
+                }
             }
 
             /**
@@ -3182,13 +3194,20 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                     if ($this->_config->get_string('minify.engine') == 'file') {
                         if (w3_can_modify_rules(w3_get_minify_rules_cache_path())) {
                             $w3_plugin_minify->write_rules_cache();
-                        } else {
+                        }
+                    } else {
+                        if (w3_can_modify_rules(w3_get_minify_rules_cache_path())) {
                             $w3_plugin_minify->remove_rules_cache();
                         }
                     }
                 } else {
-                    $w3_plugin_minify->remove_rules_core();
-                    $w3_plugin_minify->remove_rules_cache();
+                    if (w3_can_modify_rules(w3_get_minify_rules_core_path())) {
+                        $w3_plugin_minify->remove_rules_core();
+                    }
+
+                    if (w3_can_modify_rules(w3_get_minify_rules_cache_path())) {
+                        $w3_plugin_minify->remove_rules_cache();
+                    }
                 }
             }
 
