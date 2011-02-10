@@ -47,11 +47,25 @@ class W3_ObjectCache {
     var $cache_misses = 0;
 
     /**
+     * Total time
+     *
+     * @var integer
+     */
+    var $time_total = 0;
+
+    /**
      * Store debug information of w3tc using
      *
      * @var array
      */
     var $debug_info = array();
+
+    /**
+     * Key cache
+     *
+     * @var array
+     */
+    var $_key_cache = array();
 
     /**
      * Config
@@ -144,6 +158,10 @@ class W3_ObjectCache {
      * @return mixed
      */
     function get($id, $group = 'default') {
+        if ($this->_debug) {
+            $time_start = w3_microtime();
+        }
+
         $key = $this->_get_cache_key($id, $group);
 
         $caching = true;
@@ -184,6 +202,9 @@ class W3_ObjectCache {
          * Add debug info
          */
         if ($this->_debug) {
+            $time = w3_microtime() - $time_start;
+            $this->time_total += $time;
+
             if (!$group) {
                 $group = 'default';
             }
@@ -195,7 +216,8 @@ class W3_ObjectCache {
                 'reason' => $reason,
                 'cached' => $cached,
                 'internal' => $internal,
-                'data_size' => ($value ? strlen(serialize($value)) : 0)
+                'data_size' => ($value ? strlen(serialize($value)) : 0),
+                'time' => $time
             );
         }
 
@@ -361,15 +383,23 @@ class W3_ObjectCache {
             $group = 'default';
         }
 
-        $host = w3_get_host();
+        $key_cache_id = $id . $group;
 
-        if (!in_array($group, $this->global_groups)) {
-            $prefix = w3_get_blogname();
+        if (isset($this->_key_cache[$key_cache_id])) {
+            $key = $this->_key_cache[$key_cache_id];
         } else {
-            $prefix = '';
-        }
+            $host = w3_get_host();
 
-        $key = sprintf('w3tc_%s_object_%s', md5($host), md5($prefix . $group . $id));
+            if (!in_array($group, $this->global_groups)) {
+                $prefix = w3_get_blogname();
+            } else {
+                $prefix = '';
+            }
+
+            $key = sprintf('w3tc_%s_object_%s', md5($host), md5($prefix . $group . $id));
+
+            $this->_key_cache[$key_cache_id] = $key;
+        }
 
         /**
          * Allow to modify cache key by W3TC plugins
@@ -610,12 +640,13 @@ class W3_ObjectCache {
         $debug_info .= sprintf("%s%d\r\n", str_pad('Total calls: ', 20), $this->cache_total);
         $debug_info .= sprintf("%s%d\r\n", str_pad('Cache hits: ', 20), $this->cache_hits);
         $debug_info .= sprintf("%s%d\r\n", str_pad('Cache misses: ', 20), $this->cache_misses);
+        $debug_info .= sprintf("%s%.4f\r\n", str_pad('Total time: ', 20), $this->time_total);
 
         $debug_info .= "W3TC Object Cache info:\r\n";
-        $debug_info .= sprintf("%s | %s | %s | %s | %s | %s\r\n", str_pad('#', 5, ' ', STR_PAD_LEFT), str_pad('Caching (Reject reason)', 30, ' ', STR_PAD_BOTH), str_pad('Status', 15, ' ', STR_PAD_BOTH), str_pad('Source', 15, ' ', STR_PAD_BOTH), str_pad('Data size (b)', 13, ' ', STR_PAD_LEFT), 'ID:Group');
+        $debug_info .= sprintf("%s | %s | %s | %s | %s | %s | %s\r\n", str_pad('#', 5, ' ', STR_PAD_LEFT), str_pad('Caching (Reject reason)', 30, ' ', STR_PAD_BOTH), str_pad('Status', 15, ' ', STR_PAD_BOTH), str_pad('Source', 15, ' ', STR_PAD_BOTH), str_pad('Data size (b)', 13, ' ', STR_PAD_LEFT), str_pad('Query time (s)', 14, ' ', STR_PAD_LEFT), 'ID:Group');
 
         foreach ($this->debug_info as $index => $debug) {
-            $debug_info .= sprintf("%s | %s | %s | %s | %s | %s\r\n", str_pad($index + 1, 5, ' ', STR_PAD_LEFT), str_pad(($debug['caching'] ? 'enabled' : sprintf('disabled (%s)', $debug['reason'])), 30, ' ', STR_PAD_BOTH), str_pad(($debug['cached'] ? 'cached' : 'not cached'), 15, ' ', STR_PAD_BOTH), str_pad(($debug['internal'] ? 'internal' : 'persistent'), 15, ' ', STR_PAD_BOTH), str_pad($debug['data_size'], 13, ' ', STR_PAD_LEFT), sprintf('%s:%s', $debug['id'], $debug['group']));
+            $debug_info .= sprintf("%s | %s | %s | %s | %s | %s | %s\r\n", str_pad($index + 1, 5, ' ', STR_PAD_LEFT), str_pad(($debug['caching'] ? 'enabled' : sprintf('disabled (%s)', $debug['reason'])), 30, ' ', STR_PAD_BOTH), str_pad(($debug['cached'] ? 'cached' : 'not cached'), 15, ' ', STR_PAD_BOTH), str_pad(($debug['internal'] ? 'internal' : 'persistent'), 15, ' ', STR_PAD_BOTH), str_pad($debug['data_size'], 13, ' ', STR_PAD_LEFT), str_pad(round($debug['time'], 4), 14, ' ', STR_PAD_LEFT), sprintf('%s:%s', $debug['id'], $debug['group']));
         }
 
         $debug_info .= '-->';

@@ -649,13 +649,13 @@ class W3_Db extends wpdb {
         $debug_info .= sprintf("%s%s\r\n", str_pad('Engine: ', 20), w3_get_engine_name($this->_config->get_string('dbcache.engine')));
         $debug_info .= sprintf("%s%d\r\n", str_pad('Total queries: ', 20), $this->query_total);
         $debug_info .= sprintf("%s%d\r\n", str_pad('Cached queries: ', 20), $this->query_hits);
-        $debug_info .= sprintf("%s%.3f\r\n", str_pad('Total query time: ', 20), $this->time_total);
+        $debug_info .= sprintf("%s%.4f\r\n", str_pad('Total query time: ', 20), $this->time_total);
 
         if (count($this->query_stats)) {
             $debug_info .= "SQL info:\r\n";
             $debug_info .= sprintf("%s | %s | %s | % s | %s | %s\r\n", str_pad('#', 5, ' ', STR_PAD_LEFT), str_pad('Time (s)', 8, ' ', STR_PAD_LEFT), str_pad('Caching (Reject reason)', 30, ' ', STR_PAD_BOTH), str_pad('Status', 10, ' ', STR_PAD_BOTH), str_pad('Data size (b)', 13, ' ', STR_PAD_LEFT), 'Query');
             foreach ($this->query_stats as $index => $query) {
-                $debug_info .= sprintf("%s | %s | %s | %s | %s | %s\r\n", str_pad($index + 1, 5, ' ', STR_PAD_LEFT), str_pad(round($query['time_total'], 3), 8, ' ', STR_PAD_LEFT), str_pad(($query['caching'] ? 'enabled' : sprintf('disabled (%s)', $query['reason'])), 30, ' ', STR_PAD_BOTH), str_pad(($query['cached'] ? 'cached' : 'not cached'), 10, ' ', STR_PAD_BOTH), str_pad($query['data_size'], 13, ' ', STR_PAD_LEFT), str_replace('-->', '-- >', trim($query['query'])));
+                $debug_info .= sprintf("%s | %s | %s | %s | %s | %s\r\n", str_pad($index + 1, 5, ' ', STR_PAD_LEFT), str_pad(round($query['time_total'], 4), 8, ' ', STR_PAD_LEFT), str_pad(($query['caching'] ? 'enabled' : sprintf('disabled (%s)', $query['reason'])), 30, ' ', STR_PAD_BOTH), str_pad(($query['cached'] ? 'cached' : 'not cached'), 10, ' ', STR_PAD_BOTH), str_pad($query['data_size'], 13, ' ', STR_PAD_LEFT), str_replace('-->', '-- >', trim($query['query'])));
             }
         }
 
