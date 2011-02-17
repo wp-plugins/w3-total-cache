@@ -1,0 +1,23 @@
+<?php include W3TC_DIR . '/inc/popup/common/header.phtml'; ?>
+
+<form action="admin.php?page=<?php echo $this->_page; ?>" method="post">
+    <p>Files to purge:</p>
+    <p>
+        <textarea name="files" rows="8" cols="90"></textarea>
+    </p>
+    <p>
+        <input type="hidden" name="w3tc_action" value="cdn_purge_post" />
+        <input class="button-primary" type="submit" value="Purge" />
+    </p>
+</form>
+
+<div class="log">
+    <?php foreach ($results as $result): ?>
+        <div class="log-<?php echo ($result['result'] == W3TC_CDN_RESULT_OK ? 'success' : 'error') ?>">
+            <?php echo htmlspecialchars($result['remote_path']); ?>
+            <strong><?php echo htmlspecialchars($result['error']); ?></strong>
+        </div>
+    <?php endforeach; ?>
+</div>
+
+<?php include W3TC_DIR . '/inc/popup/common/footer.phtml'; ?>

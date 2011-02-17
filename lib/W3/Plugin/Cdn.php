@@ -208,7 +208,7 @@ class W3_Plugin_Cdn extends W3_Plugin {
             `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
             `local_path` varchar(150) NOT NULL DEFAULT '',
             `remote_path` varchar(150) NOT NULL DEFAULT '',
-            `command` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '1 - Upload, 2 - Delete',
+            `command` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '1 - Upload, 2 - Delete, 3 - Purge',
             `last_error` varchar(150) NOT NULL DEFAULT '',
             `date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
             PRIMARY KEY (`id`),
@@ -723,6 +723,10 @@ class W3_Plugin_Cdn extends W3_Plugin {
                     case W3TC_CDN_COMMAND_DELETE:
                         $cdn->delete($files, $results);
                         break;
+
+                    case W3TC_CDN_COMMAND_PURGE:
+                        $cdn->purge($files, $results);
+                        break;
                 }
 
                 foreach ($results as $result) {
@@ -802,7 +806,7 @@ class W3_Plugin_Cdn extends W3_Plugin {
             if ($queue_failed) {
                 foreach ($results as $result) {
                     if ($result['result'] != W3TC_CDN_RESULT_OK) {
-                        $this->queue_add($result['local_path'], $result['remote_path'], W3TC_CDN_COMMAND_UPLOAD, $result['error']);
+                        $this->queue_add($result['local_path'], $result['remote_path'], W3TC_CDN_COMMAND_PURGE, $result['error']);
                     }
                 }
             }
@@ -1469,11 +1473,15 @@ class W3_Plugin_Cdn extends W3_Plugin {
          * Don't replace URL for files that are in the CDN queue
          */
         if ($queue === null) {
-            $sql = sprintf('SELECT remote_path FROM %s', $wpdb->prefix . W3TC_CDN_TABLE_QUEUE);
-            $queue = $wpdb->get_col($sql);
+            if (!w3_is_cdn_mirror($this->_config->get_string('cdn.engine'))) {
+                $sql = sprintf('SELECT remote_path FROM %s', $wpdb->prefix . W3TC_CDN_TABLE_QUEUE);
+                $queue = $wpdb->get_col($sql);
+            } else {
+                $queue = false;
+            }
         }
 
-        if (in_array($path, $queue)) {
+        if ($queue && in_array($path, $queue)) {
             return $match;
         }
 
@@ -1601,7 +1609,6 @@ class W3_Plugin_Cdn extends W3_Plugin {
 
         if (!isset($cdn[0])) {
             $engine = $this->_config->get_string('cdn.engine');
-            $engine_config = array();
 
             switch ($engine) {
                 case 'mirror':
@@ -1623,6 +1630,7 @@ class W3_Plugin_Cdn extends W3_Plugin {
                 case 'ftp':
                     $engine_config = array(
                         'host' => $this->_config->get_string('cdn.ftp.host'),
+                        'port' => $this->_config->get_integer('cdn.ftp.port'),
                         'user' => $this->_config->get_string('cdn.ftp.user'),
                         'pass' => $this->_config->get_string('cdn.ftp.pass'),
                         'path' => $this->_config->get_string('cdn.ftp.path'),
@@ -1683,9 +1691,15 @@ class W3_Plugin_Cdn extends W3_Plugin {
                         'key' => $this->_config->get_string('cdn.azure.key'),
                         'container' => $this->_config->get_string('cdn.azure.container'),
                         'compression' => ($this->_config->get_boolean('browsercache.enabled') && $this->_config->get_boolean('browsercache.html.compression')),
+                        'cname' => $this->_config->get_array('cdn.azure.cname'),
                         'ssl' => $this->_config->get_string('cdn.azure.ssl')
                     );
+                    break;
             }
+
+            $engine_config = array_merge($engine_config, array(
+                'debug' => $this->_config->get_boolean('cdn.debug')
+            ));
 
             require_once W3TC_LIB_W3_DIR . '/Cdn.php';
             $cdn[0] = & W3_Cdn::instance($engine, $engine_config);

@@ -478,6 +478,10 @@ jQuery(function() {
         w3tc_popup('admin.php?page=w3tc_cdn&w3tc_action=cdn_rename_domain', 'cdn_rename_domain');
     });
 
+    jQuery('#cdn_purge').click(function() {
+        w3tc_popup('admin.php?page=w3tc_cdn&w3tc_action=cdn_purge', 'cdn_purge');
+    });
+
     jQuery('.cdn_export').click(function() {
         w3tc_popup('admin.php?page=w3tc_cdn&w3tc_action=cdn_export&cdn_export_type=' + this.name, 'cdn_export_' + this.name);
     });

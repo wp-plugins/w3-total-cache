@@ -1064,6 +1064,101 @@ class S3 {
 	}
 
 
+    /**
+     * Creates invalidation bath
+     *
+     * @static
+     * @param integer $distributionId
+     * @param array $paths
+     * @return array|bool
+     */
+    public static function createInvalidation($distributionId, $paths) {
+        self::$useSSL = true; // CloudFront requires SSL
+
+        $rest = new S3Request('POST', '', '2010-11-01/distribution/' . $distributionId . '/invalidation', 'cloudfront.amazonaws.com');
+
+        $rest->data = self::__getCloudFrontInvalidationBath($paths);
+        $rest->size = strlen($rest->data);
+        $rest->setHeader('Content-Type', 'application/xml');
+
+        $rest = self::__getCloudFrontResponse($rest);
+
+        if ($rest->error === false && $rest->code !== 201) {
+            $rest->error = array('code' => $rest->code, 'message' => 'Unexpected HTTP status');
+        }
+
+        if ($rest->error !== false) {
+            trigger_error(sprintf("S3::createInvalidation($distributionId, %s): [%s] %s",
+            print_r($files, true),
+            $rest->error['code'], $rest->error['message']), E_USER_WARNING);
+
+            return false;
+        } elseif ($rest->body instanceof SimpleXMLElement) {
+            return self::__parseCloudFrontInvalidation($rest->body);
+        }
+
+        return false;
+    }
+
+
+    /**
+     * Returns invalidation bath XML
+     *
+     * @static
+     * @param array $files
+     * @return string
+     */
+    private static function __getCloudFrontInvalidationBath($paths) {
+        $dom = new DOMDocument('1.0', 'UTF-8');
+        $dom->formatOutput = true;
+
+        $invalidationBath = $dom->createElement('InvalidationBatch');
+
+        foreach ($paths as $path) {
+            $invalidationBath->appendChild($dom->createElement('Path', $path));
+        }
+
+        $invalidationBath->appendChild($dom->createElement('CallerReference', date('YmdHis')));
+        $dom->appendChild($invalidationBath);
+
+        return $dom->saveXML();
+    }
+
+
+    /**
+     * Parse CloudFront invalidation XML
+     *
+     * @static
+     * @param DOMNode $node
+     * @return array
+     */
+    private static function __parseCloudFrontInvalidation(&$node) {
+        $invalidation = array();
+
+        if (isset($node->Id)) {
+            $invalidation['id'] = $node->Id;
+        }
+
+        if (isset($node->Status)) {
+            $invalidation['status'] = $node->Status;
+        }
+
+        if (isset($node->CreateTime)) {
+            $invalidation['createTime'] = $node->CreateTime;
+        }
+
+        if (isset($node->InvalidationBatch)) {
+            $invalidation['invalidationBath'] = array();
+
+            foreach ($node->InvalidationBatch as $path) {
+                $invalidation['invalidationBath'][] = $path;
+            }
+        }
+
+        return $invalidation;
+    }
+
+
 	/**
 	* Grab CloudFront response
 	*

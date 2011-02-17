@@ -17,6 +17,31 @@ class W3_Cdn_Azure extends W3_Cdn_Base {
     var $_client = null;
 
     /**
+     * PHP5 Constructor
+     *
+     * @param array $config
+     */
+    function __construct($config = array()) {
+        $config = array_merge(array(
+            'user' => '',
+            'key' => '',
+            'container' => '',
+            'cname' => array(),
+        ), $config);
+
+        parent::__construct($config);
+    }
+
+    /**
+     * PHP4 Constructor
+     *
+     * @param array $config
+     */
+    function W3_Cdn_Azure($config = array()) {
+        $this->__construct($config);
+    }
+
+    /**
      * Inits storage client object
      *
      * @param string $error
@@ -24,19 +49,19 @@ class W3_Cdn_Azure extends W3_Cdn_Base {
      */
     function _init(&$error) {
         if (empty($this->_config['user'])) {
-            $error = 'Empty account name';
+            $error = 'Empty account name.';
 
             return false;
         }
 
         if (empty($this->_config['key'])) {
-            $error = 'Empty account key';
+            $error = 'Empty account key.';
 
             return false;
         }
 
         if (empty($this->_config['container'])) {
-            $error = 'Empty container name';
+            $error = 'Empty container name.';
 
             return false;
         }
@@ -68,15 +93,17 @@ class W3_Cdn_Azure extends W3_Cdn_Base {
         $error = null;
 
         if (!$this->_init($error)) {
-            $results = $this->get_results($files, W3TC_CDN_RESULT_HALT, $error);
+            $results = $this->_get_results($files, W3TC_CDN_RESULT_HALT, $error);
+
             return;
         }
 
         foreach ($files as $local_path => $remote_path) {
             $results[] = $this->_upload($local_path, $remote_path, $force_rewrite);
 
-            if ($this->_config['compression'] && $this->may_gzip($remote_path)) {
+            if ($this->_config['compression'] && $this->_may_gzip($remote_path)) {
                 $remote_path_gzip = $remote_path . $this->_gzip_extension;
+
                 $results[] = $this->_upload_gzip($local_path, $remote_path_gzip, $force_rewrite);
             }
         }
@@ -92,7 +119,7 @@ class W3_Cdn_Azure extends W3_Cdn_Base {
      */
     function _upload($local_path, $remote_path, $force_rewrite = false) {
         if (!file_exists($local_path)) {
-            return $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Source file not found');
+            return $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Source file not found.');
         }
 
         $md5 = @md5_file($local_path);
@@ -104,25 +131,24 @@ class W3_Cdn_Azure extends W3_Cdn_Base {
                 $size = @filesize($local_path);
 
                 if ($size === (int) $properties->Size && $content_md5 === $properties->ContentMd5) {
-                    return $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'File already exists');
+                    return $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'File already exists.');
                 }
             } catch (Exception $exception) {
             }
         }
 
-        $headers = $this->get_headers($local_path);
+        $headers = $this->_get_headers($local_path);
         $headers = array_merge($headers, array(
             'Content-MD5' => $content_md5
         ));
 
         try {
             $this->_client->putBlob($this->_config['container'], $remote_path, $local_path, array(), null, $headers);
-
-            return $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'OK');
         } catch (Exception $exception) {
+            return $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, sprintf('Unable to put blob (%s).', $exception->getMessage()));
         }
 
-        return $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Unable to put blob');
+        return $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'OK');
     }
 
     /**
@@ -135,17 +161,17 @@ class W3_Cdn_Azure extends W3_Cdn_Base {
      */
     function _upload_gzip($local_path, $remote_path, $force_rewrite = false) {
         if (!function_exists('gzencode')) {
-            return $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, "GZIP library doesn't exists");
+            return $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, "GZIP library doesn't exists.");
         }
 
         if (!file_exists($local_path)) {
-            return $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Source file not found');
+            return $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Source file not found.');
         }
 
         $contents = @file_get_contents($local_path);
 
         if ($contents === false) {
-            return $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Unable to read file');
+            return $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Unable to read file.');
         }
 
         $data = gzencode($contents);
@@ -158,13 +184,13 @@ class W3_Cdn_Azure extends W3_Cdn_Base {
                 $size = @filesize($local_path);
 
                 if ($size === (int) $properties->Size && $content_md5 === $properties->ContentMd5) {
-                    return $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'File already exists');
+                    return $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'File already exists.');
                 }
             } catch (Exception $exception) {
             }
         }
 
-        $headers = $this->get_headers($local_path);
+        $headers = $this->_get_headers($local_path);
         $headers = array_merge($headers, array(
             'Content-MD5' => $content_md5,
             'Content-Encoding' => 'gzip'
@@ -172,12 +198,11 @@ class W3_Cdn_Azure extends W3_Cdn_Base {
 
         try {
             $this->_client->putBlobData($this->_config['container'], $remote_path, $data, array(), null, $headers);
-
-            return $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'OK');
         } catch (Exception $exception) {
+            return $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, sprintf('Unable to put blob (%s).', $exception->getMessage()));
         }
 
-        return $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Unable to put blob');
+        return $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'OK');
     }
 
     /**
@@ -191,25 +216,26 @@ class W3_Cdn_Azure extends W3_Cdn_Base {
         $error = null;
 
         if (!$this->_init($error)) {
-            $results = $this->get_results($files, W3TC_CDN_RESULT_HALT, $error);
+            $results = $this->_get_results($files, W3TC_CDN_RESULT_HALT, $error);
             return;
         }
 
         foreach ($files as $local_path => $remote_path) {
             try {
                 $this->_client->deleteBlob($this->_config['container'], $remote_path);
-                $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'OK');
+                $results[] = $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'OK');
             } catch (Exception $exception) {
-                $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Unable to delete blob');
+                $results[] = $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, sprintf('Unable to delete blob (%s).', $exception->getMessage()));
             }
 
             if ($this->_config['compression']) {
+                $remote_path_gzip = $remote_path . $this->_gzip_extension;
+
                 try {
-                    $remote_path_gzip = $remote_path . $this->_gzip_extension;
                     $this->_client->deleteBlob($this->_config['container'], $remote_path_gzip);
-                    $results[] = $this->get_result($local_path, $remote_path_gzip, W3TC_CDN_RESULT_OK, 'OK');
+                    $results[] = $this->_get_result($local_path, $remote_path_gzip, W3TC_CDN_RESULT_OK, 'OK');
                 } catch (Exception $exception) {
-                    $results[] = $this->get_result($local_path, $remote_path_gzip, W3TC_CDN_RESULT_ERROR, 'Unable to delete blob');
+                    $results[] = $this->_get_result($local_path, $remote_path_gzip, W3TC_CDN_RESULT_ERROR, sprintf('Unable to delete blob (%s).', $exception->getMessage()));
                 }
             }
         }
@@ -240,8 +266,17 @@ class W3_Cdn_Azure extends W3_Cdn_Base {
             return false;
         }
 
-        if (!in_array($this->_config['container'], (array) $containers)) {
-            $error = sprintf('Container doesn\'t exist: %s', $this->_config['container']);
+        $container = null;
+
+        foreach ((array) $containers as $_container) {
+            if ($_container->Name == $this->_config['container']) {
+                $container = $_container;
+                break;
+            }
+        }
+
+        if (!$container) {
+            $error = sprintf('Container doesn\'t exist: %s.', $this->_config['container']);
 
             return false;
         }
@@ -264,7 +299,7 @@ class W3_Cdn_Azure extends W3_Cdn_Base {
 
         if ($data != $string) {
             try {
-                @$this->_client->deleteBlob($this->_config['container'], $string);
+                $this->_client->deleteBlob($this->_config['container'], $string);
             } catch (Exception $exception) {
             }
 
@@ -276,7 +311,7 @@ class W3_Cdn_Azure extends W3_Cdn_Base {
         try {
             $this->_client->deleteBlob($this->_config['container'], $string);
         } catch (Exception $exception) {
-            $error = sprintf('Unable to delete object (%s).', $exception->getMessage());
+            $error = sprintf('Unable to delete blob (%s).', $exception->getMessage());
 
             return false;
         }
@@ -313,33 +348,6 @@ class W3_Cdn_Azure extends W3_Cdn_Base {
     }
 
     /**
-     * Formats object URL
-     *
-     * @param string $path
-     * @return string
-     */
-    function format_url($path) {
-        $domain = $this->get_domain($path);
-
-        if ($domain && !empty($this->_config['container'])) {
-            $scheme = $this->_get_scheme();
-            $url = sprintf('%s://%s/%s/%s', $scheme, $domain, $this->_config['container'], $path);
-
-            if ($this->_config['compression'] && isset($_SERVER['HTTP_ACCEPT_ENCODING']) && stristr($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false && $this->may_gzip($path)) {
-                if (($qpos = strpos($url, '?')) !== false) {
-                    $url = substr_replace($url, $this->_gzip_extension, $qpos, 0);
-                } else {
-                    $url .= $this->_gzip_extension;
-                }
-            }
-
-            return $url;
-        }
-
-        return false;
-    }
-
-    /**
      * Creates bucket
      *
      * @param string $container_id
@@ -369,39 +377,12 @@ class W3_Cdn_Azure extends W3_Cdn_Base {
             $this->_client->createContainer($this->_config['container']);
             $this->_client->setContainerAcl($this->_config['container'], Microsoft_WindowsAzure_Storage_Blob::ACL_PUBLIC_BLOB);
         } catch (Exception $exception) {
-            $error = sprintf('Unable to create container: %s (%s).', $this->_config['container'], $exception->getMessage());
+            $error = sprintf('Unable to create container: %s (%s)', $this->_config['container'], $exception->getMessage());
 
             return false;
         }
 
         return true;
-    }
-
-    /**
-     * Returns array of headers
-     *
-     * @param string $file
-     * @return array
-     */
-    function get_headers($file) {
-        $allowed_headers = array(
-            'Content-Length',
-            'Content-Type',
-            'Content-Encoding',
-            'Content-Language',
-            'Content-MD5',
-            'Cache-Control',
-        );
-
-        $headers = parent::get_headers($file);
-
-        foreach ($headers as $header => $value) {
-            if (!in_array($header, $allowed_headers)) {
-                unset($headers[$header]);
-            }
-        }
-
-        return $headers;
     }
 
     /**
@@ -412,5 +393,51 @@ class W3_Cdn_Azure extends W3_Cdn_Base {
      */
     function _get_content_md5($md5) {
         return base64_encode(pack('H*', $md5));
+    }
+
+    /**
+     * Formats object URL
+     *
+     * @param string $path
+     * @return string
+     */
+    function _format_url($path) {
+        $domain = $this->get_domain($path);
+
+        if ($domain && !empty($this->_config['container'])) {
+            $scheme = $this->_get_scheme();
+            $url = sprintf('%s://%s/%s/%s', $scheme, $domain, $this->_config['container'], $path);
+
+            return $url;
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns array of headers
+     *
+     * @param string $file
+     * @return array
+     */
+    function _get_headers($file) {
+        $allowed_headers = array(
+            'Content-Length',
+            'Content-Type',
+            'Content-Encoding',
+            'Content-Language',
+            'Content-MD5',
+            'Cache-Control',
+        );
+
+        $headers = parent::_get_headers($file);
+
+        foreach ($headers as $header => $value) {
+            if (!in_array($header, $allowed_headers)) {
+                unset($headers[$header]);
+            }
+        }
+
+        return $headers;
     }
 }

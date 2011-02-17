@@ -32,6 +32,32 @@ class W3_Cdn_Rscf extends W3_Cdn_Base {
     var $_container = null;
 
     /**
+     * PHP5 Constructor
+     *
+     * @param array $config
+     */
+    function __construct($config = array()) {
+        $config = array_merge(array(
+            'user' => '',
+            'key' => '',
+            'container' => '',
+            'id' => '',
+            'cname' => array(),
+        ), $config);
+
+        parent::__construct($config);
+    }
+
+    /**
+     * PHP4 Constructor
+     *
+     * @param array $config
+     */
+    function W3_Cdn_Rscf($config = array()) {
+        $this->__construct($config);
+    }
+
+    /**
      * Init connection object
      *
      * @param string $error
@@ -39,13 +65,13 @@ class W3_Cdn_Rscf extends W3_Cdn_Base {
      */
     function _init(&$error) {
         if (empty($this->_config['user'])) {
-            $error = 'Empty username';
+            $error = 'Empty username.';
 
             return false;
         }
 
         if (empty($this->_config['key'])) {
-            $error = 'Empty API key';
+            $error = 'Empty API key.';
 
             return false;
         }
@@ -74,7 +100,7 @@ class W3_Cdn_Rscf extends W3_Cdn_Base {
      */
     function _init_container(&$error) {
         if (empty($this->_config['container'])) {
-            $error = 'Empty container';
+            $error = 'Empty container.';
 
             return false;
         }
@@ -102,20 +128,23 @@ class W3_Cdn_Rscf extends W3_Cdn_Base {
         $error = null;
 
         if (!$this->_init($error) || !$this->_init_container($error)) {
-            $results = $this->get_results($files, W3TC_CDN_RESULT_HALT, $error);
+            $results = $this->_get_results($files, W3TC_CDN_RESULT_HALT, $error);
+
             return;
         }
 
         foreach ($files as $local_path => $remote_path) {
             if (!file_exists($local_path)) {
-                $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Source file not found');
+                $results[] = $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Source file not found.');
+
                 continue;
             }
 
             try {
                 $object = & new CF_Object($this->_container, $remote_path, false, false);
             } catch (Exception $exception) {
-                $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Unable to create object');
+                $results[] = $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, sprintf('Unable to create object (%s).', $exception->getMessage()));
+
                 continue;
             }
 
@@ -123,7 +152,8 @@ class W3_Cdn_Rscf extends W3_Cdn_Base {
                 try {
                     list($status, $reason, $etag, $last_modified, $content_type, $content_length, $metadata) = $this->_container->cfs_http->head_object($object);
                 } catch (Exception $exception) {
-                    $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Unable to get object info');
+                    $results[] = $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, sprintf('Unable to get object info (%s).', $exception->getMessage()));
+
                     continue;
                 }
 
@@ -131,7 +161,8 @@ class W3_Cdn_Rscf extends W3_Cdn_Base {
                     $hash = @md5_file($local_path);
 
                     if ($hash === $etag) {
-                        $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'Object already exists');
+                        $results[] = $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'Object already exists.');
+
                         continue;
                     }
                 }
@@ -139,9 +170,9 @@ class W3_Cdn_Rscf extends W3_Cdn_Base {
 
             try {
                 $object->load_from_filename($local_path);
-                $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'OK');
+                $results[] = $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'OK');
             } catch (Exception $exception) {
-                $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Unable to put object');
+                $results[] = $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, sprintf('Unable to write object (%s).', $exception->getMessage()));
             }
         }
     }
@@ -157,16 +188,17 @@ class W3_Cdn_Rscf extends W3_Cdn_Base {
         $error = null;
 
         if (!$this->_init($error) || !$this->_init_container($error)) {
-            $results = $this->get_results($files, W3TC_CDN_RESULT_HALT, $error);
+            $results = $this->_get_results($files, W3TC_CDN_RESULT_HALT, $error);
+
             return;
         }
 
         foreach ($files as $local_path => $remote_path) {
             try {
                 $this->_container->delete_object($remote_path);
-                $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'OK');
+                $results[] = $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'OK');
             } catch (Exception $exception) {
-                $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Unable to delete object');
+                $results[] = $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, sprintf('Unable to delete object (%s).', $exception->getMessage()));
             }
         }
     }
@@ -186,23 +218,47 @@ class W3_Cdn_Rscf extends W3_Cdn_Base {
             return false;
         }
 
-        try {
-            $string = 'test_rscf_' . md5(time());
+        $string = 'test_rscf_' . md5(time());
 
+        try {
             $object = $this->_container->create_object($string);
             $object->content_type = 'text/plain';
             $object->write($string, strlen($string));
+        } catch (Exception $exception) {
+            $error = sprintf('Unable to write object (%s).', $exception->getMessage());
 
+            return false;
+        }
+
+        try {
             $object = $this->_container->get_object($string);
             $data = $object->read();
+        } catch (Exception $exception) {
+            $error = sprintf('Unable to read object (%s).', $exception->getMessage());
 
-            if ($data != $string) {
-                throw new Exception('Objects are not equal.');
+            try {
+                $this->_container->delete_object($string);
+            } catch (Exception $exception) {
             }
 
+            return false;
+        }
+
+        if ($data != $string) {
+            $error = 'Objects are not equal.';
+
+            try {
+                $this->_container->delete_object($string);
+            } catch (Exception $exception) {
+            }
+
+            return false;
+        }
+
+        try {
             $this->_container->delete_object($string);
         } catch (Exception $exception) {
-            $error = $exception->getMessage();
+            $error = sprintf('Unable to delete object (%s).', $exception->getMessage());
 
             return false;
         }

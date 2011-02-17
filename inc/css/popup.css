@@ -73,6 +73,24 @@ a:hover {
     background: #F2F2F2 url(../../../../../wp-admin/images/white-grad-active.png) repeat-x scroll left top;
 }
 
+input.button-primary {
+    background: url(../../../../../wp-admin/images/button-grad.png) repeat-x scroll left top #21759B;
+    border-color: #298CBA;
+    color: #FFFFFF;
+    font-weight: bold;
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.3);
+}
+
+input.button-primary:active, button.button-primary:active, a.button-primary:active {
+    background: url(../../../../../images/button-grad-active.png) repeat-x scroll left top #21759B;
+    color: #EAF2FA;
+}
+
+input.button-primary:hover, button.button-primary:hover, a.button-primary:hover, a.button-primary:focus, a.button-primary:active {
+    border-color: #13455B;
+    color: #EAF2FA;
+}
+
 .progress {
     background: #fff;
     border: 1px solid #464646;

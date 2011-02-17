@@ -41,12 +41,23 @@ class W3_Cdn_Base {
     var $_gzip_extension = '.gzip';
 
     /**
+     * Last error
+     *
+     * @var string
+     */
+    var $_last_error = '';
+
+    /**
      * PHP5 Constructor
      *
      * @param array $config
      */
     function __construct($config = array()) {
-        $this->_config = $config;
+        $this->_config = array_merge(array(
+            'debug' => false,
+            'ssl' => 'auto',
+            'compression' => false
+        ), $config);
     }
 
     /**
@@ -67,7 +78,7 @@ class W3_Cdn_Base {
      * @return void
      */
     function upload($files, &$results, $force_rewrite = false) {
-        $results = $this->get_results($files, W3TC_CDN_RESULT_HALT, 'Not implemented.');
+        $results = $this->_get_results($files, W3TC_CDN_RESULT_HALT, 'Not implemented.');
     }
 
     /**
@@ -78,11 +89,11 @@ class W3_Cdn_Base {
      * @return void
      */
     function delete($files, &$results) {
-        $results = $this->get_results($files, W3TC_CDN_RESULT_HALT, 'Not implemented.');
+        $results = $this->_get_results($files, W3TC_CDN_RESULT_HALT, 'Not implemented.');
     }
 
     /**
-     * Purges URLs from CDN
+     * Purge files from CDN
      *
      * @param array $files
      * @param array $results
@@ -215,12 +226,31 @@ class W3_Cdn_Base {
     }
 
     /**
-     * Formats object URL
+     * Formats URL
+     *
+     * @param string $path
+     */
+    function format_url($path) {
+        $url = $this->_format_url($path);
+
+        if ($url && $this->_config['compression'] && isset($_SERVER['HTTP_ACCEPT_ENCODING']) && stristr($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') !== false && $this->_may_gzip($path)) {
+            if (($qpos = strpos($url, '?')) !== false) {
+                $url = substr_replace($url, $this->_gzip_extension, $qpos, 0);
+            } else {
+                $url .= $this->_gzip_extension;
+            }
+        }
+
+        return $url;
+    }
+
+    /**
+     * Formats URL
      *
      * @param string $path
      * @return string
      */
-    function format_url($path) {
+    function _format_url($path) {
         $domain = $this->get_domain($path);
 
         if ($domain) {
@@ -241,11 +271,11 @@ class W3_Cdn_Base {
      * @param string $error
      * @return array
      */
-    function get_results($files, $result = W3TC_CDN_RESULT_OK, $error = 'OK') {
+    function _get_results($files, $result = W3TC_CDN_RESULT_OK, $error = 'OK') {
         $results = array();
 
         foreach ($files as $local_path => $remote_path) {
-            $results[] = $this->get_result($local_path, $remote_path, $result, $error);
+            $results[] = $this->_get_result($local_path, $remote_path, $result, $error);
         }
 
         return $results;
@@ -260,7 +290,11 @@ class W3_Cdn_Base {
      * @param string $error
      * @return array
      */
-    function get_result($local_path, $remote_path, $result = W3TC_CDN_RESULT_OK, $error = 'OK') {
+    function _get_result($local_path, $remote_path, $result = W3TC_CDN_RESULT_OK, $error = 'OK') {
+        if ($this->_config['debug']) {
+            $this->_log($local_path, $remote_path, $error);
+        }
+
         return array(
             'local_path' => $local_path,
             'remote_path' => $remote_path,
@@ -270,12 +304,28 @@ class W3_Cdn_Base {
     }
 
     /**
+     * Check for errors
+     *
+     * @param array $results
+     * @return bool
+     */
+    function _is_error($results) {
+        foreach ($results as $result) {
+            if ($result['result'] != W3TC_CDN_RESULT_OK) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Returns headers for file
      *
      * @param string $file
      * @return array
      */
-    function get_headers($file) {
+    function _get_headers($file) {
         $mime_type = w3_get_mime_type($file);
         $last_modified = time();
 
@@ -341,7 +391,7 @@ class W3_Cdn_Base {
      * @param string $file
      * @return boolean
      */
-    function may_gzip($file) {
+    function _may_gzip($file) {
         /**
          * Remove query string
          */
@@ -491,5 +541,62 @@ class W3_Cdn_Base {
         }
 
         return $scheme;
+    }
+
+    /**
+     * Write log entry
+     *
+     * @param string $local_path
+     * @param string $remote_path
+     * @param string $error
+     * @return bool|int
+     */
+    function _log($local_path, $remote_path, $error) {
+        $data = sprintf("[%s] [%s => %s] %s\n", date('r'), $local_path, $remote_path, $error);
+
+        return @file_put_contents(W3TC_CDN_LOG_FILE, $data, FILE_APPEND);
+    }
+
+    /**
+     * Our error handler
+     *
+     * @param integer $errno
+     * @param string $errstr
+     * @return boolean
+     */
+    function _error_handler($errno, $errstr) {
+        $this->_last_error = $errstr;
+
+        return false;
+    }
+
+    /**
+     * Returns last error
+     *
+     * @return string
+     */
+    function _get_last_error() {
+        return $this->_last_error;
+    }
+
+    /**
+     * Set our error handler
+     *
+     * @return void
+     */
+    function _set_error_handler() {
+        set_error_handler(array(
+            &$this,
+            '_error_handler'
+        ));
+    }
+
+    /**
+     * Restore prev error handler
+     *
+     * @return void
+     */
+    function _restore_error_handler() {
+        restore_error_handler();
     }
 }

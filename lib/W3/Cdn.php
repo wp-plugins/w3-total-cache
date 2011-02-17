@@ -20,10 +20,6 @@ if (!defined('W3TC_CDN_CF_CUSTOM')) {
     define('W3TC_CDN_CF_CUSTOM', 'cf2');
 }
 
-if (!defined('W3TC_CDN_CF2')) {
-    define('W3TC_CDN_CF2', 'cf2');
-}
-
 if (!defined('W3TC_CDN_MIRROR')) {
     define('W3TC_CDN_MIRROR', 'mirror');
 }
@@ -70,12 +66,12 @@ class W3_Cdn {
 
                 case (W3TC_PHP5 && $engine == W3TC_CDN_CF_S3):
                     require_once W3TC_LIB_W3_DIR . '/Cdn/Cf/S3.php';
-                    $instances[$instance_key] = & new W3_Cdn_Cf_S3($config);
+                    $instances[$instance_key] = & new W3_Cdn_S3_Cf_S3($config);
                     break;
 
                 case (W3TC_PHP5 && $engine == W3TC_CDN_CF_CUSTOM):
                     require_once W3TC_LIB_W3_DIR . '/Cdn/Cf/Custom.php';
-                    $instances[$instance_key] = & new W3_Cdn_Cf_Custom($config);
+                    $instances[$instance_key] = & new W3_Cdn_S3_Cf_Custom($config);
                     break;
 
                 case (W3TC_PHP5 && $engine == W3TC_CDN_RSCF):
@@ -95,7 +91,7 @@ class W3_Cdn {
 
                 case ($engine == W3TC_CDN_NETDNA):
                     require_once W3TC_LIB_W3_DIR . '/Cdn/Netdna.php';
-                    $instances[$instance_key] = & new W3_Cdn_Netdna($config);
+                    $instances[$instance_key] = & new W3_Cdn_Mirror_Netdna($config);
                     break;
 
                 default :

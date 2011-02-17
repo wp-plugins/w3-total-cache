@@ -18,6 +18,9 @@
 	<input id="cdn_export_library" class="button" type="button" value="exporting media library to CDN" />.
 	Check <input id="cdn_queue" class="button" type="button" value="unsuccessful file transfers" /> if some objects appear to be missing.
 	<input id="cdn_rename_domain" class="button" type="button" value="Modify attachment URLs" /> if the domain name of your site has ever changed.
+    <?php if (w3_can_cdn_purge($cdn_engine)): ?>
+    <input id="cdn_purge" class="button" type="button" value="Purge" />
+    <?php endif; ?>
 </p>
 <?php endif; ?>
 

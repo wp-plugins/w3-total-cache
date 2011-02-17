@@ -21,6 +21,34 @@ class W3_Cdn_Ftp extends W3_Cdn_Base {
     var $_ftp = null;
 
     /**
+     * PHP5 Constructor
+     *
+     * @param array $config
+     */
+    function __construct($config = array()) {
+        $config = array_merge(array(
+            'host' => '',
+            'port' => 21,
+            'user' => '',
+            'pass' => '',
+            'path' => '',
+            'pasv' => false,
+            'domain' => array(),
+        ), $config);
+
+        parent::__construct($config);
+    }
+
+    /**
+     * PHP4 Constructor
+     *
+     * @param array $config
+     */
+    function W3_Cdn_Ftp($config = array()) {
+        $this->__construct($config);
+    }
+
+    /**
      * Connects to FTP server
      *
      * @param string $error
@@ -33,38 +61,50 @@ class W3_Cdn_Ftp extends W3_Cdn_Base {
             return false;
         }
 
-        if (!isset($this->_config['port'])) {
+        if (empty($this->_config['port'])) {
             $this->_config['port'] = 21;
         }
 
-        $this->_ftp = @ftp_connect($this->_config['host'], $this->_config['port'], W3TC_CDN_FTP_CONNECT_TIMEOUT);
+        $this->_set_error_handler();
+
+        $this->_ftp = @ftp_connect($this->_config['host'], (int) $this->_config['port'], W3TC_CDN_FTP_CONNECT_TIMEOUT);
 
         if (!$this->_ftp) {
-            $error = sprintf('Unable to connect to %s:%d.', $this->_config['host'], $this->_config['port']);
+            $error = sprintf('Unable to connect to %s:%d (%s).', $this->_config['host'], $this->_config['port'], $this->_get_last_error());
+
+            $this->_restore_error_handler();
 
             return false;
         }
 
         if (!@ftp_login($this->_ftp, $this->_config['user'], $this->_config['pass'])) {
+            $error = sprintf('Incorrect login or password (%s).', $this->_get_last_error());
+
+            $this->_restore_error_handler();
             $this->_disconnect();
-            $error = 'Incorrect login or password.';
 
             return false;
         }
 
-        if (isset($this->_config['pasv']) && !@ftp_pasv($this->_ftp, $this->_config['pasv'])) {
+        if (!@ftp_pasv($this->_ftp, $this->_config['pasv'])) {
+            $error = sprintf('Unable to change mode to passive (%s).', $this->_get_last_error());
+
+            $this->_restore_error_handler();
             $this->_disconnect();
-            $error = 'Unable to change mode to passive.';
 
             return false;
         }
 
         if (!empty($this->_config['path']) && !@ftp_chdir($this->_ftp, $this->_config['path'])) {
+            $error = sprintf('Unable to change directory to: %s (%s).', $this->_config['path'], $this->_get_last_error());
+
+            $this->_restore_error_handler();
             $this->_disconnect();
-            $error = sprintf('Unable to change directory to: %s.', $this->_config['path']);
 
             return false;
         }
+
+        $this->_restore_error_handler();
 
         return true;
     }
@@ -100,15 +140,28 @@ class W3_Cdn_Ftp extends W3_Cdn_Base {
         $error = null;
 
         if (!$this->_connect($error)) {
-            $results = $this->get_results($files, W3TC_CDN_RESULT_HALT, $error);
+            $results = $this->_get_results($files, W3TC_CDN_RESULT_HALT, $error);
+
             return;
         }
 
+        $this->_set_error_handler();
+
         $home = @ftp_pwd($this->_ftp);
+
+        if ($home === false) {
+            $results = $this->_get_results($files, W3TC_CDN_RESULT_HALT, sprintf('Unable to get current directory (%s).', $this->_get_last_error()));
+
+            $this->_restore_error_handler();
+            $this->_disconnect();
+
+            return;
+        }
 
         foreach ($files as $local_path => $remote_path) {
             if (!file_exists($local_path)) {
-                $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Source file not found');
+                $results[] = $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Source file not found.');
+
                 continue;
             }
 
@@ -120,12 +173,14 @@ class W3_Cdn_Ftp extends W3_Cdn_Base {
             foreach ($remote_dirs as $dir) {
                 if (!@ftp_chdir($this->_ftp, $dir)) {
                     if (!@ftp_mkdir($this->_ftp, $dir)) {
-                        $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Unable to create directory');
+                        $results[] = $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, sprintf('Unable to create directory (%s).', $this->_get_last_error()));
+
                         continue 2;
                     }
 
                     if (!@ftp_chdir($this->_ftp, $dir)) {
-                        $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Unable to change directory');
+                        $results[] = $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, sprintf('Unable to change directory (%s).', $this->_get_last_error()));
+
                         continue 2;
                     }
                 }
@@ -140,7 +195,8 @@ class W3_Cdn_Ftp extends W3_Cdn_Base {
                 $ftp_mtime = @ftp_mdtm($this->_ftp, $remote_file);
 
                 if ($size === $ftp_size && $mtime === $ftp_mtime) {
-                    $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'File already exists');
+                    $results[] = $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'File already exists.');
+
                     continue;
                 }
             }
@@ -149,12 +205,14 @@ class W3_Cdn_Ftp extends W3_Cdn_Base {
 
             if ($result) {
                 $this->_mdtm($remote_file, $mtime);
-                $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'OK');
+
+                $results[] = $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'OK');
             } else {
-                $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Unable to upload file');
+                $results[] = $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, sprintf('Unable to upload file (%s).', $this->_get_last_error()));
             }
         }
 
+        $this->_restore_error_handler();
         $this->_disconnect();
     }
 
@@ -169,27 +227,32 @@ class W3_Cdn_Ftp extends W3_Cdn_Base {
         $error = null;
 
         if (!$this->_connect($error)) {
-            $results = $this->get_results($files, W3TC_CDN_RESULT_HALT, $error);
+            $results = $this->_get_results($files, W3TC_CDN_RESULT_HALT, $error);
+
             return;
         }
+
+        $this->_set_error_handler();
 
         foreach ($files as $local_path => $remote_path) {
             $result = @ftp_delete($this->_ftp, $remote_path);
 
             if ($result) {
-                $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'OK');
+                $results[] = $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'OK');
             } else {
-                $results[] = $this->get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Unable to delete file');
+                $results[] = $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, sprintf('Unable to delete file (%s).', $this->_get_last_error()));
             }
 
             while (true) {
                 $remote_path = dirname($remote_path);
+
                 if ($remote_path == '.' || !@ftp_rmdir($this->_ftp, $remote_path)) {
                     break;
                 }
             }
         }
 
+        $this->_restore_error_handler();
         $this->_disconnect();
     }
 
@@ -205,10 +268,9 @@ class W3_Cdn_Ftp extends W3_Cdn_Base {
         }
 
         $rand = md5(time());
-        $upload_info = w3_upload_info();
         $tmp_dir = 'test_dir_' . $rand;
         $tmp_file = 'test_file_' . $rand;
-        $tmp_path = $upload_info['path'] . '/' . $tmp_file;
+        $tmp_path = W3TC_TMP_DIR . '/' . $tmp_file;
 
         if (!@file_put_contents($tmp_path, $rand)) {
             $error = sprintf('Unable to create file: %s.', $tmp_path);
@@ -220,34 +282,70 @@ class W3_Cdn_Ftp extends W3_Cdn_Base {
             return false;
         }
 
+        $this->_set_error_handler();
+
         if (!@ftp_mkdir($this->_ftp, $tmp_dir)) {
+            $error = sprintf('Unable to make directory: %s (%s).', $tmp_dir, $this->_get_last_error());
+
+            @unlink($tmp_path);
+
+            $this->_restore_error_handler();
             $this->_disconnect();
-            $error = sprintf('Unable to make directory: %s.', $tmp_dir);
 
             return false;
         }
 
         if (!@ftp_chdir($this->_ftp, $tmp_dir)) {
+            $error = sprintf('Unable to change directory to: %s (%s).', $tmp_dir, $this->_get_last_error());
+
+            @unlink($tmp_path);
+            @ftp_rmdir($this->_ftp, $tmp_dir);
+
+            $this->_restore_error_handler();
             $this->_disconnect();
-            $error = sprintf('Unable to change directory to: %s.', $tmp_dir);
 
             return false;
         }
 
         if (!@ftp_put($this->_ftp, $tmp_file, $tmp_path, FTP_BINARY)) {
+            $error = sprintf('Unable to upload file: %s (%s).', $tmp_path, $this->_get_last_error());
+
+            @unlink($tmp_path);
             @ftp_cdup($this->_ftp);
             @ftp_rmdir($this->_ftp, $tmp_dir);
-            @unlink($tmp_path);
+
+            $this->_restore_error_handler();
             $this->_disconnect();
-            $error = sprintf('Unable to upload file: %s.', $tmp_path);
 
             return false;
         }
 
-        @ftp_delete($this->_ftp, $tmp_file);
-        @ftp_cdup($this->_ftp);
-        @ftp_rmdir($this->_ftp, $tmp_dir);
         @unlink($tmp_path);
+
+        if (!@ftp_delete($this->_ftp, $tmp_file)) {
+            $error = sprintf('Unable to delete file: %s (%s).', $tmp_path, $this->_get_last_error());
+
+            @ftp_cdup($this->_ftp);
+            @ftp_rmdir($this->_ftp, $tmp_dir);
+
+            $this->_restore_error_handler();
+            $this->_disconnect();
+
+            return false;
+        }
+
+        @ftp_cdup($this->_ftp);
+
+        if (!@ftp_rmdir($this->_ftp, $tmp_dir)) {
+            $error = sprintf('Unable to remove directory: %s (%s).', $tmp_dir, $this->_get_last_error());
+
+            $this->_restore_error_handler();
+            $this->_disconnect();
+
+            return false;
+        }
+
+        $this->_restore_error_handler();
         $this->_disconnect();
 
         return true;

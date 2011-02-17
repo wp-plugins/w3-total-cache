@@ -3826,6 +3826,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
         switch ($cdn_queue_tab) {
             case 'upload':
             case 'delete':
+            case 'purge':
                 break;
 
             default:
@@ -4057,6 +4058,47 @@ class W3_Plugin_TotalCache extends W3_Plugin {
     }
 
     /**
+     * CDN purge action
+     */
+    function cdn_purge() {
+        $title = 'Purge CDN';
+        $results = array();
+
+        include W3TC_DIR . '/inc/popup/cdn_purge.phtml';
+    }
+
+    /**
+     * CDN purge post action
+     */
+    function cdn_purge_post() {
+        $title = 'Purge CDN';
+        $results = array();
+
+        require_once W3TC_LIB_W3_DIR . '/Request.php';
+
+        $files = W3_Request::get_array('files');
+        $document_root = w3_get_document_root();
+
+        $purge = array();
+
+        foreach ($files as $remote_file) {
+            $local_file = $document_root . '/' . w3_translate_file($remote_file);
+            $purge[$local_file] = $remote_file;
+        }
+
+        if (count($purge)) {
+            require_once W3TC_LIB_W3_DIR . '/Plugin/Cdn.php';
+
+            $w3_plugin_cdn = & W3_Plugin_Cdn::instance();
+            $w3_plugin_cdn->purge($purge, false, $results);
+        } else {
+            $errors[] = 'Empty files list.';
+        }
+
+        include W3TC_DIR . '/inc/popup/cdn_purge.phtml';
+    }
+
+    /**
      * Uploads minify files to CDN
      *
      * @return void
@@ -4139,6 +4181,10 @@ class W3_Plugin_TotalCache extends W3_Plugin {
         $engine = W3_Request::get_string('engine');
         $config = W3_Request::get_array('config');
 
+        $config = array_merge($config, array(
+            'debug' => false
+        ));
+
         switch ($engine) {
             case 'mirror':
             case 'netdna':
@@ -4189,6 +4235,10 @@ class W3_Plugin_TotalCache extends W3_Plugin {
 
         $engine = W3_Request::get_string('engine');
         $config = W3_Request::get_array('config');
+
+        $config = array_merge($config, array(
+            'debug' => false
+        ));
 
         $result = false;
         $error = 'Incorrect type.';

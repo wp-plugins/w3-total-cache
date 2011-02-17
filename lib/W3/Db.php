@@ -132,9 +132,8 @@ class W3_Db extends wpdb {
         $time_total = 0;
 
         if ($caching) {
-            $cache_key = $this->_get_cache_key($query);
-
             $this->timer_start();
+            $cache_key = $this->_get_cache_key($query);
             $cache = & $this->_get_cache();
             $data = $cache->get($cache_key);
             $time_total = $this->timer_stop();

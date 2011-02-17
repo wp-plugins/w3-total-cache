@@ -49,7 +49,9 @@ define('W3TC_CONFIG_MASTER_PATH', WP_CONTENT_DIR . '/w3-total-cache-config.php')
 define('W3TC_MINIFY_LOG_FILE', W3TC_LOG_DIR . '/minify.log');
 define('W3TC_CDN_COMMAND_UPLOAD', 1);
 define('W3TC_CDN_COMMAND_DELETE', 2);
+define('W3TC_CDN_COMMAND_PURGE', 3);
 define('W3TC_CDN_TABLE_QUEUE', 'w3tc_cdn_queue');
+define('W3TC_CDN_LOG_FILE', W3TC_LOG_DIR . '/cdn.log');
 
 define('W3TC_MARKER_BEGIN_WORDPRESS', '# BEGIN WordPress');
 define('W3TC_MARKER_BEGIN_SUPERCACHE', '# BEGIN WPSuperCache');
@@ -1081,7 +1083,7 @@ function w3_can_modify_rules($path) {
  * @return bool
  */
 function w3_can_cdn_purge($engine) {
-    return in_array($engine, array('mirror'));
+    return in_array($engine, array('ftp', 's3', 'cf', 'cf2', 'netdna', 'rscf', 'azure'));
 }
 
 /**
