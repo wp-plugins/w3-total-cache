@@ -1,9 +1,17 @@
 <?php include W3TC_DIR . '/inc/popup/common/header.phtml'; ?>
 
+<p>
+    Remove objects from the CDN by specifying the relative path on individual lines below and clicking the "Purge" button when done. Example:
+</p>
+<p>
+    wp-content/themes/twentyten/images/headers/path.jpg
+</p>
+
+
 <form action="admin.php?page=<?php echo $this->_page; ?>" method="post">
     <p>Files to purge:</p>
     <p>
-        <textarea name="files" rows="8" cols="90"></textarea>
+        <textarea name="files" rows="10" cols="90"></textarea>
     </p>
     <p>
         <input type="hidden" name="w3tc_action" value="cdn_purge_post" />

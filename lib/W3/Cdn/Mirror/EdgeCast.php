@@ -3,7 +3,7 @@
 /**
  * W3 CDN EdgeCast Class
  */
-require_once W3TC_LIB_W3_DIR . '/Cdn/Base.php';
+require_once W3TC_LIB_W3_DIR . '/Cdn/Mirror.php';
 
 /**
  * Class W3_Cdn_Mirror_EdgeCast

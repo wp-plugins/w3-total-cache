@@ -4061,7 +4061,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
      * CDN purge action
      */
     function cdn_purge() {
-        $title = 'Purge CDN';
+        $title = 'Content Delivery Network (CDN): Purge Tool';
         $results = array();
 
         include W3TC_DIR . '/inc/popup/cdn_purge.phtml';
@@ -4071,7 +4071,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
      * CDN purge post action
      */
     function cdn_purge_post() {
-        $title = 'Purge CDN';
+        $title = 'Content Delivery Network (CDN): Purge Tool';
         $results = array();
 
         require_once W3TC_LIB_W3_DIR . '/Request.php';

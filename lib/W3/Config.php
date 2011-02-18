@@ -7,7 +7,8 @@
 /**
  * Class W3_Config
  */
-class W3_Config {
+class W3_Config
+{
     /**
      * Tabs count
      *
@@ -813,7 +814,8 @@ class W3_Config {
      * PHP5 Constructor
      * @param boolean $preview
      */
-    function __construct($preview = null) {
+    function __construct($preview = null)
+    {
         $this->load_defaults();
         $this->load($preview);
 
@@ -826,7 +828,8 @@ class W3_Config {
      * PHP4 Constructor
      * @param boolean $preview
      */
-    function W3_Config($preview = null) {
+    function W3_Config($preview = null)
+    {
         $this->__construct($preview);
     }
 
@@ -837,7 +840,8 @@ class W3_Config {
      * @param mixed $default
      * @return mixed
      */
-    function get($key, $default = null) {
+    function get($key, $default = null)
+    {
         if (array_key_exists($key, $this->_keys) && array_key_exists($key, $this->_config)) {
             $value = $this->_config[$key];
         } else {
@@ -879,7 +883,7 @@ class W3_Config {
              * Disabled some page cache options when enhanced mode enabled
              */
             case 'pgcache.cache.query':
-                if ($this->get_boolean('pgcache.enabled') && $this->get_string('pgcache.engine') == 'file_pgcache') {
+                if ($this->get_string('pgcache.engine') == 'file_pgcache') {
                     return false;
                 }
                 break;
@@ -890,15 +894,6 @@ class W3_Config {
             case 'pgcache.prime.sitemap':
                 if (!$value) {
                     $value = w3_get_site_url() . '/sitemap.xml';
-                }
-                break;
-
-            /**
-             * Don't support additional headers in some cases
-             */
-            case 'pgcache.cache.headers':
-                if (!W3TC_PHP5 || ($this->get_boolean('pgcache.enabled') && $this->get_string('pgcache.engine') == 'file_pgcache')) {
-                    return array();
                 }
                 break;
 
@@ -978,7 +973,7 @@ class W3_Config {
              * Disable CDN minify when PHP5 is not installed or minify is disabled
              */
             case 'cdn.minify.enable':
-                if (!W3TC_PHP5 || !$this->get_boolean('minify.enabled') || !$this->get_boolean('minify.rewrite')) {
+                if (!W3TC_PHP5 || !$this->get_boolean('minify.rewrite')) {
                     return false;
                 }
                 break;
@@ -1010,8 +1005,9 @@ class W3_Config {
      * @param boolean $trim
      * @return string
      */
-    function get_string($key, $default = '', $trim = true) {
-        $value = (string) $this->get($key, $default);
+    function get_string($key, $default = '', $trim = true)
+    {
+        $value = (string)$this->get($key, $default);
 
         return ($trim ? trim($value) : $value);
     }
@@ -1023,8 +1019,9 @@ class W3_Config {
      * @param integer $default
      * @return integer
      */
-    function get_integer($key, $default = 0) {
-        return (integer) $this->get($key, $default);
+    function get_integer($key, $default = 0)
+    {
+        return (integer)$this->get($key, $default);
     }
 
     /**
@@ -1034,8 +1031,9 @@ class W3_Config {
      * @param boolean $default
      * @return boolean
      */
-    function get_boolean($key, $default = false) {
-        return (boolean) $this->get($key, $default);
+    function get_boolean($key, $default = false)
+    {
+        return (boolean)$this->get($key, $default);
     }
 
     /**
@@ -1045,8 +1043,9 @@ class W3_Config {
      * @param array $default
      * @return array
      */
-    function get_array($key, $default = array()) {
-        return (array) $this->get($key, $default);
+    function get_array($key, $default = array())
+    {
+        return (array)$this->get($key, $default);
     }
 
     /**
@@ -1055,7 +1054,8 @@ class W3_Config {
      * @param string $key
      * @param string $value
      */
-    function set($key, $value) {
+    function set($key, $value)
+    {
         if (array_key_exists($key, $this->_keys)) {
             $type = $this->_keys[$key];
             settype($value, $type);
@@ -1068,7 +1068,8 @@ class W3_Config {
     /**
      * Flush config
      */
-    function flush() {
+    function flush()
+    {
         $this->_config = array();
     }
 
@@ -1078,7 +1079,8 @@ class W3_Config {
      * @param string $file
      * @return array
      */
-    function read($file) {
+    function read($file)
+    {
         if (file_exists($file) && is_readable($file)) {
             $config = @include $file;
 
@@ -1099,7 +1101,8 @@ class W3_Config {
     /**
      * Reads config from request
      */
-    function read_request() {
+    function read_request()
+    {
         require_once W3TC_LIB_W3_DIR . '/Request.php';
 
         $request = W3_Request::get_request();
@@ -1144,7 +1147,8 @@ class W3_Config {
      * @param string $file
      * @return boolean
      */
-    function write($file) {
+    function write($file)
+    {
         $fp = @fopen($file, 'w');
 
         if ($fp) {
@@ -1172,10 +1176,11 @@ class W3_Config {
      * @param string $key
      * @param mixed $value
      */
-    function _write($fp, $key, $value) {
+    function _write($fp, $key, $value)
+    {
         @fputs($fp, str_repeat("\t", $this->_tabs));
 
-        if (is_numeric($key) && (string) (int) $key === (string) $key) {
+        if (is_numeric($key) && (string)(int)$key === (string)$key) {
             @fputs($fp, sprintf("%d => ", $key));
         } else {
             @fputs($fp, sprintf("'%s' => ", addslashes($key)));
@@ -1186,7 +1191,7 @@ class W3_Config {
             case 'array':
                 @fputs($fp, "array(\r\n");
                 ++$this->_tabs;
-                foreach ((array) $value as $k => $v) {
+                foreach ((array)$value as $k => $v) {
                     $this->_write($fp, $k, $v);
                 }
                 --$this->_tabs;
@@ -1194,11 +1199,11 @@ class W3_Config {
                 return;
 
             case 'integer':
-                $data = (string) $value;
+                $data = (string)$value;
                 break;
 
             case 'double':
-                $data = (string) $value;
+                $data = (string)$value;
                 break;
 
             case 'boolean':
@@ -1211,7 +1216,7 @@ class W3_Config {
 
             default:
             case 'string':
-                $data = "'" . addslashes((string) $value) . "'";
+                $data = "'" . addslashes((string)$value) . "'";
                 break;
         }
 
@@ -1224,7 +1229,8 @@ class W3_Config {
      * @param boolean $preview
      * @return boolean
      */
-    function load($preview = null) {
+    function load($preview = null)
+    {
         if ($preview === null) {
             $preview = w3_is_preview_mode();
         }
@@ -1239,14 +1245,16 @@ class W3_Config {
     /**
      * Loads master config (for WPMU)
      */
-    function load_master() {
+    function load_master()
+    {
         return $this->read(W3TC_CONFIG_MASTER_PATH);
     }
 
     /**
      * Loads config dfefaults
      */
-    function load_defaults() {
+    function load_defaults()
+    {
         foreach ($this->_defaults as $key => $value) {
             $this->set($key, $value);
         }
@@ -1255,7 +1263,8 @@ class W3_Config {
     /**
      * Set default option on plugin activate
      */
-    function set_defaults() {
+    function set_defaults()
+    {
         $this->set('pgcache.enabled', true);
         $this->set('minify.enabled', true);
         $this->set('browsercache.enabled', true);
@@ -1267,7 +1276,8 @@ class W3_Config {
      * @param boolean preview
      * @return boolean
      */
-    function save($preview = null) {
+    function save($preview = null)
+    {
         if ($preview === null) {
             $preview = w3_is_preview_mode();
         }
@@ -1285,7 +1295,8 @@ class W3_Config {
      * @param boolean $preview
      * @return W3_Config
      */
-    function &instance($preview = null) {
+    function &instance($preview = null)
+    {
         static $instances = array();
 
         if (!isset($instances[0])) {

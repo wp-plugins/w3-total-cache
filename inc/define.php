@@ -1025,7 +1025,7 @@ function w3_get_theme_key($theme_root, $template, $stylesheet) {
     $site_root = w3_get_site_root();
     $theme_path = ltrim(str_replace($site_root, '', w3_path($theme_root)), '/');
 
-    return substr(md5($theme_path . $template . $stylesheet), 0, 6);
+    return substr(md5($theme_path . $template . $stylesheet), 0, 5);
 }
 
 /**

@@ -390,7 +390,7 @@ class Microsoft_Http_Client_Adapter_Curl implements Microsoft_Http_Client_Adapte
         if (isset($this->_config['curloptions'])) {
             foreach ((array)$this->_config['curloptions'] as $k => $v) {
                 if (!in_array($k, $this->_invalidOverwritableCurlOptions)) {
-                    if (curl_setopt($this->_curl, $k, $v) == false) {
+                    if (@curl_setopt($this->_curl, $k, $v) == false) {
                         require_once 'Microsoft/Http/Client/Exception.php';
                         throw new Microsoft_Http_Client_Exception(sprintf("Unknown or erroreous cURL option '%s' set", $k));
                     }
