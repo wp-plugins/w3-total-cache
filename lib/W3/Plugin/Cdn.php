@@ -1325,7 +1325,7 @@ class W3_Plugin_Cdn extends W3_Plugin {
     function get_files_includes() {
         $includes_root = w3_path(ABSPATH . WPINC);
         $site_root = w3_get_site_root();
-        $includes_path = trim(w3_get_site_path(), '/') . str_replace($site_root, '', $includes_root);
+        $includes_path = ltrim(str_replace($site_root, rtrim(w3_get_site_path(), '/'), $includes_root), '/');
 
         $files = $this->search_files($includes_root, $includes_path, $this->_config->get_string('cdn.includes.files'));
 
@@ -1348,7 +1348,7 @@ class W3_Plugin_Cdn extends W3_Plugin {
 
         $themes_root = w3_path($themes_root);
         $site_root = w3_get_site_root();
-        $themes_path = trim(w3_get_site_path(), '/') . str_replace($site_root, '', $themes_root);
+        $themes_path =  ltrim(str_replace($site_root, rtrim(w3_get_site_path(), '/'), $themes_root), '/');
 
         $files = $this->search_files($themes_root, $themes_path, $this->_config->get_string('cdn.theme.files'));
 
@@ -1368,7 +1368,7 @@ class W3_Plugin_Cdn extends W3_Plugin {
             $document_root = w3_get_document_root();
             $site_root = w3_get_site_root();
             $minify_root = w3_path(W3TC_CACHE_FILE_MINIFY_DIR);
-            $minify_path = trim(w3_get_site_path(), '/') . str_replace($site_root, '', $minify_root);
+            $minify_path = ltrim(str_replace($site_root, rtrim(w3_get_site_path(), '/'), $minify_root), '/');
 
             $urls = $minify->get_urls();
 
@@ -1678,8 +1678,8 @@ class W3_Plugin_Cdn extends W3_Plugin {
                     $engine_config = array(
                         'user' => $this->_config->get_string('cdn.rscf.user'),
                         'key' => $this->_config->get_string('cdn.rscf.key'),
+                        'location' => $this->_config->get_string('cdn.rscf.location'),
                         'container' => $this->_config->get_string('cdn.rscf.container'),
-                        'id' => $this->_config->get_string('cdn.rscf.id'),
                         'cname' => $this->_config->get_array('cdn.rscf.cname'),
                         'ssl' => $this->_config->get_string('cdn.rscf.ssl')
                     );

@@ -131,7 +131,7 @@ class W3_Cdn_Azure extends W3_Cdn_Base {
                 $size = @filesize($local_path);
 
                 if ($size === (int) $properties->Size && $content_md5 === $properties->ContentMd5) {
-                    return $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'File already exists.');
+                    return $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'File up-to-date.');
                 }
             } catch (Exception $exception) {
             }
@@ -184,7 +184,7 @@ class W3_Cdn_Azure extends W3_Cdn_Base {
                 $size = @filesize($local_path);
 
                 if ($size === (int) $properties->Size && $content_md5 === $properties->ContentMd5) {
-                    return $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'File already exists.');
+                    return $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'File up-to-date.');
                 }
             } catch (Exception $exception) {
             }

@@ -1842,7 +1842,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                     $this->_errors[] = 'Content Delivery Network Error: The <strong>"Access key", "Secret key" and "Replace default hostname with"</strong> fields must be populated.';
                     break;
 
-                case ($cdn_engine == 'rscf' && ($this->_config->get_string('cdn.rscf.user') == '' || $this->_config->get_string('cdn.rscf.key') == '' || $this->_config->get_string('cdn.rscf.container') == '' || ($this->_config->get_string('cdn.rscf.id') == '' && !count($this->_config->get_array('cdn.rscf.cname'))))):
+                case ($cdn_engine == 'rscf' && ($this->_config->get_string('cdn.rscf.user') == '' || $this->_config->get_string('cdn.rscf.key') == '' || $this->_config->get_string('cdn.rscf.container') == '' || !count($this->_config->get_array('cdn.rscf.cname')))):
                     $this->_errors[] = 'Content Delivery Network Error: The <strong>"Username", "API key", "Container" and "Replace default hostname with"</strong> fields must be populated.';
                     break;
 
@@ -1856,7 +1856,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
          * Preview mode
          */
         if (w3_is_preview_config()) {
-            $this->_notes[] = sprintf('Preview mode is active: Changed settings will not take effect until preview mode is %s or %s. %s any changed settings (without deploying), or make additional changes.', $this->button_link('deploy', sprintf('admin.php?page=%s&preview_deploy', $this->_page)), $this->button_link('disable', sprintf('admin.php?page=%s&preview_save&preview=0', $this->_page)), $this->button_link('Preview', w3_get_site_url() . '/?w3tc_preview=1', true));
+            $this->_notes[] = sprintf('Preview mode is active: Changed settings will not take effect until preview mode is %s or %s. %s any changed settings (without deploying), or make additional changes.', $this->button_link('deploy', sprintf('admin.php?page=%s&preview_deploy', $this->_page)), $this->button_link('disable', sprintf('admin.php?page=%s&preview_save&preview=0', $this->_page)), $this->button_link('Preview', w3_get_home_url() . '/?w3tc_preview=1', true));
         }
 
         /**
@@ -1904,6 +1904,8 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                 break;
 
             case 'w3tc_support':
+                require_once W3TC_LIB_W3_DIR . '/Request.php';
+
                 $request_type = W3_Request::get_string('request_type');
 
                 if (!$request_type || !isset($this->_request_types[$request_type])) {
@@ -2088,6 +2090,8 @@ class W3_Plugin_TotalCache extends W3_Plugin {
 
         $auto = $this->_config->get_boolean('minify.auto');
 
+        require_once W3TC_LIB_W3_DIR . '/Request.php';
+
         $js_theme = W3_Request::get_string('js_theme', $current_theme_key);
         $js_groups = $this->_config->get_array('minify.js.groups');
 
@@ -2192,54 +2196,58 @@ class W3_Plugin_TotalCache extends W3_Plugin {
      * Support tab
      */
     function options_support() {
-        global $current_user;
-
-        $name = '';
-        $email = '';
-
-        if (is_a($current_user, 'WP_User')) {
-            if ($current_user->first_name) {
-                $name = $current_user->first_name;
-            }
-
-            if ($current_user->last_name) {
-                $name .= ($name != '' ? ' ' : '') . $current_user->last_name;
-            }
-
-            if ($name == 'admin') {
-                $name = '';
-            }
-
-            if ($current_user->user_email) {
-                $email = $current_user->user_email;
-            }
-        }
-
-        $theme = get_theme(get_current_theme());
-        $template_files = (isset($theme['Template Files']) ? (array) $theme['Template Files'] : array());
-
         require_once W3TC_LIB_W3_DIR . '/Request.php';
 
-        $ajax = W3_Request::get_boolean('ajax');
         $request_type = W3_Request::get_string('request_type');
-        $request_id = W3_Request::get_string('request_id', date('YmdHi'));
-        $payment = W3_Request::get_boolean('payment');
-        $url = W3_Request::get_string('url', w3_get_domain_url());
-        $name = W3_Request::get_string('name', $name);
-        $email = W3_Request::get_string('email', $email);
-        $twitter = W3_Request::get_string('twitter');
-        $phone = W3_Request::get_string('phone');
-        $subject = W3_Request::get_string('subject');
-        $description = W3_Request::get_string('description');
-        $templates = W3_Request::get_array('templates');
-        $forum_url = W3_Request::get_string('forum_url');
-        $wp_login = W3_Request::get_string('wp_login');
-        $wp_password = W3_Request::get_string('wp_password');
-        $ftp_host = W3_Request::get_string('ftp_host');
-        $ftp_login = W3_Request::get_string('ftp_login');
-        $ftp_password = W3_Request::get_string('ftp_password');
 
-        include W3TC_DIR . '/inc/options/support.phtml';
+        if (isset($this->_request_types[$request_type])) {
+            global $current_user;
+
+            $name = '';
+            $email = '';
+
+            if (is_a($current_user, 'WP_User')) {
+                if ($current_user->first_name) {
+                    $name = $current_user->first_name;
+                }
+
+                if ($current_user->last_name) {
+                    $name .= ($name != '' ? ' ' : '') . $current_user->last_name;
+                }
+
+                if ($name == 'admin') {
+                    $name = '';
+                }
+
+                if ($current_user->user_email) {
+                    $email = $current_user->user_email;
+                }
+            }
+
+            $theme = get_theme(get_current_theme());
+            $template_files = (isset($theme['Template Files']) ? (array) $theme['Template Files'] : array());
+
+
+            $ajax = W3_Request::get_boolean('ajax');
+            $request_id = W3_Request::get_string('request_id', date('YmdHi'));
+            $payment = W3_Request::get_boolean('payment');
+            $url = W3_Request::get_string('url', w3_get_domain_url());
+            $name = W3_Request::get_string('name', $name);
+            $email = W3_Request::get_string('email', $email);
+            $twitter = W3_Request::get_string('twitter');
+            $phone = W3_Request::get_string('phone');
+            $subject = W3_Request::get_string('subject');
+            $description = W3_Request::get_string('description');
+            $templates = W3_Request::get_array('templates');
+            $forum_url = W3_Request::get_string('forum_url');
+            $wp_login = W3_Request::get_string('wp_login');
+            $wp_password = W3_Request::get_string('wp_password');
+            $ftp_host = W3_Request::get_string('ftp_host');
+            $ftp_login = W3_Request::get_string('ftp_login');
+            $ftp_password = W3_Request::get_string('ftp_password');
+
+            include W3TC_DIR . '/inc/options/support.phtml';
+        }
     }
 
     /**
@@ -2259,16 +2267,18 @@ class W3_Plugin_TotalCache extends W3_Plugin {
     function options_support_payment() {
         require_once W3TC_LIB_W3_DIR . '/Request.php';
 
-        $ajax = W3_Request::get_boolean('ajax');
         $request_type = W3_Request::get_string('request_type');
-        $request_id = date('YmdHi');
 
-        $base_url = w3_get_site_url() . '/wp-admin/admin.php';
+        if (isset($this->_request_types[$request_type])) {
+            $ajax = W3_Request::get_boolean('ajax');
+            $request_id = date('YmdHi');
+            $base_url = w3_get_home_url() . '/wp-admin/admin.php';
 
-        $return_url = $base_url . '?page=w3tc_support&request_type=' . $request_type . '&payment=1&request_id=' . $request_id;
-        $cancel_url = $base_url . '?page=w3tc_general';
+            $return_url = $base_url . '?page=w3tc_support&request_type=' . $request_type . '&payment=1&request_id=' . $request_id;
+            $cancel_url = $base_url . '?page=w3tc_general';
 
-        include W3TC_DIR . '/inc/options/support_payment.phtml';
+            include W3TC_DIR . '/inc/options/support_payment.phtml';
+        }
     }
 
     /**
@@ -3659,7 +3669,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
 
             update_option('w3tc_request_data', $request_data);
 
-            $request_data_url = sprintf('%s/w3tc_request_data/%s', w3_get_site_url(), $hash);
+            $request_data_url = sprintf('%s/w3tc_request_data/%s', w3_get_home_url(), $hash);
         } else {
             $request_data_url = null;
         }
@@ -4731,21 +4741,21 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                 } else {
                     $buffer .= "\r\n<!-- Performance optimized by W3 Total Cache. Learn more: http://www.w3-edge.com/wordpress-plugins/\r\n\r\n";
 
-                    if ($this->_config->get_boolean('minify.enabled')) {
+                    if ($this->_config->get_boolean('minify.enabled') && !$this->_config->get_boolean('minify.debug')) {
                         require_once W3TC_LIB_W3_DIR . '/Plugin/Minify.php';
                         $w3_plugin_minify = & W3_Plugin_Minify::instance();
 
                         $buffer .= sprintf("Minified using %s%s\r\n", w3_get_engine_name($this->_config->get_string('minify.engine')), ($w3_plugin_minify->minify_reject_reason != '' ? sprintf(' (%s)', $w3_plugin_minify->minify_reject_reason) : ''));
                     }
 
-                    if ($this->_config->get_boolean('pgcache.enabled')) {
+                    if ($this->_config->get_boolean('pgcache.enabled') && !$this->_config->get_boolean('pgcache.debug')) {
                         require_once W3TC_LIB_W3_DIR . '/PgCache.php';
                         $w3_pgcache = & W3_PgCache::instance();
 
                         $buffer .= sprintf("Page Caching using %s%s\r\n", w3_get_engine_name($this->_config->get_string('pgcache.engine')), ($w3_pgcache->cache_reject_reason != '' ? sprintf(' (%s)', $w3_pgcache->cache_reject_reason) : ''));
                     }
 
-                    if ($this->_config->get_boolean('dbcache.enabled') && is_a($wpdb, 'W3_Db')) {
+                    if ($this->_config->get_boolean('dbcache.enabled') && !$this->_config->get_boolean('dbcache.debug') && is_a($wpdb, 'W3_Db')) {
                         $append = (is_user_logged_in() ? ' (user is logged in)' : '');
 
                         if ($wpdb->query_hits) {
@@ -4755,14 +4765,14 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                         }
                     }
 
-                    if ($this->_config->get_boolean('objectcache.enabled')) {
+                    if ($this->_config->get_boolean('objectcache.enabled') && !$this->_config->get_boolean('objectcache.debug')) {
                         require_once W3TC_LIB_W3_DIR . '/ObjectCache.php';
                         $w3_objectcache = & W3_ObjectCache::instance();
 
                         $buffer .= sprintf("Object Caching %d/%d objects using %s\r\n", $w3_objectcache->cache_hits, $w3_objectcache->cache_total, w3_get_engine_name($this->_config->get_string('objectcache.engine')));
                     }
 
-                    if ($this->_config->get_boolean('cdn.enabled')) {
+                    if ($this->_config->get_boolean('cdn.enabled') && !$this->_config->get_boolean('cdn.debug')) {
                         require_once W3TC_LIB_W3_DIR . '/Plugin/Cdn.php';
 
                         $w3_plugin_cdn = & W3_Plugin_Cdn::instance();
@@ -4786,7 +4796,8 @@ class W3_Plugin_TotalCache extends W3_Plugin {
      * @return boolean
      */
     function can_ob() {
-        $enabled = $this->_config->get_boolean('pgcache.enabled');
+        $enabled = w3_is_preview_mode();
+        $enabled = $enabled || $this->_config->get_boolean('pgcache.enabled');
         $enabled = $enabled || $this->_config->get_boolean('dbcache.enabled');
         $enabled = $enabled || $this->_config->get_boolean('objectcache.enabled');
         $enabled = $enabled || $this->_config->get_boolean('browsercache.enabled');
@@ -4839,19 +4850,6 @@ class W3_Plugin_TotalCache extends W3_Plugin {
          * Check for WPMU's and WP's 3.0 short init
          */
         if (defined('SHORTINIT') && SHORTINIT) {
-            return false;
-        }
-
-        /**
-         * Skip if debug mode is enabled
-         */
-        $debug = ($this->_config->get_boolean('pgcache.enabled') && $this->_config->get_boolean('pgcache.debug'));
-        $debug = $debug || ($this->_config->get_boolean('dbcache.enabled') && $this->_config->get_boolean('dbcache.debug'));
-        $debug = $debug || ($this->_config->get_boolean('objectcache.enabled') && $this->_config->get_boolean('objectcache.debug'));
-        $debug = $debug || ($this->_config->get_boolean('minify.enabled') && $this->_config->get_boolean('minify.debug'));
-        $debug = $debug || ($this->_config->get_boolean('cdn.enabled') && $this->_config->get_boolean('cdn.debug'));
-
-        if ($debug) {
             return false;
         }
 

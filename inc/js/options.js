@@ -569,6 +569,7 @@ jQuery(function() {
                     engine: 'rscf',
                     'config[user]': jQuery('#cdn_rscf_user').val(),
                     'config[key]': jQuery('#cdn_rscf_key').val(),
+                    'config[location]': jQuery('#cdn_rscf_location').val(),
                     'config[container]': jQuery('#cdn_rscf_container').val(),
                     'config[id]': jQuery('#cdn_rscf_id').val()
                 });
@@ -649,7 +650,7 @@ jQuery(function() {
                 break;
 
             case me.hasClass('cdn_rscf'):
-                container_id = jQuery('#cdn_rscf_id');
+                container_id = jQuery('#cdn_cnames input[type=text]:first');
 
                 jQuery.extend(params, {
                     engine: 'rscf',
@@ -856,44 +857,50 @@ jQuery(function() {
         return true;
     });
 
-    jQuery('#support_request_type').live('change', function() {
-        var request_type = jQuery(this);
+    function w3tc_support_request_type_change() {
+        jQuery('#support_request_type').change(function() {
+            var request_type = jQuery(this);
 
-        if (request_type.val() == '') {
-            alert('Please select request type.');
-            request_type.focus();
+            if (request_type.val() == '') {
+                alert('Please select request type.');
+                request_type.focus();
 
-            return false;
-        }
+                return false;
+            }
 
-        var action = '';
+            var type = request_type.val(), action = '';
 
-        switch (request_type.val()) {
-            case 'bug_report':
-            case 'new_feature':
-                action = 'options_support';
-                break;
+            switch (type) {
+                case 'bug_report':
+                case 'new_feature':
+                    action = 'options_support';
+                    break;
 
-            case 'email_support':
-            case 'phone_support':
-            case 'plugin_config':
-            case 'theme_config':
-            case 'linux_config':
-                action = 'options_support_payment';
-                break;
-        }
+                case 'email_support':
+                case 'phone_support':
+                case 'plugin_config':
+                case 'theme_config':
+                case 'linux_config':
+                    action = 'options_support_payment';
+                    break;
+            }
 
-        if (action) {
-            jQuery('#support_container').html('<div id="support_loading">Loading...</div>').load('admin.php?page=w3tc_support&w3tc_action=' + action + '&request_type=' + request_type.val() + '&ajax=1');
+            if (action) {
+                jQuery('#support_container').html('<div id="support_loading">Loading...</div>').load('admin.php?page=w3tc_support&w3tc_action=' + action + '&request_type=' + type + '&ajax=1');
 
-            return false;
-        }
+                return false;
+            }
 
-        return true;
-    });
+            return true;
+        });
+    }
+
+    w3tc_support_request_type_change();
 
     jQuery('#support_cancel').live('click', function() {
-        jQuery('#support_container').html('<div id="support_loading">Loading...</div>').load('admin.php?page=w3tc_support&w3tc_action=options_support_select&ajax=1');
+        jQuery('#support_container').html('<div id="support_loading">Loading...</div>').load('admin.php?page=w3tc_support&w3tc_action=options_support_select&ajax=1', function() {
+            w3tc_support_request_type_change();
+        });
     });
 
     // mobile tab

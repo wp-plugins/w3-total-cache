@@ -20,10 +20,10 @@
 	<input id="cdn_import_library" class="button" type="button" value="importing attachments into the Media Library" /> then
 	<input id="cdn_export_library" class="button" type="button" value="exporting media library to CDN" />.
 	Check <input id="cdn_queue" class="button" type="button" value="unsuccessful file transfers" /> if some objects appear to be missing.
-	<input id="cdn_rename_domain" class="button" type="button" value="Modify attachment URLs" /> if the domain name of your site has ever changed.
     <?php if (w3_can_cdn_purge($cdn_engine)): ?>
-    <input id="cdn_purge" class="button" type="button" value="Purge" /> objects from the CDN using this tool.
+    <input id="cdn_purge" class="button" type="button" value="Purge" /> objects from the <acronym title="Content Delivery Network">CDN</acronym> if needed.
     <?php endif; ?>
+	<input id="cdn_rename_domain" class="button" type="button" value="Modify attachment URLs" /> if the domain name of your site has ever changed.
 </p>
 <?php endif; ?>
 
@@ -95,13 +95,6 @@
         			<span class="description">Download attachments hosted elsewhere into your media library and deliver them via <acronym title="Content Delivery Network">CDN</acronym>.</span>
         		</th>
         	</tr>
-        	<tr>
-        		<th colspan="2">
-        			<input type="hidden" name="set_cookie_domain_old" value="<?php echo (int) $set_cookie_domain; ?>" />
-        			<input type="hidden" name="set_cookie_domain_new" value="0" />
-        			<label><input type="checkbox" name="set_cookie_domain_new" value="1"<?php checked($set_cookie_domain, true); ?> /> Set Cookie Domain to &quot;<?php echo htmlspecialchars($cookie_domain); ?>&quot;</label>
-        		</th>
-        	</tr>
         </table>
 
         <p class="submit">
@@ -139,14 +132,7 @@
         		<th colspan="2">
         			<input type="hidden" name="cdn.reject.admins" value="0" />
         			<label><input type="checkbox" name="cdn.reject.admins" value="1"<?php checked($this->_config->get_boolean('cdn.reject.admins'), true); ?> /> Don't replace URLs for logged in administrators</label><br />
-                    <span class="description">Users that have signed in to WordPress as administrators will never see replaced URLs.</span>
-        		</th>
-        	</tr>
-        	<tr>
-        		<th colspan="2">
-        			<input type="hidden" name="cdn.autoupload.enabled" value="0" />
-        			<label><input type="checkbox" name="cdn.autoupload.enabled" value="1"<?php checked($this->_config->get_boolean('cdn.autoupload.enabled'), true); ?> /> Enable changed files auto-upload</label><br />
-        			<span class="description">Automatically attempt to find and upload changed files.</span>
+                    <span class="description">Authenticated administrators will use the origin server exclusively when this option is selected.</span>
         		</th>
         	</tr>
             <tr>
@@ -156,6 +142,13 @@
                     <span class="description">If <acronym title="Content Delivery Network">CDN</acronym> is enabled (and not using the origin pull method), your minified files will be automatically uploaded.</span>
                 </th>
             </tr>
+        	<tr>
+        		<th colspan="2">
+        			<input type="hidden" name="cdn.autoupload.enabled" value="0" />
+        			<label><input type="checkbox" name="cdn.autoupload.enabled" value="1"<?php checked($this->_config->get_boolean('cdn.autoupload.enabled'), true); ?> /> Export changed files automatically</label><br />
+        			<span class="description">Automatically attempt to find and upload changed files.</span>
+        		</th>
+        	</tr>
             <tr>
                 <th><label for="cdn_autoupload_interval">Auto upload interval:</label></th>
                 <td>
@@ -219,6 +212,14 @@
         			<textarea id="cdn_reject_files" name="cdn.reject.files" cols="40" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('cdn.reject.files'))); ?></textarea><br />
         			<span class="description">Specify the path of files that should not use the <acronym title="Content Delivery Network">CDN</acronym>.</span>
         		</td>
+        	</tr>
+        	<tr>
+        		<th colspan="2">
+        			<input type="hidden" name="set_cookie_domain_old" value="<?php echo (int) $set_cookie_domain; ?>" />
+        			<input type="hidden" name="set_cookie_domain_new" value="0" />
+        			<label><input type="checkbox" name="set_cookie_domain_new" value="1"<?php checked($set_cookie_domain, true); ?> /> Set Cookie Domain to &quot;<?php echo htmlspecialchars($cookie_domain); ?>&quot;</label>
+					<br /><span class="description">If using subdomain for CDN functionality, this setting helps prevent new users from sending cookies in requests to the CDN subdomain.</span>
+        		</th>
         	</tr>
         </table>
 

@@ -9,22 +9,23 @@ Easily optimize the speed and user experience of your site with caching: browser
 
 == Description ==
 
-The fastest and most complete WordPress performance optimization plugin. Trusted by many popular sites like: mattcutts.com, mashable.com, smashingmagazine.com, makeuseof.com, kiss925.com, pearsonified.com, lockergnome.com, tutsplus.com, johnchow.com, ilovetypography.com, webdesignerdepot.com, css-tricks.com, yoast.com and others &mdash; W3 Total Cache improves the user experience of your site by improving your server performance, caching every aspect of your site, reducing the download times and providing transparent content delivery network (CDN) integration.
+The fastest and most complete WordPress performance optimization plugin. Trusted by countless sites like: mattcutts.com, mashable.com, smashingmagazine.com, makeuseof.com, yoast.com, kiss925.com, pearsonified.com, lockergnome.com, tutsplus.com, johnchow.com, ilovetypography.com, webdesignerdepot.com, css-tricks.com and others &mdash; W3 Total Cache improves the user experience of your site by improving your server performance, caching every aspect of your site, reducing the download times and providing transparent content delivery network (CDN) integration.
 
 Benefits:
 
 * At least 10x improvement in overall site performance (Grade A in [YSlow](http://developer.yahoo.com/yslow/) or significant [Google Page Speed](http://code.google.com/speed/page-speed/) improvements) **when fully configured**
-* Improve conversion rates and "[site performance](http://googlewebmastercentral.blogspot.com/2009/12/your-sites-performance-in-webmaster.html)" which [affect your site's rank](http://googlewebmastercentral.blogspot.com/2010/04/using-site-speed-in-web-search-ranking.html) on Google.com
-* "Instant" second page views (browser caching after first page view)
-* Optimized progressive render (pages start rendering immediately)
-* Reduced page load time: increased visitor time on site (visitors view more pages)
-* Improved web server performance (sustain high traffic periods)
+* Improved conversion rates and "[site performance](http://googlewebmastercentral.blogspot.com/2009/12/your-sites-performance-in-webmaster.html)" which [affect your site's rank](http://googlewebmastercentral.blogspot.com/2010/04/using-site-speed-in-web-search-ranking.html) on Google.com
+* "Instant" subsequent page views: browser caching
+* Optimized progressive render: pages start rendering quickly
+* Reduced page load time: increased visitor time on site; visitors view more pages
+* Improved web server performance; sustain high traffic periods
 * Up to 80% bandwidth savings via minify and HTTP compression of HTML, CSS, JavaScript and feeds
 
 Features:
 
 * Compatible with shared hosting, virtual private / dedicated servers and dedicated servers / clusters
 * Transparent content delivery network (CDN) integration with Media Library, theme files and WordPress itself
+* Mobile support: custom caching of pages by referrer or groups of user agents including theme switching for groups of referrers or user agents
 * Caching of (minified and compressed) pages and posts in memory or on disk or on CDN (mirror only)
 * Caching of (minified and compressed) CSS and JavaScript in memory, on disk or on CDN
 * Caching of feeds (site, categories, tags, comments, search results) in memory or on disk or on CDN (mirror only)
@@ -414,7 +415,7 @@ Please reach out to all of these people and support their projects if you're so 
 * Added support for nginx web server
 * Added support for CloudFlare
 * Added origin pull support for Amazon Cloudfront
-* Added Microsoft Azure support for CDN
+* Added Microsoft Azure Storage support for CDN
 * Added WinCache opcode cache support
 * Added additional minifier engines for HTML, CSS and JS including: HTMLtidy, CSStidy, Closure Compiler, YUI Compressor
 * Added controls for page cache purging policy
@@ -423,18 +424,23 @@ Please reach out to all of these people and support their projects if you're so 
 * Added reliability improvements for Amazon Web Services
 * Added referrer group management for uniquely caching these cases
 * Added Amazon S3 bucket location selection control
-* Added support to reconfigure CNAMEs in for Amazon Cloudfront using W3TC settings
+* Added support CNAMEs confguration support for Amazon Cloudfront
 * Improved non-blocking JS embedding implementation
 * Improved reliability of CDN export operations
 * Improved implementation of headers for all cache engines
 * Improved minify help (recommendations) tool
+* Improved handling of .htaccess directive changes
+* Improved support of IIS web server
+* Fixed bugs with API changes with Rackspace Cloudfiles
+* Fixed bugs with origin push content delivery network methods
+* Fixed bug with HTML encoding
 * Fixed bug with emptying cache for various cache keys
-* Fixed division by zero error
 * Fixed bug with rejected CDN file support
 * Fixed bug with HTTPS mode in WP Admin
-* Fixed bug with related document root for disk enhanced page cache
-* Fixed bug with trailing slashes for disk enhanced page cache
+* Fixed bug with relative document root for disk enhanced page cache
+* Fixed bug with trailing slash for disk enhanced page cache
 * Fixed bug with minify template group settings being lost upon upgrade
+* Fixed division by zero error
 * Moved browser cache rules to site root instead of document root
 
 = 0.9.1.3 =

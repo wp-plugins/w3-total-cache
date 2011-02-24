@@ -107,6 +107,7 @@
                 <td>
                     <label><input type="radio" name="minify.auto" value="1"<?php checked($this->_config->get_boolean('minify.auto'), true); ?><?php if (! W3TC_PHP5): ?> disabled="disabled"<?php endif; ?> /> Auto</label>
                     <label><input type="radio" name="minify.auto" value="0"<?php checked($this->_config->get_boolean('minify.auto'), false); ?><?php if (! W3TC_PHP5): ?> disabled="disabled"<?php endif; ?> /> Manual</label>
+					<br /><span class="description">Select manual mode to use fields on the minify settings tab to specify files to be minified, otherwise files will be minified automatically, but will not use the <acronym title="Content Delivery Network">CDN</acronym>.</span>
                 </td>
             </tr>
             <tr>
@@ -164,7 +165,6 @@
             <input type="submit" name="flush_minify" value="Empty cache"<?php if (! $minify_enabled): ?> disabled="disabled"<?php endif; ?> class="button" />
         </p>
         <?php echo $this->postbox_footer(); ?>
-
 
         <?php echo $this->postbox_header('Database Cache'); ?>
         <p>Enable database caching to reduce post, page and feed creation time.</p>
@@ -260,7 +260,7 @@
                 </td>
             </tr>
             <tr>
-                <th><label for="cloudflare_email">CloudFlare Account Email:</label></th>
+                <th><label for="cloudflare_email">CloudFlare account email:</label></th>
                 <td>
                     <input id="cloudflare_email" class="w3tc-ignore-change" type="text" name="cloudflare.email" value="<?php echo htmlspecialchars($this->_config->get_string('cloudflare.email')); ?>" size="60" />
                 </td>
@@ -417,36 +417,36 @@
 
         <?php echo $this->postbox_header('Miscellaneous'); ?>
         <table class="form-table">
+            <?php if (w3_is_nginx()): ?>
+            <tr>
+                <th>Nginx server configuration file path:</th>
+                <td>
+                    <input type="text" name="config.path" value="<?php echo htmlspecialchars($this->_config->get_string('config.path')); ?>" size="80" />
+                    <br /><span class="description">If empty the default path will be used..</span>
+                </td>
+            </tr>
+            <?php endif; ?>
             <tr>
                 <th colspan="2">
-                    <input type="hidden" name="widget.latest.enabled" value="0" />
-                    <label><input type="checkbox" name="widget.latest.enabled" value="1"<?php checked($this->_config->get_boolean('widget.latest.enabled'), true); ?> /> Enable dashboard news widget</label>
-                    <br /><span class="description">Display latest tweets and support tips on the WordPress Dashboard.</span>
+                    <input type="hidden" name="config.check" value="0" />
+                    <label><input type="checkbox" name="config.check" value="1"<?php checked($this->_config->get_boolean('config.check'), true); ?> /> Verify rewrite rules:</label>
+                    <br /><span class="description">Notify of server configuration errors, if this option is disabled, the server configuration for active settings can be found on the <a href="admin.php?page=w3tc_install">install</a> tab.</span>
                 </th>
             </tr>
             <tr>
                 <th colspan="2">
                     <input type="hidden" name="file_locking" value="0"<?php if (! $can_empty_file): ?> disabled="disabled"<?php endif; ?> />
                     <label><input type="checkbox" name="file_locking" value="1"<?php checked($file_locking, true); ?><?php if (! $can_empty_file): ?> disabled="disabled"<?php endif; ?> /> Enable file locking</label>
-                    <br /><span class="description">Not recommended for network-based file systems.</span>
+                    <br /><span class="description">Not recommended for "slow" network-based file systems.</span>
                 </th>
             </tr>
             <tr>
                 <th colspan="2">
-                    <input type="hidden" name="config.check" value="0" />
-                    <label><input type="checkbox" name="config.check" value="1"<?php checked($this->_config->get_boolean('config.check'), true); ?> /> Enable rewrite rules checking</label>
-                    <br /><span class="description">Display rewrite rules configuration errors.</span>
+                    <input type="hidden" name="widget.latest.enabled" value="0" />
+                    <label><input type="checkbox" name="widget.latest.enabled" value="1"<?php checked($this->_config->get_boolean('widget.latest.enabled'), true); ?> /> Enable dashboard news widget</label>
+                    <br /><span class="description">Display latest tweets and support tips on the WordPress dashboard.</span>
                 </th>
             </tr>
-            <?php if (w3_is_nginx()): ?>
-            <tr>
-                <th>Server configuration path:</th>
-                <td>
-                    <input type="text" name="config.path" value="<?php echo htmlspecialchars($this->_config->get_string('config.path')); ?>" size="80" />
-                    <br /><span class="description">Leave it empty to use default settings.</span>
-                </td>
-            </tr>
-            <?php endif; ?>
         </table>
 
         <p class="submit">
@@ -465,14 +465,14 @@
                 <td>
                     <input type="file" name="config_file" />
                     <input type="submit" name="config_import" class="button" value="Upload" />
-                    <br /><span class="description">Upload and replace the settings file on the server.</span>
+                    <br /><span class="description">Upload and replace the active settings file.</span>
                 </td>
             </tr>
             <tr>
                 <th>Export configuration:</th>
                 <td>
                     <input type="submit" name="config_export" class="button" value="Download" />
-                    <br /><span class="description">Download the settings file from the server.</span>
+                    <br /><span class="description">Download the active settings file.</span>
                 </td>
             </tr>
             <tr>

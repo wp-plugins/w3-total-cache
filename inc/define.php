@@ -278,6 +278,15 @@ function w3_is_wpmu() {
 }
 
 /**
+ * Returns true if WPMU uses vhosts
+ *
+ * @return boolean
+ */
+function w3_is_subdomain_install() {
+    return ((defined('SUBDOMAIN_INSTALL') && SUBDOMAIN_INSTALL) || (defined('VHOST') && VHOST == 'yes'));
+}
+
+/**
  * Returns true if it's WP with enabled Network mode
  *
  * @return boolean
@@ -286,7 +295,7 @@ function w3_is_multisite() {
     static $multisite = null;
 
     if ($multisite === null) {
-        $multisite = (defined('MULTISITE') && MULTISITE);
+        $multisite = ((defined('MULTISITE') && MULTISITE) || defined('SUNRISE') || w3_is_subdomain_install());
     }
 
     return $multisite;
@@ -299,15 +308,6 @@ function w3_is_multisite() {
  */
 function w3_is_network() {
     return (w3_is_wpmu() || w3_is_multisite());
-}
-
-/**
- * Returns true if WPMU uses vhosts
- *
- * @return boolean
- */
-function w3_is_subdomain_install() {
-    return ((defined('SUBDOMAIN_INSTALL') && SUBDOMAIN_INSTALL) || (defined('VHOST') && VHOST == 'yes'));
 }
 
 /**
@@ -629,8 +629,8 @@ function w3_get_url_ssl($url) {
  */
 
 function w3_get_domain_url() {
-    $site_url = w3_get_site_url();
-    $parse_url = @parse_url($site_url);
+    $home_url = w3_get_home_url();
+    $parse_url = @parse_url($home_url);
 
     if ($parse_url && isset($parse_url['scheme']) && isset($parse_url['host'])) {
         $scheme = $parse_url['scheme'];
@@ -692,6 +692,18 @@ function w3_get_home_url_ssl() {
 }
 
 /**
+ * Returns home url regexp
+ *
+ * @return string
+ */
+function w3_get_home_url_regexp() {
+    $home_url = w3_get_home_url();
+    $regexp = w3_get_url_regexp($home_url);
+
+    return $regexp;
+}
+
+/**
  * Returns site URL
  *
  * No trailing slash!
@@ -724,18 +736,6 @@ function w3_get_site_url_ssl() {
     $ssl = w3_get_url_ssl($site_url);
 
     return $ssl;
-}
-
-/**
- * Returns site url regexp
- *
- * @return string
- */
-function w3_get_site_url_regexp() {
-    $site_url = w3_get_site_url();
-    $regexp = w3_get_url_regexp($site_url);
-
-    return $regexp;
 }
 
 /**
@@ -1127,8 +1127,8 @@ function w3_parse_path($path) {
 function w3_normalize_file($file) {
     if (w3_is_url($file)) {
         if (strstr($file, '?') === false) {
-            $site_url_regexp = '~' . w3_get_site_url_regexp() . '~i';
-            $file = preg_replace($site_url_regexp, '', $file);
+            $home_url_regexp = '~' . w3_get_home_url_regexp() . '~i';
+            $file = preg_replace($home_url_regexp, '', $file);
         }
     }
 
@@ -1479,8 +1479,6 @@ function w3_upload_info() {
         $upload_info = @wp_upload_dir();
 
         if (empty($upload_info['error'])) {
-            $site_url = w3_get_site_url();
-
             $parse_url = @parse_url($upload_info['baseurl']);
 
             if ($parse_url) {

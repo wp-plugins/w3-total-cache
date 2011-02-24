@@ -40,8 +40,8 @@ class W3_Cdn_Rscf extends W3_Cdn_Base {
         $config = array_merge(array(
             'user' => '',
             'key' => '',
+            'location' => 'us',
             'container' => '',
-            'id' => '',
             'cname' => array(),
         ), $config);
 
@@ -76,8 +76,25 @@ class W3_Cdn_Rscf extends W3_Cdn_Base {
             return false;
         }
 
+        if (empty($this->_config['location'])) {
+            $error = 'Empty API key.';
+
+            return false;
+        }
+
+        switch ($this->_config['location']) {
+            default:
+            case 'us':
+                $host = US_AUTHURL;
+                break;
+
+            case 'uk':
+                $host = UK_AUTHURL;
+                break;
+        }
+
         try {
-            $this->_auth = new CF_Authentication($this->_config['user'], $this->_config['key']);
+            $this->_auth = new CF_Authentication($this->_config['user'], $this->_config['key'], null, $host);
             $this->_auth->ssl_use_cabundle();
             $this->_auth->authenticate();
 
@@ -161,7 +178,7 @@ class W3_Cdn_Rscf extends W3_Cdn_Base {
                     $hash = @md5_file($local_path);
 
                     if ($hash === $etag) {
-                        $results[] = $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'Object already exists.');
+                        $results[] = $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'Object up-to-date.');
 
                         continue;
                     }
@@ -274,12 +291,6 @@ class W3_Cdn_Rscf extends W3_Cdn_Base {
     function get_domains() {
         if (!empty($this->_config['cname'])) {
             return (array) $this->_config['cname'];
-        } elseif (!empty($this->_config['id'])) {
-            $domain = sprintf('%s.cloudfiles.rackspacecloud.com', $this->_config['id']);
-
-            return array(
-                $domain
-            );
         }
 
         return array();
@@ -331,7 +342,7 @@ class W3_Cdn_Rscf extends W3_Cdn_Base {
 
         $matches = null;
 
-        if (preg_match('~^https?://(.+)\.cloudfiles\.rackspacecloud\.com$~', $container->cdn_uri, $matches)) {
+        if (preg_match('~^https?://(.+)$~', $container->cdn_uri, $matches)) {
             $container_id = $matches[1];
         }
 

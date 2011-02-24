@@ -417,7 +417,7 @@ class W3_Cdn_Base {
         $domains = $this->get_domains();
 
         if (!count($domains)) {
-            $error = 'Empty domains / CNAMEs list.';
+            $error = 'Empty hostname / CNAME list.';
 
             return false;
 
