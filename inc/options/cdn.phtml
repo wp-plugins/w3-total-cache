@@ -108,6 +108,7 @@
     			switch ($cdn_engine) {
     				case 'mirror':
     				case 'netdna':
+    				case 'cotendo':
     				case 'ftp':
     				case 's3':
     				case 'cf':
@@ -193,21 +194,21 @@
         		</td>
         	</tr>
         	<tr>
-        		<th valign="top"><label for="cdn_custom_files">Custom file list:</label></th>
+        		<th><label for="cdn_custom_files">Custom file list:</label></th>
         		<td>
         			<textarea id="cdn_custom_files" name="cdn.custom.files" cols="40" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('cdn.custom.files'))); ?></textarea><br />
         			<span class="description">Specify any files outside of theme or other common directories to host with the <acronym title="Content Delivery Network">CDN</acronym>.</span>
         		</td>
         	</tr>
         	<tr>
-        		<th valign="top"><label for="cdn_reject_ua">Rejected user agents:</label></th>
+        		<th><label for="cdn_reject_ua">Rejected user agents:</label></th>
         		<td>
         			<textarea id="cdn_reject_ua" name="cdn.reject.ua" cols="40" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('cdn.reject.ua'))); ?></textarea><br />
         			<span class="description">Specify user agents that should not access files hosted with the <acronym title="Content Delivery Network">CDN</acronym>.</span>
         		</td>
         	</tr>
         	<tr>
-        		<th valign="top"><label for="cdn_reject_files">Rejected files:</label></th>
+        		<th><label for="cdn_reject_files">Rejected files:</label></th>
         		<td>
         			<textarea id="cdn_reject_files" name="cdn.reject.files" cols="40" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('cdn.reject.files'))); ?></textarea><br />
         			<span class="description">Specify the path of files that should not use the <acronym title="Content Delivery Network">CDN</acronym>.</span>
@@ -217,7 +218,7 @@
         		<th colspan="2">
         			<input type="hidden" name="set_cookie_domain_old" value="<?php echo (int) $set_cookie_domain; ?>" />
         			<input type="hidden" name="set_cookie_domain_new" value="0" />
-        			<label><input type="checkbox" name="set_cookie_domain_new" value="1"<?php checked($set_cookie_domain, true); ?> /> Set Cookie Domain to &quot;<?php echo htmlspecialchars($cookie_domain); ?>&quot;</label>
+        			<label><input type="checkbox" name="set_cookie_domain_new" value="1"<?php checked($set_cookie_domain, true); ?> /> Set cookie domain to &quot;<?php echo htmlspecialchars($cookie_domain); ?>&quot;</label>
 					<br /><span class="description">If using subdomain for CDN functionality, this setting helps prevent new users from sending cookies in requests to the CDN subdomain.</span>
         		</th>
         	</tr>
@@ -231,7 +232,7 @@
 		<?php echo $this->postbox_header('Note(s):'); ?>
         <table class="form-table">
         	<tr>
-        		<th valign="top" colspan="2">
+        		<th colspan="2">
 					<ul>
 						<li>If using Amazon Web Services or Self-Hosted <acronym title="Content Delivery Network">CDN</acronym> types, enable <acronym title="Hypertext Transfer Protocol">HTTP</acronym> compression in the "Media &amp; Other Files" section on <a href="admin.php?page=w3tc_browsercache">Browser Cache</a> Settings tab.</li>
 					</ul>

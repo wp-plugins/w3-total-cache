@@ -1,7 +1,7 @@
 <?php echo $this->postbox_header('Required information', 'required'); ?>
 <table class="form-table">
     <tr>
-        <th valign="top">Request type:</th>
+        <th>Request type:</th>
         <td><?php echo htmlspecialchars($this->_request_types[$request_type]); ?></td>
     </tr>
     <tr>
@@ -25,7 +25,7 @@
         <td><input id="support_subject" type="text" name="subject" value="<?php echo htmlspecialchars($subject); ?>" size="80" /></td>
     </tr>
     <tr>
-        <th valign="top"><label for="support_description">Issue description:</label></th>
+        <th><label for="support_description">Issue description:</label></th>
         <td><textarea id="support_description" name="description" cols="70" rows="8"><?php echo htmlspecialchars($description); ?></textarea></td>
     </tr>
     <tr>

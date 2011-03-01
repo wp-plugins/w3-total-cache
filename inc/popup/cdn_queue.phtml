@@ -77,7 +77,7 @@
 			<th width="25%">Date</th>
 			<th width="10%">Delete</th>
 		</tr>
-		<?php foreach ((array) $queue[W3TC_CDN_COMMAND_DELETE] as $result): ?>
+		<?php foreach ((array) $queue[W3TC_CDN_COMMAND_PURGE] as $result): ?>
 		<tr>
 			<td><?php echo htmlspecialchars($result->local_path); ?></td>
 			<td><?php echo htmlspecialchars($result->remote_path); ?></td>

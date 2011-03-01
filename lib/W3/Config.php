@@ -83,8 +83,6 @@ class W3_Config {
         'pgcache.purge.feed.author' => 'boolean',
         'pgcache.purge.feed.terms' => 'boolean',
         'pgcache.purge.feed.types' => 'array',
-        'pgcache.varnish.enabled' => 'boolean',
-        'pgcache.varnish.servers' => 'array',
         'pgcache.prime.enabled' => 'boolean',
         'pgcache.prime.interval' => 'integer',
         'pgcache.prime.limit' => 'integer',
@@ -185,6 +183,12 @@ class W3_Config {
         'cdn.netdna.apikey' => 'string',
         'cdn.netdna.domain' => 'array',
         'cdn.netdna.ssl' => 'string',
+        'cdn.cotendo.username' => 'string',
+        'cdn.cotendo.password' => 'string',
+        'cdn.cotendo.zones' => 'array',
+        'cdn.cotendo.domain' => 'array',
+        'cdn.cotendo.ssl' => 'string',
+        'cdn.netdna.ssl' => 'string',
         'cdn.ftp.host' => 'string',
         'cdn.ftp.port' => 'integer',
         'cdn.ftp.user' => 'string',
@@ -229,6 +233,10 @@ class W3_Config {
         'cloudflare.email' => 'string',
         'cloudflare.key' => 'string',
         'cloudflare.zone' => 'string',
+
+        'varnish.enabled' => 'boolean',
+        'varnish.debug' => 'boolean',
+        'varnish.servers' => 'array',
 
         'browsercache.enabled' => 'boolean',
         'browsercache.no404wp' => 'boolean',
@@ -401,8 +409,6 @@ class W3_Config {
         'pgcache.purge.feed.types' => array(
             'rss2'
         ),
-        'pgcache.varnish.enabled' => false,
-        'pgcache.varnish.servers' => array(),
         'pgcache.prime.enabled' => false,
         'pgcache.prime.interval' => 900,
         'pgcache.prime.limit' => 10,
@@ -512,6 +518,11 @@ class W3_Config {
         'cdn.netdna.apikey' => '',
         'cdn.netdna.domain' => array(),
         'cdn.netdna.ssl' => 'auto',
+        'cdn.cotendo.username' => '',
+        'cdn.cotendo.password' => '',
+        'cdn.cotendo.zones' => array(),
+        'cdn.cotendo.domain' => array(),
+        'cdn.cotendo.ssl' => 'auto',
         'cdn.ftp.host' => '',
         'cdn.ftp.port' => 21,
         'cdn.ftp.user' => '',
@@ -559,6 +570,10 @@ class W3_Config {
         'cloudflare.email' => '',
         'cloudflare.key' => '',
         'cloudflare.zone' => '',
+
+        'varnish.enabled' => false,
+        'varnish.debug' => false,
+        'varnish.servers' => array(),
 
         'browsercache.enabled' => true,
         'browsercache.no404wp' => false,
@@ -708,7 +723,6 @@ class W3_Config {
                     '\bppc\b',
                     'proxinet',
                     'psp',
-                    'pt',
                     'qtek',
                     'sagem',
                     'samsung',
@@ -1047,6 +1061,19 @@ class W3_Config {
      * @param string $value
      */
     function set($key, $value) {
+        /**
+         * Legacy support for <= 0.9.1.3
+         */
+        switch ($key) {
+            case 'pgcache.varnish.enabled':
+                $key = 'varnish.enabled';
+                break;
+
+            case 'pgcache.varnish.servers':
+                $key = 'varnish.servers';
+                break;
+        }
+
         if (array_key_exists($key, $this->_keys)) {
             $type = $this->_keys[$key];
             settype($value, $type);

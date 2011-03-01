@@ -43,6 +43,18 @@ class W3_Minify {
      * Runs minify
      */
     function process() {
+        require_once W3TC_LIB_W3_DIR . '/Request.php';
+
+        /**
+         * Check for rewrite test request
+         */
+        $rewrite_test = W3_Request::get_boolean('w3tc_rewrite_test');
+
+        if ($rewrite_test) {
+            echo 'OK';
+            exit();
+        }
+
         /**
          * Request variables:
          *
@@ -54,8 +66,6 @@ class W3_Minify {
          * t - type (js or css)
          * m - ID
          */
-        require_once W3TC_LIB_W3_DIR . '/Request.php';
-
         $files = W3_Request::get_array('f');
         $base = W3_Request::get_string('b');
         $theme = W3_Request::get_string('tt');

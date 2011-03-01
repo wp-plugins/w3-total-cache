@@ -60,21 +60,21 @@
     			</td>
         	</tr>
         	<tr>
-        		<th valign="top"><label for="objectcache_reject_uri">Never cache the following pages:</label></th>
+        		<th><label for="objectcache_reject_uri">Never cache the following pages:</label></th>
         		<td>
         			<textarea id="objectcache_reject_uri" name="objectcache.reject.uri" cols="40" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('objectcache.reject.uri'))); ?></textarea>
         			<br /><span class="description">Always ignore the specified pages / directories.</span>
         		</td>
         	</tr>
         	<tr>
-        		<th valign="top"><label for="objectcache_groups_global">Global groups:</label></th>
+        		<th><label for="objectcache_groups_global">Global groups:</label></th>
         		<td>
         			<textarea id="objectcache_groups_global" name="objectcache.groups.global" cols="40" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('objectcache.groups.global'))); ?></textarea>
 					<br /><span class="description">Groups shared amongst sites in network mode.</span>
         		</td>
         	</tr>
         	<tr>
-        		<th valign="top"><label for="objectcache_groups_nonpersistent">Non-persistent groups:</label></th>
+        		<th><label for="objectcache_groups_nonpersistent">Non-persistent groups:</label></th>
         		<td>
         			<textarea id="objectcache_groups_nonpersistent" name="objectcache.groups.nonpersistent" cols="40" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('objectcache.groups.nonpersistent'))); ?></textarea>
 					<br /><span class="description">Groups that should not be cached.</span>

@@ -58,14 +58,14 @@
     			</td>
         	</tr>
         	<tr>
-        		<th valign="top"><label for="dbcache_reject_uri">Never cache the following pages:</label></th>
+        		<th><label for="dbcache_reject_uri">Never cache the following pages:</label></th>
         		<td>
         			<textarea id="dbcache_reject_uri" name="dbcache.reject.uri" cols="40" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('dbcache.reject.uri'))); ?></textarea><br />
         			<span class="description">Always ignore the specified pages / directories.</span>
         		</td>
         	</tr>
         	<tr>
-        		<th valign="top"><label for="dbcache_reject_sql">Ignored query stems:</label></th>
+        		<th><label for="dbcache_reject_sql">Ignored query stems:</label></th>
         		<td>
         			<textarea id="dbcache_reject_sql" name="dbcache.reject.sql" cols="40" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('dbcache.reject.sql'))); ?></textarea><br />
         			<span class="description">Do not cache queries that contain these terms. Any entered prefix (set in wp-config.php) will be replaced with current database prefix (default: wp_). Query stems can be identified using debug mode.</span>

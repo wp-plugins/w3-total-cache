@@ -613,6 +613,7 @@ class W3_Plugin_PgCache extends W3_Plugin {
         $rules .= "<IfModule mod_rewrite.c>\n";
         $rules .= "    RewriteEngine On\n";
         $rules .= "    RewriteBase " . $home_path . "\n";
+        $rules .= "    RewriteRule ^w3tc_rewrite_test$ " . $home_path . "?w3tc_rewrite_test=1 [L]\n";
 
         /**
          * Check for mobile redirect
@@ -857,6 +858,7 @@ class W3_Plugin_PgCache extends W3_Plugin {
          */
         $rules = '';
         $rules .= W3TC_MARKER_BEGIN_PGCACHE_CORE . "\n";
+        $rules .= "rewrite ^w3tc_rewrite_test$ " . $home_path . "?w3tc_rewrite_test=1 last;\n";
 
         /**
          * Check for mobile redirect

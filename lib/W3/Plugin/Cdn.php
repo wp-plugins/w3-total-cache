@@ -364,15 +364,9 @@ class W3_Plugin_Cdn extends W3_Plugin {
     function purge_attachment($attachment_id) {
         $files = $this->get_attachment_files($attachment_id);
 
-        if ($this->_config->get_string('cdn.engine') == 'netdna') {
-            $queue_failed = false;
-        } else {
-            $queue_failed = true;
-        }
-
         $results = array();
 
-        return $this->purge($files, $queue_failed, $results);
+        return $this->purge($files, false, $results);
     }
 
     /**
@@ -798,23 +792,35 @@ class W3_Plugin_Cdn extends W3_Plugin {
      * @return boolean
      */
     function purge($files, $queue_failed, &$results) {
+        /**
+         * Purge varnish servers before mirror purging
+         */
+        if (w3_is_cdn_mirror($this->_config->get_string('cdn_engine')) && $this->_config->get_boolean('varnish.enabled')) {
+            require_once W3TC_LIB_W3_DIR . '/Varnish.php';
+
+            $varnish =& W3_Varnish::instance();
+
+            foreach ($files as $remote_path) {
+                $varnish->purge($remote_path);
+            }
+        }
+
+        /**
+         * Purge CDN
+         */
         $cdn = & $this->get_cdn();
 
         @set_time_limit($this->_config->get_integer('timelimit.cdn_purge'));
 
-        if (!$cdn->purge($files, $results)) {
-            if ($queue_failed) {
-                foreach ($results as $result) {
-                    if ($result['result'] != W3TC_CDN_RESULT_OK) {
-                        $this->queue_add($result['local_path'], $result['remote_path'], W3TC_CDN_COMMAND_PURGE, $result['error']);
-                    }
+        $cdn->purge($files, $results);
+
+        if ($queue_failed) {
+            foreach ($results as $result) {
+                if ($result['result'] != W3TC_CDN_RESULT_OK) {
+                    $this->queue_add($result['local_path'], $result['remote_path'], W3TC_CDN_COMMAND_PURGE, $result['error']);
                 }
             }
-
-            return false;
         }
-
-        return true;
     }
 
     /**
@@ -1348,7 +1354,7 @@ class W3_Plugin_Cdn extends W3_Plugin {
 
         $themes_root = w3_path($themes_root);
         $site_root = w3_get_site_root();
-        $themes_path =  ltrim(str_replace($site_root, rtrim(w3_get_site_path(), '/'), $themes_root), '/');
+        $themes_path = ltrim(str_replace($site_root, rtrim(w3_get_site_path(), '/'), $themes_root), '/');
 
         $files = $this->search_files($themes_root, $themes_path, $this->_config->get_string('cdn.theme.files'));
 
@@ -1627,6 +1633,16 @@ class W3_Plugin_Cdn extends W3_Plugin {
                     );
                     break;
 
+                case 'cotendo':
+                    $engine_config = array(
+                        'username' => $this->_config->get_string('cdn.cotendo.username'),
+                        'password' => $this->_config->get_string('cdn.cotendo.password'),
+                        'zones' => $this->_config->get_array('cdn.cotendo.zones'),
+                        'domain' => $this->_config->get_array('cdn.cotendo.domain'),
+                        'ssl' => $this->_config->get_string('cdn.cotendo.ssl')
+                    );
+                    break;
+
                 case 'ftp':
                     $engine_config = array(
                         'host' => $this->_config->get_string('cdn.ftp.host'),
@@ -1646,7 +1662,6 @@ class W3_Plugin_Cdn extends W3_Plugin {
                         'secret' => $this->_config->get_string('cdn.s3.secret'),
                         'bucket' => $this->_config->get_string('cdn.s3.bucket'),
                         'cname' => $this->_config->get_array('cdn.s3.cname'),
-                        'compression' => ($this->_config->get_boolean('browsercache.enabled') && $this->_config->get_boolean('browsercache.html.compression')),
                         'ssl' => $this->_config->get_string('cdn.s3.ssl')
                     );
                     break;
@@ -1658,7 +1673,6 @@ class W3_Plugin_Cdn extends W3_Plugin {
                         'bucket' => $this->_config->get_string('cdn.cf.bucket'),
                         'id' => $this->_config->get_string('cdn.cf.id'),
                         'cname' => $this->_config->get_array('cdn.cf.cname'),
-                        'compression' => ($this->_config->get_boolean('browsercache.enabled') && $this->_config->get_boolean('browsercache.html.compression')),
                         'ssl' => $this->_config->get_string('cdn.cf.ssl')
                     );
                     break;
@@ -1669,7 +1683,6 @@ class W3_Plugin_Cdn extends W3_Plugin {
                         'secret' => $this->_config->get_string('cdn.cf2.secret'),
                         'id' => $this->_config->get_string('cdn.cf2.id'),
                         'cname' => $this->_config->get_array('cdn.cf2.cname'),
-                        'compression' => ($this->_config->get_boolean('browsercache.enabled') && $this->_config->get_boolean('browsercache.html.compression')),
                         'ssl' => $this->_config->get_string('cdn.cf2.ssl')
                     );
                     break;
@@ -1690,7 +1703,6 @@ class W3_Plugin_Cdn extends W3_Plugin {
                         'user' => $this->_config->get_string('cdn.azure.user'),
                         'key' => $this->_config->get_string('cdn.azure.key'),
                         'container' => $this->_config->get_string('cdn.azure.container'),
-                        'compression' => ($this->_config->get_boolean('browsercache.enabled') && $this->_config->get_boolean('browsercache.html.compression')),
                         'cname' => $this->_config->get_array('cdn.azure.cname'),
                         'ssl' => $this->_config->get_string('cdn.azure.ssl')
                     );
@@ -1698,7 +1710,8 @@ class W3_Plugin_Cdn extends W3_Plugin {
             }
 
             $engine_config = array_merge($engine_config, array(
-                'debug' => $this->_config->get_boolean('cdn.debug')
+                'debug' => $this->_config->get_boolean('cdn.debug'),
+                'compression' => ($this->_config->get_boolean('browsercache.enabled') && $this->_config->get_boolean('browsercache.html.compression'))
             ));
 
             require_once W3TC_LIB_W3_DIR . '/Cdn.php';

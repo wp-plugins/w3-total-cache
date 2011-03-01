@@ -1,15 +1,21 @@
 === Plugin Name ===
 Contributors: fredericktownes
-Tags: user experience, cache, caching, page cache, css cache, js cache, db cache, disk cache, disk caching, database cache, http compression, gzip, deflate, minify, CDN, content delivery network, media library, performance, speed, multiple hosts, CSS, merge, combine, unobtrusive javascript, compress, optimize, optimizer, JavaScript, JS, cascading style sheet, plugin, yslow, YUI, google, google rank, google page speed, S3, CloudFront, AWS, Amazon Web Services, cloud files, rackspace, batcache, wp cache, wp super cache, w3 total cache, buddypress
+Tags: user experience, cache, caching, page cache, css cache, js cache, db cache, disk cache, disk caching, database cache, http compression, gzip, deflate, minify, cdn, content delivery network, media library, performance, speed, multiple hosts, css, merge, combine, unobtrusive javascript, compress, optimize, optimizer, javascript, js, cascading style sheet, plugin, yslow, yui, google, google rank, google page speed, mod_pagespeed, s3, cloudfront, aws, amazon web services, cloud files, rackspace, cotendo, max cdn, limelight, cloudflare, microsoft, microsoft azure, iis, nginx, apache, varnish, xcache, apc, eacclerator, wincache, mysql, w3 total cache, batcache, wp cache, wp super cache, buddypress
 Requires at least: 2.8
-Tested up to: 3.0.3
+Tested up to: 3.1
 Stable tag: 0.9.1.3
 
-Easily optimize the speed and user experience of your site with caching: browser, page, object, database, minify and content delivery network support.
+Improve WordPress' performance and user experience of your site via caching: browser, page, object, database, minify and content delivery network.
 
 == Description ==
 
-The fastest and most complete WordPress performance optimization plugin. Trusted by countless sites like: mattcutts.com, mashable.com, smashingmagazine.com, makeuseof.com, yoast.com, kiss925.com, pearsonified.com, lockergnome.com, tutsplus.com, johnchow.com, ilovetypography.com, webdesignerdepot.com, css-tricks.com and others &mdash; W3 Total Cache improves the user experience of your site by improving your server performance, caching every aspect of your site, reducing the download times and providing transparent content delivery network (CDN) integration.
+The fastest and **most complete** WordPress performance optimization plugin.
+
+Recommended by web hosts like: MediaTemple, Host Gator, Page.ly and WP Engine and countless more.
+
+Trusted by countless sites like: mattcutts.com, mashable.com, smashingmagazine.com, makeuseof.com, yoast.com, kiss925.com, pearsonified.com, lockergnome.com, tutsplus.com, johnchow.com, ilovetypography.com, webdesignerdepot.com, css-tricks.com and thousands of others
+
+W3 Total Cache improves the user experience of your site by improving your server performance, caching every aspect of your site, reducing the download times and providing transparent content delivery network (CDN) integration.
 
 Benefits:
 
@@ -418,6 +424,7 @@ Please reach out to all of these people and support their projects if you're so 
 * Added Microsoft Azure Storage support for CDN
 * Added WinCache opcode cache support
 * Added additional minifier engines for HTML, CSS and JS including: HTMLtidy, CSStidy, Closure Compiler, YUI Compressor
+* Added support for @import processing
 * Added controls for page cache purging policy
 * Added auto mode for minify (not compatible with CDN)
 * Added support for set cookie domain setting
@@ -425,12 +432,14 @@ Please reach out to all of these people and support their projects if you're so 
 * Added referrer group management for uniquely caching these cases
 * Added Amazon S3 bucket location selection control
 * Added support CNAMEs confguration support for Amazon Cloudfront
+* Added purge tool
 * Improved non-blocking JS embedding implementation
 * Improved reliability of CDN export operations
 * Improved implementation of headers for all cache engines
 * Improved minify help (recommendations) tool
 * Improved handling of .htaccess directive changes
 * Improved support of IIS web server
+* Improved varnish support
 * Fixed bugs with API changes with Rackspace Cloudfiles
 * Fixed bugs with origin push content delivery network methods
 * Fixed bug with HTML encoding

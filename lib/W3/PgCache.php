@@ -438,24 +438,7 @@ class W3_PgCache {
     function flush() {
         $cache = & $this->_get_cache();
 
-        $cache->flush();
-
-        /**
-         * Purge varnish servers
-         */
-        if ($this->_config->get_boolean('pgcache.varnish.enabled')) {
-            @set_time_limit($this->_config->get_integer('timelimit.varnish_purge'));
-
-            $servers = $this->_config->get_array('pgcache.varnish.servers');
-
-            foreach ($servers as $server) {
-                $url = sprintf('http://%s/', $server);
-
-                w3_http_purge($url);
-            }
-        }
-
-        return true;
+        return $cache->flush();
     }
 
     /**
@@ -704,17 +687,13 @@ class W3_PgCache {
                 /**
                  * Purge varnish servers
                  */
-                if ($this->_config->get_boolean('pgcache.varnish.enabled')) {
-                    @set_time_limit($this->_config->get_integer('timelimit.varnish_purge'));
+                if ($this->_config->get_boolean('varnish.enabled')) {
+                    require_once W3TC_LIB_W3_DIR . '/Varnish.php';
 
-                    $servers = $this->_config->get_array('pgcache.varnish.servers');
+                    $varnish =& W3_Varnish::instance();
 
-                    foreach ($servers as $server) {
-                        foreach ($uris as $uri) {
-                            $url = sprintf('http://%s%s', $server, $uri);
-
-                            w3_http_purge($url);
-                        }
+                    foreach ($uris as $uri) {
+                        $varnish->purge($uri);
                     }
                 }
             }

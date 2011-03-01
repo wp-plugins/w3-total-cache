@@ -414,7 +414,48 @@ class W3_Plugin_TotalCache extends W3_Plugin {
      * Init action
      */
     function init() {
-        $this->check_request();
+        /**
+         * Check request and handle w3tc_request_data requests
+         */
+        $pos = strpos($_SERVER['REQUEST_URI'], '/w3tc_request_data/');
+
+        if ($pos !== false) {
+            $hash = substr($_SERVER['REQUEST_URI'], $pos + 19, 32);
+
+            if (strlen($hash) == 32) {
+                $request_data = (array) get_option('w3tc_request_data');
+
+                if (isset($request_data[$hash])) {
+                    echo '<pre>';
+                    foreach ($request_data[$hash] as $key => $value) {
+                        printf("%s: %s\n", $key, $value);
+                    }
+                    echo '</pre>';
+
+                    unset($request_data[$hash]);
+                    update_option('w3tc_request_data', $request_data);
+                } else {
+                    echo 'Requested hash expired or invalid';
+                }
+
+                exit();
+            }
+        }
+
+        /**
+         * Check rewrite test
+         */
+        /**
+         * Check for rewrite test request
+         */
+        require_once W3TC_LIB_W3_DIR . '/Request.php';
+
+        $rewrite_test = W3_Request::get_boolean('w3tc_rewrite_test');
+
+        if ($rewrite_test) {
+            echo 'OK';
+            exit();
+        }
     }
 
     /**
@@ -1122,36 +1163,6 @@ class W3_Plugin_TotalCache extends W3_Plugin {
     }
 
     /**
-     * Check request and handle w3tc_request_data requests
-     */
-    function check_request() {
-        $pos = strpos($_SERVER['REQUEST_URI'], '/w3tc_request_data/');
-
-        if ($pos !== false) {
-            $hash = substr($_SERVER['REQUEST_URI'], $pos + 19, 32);
-
-            if (strlen($hash) == 32) {
-                $request_data = (array) get_option('w3tc_request_data');
-
-                if (isset($request_data[$hash])) {
-                    echo '<pre>';
-                    foreach ($request_data[$hash] as $key => $value) {
-                        printf("%s: %s\n", $key, $value);
-                    }
-                    echo '</pre>';
-
-                    unset($request_data[$hash]);
-                    update_option('w3tc_request_data', $request_data);
-                } else {
-                    echo 'Requested hash expired or invalid';
-                }
-
-                exit();
-            }
-        }
-    }
-
-    /**
      * Admin notices action
      */
     function admin_notices() {
@@ -1578,7 +1589,11 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                 require_once W3TC_LIB_W3_DIR . '/Plugin/PgCache.php';
                 $w3_plugin_pgcache = & W3_Plugin_PgCache::instance();
 
-                if ($this->_config->get_boolean('notes.pgcache_rules_core') && !$w3_plugin_pgcache->check_rules_core()) {
+                if ($w3_plugin_pgcache->check_rules_core()) {
+                    if (!$this->test_rewrite_pgcache()) {
+                        $this->_errors[] = 'It appears <acronym title="Uniform Resource Locator">URL</acronym> rewriting is not working. If using apache, verify that the server configuration allows .htaccess or if using nginx verify all configuration files are included in the configuration.';
+                    }
+                } elseif ($this->_config->get_boolean('notes.pgcache_rules_core')) {
                     $this->_errors[] = sprintf('Disk enhanced page caching is not active. To enable it, add the following rules into the server configuration file (<strong>%s</strong>) of the site above the WordPress directives %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea>. Or if permission allow this can be done automatically, by clicking here: %s. %s', w3_get_pgcache_rules_core_path(), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_pgcache->generate_rules_core()), $this->button_link('auto-install', sprintf('admin.php?page=%s&pgcache_write_rules_core', $this->_page)), $this->button_hide_note('Hide this message', 'pgcache_rules_core'));
                 }
 
@@ -1612,7 +1627,11 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                 require_once W3TC_LIB_W3_DIR . '/Plugin/Minify.php';
                 $w3_plugin_minify = & W3_Plugin_Minify::instance();
 
-                if ($this->_config->get_boolean('notes.minify_rules_core') && !$w3_plugin_minify->check_rules_core()) {
+                if ($w3_plugin_minify->check_rules_core()) {
+                    if (!$this->test_rewrite_minify()) {
+                        $this->_errors[] = 'It appears <acronym title="Uniform Resource Locator">URL</acronym> rewriting is not working. If using apache, verify that the server configuration allows .htaccess or if using nginx verify all configuration files are included in the configuration.';
+                    }
+                } elseif ($this->_config->get_boolean('notes.minify_rules_core')) {
                     $this->_errors[] = sprintf('Minify is not active. To enable it, add the following rules into the server configuration file (<strong>%s</strong>) of the site %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea>. This can be done automatically, by clicking here: %s. %s', w3_get_minify_rules_core_path(), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_minify->generate_rules_core()), $this->button_link('auto-install', sprintf('admin.php?page=%s&minify_write_rules_core', $this->_page)), $this->button_hide_note('Hide this message', 'minify_rules_core'));
                 }
 
@@ -1823,6 +1842,10 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                     break;
 
                 case ($cdn_engine == 'netdna' && !count($this->_config->get_array('cdn.netdna.domain'))):
+                    $this->_errors[] = 'Content Delivery Network Error: The <strong>"Replace default hostname with"</strong> field must be populated.';
+                    break;
+
+                case ($cdn_engine == 'cotendo' && !count($this->_config->get_array('cdn.cotendo.domain'))):
                     $this->_errors[] = 'Content Delivery Network Error: The <strong>"Replace default hostname with"</strong> field must be populated.';
                     break;
 
@@ -2418,14 +2441,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
          * General tab
          */
         if ($this->_page == 'w3tc_general') {
-            $debug = W3_Request::get_array('debug');
             $file_locking = W3_Request::get_boolean('file_locking');
-
-            $config->set('dbcache.debug', in_array('dbcache', $debug));
-            $config->set('objectcache.debug', in_array('objectcache', $debug));
-            $config->set('pgcache.debug', in_array('pgcache', $debug));
-            $config->set('minify.debug', in_array('minify', $debug));
-            $config->set('cdn.debug', in_array('cdn', $debug));
 
             $config->set('dbcache.file.locking', $file_locking);
             $config->set('objectcache.file.locking', $file_locking);
@@ -2699,6 +2715,10 @@ class W3_Plugin_TotalCache extends W3_Plugin {
 
                 case 'netdna':
                     $config->set('cdn.netdna.domain', $cdn_domains);
+                    break;
+
+                case 'cotendo':
+                    $config->set('cdn.cotendo.domain', $cdn_domains);
                     break;
 
                 case 'ftp':
@@ -4198,6 +4218,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
         switch ($engine) {
             case 'mirror':
             case 'netdna':
+            case 'cotendo':
             case 'ftp':
             case 's3':
             case 'cf':
@@ -4485,6 +4506,48 @@ class W3_Plugin_TotalCache extends W3_Plugin {
 
             echo json_encode($response);
         }
+    }
+
+    /**
+     * Perform pgcache rules rewrite test
+     *
+     * @return bool
+     */
+    function test_rewrite_pgcache() {
+        $url = w3_get_home_url() . '/w3tc_rewrite_test';
+
+        return $this->_test_rewrite($url);
+    }
+
+    /**
+     * Perform minify rules rewrite test
+     *
+     * @return bool
+     */
+    function test_rewrite_minify() {
+        $url = sprintf('%s/%s/w3tc_rewrite_test', w3_get_site_url(), W3TC_CONTENT_MINIFY_DIR_NAME);
+
+        return $this->_test_rewrite($url);
+    }
+
+    /**
+     * Perform rewrite test
+     *
+     * @param string $url
+     * @return boolean
+     */
+    function _test_rewrite($url) {
+        $key = sprintf('w3tc_rewrite_test_%s', substr(md5($url), 0, 16));
+        $result = get_transient($key);
+
+        if ($result === false) {
+            $data = w3_http_get($url);
+            $result = (int) ($data == 'OK');
+
+            set_transient($key, $result, 30);
+        }
+
+        return $result;
     }
 
     /**

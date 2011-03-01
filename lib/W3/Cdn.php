@@ -28,6 +28,10 @@ if (!defined('W3TC_CDN_NETDNA')) {
     define('W3TC_CDN_NETDNA', 'netdna');
 }
 
+if (!defined('W3TC_CDN_COTENDO')) {
+    define('W3TC_CDN_COTENDO', 'cotendo');
+}
+
 if (!defined('W3TC_CDN_RSCF')) {
     define('W3TC_CDN_RSCF', 'rscf');
 }
@@ -92,6 +96,11 @@ class W3_Cdn {
                 case ($engine == W3TC_CDN_NETDNA):
                     require_once W3TC_LIB_W3_DIR . '/Cdn/Mirror/Netdna.php';
                     $instances[$instance_key] = & new W3_Cdn_Mirror_Netdna($config);
+                    break;
+
+                case ($engine == W3TC_CDN_COTENDO):
+                    require_once W3TC_LIB_W3_DIR . '/Cdn/Mirror/Cotendo.php';
+                    $instances[$instance_key] = & new W3_Cdn_Mirror_Cotendo($config);
                     break;
 
                 default :

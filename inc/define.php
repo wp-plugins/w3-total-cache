@@ -22,6 +22,7 @@ define('W3TC_LIB_MINIFY_DIR', W3TC_LIB_DIR . '/Minify');
 define('W3TC_LIB_CF_DIR', W3TC_LIB_DIR . '/CF');
 define('W3TC_LIB_CSSTIDY_DIR', W3TC_LIB_DIR . '/CSSTidy');
 define('W3TC_LIB_MICROSOFT_DIR', W3TC_LIB_DIR . '/Microsoft');
+define('W3TC_LIB_NUSOAP_DIR', W3TC_LIB_DIR . '/Nusoap');
 define('W3TC_PLUGINS_DIR', W3TC_DIR . '/plugins');
 define('W3TC_INSTALL_DIR', W3TC_DIR . '/wp-content');
 define('W3TC_INSTALL_MINIFY_DIR', W3TC_INSTALL_DIR . '/w3tc/min');
@@ -52,6 +53,7 @@ define('W3TC_CDN_COMMAND_DELETE', 2);
 define('W3TC_CDN_COMMAND_PURGE', 3);
 define('W3TC_CDN_TABLE_QUEUE', 'w3tc_cdn_queue');
 define('W3TC_CDN_LOG_FILE', W3TC_LOG_DIR . '/cdn.log');
+define('W3TC_VARNISH_LOG_FILE', W3TC_LOG_DIR . '/varnish.log');
 
 define('W3TC_MARKER_BEGIN_WORDPRESS', '# BEGIN WordPress');
 define('W3TC_MARKER_BEGIN_SUPERCACHE', '# BEGIN WPSuperCache');
@@ -439,7 +441,7 @@ function w3_is_nginx() {
  * @return bool
  */
 function w3_is_cdn_mirror($engine) {
-    return in_array($engine, array('mirror', 'netdna', 'cf2'));
+    return in_array($engine, array('mirror', 'netdna', 'cotendo', 'cf2'));
 }
 
 /**
@@ -1083,7 +1085,7 @@ function w3_can_modify_rules($path) {
  * @return bool
  */
 function w3_can_cdn_purge($engine) {
-    return in_array($engine, array('ftp', 's3', 'cf', 'cf2', 'netdna', 'rscf', 'azure'));
+    return in_array($engine, array('ftp', 's3', 'cf', 'cf2', 'rscf', 'azure', 'netdna', 'cotendo'));
 }
 
 /**
@@ -1606,6 +1608,10 @@ function w3_get_engine_name($engine) {
 
         case 'netdna':
             $engine_name = 'netdna / maxcdn';
+            break;
+
+        case 'cotendo':
+            $engine_name = 'cotendo';
             break;
 
         case 'ftp':

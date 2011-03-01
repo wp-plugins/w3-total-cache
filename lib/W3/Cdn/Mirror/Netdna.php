@@ -5,6 +5,9 @@
  */
 require_once W3TC_LIB_W3_DIR . '/Cdn/Mirror.php';
 
+define('W3TC_CDN_MIRROR_NETDNA_TZ', 'America/Los_Angeles');
+define('W3TC_CDN_MIRROR_NETDNA_URL', 'http://api.netdna.com/xmlrpc/cache');
+
 /**
  * Class W3_Cdn_Mirror_Netdna
  */
@@ -62,12 +65,13 @@ class W3_Cdn_Mirror_Netdna extends W3_Cdn_Mirror {
             require_once (ABSPATH . WPINC . '/class-IXR.php');
         }
 
+        date_default_timezone_set(W3TC_CDN_MIRROR_NETDNA_TZ);
+
         $date = date('c');
-        $method = 'purge';
-        $auth_string = sprintf('%s:%s:%s', $date, $this->_config['apikey'], $method);
+        $auth_string = sprintf('%s:%s:purge', $date, $this->_config['apikey']);
         $auth_key = $this->_sha256($auth_string);
 
-        $client = new IXR_Client('http://api.netdna.com/xmlrpc/cache');
+        $client = new IXR_Client(W3TC_CDN_MIRROR_NETDNA_URL);
         $client->timeout = 30;
 
         $results = array();
@@ -75,7 +79,7 @@ class W3_Cdn_Mirror_Netdna extends W3_Cdn_Mirror {
         foreach ($files as $local_path => $remote_path) {
             $url = $this->format_url($remote_path);
 
-            $client->query('cache.' . $method, $this->_config['apiid'], $auth_key, $date, $url);
+            $client->query('cache.purge', $this->_config['apiid'], $auth_key, $date, $url);
 
             if (!$client->isError()) {
                 $val = $client->getResponse();
@@ -83,10 +87,10 @@ class W3_Cdn_Mirror_Netdna extends W3_Cdn_Mirror {
                 if ($val) {
                     $results[] = $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_OK, 'OK');
                 } else {
-                    $results[] = $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Unexpected Error.');
+                    $results[] = $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, 'Unable to purge.');
                 }
             } else {
-                $results[] = $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_ERROR, $client->getErrorMessage());
+                $results[] = $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_HALT, sprintf('Unable to purge (%s).', $client->getErrorMessage()));
             }
         }
     }
