@@ -193,8 +193,6 @@ function w3tc_lightbox_minify_recommendations() {
         height: height,
         url: 'admin.php?page=w3tc_minify&w3tc_action=minify_recommendations',
         callback: function(lightbox) {
-            jQuery('#recom_container').css('height', height - 50);
-
             var theme = jQuery('#recom_theme').val();
 
             if (jQuery.ui && jQuery.ui.sortable) {
@@ -315,8 +313,6 @@ function w3tc_lightbox_self_test() {
         height: height,
         url: 'admin.php?page=w3tc_general&w3tc_action=self_test',
         callback: function(lightbox) {
-            jQuery('#self_test_container').css('height', height - 50);
-
             jQuery('.button-primary', lightbox.container).click(function() {
                 lightbox.close();
             });

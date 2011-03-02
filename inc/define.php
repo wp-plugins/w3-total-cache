@@ -81,6 +81,7 @@ define('W3TC_ADDIN_FILE_ADVANCED_CACHE', WP_CONTENT_DIR . '/advanced-cache.php')
 define('W3TC_ADDIN_FILE_DB', WP_CONTENT_DIR . '/db.php');
 define('W3TC_ADDIN_FILE_OBJECT_CACHE', WP_CONTENT_DIR . '/object-cache.php');
 
+require_once W3TC_DIR . '/inc/compat.php';
 require_once W3TC_DIR . '/inc/plugin.php';
 
 @ini_set('pcre.backtrack_limit', 4194304);
