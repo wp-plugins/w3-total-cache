@@ -65,7 +65,11 @@ class W3_Cdn_Mirror_Netdna extends W3_Cdn_Mirror {
             require_once (ABSPATH . WPINC . '/class-IXR.php');
         }
 
-        date_default_timezone_set(W3TC_CDN_MIRROR_NETDNA_TZ);
+        if (function_exists('date_default_timezone_set')) {
+            $timezone = date_default_timezone_get();
+
+            date_default_timezone_set(W3TC_CDN_MIRROR_NETDNA_TZ);
+        }
 
         $date = date('c');
         $auth_string = sprintf('%s:%s:purge', $date, $this->_config['apikey']);
@@ -92,6 +96,10 @@ class W3_Cdn_Mirror_Netdna extends W3_Cdn_Mirror {
             } else {
                 $results[] = $this->_get_result($local_path, $remote_path, W3TC_CDN_RESULT_HALT, sprintf('Unable to purge (%s).', $client->getErrorMessage()));
             }
+        }
+
+        if (function_exists('date_default_timezone_set')) {
+            date_default_timezone_set($timezone);
         }
     }
 

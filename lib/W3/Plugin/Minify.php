@@ -1158,7 +1158,7 @@ class W3_Plugin_Minify extends W3_Plugin {
 
         $rules = '';
         $rules .= W3TC_MARKER_BEGIN_MINIFY_CORE . "\n";
-        $rules .= "rewrite ^w3tc_rewrite_test$ " . $cache_dir_rewrite . "/index.php?w3tc_rewrite_test=1 last;\n";
+        $rules .= "rewrite ^" . $cache_dir_condition . "/w3tc_rewrite_test$ " . $cache_dir_rewrite . "/index.php?w3tc_rewrite_test=1 last;\n";
 
         if ($engine == 'file') {
             $rules .= "set \$w3tc_enc \"\";\n";

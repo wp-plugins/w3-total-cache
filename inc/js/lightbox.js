@@ -298,7 +298,7 @@ function w3tc_lightbox_minify_recommendations() {
 
 function w3tc_lightbox_self_test() {
     var min_height = 200;
-    var max_height = 800;
+    var max_height = 1000;
 
     var height = jQuery(window).height() - 220;
 

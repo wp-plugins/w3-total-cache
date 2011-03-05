@@ -26,34 +26,9 @@
     background-repeat: no-repeat;
 }
 
-#self_test_container {
-    overflow: auto;
-    height: 500px;
-}
-
 #recom_container {
     overflow: auto;
     height: 475px;
-}
-
-.monospace {
-    font-family: monospace;
-}
-
-.w3tc-test-ok, .w3tc-test-warn, .w3tc-test-error {
-    font-weight: bold;
-}
-
-.w3tc-test-ok {
-    color: #090;
-}
-
-.w3tc-test-warn {
-    color: #f90;
-}
-
-.w3tc-test-error {
-    color: #f00;
 }
 
 .minify-files li {
@@ -92,4 +67,19 @@ th.minify-files-add, td.minify-files-add {
 
 .minify-files-exists input, .minify-files-exists select {
     color: red;
+}
+
+#w3tc-self-test {
+    height: 490px;
+    overflow: auto;
+}
+
+#w3tc-self-test ul {
+    list-style: none;
+}
+
+.w3tc-self-test-hint {
+    font-size: 0.8em;
+    font-style: italic;
+    color: #999;
 }

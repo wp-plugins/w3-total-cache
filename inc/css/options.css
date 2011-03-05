@@ -144,7 +144,7 @@
 #w3tc fieldset {
     margin: 1em 0;
     background: #fdfdfd;
-    padding: 0 1em 1em 1em;
+    padding: 0 1em;
     border: 1px solid #bbb;
     border-radius: 11px;
     -webkit-border-radius: 11px;

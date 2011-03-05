@@ -17,6 +17,10 @@ Trusted by countless sites like: mattcutts.com, mashable.com, smashingmagazine.c
 
 W3 Total Cache improves the user experience of your site by improving your server performance, caching every aspect of your site, reducing the download times and providing transparent content delivery network (CDN) integration.
 
+An inside look:
+
+http://www.youtube.com/watch?v=rkmrQP8S5KY
+
 Benefits:
 
 * At least 10x improvement in overall site performance (Grade A in [YSlow](http://developer.yahoo.com/yslow/) or significant [Google Page Speed](http://code.google.com/speed/page-speed/) improvements) **when fully configured**

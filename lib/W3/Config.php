@@ -297,6 +297,7 @@ class W3_Config {
         'notes.no_zlib' => 'boolean',
         'notes.zlib_output_compression' => 'boolean',
         'notes.no_permalink_rules' => 'boolean',
+        'notes.no_trailing_slash' => 'boolean',
         'notes.browsercache_rules_cache' => 'boolean',
         'notes.browsercache_rules_no404wp' => 'boolean',
         'notes.minify_error' => 'boolean',
@@ -436,7 +437,7 @@ class W3_Config {
         'minify.html.inline.js' => false,
         'minify.html.strip.crlf' => false,
         'minify.html.comments.ignore' => array(
-            'google_ad_section_',
+            'google_ad_',
             'RSPEAK_'
         ),
         'minify.css.enable' => true,
@@ -804,6 +805,7 @@ class W3_Config {
         'notes.no_zlib' => true,
         'notes.zlib_output_compression' => true,
         'notes.no_permalink_rules' => true,
+        'notes.no_trailing_slash' => true,
         'notes.browsercache_rules_cache' => true,
         'notes.browsercache_rules_no404wp' => true,
         'notes.minify_error' => false,
@@ -992,13 +994,31 @@ class W3_Config {
              * Check CDN engines
              */
             case 'cdn.engine':
-                if (($value == 's3' || $value == 'cf' || $value == 'cf2' || $value == 'rscf') && (!W3TC_PHP5 || !function_exists('curl_init'))) {
+                /**
+                 * Check for PHP5
+                 */
+                if (in_array($value, array('rscf', 'azure')) && !W3TC_PHP5) {
                     return 'mirror';
                 }
-                if ($value == 'azure' && !W3TC_PHP5) {
+
+                /**
+                 * Check for CURL
+                 */
+                if (in_array($value, array('s3', 'cf', 'cf2', 'rscf')) && !function_exists('curl_init')) {
                     return 'mirror';
                 }
+
+                /**
+                 * Check for FTP
+                 */
                 if ($value == 'ftp' && !function_exists('ftp_connect')) {
+                    return 'mirror';
+                }
+
+                /**
+                 * Check for SHA 256 functions
+                 */
+                if ($value == 'netdna' && !function_exists('hash') && !function_exists('mhash')) {
                     return 'mirror';
                 }
                 break;

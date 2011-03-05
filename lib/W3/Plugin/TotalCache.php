@@ -609,6 +609,15 @@ class W3_Plugin_TotalCache extends W3_Plugin {
         }
 
         /**
+         * Update upload path action
+         */
+        if (isset($_REQUEST['update_upload_path'])) {
+            update_option('upload_path', '');
+
+            $this->redirect();
+        }
+
+        /**
          * Save config
          */
         if (isset($_REQUEST['save_config'])) {
@@ -1583,22 +1592,32 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                 $this->_errors[] = sprintf('Page caching is not available: %s is not installed. Either the <strong>%s</strong> directory is not write-able or another caching plugin installed. This error message will automatically disappear once the change is successfully made.', W3TC_ADDIN_FILE_ADVANCED_CACHE, WP_CONTENT_DIR);
             } elseif (!$this->advanced_cache_check()) {
                 $this->_errors[] = sprintf('Page caching is not available. The current add-in %s is either an incorrect file or an old version. De-activate the plugin, remove the file, then activate the plugin again.', W3TC_ADDIN_FILE_ADVANCED_CACHE);
-            } elseif (!defined('WP_CACHE')) {
+            } elseif (!defined('WP_CACHE') || !WP_CACHE) {
                 $this->_errors[] = sprintf('Page caching is not available: please add: <strong>define(\'WP_CACHE\', true);</strong> to <strong>%swp-config.php</strong>. This error message will automatically disappear once the change is successfully made.', ABSPATH);
-            } elseif ($this->_config->get_string('pgcache.engine') == 'file_pgcache' && $this->_config->get_boolean('config.check')) {
-                require_once W3TC_LIB_W3_DIR . '/Plugin/PgCache.php';
-                $w3_plugin_pgcache = & W3_Plugin_PgCache::instance();
+            } elseif ($this->_config->get_string('pgcache.engine') == 'file_pgcache') {
+                if ($this->_config->get_boolean('notes.no_trailing_slash')) {
+                    $permalink_structure = get_option('permalink_structure');
 
-                if ($w3_plugin_pgcache->check_rules_core()) {
-                    if (!$this->test_rewrite_pgcache()) {
-                        $this->_errors[] = 'It appears <acronym title="Uniform Resource Locator">URL</acronym> rewriting is not working. If using apache, verify that the server configuration allows .htaccess or if using nginx verify all configuration files are included in the configuration.';
+                    if (substr($permalink_structure, -1) !== '/') {
+                        $this->_errors[] = sprintf('The permalink structure (<strong>%s</strong>) does not include a trailing slash, disk enhanced page caching will fail to cache most requests. Either switch to any other supported caching method or add a trailing slash in the %s. %s', $permalink_structure, $this->button_link('settings', 'options-permalink.php'), $this->button_hide_note('Hide this message', 'no_trailing_slash'));
                     }
-                } elseif ($this->_config->get_boolean('notes.pgcache_rules_core')) {
-                    $this->_errors[] = sprintf('Disk enhanced page caching is not active. To enable it, add the following rules into the server configuration file (<strong>%s</strong>) of the site above the WordPress directives %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea>. Or if permission allow this can be done automatically, by clicking here: %s. %s', w3_get_pgcache_rules_core_path(), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_pgcache->generate_rules_core()), $this->button_link('auto-install', sprintf('admin.php?page=%s&pgcache_write_rules_core', $this->_page)), $this->button_hide_note('Hide this message', 'pgcache_rules_core'));
                 }
 
-                if ($this->_config->get_boolean('notes.pgcache_rules_cache') && !$w3_plugin_pgcache->check_rules_cache()) {
-                    $this->_errors[] = sprintf('Disk enhanced page caching is not active. To enable it, add the following rules into the server configuration file (<strong>%s</strong>) of the site %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea>. This can be done automatically, by clicking here: %s. %s', w3_get_pgcache_rules_cache_path(), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_pgcache->generate_rules_cache()), $this->button_link('auto-install', sprintf('admin.php?page=%s&pgcache_write_rules_cache', $this->_page)), $this->button_hide_note('Hide this message', 'pgcache_rules_cache'));
+                if ($this->_config->get_boolean('config.check')) {
+                    require_once W3TC_LIB_W3_DIR . '/Plugin/PgCache.php';
+                    $w3_plugin_pgcache = & W3_Plugin_PgCache::instance();
+
+                    if ($w3_plugin_pgcache->check_rules_core()) {
+                        if (!$this->test_rewrite_pgcache()) {
+                            $this->_errors[] = 'It appears Page Cache <acronym title="Uniform Resource Locator">URL</acronym> rewriting is not working. If using apache, verify that the server configuration allows .htaccess or if using nginx verify all configuration files are included in the configuration.';
+                        }
+                    } elseif ($this->_config->get_boolean('notes.pgcache_rules_core')) {
+                        $this->_errors[] = sprintf('Disk enhanced page caching is not active. To enable it, add the following rules into the server configuration file (<strong>%s</strong>) of the site above the WordPress directives %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea>. Or if permission allow this can be done automatically, by clicking here: %s. %s', w3_get_pgcache_rules_core_path(), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_pgcache->generate_rules_core()), $this->button_link('auto-install', sprintf('admin.php?page=%s&pgcache_write_rules_core', $this->_page)), $this->button_hide_note('Hide this message', 'pgcache_rules_core'));
+                    }
+
+                    if ($this->_config->get_boolean('notes.pgcache_rules_cache') && !$w3_plugin_pgcache->check_rules_cache()) {
+                        $this->_errors[] = sprintf('Disk enhanced page caching is not active. To enable it, add the following rules into the server configuration file (<strong>%s</strong>) of the site %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea>. This can be done automatically, by clicking here: %s. %s', w3_get_pgcache_rules_cache_path(), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_pgcache->generate_rules_cache()), $this->button_link('auto-install', sprintf('admin.php?page=%s&pgcache_write_rules_cache', $this->_page)), $this->button_hide_note('Hide this message', 'pgcache_rules_cache'));
+                    }
                 }
             }
         }
@@ -1629,7 +1648,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
 
                 if ($w3_plugin_minify->check_rules_core()) {
                     if (!$this->test_rewrite_minify()) {
-                        $this->_errors[] = 'It appears <acronym title="Uniform Resource Locator">URL</acronym> rewriting is not working. If using apache, verify that the server configuration allows .htaccess or if using nginx verify all configuration files are included in the configuration.';
+                        $this->_errors[] = 'It appears Minify <acronym title="Uniform Resource Locator">URL</acronym> rewriting is not working. If using apache, verify that the server configuration allows .htaccess or if using nginx verify all configuration files are included in the configuration.';
                     }
                 } elseif ($this->_config->get_boolean('notes.minify_rules_core')) {
                     $this->_errors[] = sprintf('Minify is not active. To enable it, add the following rules into the server configuration file (<strong>%s</strong>) of the site %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea>. This can be done automatically, by clicking here: %s. %s', w3_get_minify_rules_core_path(), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_minify->generate_rules_core()), $this->button_link('auto-install', sprintf('admin.php?page=%s&minify_write_rules_core', $this->_page)), $this->button_hide_note('Hide this message', 'minify_rules_core'));
@@ -1828,7 +1847,9 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                     $this->_errors[] = sprintf('The uploads directory is not available. Default WordPress directories will be created: <strong>%s</strong>.', $upload_path);
                 }
 
-                $this->_errors[] = sprintf('An inconsistent path was found in the database (%s). Please manually adjust the upload path either in miscellaneous settings or in the site\'s edit page (if in network mode).', $upload_path);
+                if (!w3_is_multisite()) {
+                    $this->_errors[] = sprintf('The uploads path found in the database (%s) is inconsistent with the actual path. Please manually adjust the upload path either in miscellaneous settings or if not using a custom path %s automatically to resolve the issue.', $upload_path, $this->button_link('update the path', sprintf('admin.php?page=%s&update_upload_path', $this->_page)));
+                }
             }
 
             /**
