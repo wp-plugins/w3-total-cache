@@ -38,13 +38,15 @@ class Minify_CSSTidy {
         if (isset($options['currentDir']) || isset($options['prependRelativePath'])) {
             require_once W3TC_LIB_MINIFY_DIR . '/Minify/CSS/UriRewriter.php';
 
+            $browsercache_id = (isset($options['browserCacheId']) ? $options['browserCacheId'] : 0);
+
             if (isset($options['currentDir'])) {
                 $document_root = (isset($options['docRoot']) ? $options['docRoot'] : $_SERVER['DOCUMENT_ROOT']);
                 $symlinks = (isset($options['symlinks']) ? $options['symlinks'] : array());
 
-                return Minify_CSS_UriRewriter::rewrite($css, $options['currentDir'], $document_root, $symlinks);
+                return Minify_CSS_UriRewriter::rewrite($css, $options['currentDir'], $document_root, $symlinks, $browsercache_id);
             } else {
-                return Minify_CSS_UriRewriter::prepend($css, $options['prependRelativePath']);
+                return Minify_CSS_UriRewriter::prepend($css, $options['prependRelativePath'], $browsercache_id);
             }
         }
 

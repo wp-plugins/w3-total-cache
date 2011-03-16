@@ -1247,13 +1247,7 @@ class W3_PgCache {
 
             $key .= '_index';
         } else {
-            $blogname = w3_get_blogname();
-
-            if (!$blogname) {
-                $blogname = w3_get_host();
-            }
-
-            $key = sprintf('w3tc_%s_page_%s', md5($blogname), md5($key));
+            $key = sprintf('w3tc_%s_page_%s', md5(w3_get_host_id()), md5($key));
         }
 
         /**

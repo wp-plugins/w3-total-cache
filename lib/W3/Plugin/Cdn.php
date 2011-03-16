@@ -554,7 +554,11 @@ class W3_Plugin_Cdn extends W3_Plugin {
                 }
 
                 if ($this->_config->get_boolean('cdn.minify.enable')) {
-                    $regexps[] = '~(["\'])((' . $domain_url_regexp . ')?(' . w3_preg_quote($site_path . W3TC_CONTENT_MINIFY_DIR_NAME) . '/[a-f0-9]+/.+\.include(-(footer|body))?(-nb)?\.[0-9]+\.(css|js)))~U';
+                    if ($this->_config->get_boolean('minify.auto')) {
+                        $regexps[] = '~(["\'])((' . $domain_url_regexp . ')?(' . w3_preg_quote($site_path . W3TC_CONTENT_MINIFY_DIR_NAME) . '/[a-f0-9]+\.[0-9]+\.(css|js)))~U';
+                    } else {
+                        $regexps[] = '~(["\'])((' . $domain_url_regexp . ')?(' . w3_preg_quote($site_path . W3TC_CONTENT_MINIFY_DIR_NAME) . '/[a-f0-9]+/.+\.include(-(footer|body))?(-nb)?\.[0-9]+\.(css|js)))~U';
+                    }
                 }
 
                 if ($this->_config->get_boolean('cdn.custom.enable')) {
@@ -1615,12 +1619,14 @@ class W3_Plugin_Cdn extends W3_Plugin {
 
         if (!isset($cdn[0])) {
             $engine = $this->_config->get_string('cdn.engine');
+            $compression = ($this->_config->get_boolean('browsercache.enabled') && $this->_config->get_boolean('browsercache.html.compression'));
 
             switch ($engine) {
                 case 'mirror':
                     $engine_config = array(
                         'domain' => $this->_config->get_array('cdn.mirror.domain'),
-                        'ssl' => $this->_config->get_string('cdn.mirror.ssl')
+                        'ssl' => $this->_config->get_string('cdn.mirror.ssl'),
+                        'compression' => false
                     );
                     break;
 
@@ -1629,7 +1635,8 @@ class W3_Plugin_Cdn extends W3_Plugin {
                         'apiid' => $this->_config->get_string('cdn.netdna.apiid'),
                         'apikey' => $this->_config->get_string('cdn.netdna.apikey'),
                         'domain' => $this->_config->get_array('cdn.netdna.domain'),
-                        'ssl' => $this->_config->get_string('cdn.netdna.ssl')
+                        'ssl' => $this->_config->get_string('cdn.netdna.ssl'),
+                        'compression' => false
                     );
                     break;
 
@@ -1639,7 +1646,8 @@ class W3_Plugin_Cdn extends W3_Plugin {
                         'password' => $this->_config->get_string('cdn.cotendo.password'),
                         'zones' => $this->_config->get_array('cdn.cotendo.zones'),
                         'domain' => $this->_config->get_array('cdn.cotendo.domain'),
-                        'ssl' => $this->_config->get_string('cdn.cotendo.ssl')
+                        'ssl' => $this->_config->get_string('cdn.cotendo.ssl'),
+                        'compression' => false
                     );
                     break;
 
@@ -1652,7 +1660,8 @@ class W3_Plugin_Cdn extends W3_Plugin {
                         'path' => $this->_config->get_string('cdn.ftp.path'),
                         'pasv' => $this->_config->get_boolean('cdn.ftp.pasv'),
                         'domain' => $this->_config->get_array('cdn.ftp.domain'),
-                        'ssl' => $this->_config->get_string('cdn.ftp.ssl')
+                        'ssl' => $this->_config->get_string('cdn.ftp.ssl'),
+                        'compression' => false
                     );
                     break;
 
@@ -1662,7 +1671,8 @@ class W3_Plugin_Cdn extends W3_Plugin {
                         'secret' => $this->_config->get_string('cdn.s3.secret'),
                         'bucket' => $this->_config->get_string('cdn.s3.bucket'),
                         'cname' => $this->_config->get_array('cdn.s3.cname'),
-                        'ssl' => $this->_config->get_string('cdn.s3.ssl')
+                        'ssl' => $this->_config->get_string('cdn.s3.ssl'),
+                        'compression' => $compression
                     );
                     break;
 
@@ -1673,7 +1683,8 @@ class W3_Plugin_Cdn extends W3_Plugin {
                         'bucket' => $this->_config->get_string('cdn.cf.bucket'),
                         'id' => $this->_config->get_string('cdn.cf.id'),
                         'cname' => $this->_config->get_array('cdn.cf.cname'),
-                        'ssl' => $this->_config->get_string('cdn.cf.ssl')
+                        'ssl' => $this->_config->get_string('cdn.cf.ssl'),
+                        'compression' => $compression
                     );
                     break;
 
@@ -1683,7 +1694,8 @@ class W3_Plugin_Cdn extends W3_Plugin {
                         'secret' => $this->_config->get_string('cdn.cf2.secret'),
                         'id' => $this->_config->get_string('cdn.cf2.id'),
                         'cname' => $this->_config->get_array('cdn.cf2.cname'),
-                        'ssl' => $this->_config->get_string('cdn.cf2.ssl')
+                        'ssl' => $this->_config->get_string('cdn.cf2.ssl'),
+                        'compression' => $compression
                     );
                     break;
 
@@ -1694,7 +1706,8 @@ class W3_Plugin_Cdn extends W3_Plugin {
                         'location' => $this->_config->get_string('cdn.rscf.location'),
                         'container' => $this->_config->get_string('cdn.rscf.container'),
                         'cname' => $this->_config->get_array('cdn.rscf.cname'),
-                        'ssl' => $this->_config->get_string('cdn.rscf.ssl')
+                        'ssl' => $this->_config->get_string('cdn.rscf.ssl'),
+                        'compression' => false
                     );
                     break;
 
@@ -1704,14 +1717,14 @@ class W3_Plugin_Cdn extends W3_Plugin {
                         'key' => $this->_config->get_string('cdn.azure.key'),
                         'container' => $this->_config->get_string('cdn.azure.container'),
                         'cname' => $this->_config->get_array('cdn.azure.cname'),
-                        'ssl' => $this->_config->get_string('cdn.azure.ssl')
+                        'ssl' => $this->_config->get_string('cdn.azure.ssl'),
+                        'compression' => $compression
                     );
                     break;
             }
 
             $engine_config = array_merge($engine_config, array(
-                'debug' => $this->_config->get_boolean('cdn.debug'),
-                'compression' => ($this->_config->get_boolean('browsercache.enabled') && $this->_config->get_boolean('browsercache.html.compression'))
+                'debug' => $this->_config->get_boolean('cdn.debug')
             ));
 
             require_once W3TC_LIB_W3_DIR . '/Cdn.php';

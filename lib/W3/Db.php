@@ -622,13 +622,7 @@ class W3_Db extends wpdb {
      * @return string
      */
     function _get_cache_key($sql) {
-        $blogname = w3_get_blogname();
-
-        if ($blogname == '') {
-            $blogname = w3_get_host();
-        }
-
-        $key = sprintf('w3tc_%s_sql_%s', md5($blogname), md5($sql));
+        $key = sprintf('w3tc_%s_sql_%s', md5(w3_get_host_id()), md5($sql));
 
         /**
          * Allow to modify cache key by W3TC plugins

@@ -9,11 +9,11 @@ Improve WordPress' performance and user experience of your site via caching: bro
 
 == Description ==
 
-The fastest and **most complete** WordPress performance optimization plugin.
+The **most complete** WordPress performance framework.
 
 Recommended by web hosts like: MediaTemple, Host Gator, Page.ly and WP Engine and countless more.
 
-Trusted by countless sites like: mattcutts.com, mashable.com, smashingmagazine.com, makeuseof.com, yoast.com, kiss925.com, pearsonified.com, lockergnome.com, tutsplus.com, johnchow.com, ilovetypography.com, webdesignerdepot.com, css-tricks.com and thousands of others
+Trusted by countless sites like: mattcutts.com, mashable.com, smashingmagazine.com, makeuseof.com, yoast.com, kiss925.com, pearsonified.com, lockergnome.com, johnchow.com, ilovetypography.com, webdesignerdepot.com, css-tricks.com and thousands of others
 
 W3 Total Cache improves the user experience of your site by improving your server performance, caching every aspect of your site, reducing the download times and providing transparent content delivery network (CDN) integration.
 
@@ -437,6 +437,9 @@ Please reach out to all of these people and support their projects if you're so 
 * Added Amazon S3 bucket location selection control
 * Added support CNAMEs confguration support for Amazon Cloudfront
 * Added purge tool
+* Added support of custom wp-config.php location
+* Added cache busting support
+* Improved object caching performance when no plugins are active
 * Improved non-blocking JS embedding implementation
 * Improved reliability of CDN export operations
 * Improved implementation of headers for all cache engines
@@ -454,6 +457,7 @@ Please reach out to all of these people and support their projects if you're so 
 * Fixed bug with trailing slash for disk enhanced page cache
 * Fixed bug with minify template group settings being lost upon upgrade
 * Fixed division by zero error
+* Fixed bug with object cache clones
 * Moved browser cache rules to site root instead of document root
 
 = 0.9.1.3 =

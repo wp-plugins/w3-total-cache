@@ -306,7 +306,7 @@
 
         <p class="submit">
             <input type="submit" name="options_save" class="w3tc-button-save button-primary" value="Save all settings" />
-            <input id="cloudflare_purge_cache" class="button" type="button" value="Purge cache" />
+            <input id="cloudflare_purge_cache" type="button" value="Purge cache"<?php if (! $cloudflare_enabled): ?> disabled="disabled"<?php endif; ?> class="button" />
         </p>
         <?php echo $this->postbox_footer(); ?>
 
@@ -315,7 +315,7 @@
             <tr>
                 <th colspan="2">
                     <input type="hidden" name="varnish.enabled" value="0" />
-                    <label><input class="enabled" type="checkbox" name="varnish.enabled" value="1"<?php checked($this->_config->get_boolean('varnish.enabled'), true); ?> /> Enable varnish cache purging</label><br />
+                    <label><input class="enabled" type="checkbox" name="varnish.enabled" value="1"<?php checked($varnish_enabled, true); ?> /> Enable varnish cache purging</label><br />
                 </th>
             </tr>
              <tr>
@@ -369,7 +369,7 @@
 
         <p class="submit">
             <input type="submit" name="options_save" class="w3tc-button-save button-primary" value="Save all settings" />
-            <input id="cdn_purge" class="button" type="button" value="Purge cache"<?php if (!w3_can_cdn_purge($this->_config->get_string('cdn.engine'))): ?> disabled="disabled"<?php endif; ?> />
+            <input id="cdn_purge" type="button" value="Purge cache"<?php if (!$cdn_enabled || !w3_can_cdn_purge($this->_config->get_string('cdn.engine'))): ?> disabled="disabled"<?php endif; ?> class="button" />
         </p>
         <?php echo $this->postbox_footer(); ?>
 

@@ -239,6 +239,7 @@ class W3_Config {
         'varnish.servers' => 'array',
 
         'browsercache.enabled' => 'boolean',
+        'browsercache.id' => 'string',
         'browsercache.no404wp' => 'boolean',
         'browsercache.no404wp.exceptions' => 'array',
         'browsercache.cssjs.compression' => 'boolean',
@@ -577,6 +578,7 @@ class W3_Config {
         'varnish.servers' => array(),
 
         'browsercache.enabled' => true,
+        'browsercache.id' => '12345',
         'browsercache.no404wp' => false,
         'browsercache.no404wp.exceptions' => array(
             'robots\.txt',
@@ -586,21 +588,21 @@ class W3_Config {
         'browsercache.cssjs.expires' => false,
         'browsercache.cssjs.lifetime' => 31536000,
         'browsercache.cssjs.cache.control' => false,
-        'browsercache.cssjs.cache.policy' => 'cache_validation',
+        'browsercache.cssjs.cache.policy' => 'cache_maxage',
         'browsercache.cssjs.etag' => false,
         'browsercache.cssjs.w3tc' => true,
         'browsercache.html.compression' => true,
         'browsercache.html.expires' => false,
         'browsercache.html.lifetime' => 3600,
         'browsercache.html.cache.control' => false,
-        'browsercache.html.cache.policy' => 'cache_validation',
+        'browsercache.html.cache.policy' => 'cache_maxage',
         'browsercache.html.etag' => false,
         'browsercache.html.w3tc' => true,
         'browsercache.other.compression' => true,
         'browsercache.other.expires' => false,
         'browsercache.other.lifetime' => 31536000,
         'browsercache.other.cache.control' => false,
-        'browsercache.other.cache.policy' => 'cache_validation',
+        'browsercache.other.cache.policy' => 'cache_maxage',
         'browsercache.other.etag' => false,
         'browsercache.other.w3tc' => true,
 
@@ -921,7 +923,6 @@ class W3_Config {
             /**
              * Disable minify options for auto mode
              */
-            case 'minify.rewrite':
             case 'minify.upload':
                 if ($this->get_boolean('minify.auto')) {
                     return false;

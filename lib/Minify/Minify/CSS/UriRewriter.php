@@ -44,16 +44,19 @@ class Minify_CSS_UriRewriter {
      * array('//symlink' => '/real/target/path') // unix
      * array('//static' => 'D:\\staticStorage')  // Windows
      * </code>
+     *
+     * @param int $browserCacheId
      * 
      * @return string
      */
-    public static function rewrite($css, $currentDir, $docRoot = null, $symlinks = array()) 
+    public static function rewrite($css, $currentDir, $docRoot = null, $symlinks = array(), $browserCacheId = 0)
     {
         self::$_docRoot = self::_realpath(
             $docRoot ? $docRoot : $_SERVER['DOCUMENT_ROOT']
         );
         self::$_currentDir = self::_realpath($currentDir);
         self::$_symlinks = array();
+        self::$_browserCacheId = $browserCacheId;
         
         // normalize symlinks
         foreach ($symlinks as $link => $target) {
@@ -86,14 +89,15 @@ class Minify_CSS_UriRewriter {
      * Prepend a path to relative URIs in CSS files
      * 
      * @param string $css
-     * 
      * @param string $path The path to prepend.
-     * 
+     * @param integer $browserCacheId
+     *
      * @return string
      */
-    public static function prepend($css, $path)
+    public static function prepend($css, $path, $browserCacheId = 0)
     {
         self::$_prependPath = $path;
+        self::$_browserCacheId = $browserCacheId;
         
         $css = self::_trimUrls($css);
         
@@ -123,6 +127,11 @@ class Minify_CSS_UriRewriter {
      * source (within the document root) E.g. '/var/www/symlink' => '/var/realpath'
      */
     private static $_symlinks = array();
+
+    /**
+     * @var int
+     */
+    private static $_browserCacheId = 0;
     
     /**
      * @var string path to prepend
@@ -182,6 +191,10 @@ class Minify_CSS_UriRewriter {
                 }             
             } else {
                 $uri = self::rewriteRelative($uri, self::$_currentDir, self::$_docRoot, self::$_symlinks);
+            }
+
+            if (self::$_browserCacheId) {
+                $uri .= (strstr($uri, '?') !== false ? '&' : '?') . self::$_browserCacheId;
             }
         }
         

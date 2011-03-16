@@ -16,13 +16,6 @@ class W3_Minify {
     var $_config = null;
 
     /**
-     * Memcached object
-     *
-     * @var W3_Cache_Memcached
-     */
-    var $_memcached = null;
-
-    /**
      * PHP5 constructor
      */
     function __construct() {
@@ -58,41 +51,37 @@ class W3_Minify {
         /**
          * Request variables:
          *
-         * f - files
-         * b - base
+         * h - files hash
          * tt - theme name in format template:stylesheet
          * gg - template
          * g - location (include, include-footer, etc...)
          * t - type (js or css)
          * m - ID
          */
-        $files = W3_Request::get_array('f');
-        $base = W3_Request::get_string('b');
+        $hash = W3_Request::get_string('h');
         $theme = W3_Request::get_string('tt');
         $template = W3_Request::get_string('gg');
         $location = W3_Request::get_string('g');
         $type = W3_Request::get_string('t');
 
-        if (!$files && !$theme && !$template && !$location && !$type) {
-            die('Params (f, tt, gg, g, t) are missed.');
-        } elseif (!$files) {
+        if (!$hash && !$theme && !$template && !$location && !$type) {
+            die('Params (h, tt, gg, g, t) are missing.');
+        } elseif (!$hash) {
             if (!$theme) {
-                die('Theme param (tt) is missed.');
+                die('Theme param (tt) is missing.');
             }
 
             if (!$template) {
-                die('Template param (gg) is missed.');
+                die('Template param (gg) is missing.');
             }
 
             if (!$location) {
-                die('Location param (g) is missed.');
+                die('Location param (g) is missing.');
             }
 
             if (!$type) {
-                die('Type param (t) is missed.');
+                die('Type param (t) is missing.');
             }
-        } else {
-            $type = 'css';
         }
 
         require_once W3TC_LIB_MINIFY_DIR . '/Minify.php';
@@ -126,7 +115,10 @@ class W3_Minify {
             )
         ));
 
-        if (!$files) {
+        if ($hash) {
+            $files = $this->get_custom_files($hash, $type);
+            $_GET['f'] = implode(',', $files);
+        } else {
             $serve_options['minApp']['groups'] = $this->get_groups($theme, $template, $type);
         }
 
@@ -137,7 +129,7 @@ class W3_Minify {
             $minifier_type = 'application/x-javascript';
 
             switch (true) {
-                case (($files || $location == 'include' || $location == 'include-nb') && $this->_config->get_boolean('minify.js.combine.header')):
+                case (($hash || $location == 'include' || $location == 'include-nb') && $this->_config->get_boolean('minify.js.combine.header')):
                 case (($location == 'include-body' || $location == 'include-body-nb') && $this->_config->get_boolean('minify.js.combine.body')):
                 case (($location == 'include-footer' || $location == 'include-footer-nb') && $this->_config->get_boolean('minify.js.combine.footer')):
                     $engine = 'combinejs';
@@ -163,7 +155,6 @@ class W3_Minify {
                 if (!$w3_minifier->exists($engine) || !$w3_minifier->available($engine)) {
                     $engine = 'css';
                 }
-
             }
         }
 
@@ -172,13 +163,15 @@ class W3_Minify {
         $serve_options['minifiers'][$minifier_type] = $w3_minifier->get_minifier($engine);
         $serve_options['minifierOptions'][$minifier_type] = $w3_minifier->get_options($engine);
 
-        if ($files) {
-            $cache_id = $this->get_cache_id_custom($files, $base);
-        } else {
-            $key = $this->get_id_key_group($theme, $template, $location, $type);
-            $sources = $this->get_sources_group($theme, $template, $location, $type);
+        if ($browsercache) {
+            $serve_options['minifierOptions'][$minifier_type]['browserCacheId'] = $this->_config->get_integer('browsercache.id');
+        }
 
-            $id = $this->get_id($key, $sources);
+        if ($hash) {
+            $id = $this->get_id_custom($hash, $type);
+            $cache_id = $this->get_cache_id_custom($hash, $id, $type);
+        } else {
+            $id = $this->get_id_group($theme, $template, $location, $type);
             $cache_id = $this->get_cache_id_group($theme, $template, $location, $id, $type);
         }
 
@@ -201,22 +194,7 @@ class W3_Minify {
     function flush() {
         $cache = & $this->_get_cache();
 
-        if (is_a($cache, 'W3_Cache_Memcached') && class_exists('Memcache')) {
-            return $this->_memcached->flush();
-        } elseif (is_a($cache, 'Minify_Cache_APC') && function_exists('apc_clear_cache')) {
-            return apc_clear_cache('user');
-        } elseif (is_a($cache, 'Minify_Cache_File')) {
-            if (!@is_dir(W3TC_CACHE_FILE_MINIFY_DIR)) {
-                $this->log(sprintf('Cache directory %s does not exists', W3TC_CACHE_FILE_MINIFY_DIR));
-            }
-
-            return w3_emptydir(W3TC_CACHE_FILE_MINIFY_DIR, array(
-                W3TC_CACHE_FILE_MINIFY_DIR . '/index.php',
-                W3TC_CACHE_FILE_MINIFY_DIR . '/.htaccess'
-            ));
-        }
-
-        return false;
+        return $cache->flush();
     }
 
     /**
@@ -240,9 +218,10 @@ class W3_Minify {
      *
      * @param mixed $object
      * @param string $label
+     * @return bool
      */
     function log($object, $label = null) {
-        $data = sprintf("[%s] [%s] %s\n", date('r'), $_SERVER['REQUEST_URI'], $object);
+        $data = sprintf("[%s] [%s] [%s] %s\n", date('r'), $_SERVER['REQUEST_URI'], $label, $object);
 
         return @file_put_contents(W3TC_MINIFY_LOG_FILE, $data, FILE_APPEND);
     }
@@ -317,12 +296,16 @@ class W3_Minify {
      * @param string $theme
      * @param string $template
      * @param string $location
-     * @param string $id
+     * @param integer $id
      * @param string $type
      * @return string
      */
     function get_cache_id_group($theme, $template, $location, $id, $type) {
-        $cache_id = sprintf('%s/%s.%s.%s.%s', $theme, $template, $location, $id, $type);
+        if ($this->_config->get_string('minify.engine') == 'file') {
+            $cache_id = sprintf('%s/%s.%s.%d.%s', $theme, $template, $location, $id, $type);
+        } else {
+            $cache_id = sprintf('w3tc_%s_minify_%s', md5(w3_get_host_id()), md5($theme . $template . $location . $id . $type));
+        }
 
         return $cache_id;
     }
@@ -330,12 +313,17 @@ class W3_Minify {
     /**
      * Returns cache id for custom files
      *
-     * @param array $files
-     * @param string $base
+     * @param string $hash
+     * @param integer $id
+     * @param string $type
      * @return string
      */
-    function get_cache_id_custom($files, $base) {
-        $cache_id = sprintf('%s', md5(serialize($files) . $base));
+    function get_cache_id_custom($hash, $id, $type) {
+        if ($this->_config->get_string('minify.engine') == 'file') {
+            $cache_id = sprintf('%s.%d.%s', $hash, $id, $type);
+        } else {
+            $cache_id = sprintf('w3tc_%s_minify_%s', md5(w3_get_host_id()), md5($hash . $id . $type));
+        }
 
         return $cache_id;
     }
@@ -375,25 +363,20 @@ class W3_Minify {
     /**
      * Returns array of custom sources
      *
-     * @param array $files
-     * @param string $base
+     * @param string $hash
+     * @param string $type
      * @return array
      */
-    function get_sources_custom($files, $base = '') {
+    function get_sources_custom($hash, $type) {
         $sources = array();
+        $files = $this->get_custom_files($hash, $type);
 
         if (count($files)) {
             $document_root = w3_get_document_root();
 
             foreach ($files as $file) {
-                if ($base) {
-                    $file = $base . '/' . $file;
-                }
-
-                $path = $document_root . '/' . $file;
+                $sources[] = $document_root . '/' . $file;
             }
-
-            $sources[] = $path;
         }
 
         return $sources;
@@ -409,42 +392,130 @@ class W3_Minify {
      * @return string
      */
     function get_id_key_group($theme, $template, $location, $type) {
-        $id_key = sprintf('%s/%s.%s.%s.id', $theme, $template, $location, $type);
+        if ($this->_config->get_string('minify.engine') == 'file') {
+            $key = sprintf('%s/%s.%s.%s.id', $theme, $template, $location, $type);
+        } else {
+            $key = sprintf('w3tc_%s_minify_id_%s', md5(w3_get_host_id()), md5($theme . $template . $location . $type));
+        }
 
-        return $id_key;
+        return $key;
     }
 
     /**
      * Returns ID key for custom files
      *
-     * @param array $files
-     * @param string $base
+     * @param string $hash
+     * @param string $type
      * @return string
      */
-    function get_id_key_custom($files, $base) {
-        return sprintf('%s.id', md5(serialize($files) . $base));
-    }
-
-    /**
-     * Returns id of sources
-     *
-     * @param string $key
-     * @param array $sources
-     * @return string
-     */
-    function get_id($key, $sources) {
-        $id = $this->_load_id($key);
-
-        if (!$id) {
-            $id = $this->_generate_id($sources);
-            $this->_save_id($key, $id);
+    function get_id_key_custom($hash, $type) {
+        if ($this->_config->get_string('minify.engine') == 'file') {
+            $key = sprintf('%s.%s.id', $hash, $type);
+        } else {
+            $key = sprintf('w3tc_%s_minify_id_%s', md5(w3_get_host_id()), md5($hash . $type));
         }
 
-        return $id;
+        return $key;
     }
 
     /**
-     * Precaches external file
+     * Returns id for custom files
+     *
+     * @param string $hash
+     * @param string $type
+     * @return integer
+     */
+    function get_id_custom($hash, $type) {
+        $key = $this->get_id_key_custom($hash, $type);
+        $id = $this->_cache_get($key);
+
+        if ($id === false) {
+            $sources = $this->get_sources_custom($hash, $type);
+            $id = $this->_generate_id($sources);
+            $this->_cache_set($key, $id);
+        }
+
+        return (int) $id;
+    }
+
+    /**
+     * Returns id for group
+     *
+     * @param string $theme
+     * @param string $template
+     * @param string $location
+     * @param string $type
+     * @return integer
+     */
+    function get_id_group($theme, $template, $location, $type) {
+        $key = $this->get_id_key_group($theme, $template, $location, $type);
+        $id = $this->_cache_get($key);
+
+        if ($id === false) {
+            $sources = $this->get_sources_group($theme, $template, $location, $type);
+            $id = $this->_generate_id($sources);
+            $this->_cache_set($key, $id);
+        }
+
+        return (int) $id;
+    }
+
+    /**
+     * Returns custom files hash
+     *
+     * @param array $files
+     * @return string
+     */
+    function get_custom_files_hash($files) {
+        return md5(implode('', $files));
+    }
+
+    /**
+     * Returns custom files key
+     *
+     * @param string $hash
+     * @param string $type
+     * @return string
+     */
+    function get_custom_files_key($hash, $type) {
+        if ($this->_config->get_string('minify.engine') == 'file') {
+            $key = sprintf('%s.%s.files', $hash, $type);
+        } else {
+            $key = sprintf('w3tc_%s_minify_files_%s', md5(w3_get_host_id()), md5($hash . $type));
+        }
+
+        return $key;
+    }
+
+    /**
+     * Sets custom files
+     *
+     * @param array $files
+     * @param string $type
+     * @return bool
+     */
+    function set_custom_files($files, $type) {
+        $hash = $this->get_custom_files_hash($files);
+        $key = $this->get_custom_files_key($hash, $type);
+
+        return $this->_cache_set($key, $files);
+    }
+
+    /**
+     * Returns custom files
+     *
+     * @param string $hash
+     * @param string $type
+     * @return array
+     */
+    function get_custom_files($hash, $type) {
+        $key = $this->get_custom_files_key($hash, $type);
+
+        return (array) $this->_cache_get($key);
+    }
+
+    /**
+     * Pre-caches external file
      *
      * @param string $url
      * @param string $type
@@ -474,6 +545,7 @@ class W3_Minify {
 
     /**
      * Returns minify source
+     *
      * @param $file_path
      * @param $url
      * @return Minify_Source
@@ -502,11 +574,11 @@ class W3_Minify {
                 case 'memcached':
                     require_once W3TC_LIB_W3_DIR . '/Cache/Memcached.php';
                     require_once W3TC_LIB_MINIFY_DIR . '/Minify/Cache/Memcache.php';
-                    $this->_memcached = & new W3_Cache_Memcached(array(
+                    $w3_cache_memcached = & new W3_Cache_Memcached(array(
                         'servers' => $this->_config->get_array('minify.memcached.servers'),
                         'persistant' => $this->_config->get_boolean('minify.memcached.persistant')
                     ));
-                    $cache[0] = & new Minify_Cache_Memcache($this->_memcached);
+                    $cache[0] = & new Minify_Cache_Memcache($w3_cache_memcached);
                     break;
 
                 case 'apc':
@@ -531,11 +603,17 @@ class W3_Minify {
 
                 case 'file':
                 default:
-                    require_once W3TC_LIB_MINIFY_DIR . '/Minify/Cache/File.php';
                     if (!@is_dir(W3TC_CACHE_FILE_MINIFY_DIR)) {
                         $this->log(sprintf('Cache directory %s does not exist', W3TC_CACHE_FILE_MINIFY_DIR));
                     }
-                    $cache[0] = & new Minify_Cache_File(W3TC_CACHE_FILE_MINIFY_DIR, $this->_config->get_boolean('minify.file.locking'));
+
+                    require_once W3TC_LIB_MINIFY_DIR . '/Minify/Cache/File.php';
+
+                    $cache[0] = & new Minify_Cache_File(
+                        W3TC_CACHE_FILE_MINIFY_DIR,
+                        $this->_config->get_boolean('minify.file.locking'),
+                        $this->_config->get_integer('timelimit.cache_flush')
+                    );
                     break;
             }
         }
@@ -622,29 +700,29 @@ class W3_Minify {
     }
 
     /**
-     * Returns cached ID
+     * Returns cache data
      *
      * @param string $key
      * @return string
      */
-    function _load_id($key) {
-        $cache = & $this->_get_cache();
+    function _cache_get($key) {
+        $cache =& $this->_get_cache();
 
-        $id = @$cache->fetch($key);
+        $value = @unserialize($cache->fetch($key));
 
-        return $id;
+        return $value;
     }
 
     /**
-     * Cache ID
+     * Sets cache date
      *
      * @param string $key
-     * @param string $id
+     * @param string $value
      * @return boolean
      */
-    function _save_id($key, $id) {
-        $cache = & $this->_get_cache();
+    function _cache_set($key, $value) {
+        $cache =& $this->_get_cache();
 
-        return $cache->store($key, $id);
+        return $cache->store($key, serialize($value));
     }
 }

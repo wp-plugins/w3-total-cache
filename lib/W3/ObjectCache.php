@@ -169,7 +169,11 @@ class W3_ObjectCache {
         $reason = '';
 
         if (isset($this->cache[$key])) {
-            $value = $this->cache[$key];
+            if (is_object($this->cache[$key])) {
+                $value = wp_clone($this->cache[$key]);
+            } else {
+                $value = $this->cache[$key];
+            }
         } else {
             $caching = $this->_can_cache2($id, $group, $reason);
             $internal = false;
@@ -181,7 +185,11 @@ class W3_ObjectCache {
                 $value = false;
             }
 
-            $this->cache[$key] = $value;
+            if (is_object($value)) {
+                $this->cache[$key] = wp_clone($value);
+            } else {
+                $this->cache[$key] = $value;
+            }
         }
 
         if ($value === null) {

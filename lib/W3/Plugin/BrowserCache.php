@@ -10,6 +10,13 @@ require_once W3TC_LIB_W3_DIR . '/Plugin.php';
  */
 class W3_Plugin_BrowserCache extends W3_Plugin {
     /**
+     * Cache ID
+     *
+     * @var string
+     */
+    var $_id = '';
+
+    /**
      * Runs plugin
      */
     function run() {
@@ -27,6 +34,13 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
             add_action('send_headers', array(
                 &$this,
                 'send_headers'
+            ));
+        }
+
+        if ($this->can_ob()) {
+            ob_start(array(
+                &$this,
+                'ob_callback'
             ));
         }
     }
@@ -73,6 +87,102 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
         if (w3_can_modify_rules(w3_get_browsercache_rules_cache_path())) {
             $this->remove_rules_cache();
         }
+    }
+
+    /**
+     * Check if we can start OB
+     *
+     * @return boolean
+     */
+    function can_ob() {
+        /**
+         * Object cache should be enabled
+         */
+        if (!$this->_config->get_boolean('browsercache.enabled')) {
+            return false;
+        }
+
+        /**
+         * Skip if admin
+         */
+        if (defined('WP_ADMIN')) {
+            return false;
+        }
+
+        /**
+         * Skip if doint AJAX
+         */
+        if (defined('DOING_AJAX')) {
+            return false;
+        }
+
+        /**
+         * Skip if doing cron
+         */
+        if (defined('DOING_CRON')) {
+            return false;
+        }
+
+        /**
+         * Skip if APP request
+         */
+        if (defined('APP_REQUEST')) {
+            return false;
+        }
+
+        /**
+         * Skip if XMLRPC request
+         */
+        if (defined('XMLRPC_REQUEST')) {
+            return false;
+        }
+
+        /**
+         * Check for WPMU's and WP's 3.0 short init
+         */
+        if (defined('SHORTINIT') && SHORTINIT) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Output buffer callback
+     *
+     * @param string $buffer
+     * @return mixed
+     */
+    function ob_callback(&$buffer) {
+        global $wpdb;
+
+        if ($buffer != '' && w3_is_xml($buffer)) {
+            $this->_id = $this->_config->get_integer('browsercache.id');
+
+            $domain_url_regexp = w3_get_domain_url_regexp();
+
+            $buffer = preg_replace_callback('~(href|src|action)=([\'"])(' . $domain_url_regexp . ')?(/[^\'"]*)~', array(
+                &$this,
+                'link_replace_callback'
+            ), $buffer);
+        }
+
+        return $buffer;
+
+    }
+
+    /**
+     * Link replace callback
+     *
+     * @param string $matches
+     * @return string
+     */
+    function link_replace_callback($matches) {
+        list (, $attr, $quote, $domain_url, , $path) = $matches;
+
+        $path .= (strstr($path, '?') !== false ? '&' : '?') . $this->_id;
+
+        return sprintf('%s=%s%s%s', $attr, $quote, $domain_url, $path);
     }
 
     /**

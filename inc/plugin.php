@@ -104,30 +104,30 @@ function w3tc_objectcache_flush() {
  * Prints script tag for scripts group
  *
  * @param string $location
- * @param string $group
+ * @retun void
  */
-function w3tc_minify_script_group($location, $group = null) {
+function w3tc_minify_script_group($location) {
     require_once W3TC_LIB_W3_DIR . '/Plugin/Minify.php';
 
     $w3_plugin_minify = & W3_Plugin_Minify::instance();
     $w3_plugin_minify->printed_scripts[] = $location;
 
-    echo $w3_plugin_minify->get_script_group($location, $group);
+    echo $w3_plugin_minify->get_script_group($location);
 }
 
 /**
  * Prints style tag for styles group
  *
  * @param string $location
- * @param string $group
+ * @retun void
  */
-function w3tc_minify_style_group($location, $group = null) {
+function w3tc_minify_style_group($location) {
     require_once W3TC_LIB_W3_DIR . '/Plugin/Minify.php';
 
     $w3_plugin_minify = & W3_Plugin_Minify::instance();
     $w3_plugin_minify->printed_styles[] = $location;
 
-    echo $w3_plugin_minify->get_style_group($location, $group);
+    echo $w3_plugin_minify->get_style_group($location);
 }
 
 /**
@@ -135,6 +135,7 @@ function w3tc_minify_style_group($location, $group = null) {
  *
  * @param string|array $files
  * @param boolean $blocking
+ * @return void
  */
 function w3tc_minify_script_custom($files, $blocking = true) {
     require_once W3TC_LIB_W3_DIR . '/Plugin/Minify.php';
@@ -149,6 +150,7 @@ function w3tc_minify_script_custom($files, $blocking = true) {
  *
  * @param string|array $files
  * @param boolean $import
+ * @return void
  */
 function w3tc_minify_style_custom($files, $import = false) {
     require_once W3TC_LIB_W3_DIR . '/Plugin/Minify.php';

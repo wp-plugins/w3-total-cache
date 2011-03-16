@@ -921,6 +921,25 @@ function w3_get_host() {
 }
 
 /**
+ * Returns host ID
+ *
+ * @return string
+ */
+function w3_get_host_id() {
+    static $host_id = null;
+
+    if ($host_id === null) {
+        $host_id = w3_get_blogname();
+
+        if (!$host_id) {
+            $host_id = w3_get_host();
+        }
+    }
+
+    return $host_id;
+}
+
+/**
  * Returns nginx rules path
  *
  * @return string
@@ -1014,6 +1033,26 @@ function w3_get_minify_rules_cache_path() {
     }
 
     return W3TC_CACHE_FILE_MINIFY_DIR . '/.htaccess';
+}
+
+/**
+ * Returns WP config file path
+ *
+ * @return string
+ */
+function w3_get_wp_config_path() {
+    $search = array(
+        ABSPATH . 'wp-config.php',
+        dirname(ABSPATH) . '/wp-config.php'
+    );
+
+    foreach ($search as $path) {
+        if (file_exists($path)) {
+            return $path;
+        }
+    }
+
+    return false;
 }
 
 /**
@@ -1178,7 +1217,7 @@ function w3_normalize_file_minify($file) {
  * @return string
  */
 function w3_normalize_file_minify2($file) {
-    $file = preg_replace('~\?ver=[^&]+$~', '', $file);
+    $file = preg_replace('~\?.*$~', '', $file);
     $file = w3_normalize_file_minify($file);
     $file = w3_translate_file($file);
 

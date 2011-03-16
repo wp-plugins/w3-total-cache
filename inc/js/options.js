@@ -777,6 +777,32 @@ jQuery(function() {
         }
     });
 
+    jQuery('#cdn_form').submit(function() {
+        var cnames = [], ret = true;
+
+        jQuery('#cdn_cnames input[type=text]').each(function(index) {
+            var cname = jQuery(this).val();
+
+            if (cname) {
+                if (jQuery.inArray(cname, cnames) != -1) {
+                    alert('CNAME "' + cname + '" already exists.');
+                    ret = false;
+
+                    return false;
+                } else {
+                    cnames.push(cname);
+                }
+            } else {
+                alert('Empty CNAME #' + (index + 1) + '.');
+                ret = false;
+
+                return false;
+            }
+        });
+
+        return ret;
+    });
+
     // support tabs
     jQuery('#support_more_files').live('click', function() {
         jQuery(this).before('<input type="file" name="files[]" /><br />');

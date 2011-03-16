@@ -246,7 +246,7 @@ class W3_Plugin_PgCache extends W3_Plugin {
      * @return boolean
      */
     function enable_wp_cache() {
-        $config_path = ABSPATH . 'wp-config.php';
+        $config_path = w3_get_wp_config_path();
         $config_data = @file_get_contents($config_path);
 
         if ($config_data === false) {
@@ -274,7 +274,7 @@ class W3_Plugin_PgCache extends W3_Plugin {
      * @return bool
      */
     function disable_wp_cache() {
-        $config_path = ABSPATH . 'wp-config.php';
+        $config_path = w3_get_wp_config_path();
         $config_data = @file_get_contents($config_path);
 
         if ($config_data === false) {
