@@ -96,9 +96,16 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
      */
     function can_ob() {
         /**
-         * Object cache should be enabled
+         * Browser cache should be enabled
          */
         if (!$this->_config->get_boolean('browsercache.enabled')) {
+            return false;
+        }
+
+        /**
+         * Replace feature should be enabled
+         */
+        if (!$this->_config->get_boolean('browsercache.replace')) {
             return false;
         }
 
@@ -157,11 +164,11 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
         global $wpdb;
 
         if ($buffer != '' && w3_is_xml($buffer)) {
-            $this->_id = $this->_config->get_integer('browsercache.id');
+            $this->_id = $this->_config->get_integer('browsercache.replace.id');
 
             $domain_url_regexp = w3_get_domain_url_regexp();
 
-            $buffer = preg_replace_callback('~(href|src|action)=([\'"])(' . $domain_url_regexp . ')?(/[^\'"]*)~', array(
+            $buffer = preg_replace_callback('~(href|src|action)=[\'"]((' . $domain_url_regexp . ')?(/.*?\.([a-z-_]+?)(\?.*?)?))[\'"]~', array(
                 &$this,
                 'link_replace_callback'
             ), $buffer);
@@ -178,11 +185,30 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
      * @return string
      */
     function link_replace_callback($matches) {
-        list (, $attr, $quote, $domain_url, , $path) = $matches;
+        static $types = null;
 
-        $path .= (strstr($path, '?') !== false ? '&' : '?') . $this->_id;
+        if ($types === null) {
+            $types = array();
+            $extensions = array_keys(array_merge(
+                $this->get_cssjs_types(),
+                $this->get_html_types(),
+                $this->get_other_types()
+            ));
 
-        return sprintf('%s=%s%s%s', $attr, $quote, $domain_url, $path);
+            foreach ($extensions as $extension) {
+                $types = array_merge($types, explode('|', $extension));
+            }
+        }
+
+        list ($match, $attr, $url, , , , $ext) = $matches;
+
+        if (in_array($ext, $types)) {
+            $url .= (strstr($url, '?') !== false ? '&' : '?') . $this->_id;
+
+            return sprintf('%s="%s"', $attr, $url);
+        }
+
+        return $match;
     }
 
     /**

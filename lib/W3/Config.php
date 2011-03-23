@@ -239,7 +239,8 @@ class W3_Config {
         'varnish.servers' => 'array',
 
         'browsercache.enabled' => 'boolean',
-        'browsercache.id' => 'string',
+        'browsercache.replace' => 'boolean',
+        'browsercache.replace.id' => 'string',
         'browsercache.no404wp' => 'boolean',
         'browsercache.no404wp.exceptions' => 'array',
         'browsercache.cssjs.compression' => 'boolean',
@@ -578,7 +579,8 @@ class W3_Config {
         'varnish.servers' => array(),
 
         'browsercache.enabled' => true,
-        'browsercache.id' => '12345',
+        'browsercache.replace' => false,
+        'browsercache.replace.id' => '12345',
         'browsercache.no404wp' => false,
         'browsercache.no404wp.exceptions' => array(
             'robots\.txt',

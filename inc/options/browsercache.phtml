@@ -47,6 +47,13 @@
                     <br /><span class="description">Reduce server load by allowing the web server to handle 404 (not found) errors for static files (images etc).</span>
                 </th>
             </tr>
+            <tr>
+                <th colspan="2">
+                    <input type="hidden" name="browsercache.replace" value="0" />
+                    <label><input type="checkbox" name="browsercache.replace" value="1"<?php checked($this->_config->get_boolean('browsercache.replace'), true); ?> /> Prevent caching of objects after settings change</label>
+                    <br /><span class="description">Whenever settings are changed, a new query string will be generated and appended to objects allowing the new policy to be applied.</span>
+                </th>
+            </tr>
         	<tr>
         		<th><label for="browsercache_no404wp_exceptions">404 error exception list:</label></th>
         		<td>

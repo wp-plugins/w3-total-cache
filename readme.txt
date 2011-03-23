@@ -249,6 +249,9 @@ Install the plugin to read the full FAQ.
 
 == Press: Mentions, Tutorials &amp; Reviews ==
 
+**March 2011:**
+* [WPML with W3TC for Fast and Efficient Multilingual Websites](http://wpml.org/2011/03/wpml-with-w3tc/), Amir
+
 **February 2011:**
 
 * [Optimizing WordPress with Nginx, Varnish, W3 Total Cache, Amazon S3, and Memcached (With Benchmarks)](http://danielmiessler.com/blog/optimizing-wordpress-with-nginx-varnish-w3-total-cache-amazon-s3-and-memcached), Daniel Miessler

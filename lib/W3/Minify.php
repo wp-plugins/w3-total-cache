@@ -163,8 +163,8 @@ class W3_Minify {
         $serve_options['minifiers'][$minifier_type] = $w3_minifier->get_minifier($engine);
         $serve_options['minifierOptions'][$minifier_type] = $w3_minifier->get_options($engine);
 
-        if ($browsercache) {
-            $serve_options['minifierOptions'][$minifier_type]['browserCacheId'] = $this->_config->get_integer('browsercache.id');
+        if ($browsercache && $this->_config->get_boolean('browsercache.replace')) {
+            $serve_options['minifierOptions'][$minifier_type]['browserCacheId'] = $this->_config->get_integer('browsercache.replace.id');
         }
 
         if ($hash) {

@@ -128,14 +128,14 @@
 
 		<?php echo $this->postbox_header('Advanced'); ?>
         <table class="form-table">
-        	<?php if (! $cdn_mirror): ?>
-        	<tr>
-        		<th colspan="2">
-        			<input type="hidden" name="cdn.reject.admins" value="0" />
-        			<label><input type="checkbox" name="cdn.reject.admins" value="1"<?php checked($this->_config->get_boolean('cdn.reject.admins'), true); ?> /> Don't replace URLs for logged in administrators</label><br />
+            <tr>
+                <th colspan="2">
+                    <input type="hidden" name="cdn.reject.admins" value="0" />
+                    <label><input type="checkbox" name="cdn.reject.admins" value="1"<?php checked($this->_config->get_boolean('cdn.reject.admins'), true); ?> /> Don't replace URLs for logged in administrators</label><br />
                     <span class="description">Authenticated administrators will use the origin server exclusively when this option is selected.</span>
-        		</th>
-        	</tr>
+                </th>
+            </tr>
+        	<?php if (! $cdn_mirror): ?>
             <tr>
                 <th colspan="2">
                     <input type="hidden" name="minify.upload" value="0"<?php if ($this->_config->get_boolean('minify.auto')): ?> disabled="disabled"<?php endif; ?> />

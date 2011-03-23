@@ -3114,8 +3114,8 @@ class W3_Plugin_TotalCache extends W3_Plugin {
         /**
          * Set new browsercache ID
          */
-        if ($new_config->get_boolean('browsercache.enabled') && serialize($old_browsercache_dependencies_values) != serialize($new_browsercache_dependencies_values)) {
-            $new_config->set('browsercache.id', rand(10000, 99999));
+        if ($new_config->get_boolean('browsercache.enabled') && $new_config->get_boolean('browsercache.replace') && serialize($old_browsercache_dependencies_values) != serialize($new_browsercache_dependencies_values)) {
+            $new_config->set('browsercache.replace.id', rand(10000, 99999));
         }
 
         /**
