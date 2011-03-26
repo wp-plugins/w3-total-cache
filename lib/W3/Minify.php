@@ -304,7 +304,7 @@ class W3_Minify {
         if ($this->_config->get_string('minify.engine') == 'file') {
             $cache_id = sprintf('%s/%s.%s.%d.%s', $theme, $template, $location, $id, $type);
         } else {
-            $cache_id = sprintf('w3tc_%s_minify_%s', md5(w3_get_host_id()), md5($theme . $template . $location . $id . $type));
+            $cache_id = sprintf('w3tc_%s_minify_%s', w3_get_host_id(), md5($theme . $template . $location . $id . $type));
         }
 
         return $cache_id;
@@ -322,7 +322,7 @@ class W3_Minify {
         if ($this->_config->get_string('minify.engine') == 'file') {
             $cache_id = sprintf('%s.%d.%s', $hash, $id, $type);
         } else {
-            $cache_id = sprintf('w3tc_%s_minify_%s', md5(w3_get_host_id()), md5($hash . $id . $type));
+            $cache_id = sprintf('w3tc_%s_minify_%s', w3_get_host_id(), md5($hash . $id . $type));
         }
 
         return $cache_id;
@@ -395,7 +395,7 @@ class W3_Minify {
         if ($this->_config->get_string('minify.engine') == 'file') {
             $key = sprintf('%s/%s.%s.%s.id', $theme, $template, $location, $type);
         } else {
-            $key = sprintf('w3tc_%s_minify_id_%s', md5(w3_get_host_id()), md5($theme . $template . $location . $type));
+            $key = sprintf('w3tc_%s_minify_id_%s', w3_get_host_id(), md5($theme . $template . $location . $type));
         }
 
         return $key;
@@ -412,7 +412,7 @@ class W3_Minify {
         if ($this->_config->get_string('minify.engine') == 'file') {
             $key = sprintf('%s.%s.id', $hash, $type);
         } else {
-            $key = sprintf('w3tc_%s_minify_id_%s', md5(w3_get_host_id()), md5($hash . $type));
+            $key = sprintf('w3tc_%s_minify_id_%s', w3_get_host_id(), md5($hash . $type));
         }
 
         return $key;
@@ -481,7 +481,7 @@ class W3_Minify {
         if ($this->_config->get_string('minify.engine') == 'file') {
             $key = sprintf('%s.%s.files', $hash, $type);
         } else {
-            $key = sprintf('w3tc_%s_minify_files_%s', md5(w3_get_host_id()), md5($hash . $type));
+            $key = sprintf('w3tc_%s_minify_files_%s', w3_get_host_id(), md5($hash . $type));
         }
 
         return $key;

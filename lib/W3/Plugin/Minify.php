@@ -404,7 +404,7 @@ class W3_Plugin_Minify extends W3_Plugin {
         }
 
         foreach ($regexps as $regexp) {
-            $content = preg_replace('~<script\s+[^<>]*src=["\']?' . $regexp . '["\']?[^<>]*>\s*</script>~is', '', $content);
+            $content = preg_replace('~<script\s+[^<>]*src=["\']?' . $regexp . '["\']?[^<>]*>\s*</script>~Uis', '', $content);
         }
     }
 
@@ -421,12 +421,12 @@ class W3_Plugin_Minify extends W3_Plugin {
 
         $groups = $this->_config->get_array('minify.css.groups');
 
-        if (isset($groups[$theme]['default'][$location])) {
-            $files = (array) $groups[$theme]['default'];
+        if (isset($groups[$theme]['default'][$location]['files'])) {
+            $files = (array) $groups[$theme]['default'][$location]['files'];
         }
 
-        if ($template != 'default' && isset($groups[$theme][$template][$location])) {
-            $files = array_merge($files, (array) $groups[$theme][$template][$location]);
+        if ($template != 'default' && isset($groups[$theme][$template][$location]['files'])) {
+            $files = array_merge($files, (array) $groups[$theme][$template][$location]['files']);
         }
 
         $this->remove_styles($content, $files);
@@ -445,12 +445,12 @@ class W3_Plugin_Minify extends W3_Plugin {
 
         $groups = $this->_config->get_array('minify.js.groups');
 
-        if (isset($groups[$theme]['default'][$location])) {
-            $files = (array) $groups[$theme]['default'];
+        if (isset($groups[$theme]['default'][$location]['files'])) {
+            $files = (array) $groups[$theme]['default'][$location]['files'];
         }
 
-        if ($template != 'default' && isset($groups[$theme][$template][$location])) {
-            $files = array_merge($files, (array) $groups[$theme][$template][$location]);
+        if ($template != 'default' && isset($groups[$theme][$template][$location]['files'])) {
+            $files = array_merge($files, (array) $groups[$theme][$template][$location]['files']);
         }
 
         $this->remove_scripts($content, $files);
@@ -815,6 +815,8 @@ class W3_Plugin_Minify extends W3_Plugin {
     function get_debug_info() {
         $debug_info = "<!-- W3 Total Cache: Minify debug info:\r\n";
         $debug_info .= sprintf("%s%s\r\n", str_pad('Engine: ', 20), w3_get_engine_name($this->_config->get_string('minify.engine')));
+        $debug_info .= sprintf("%s%s\r\n", str_pad('Theme: ', 20), $this->get_theme());
+        $debug_info .= sprintf("%s%s\r\n", str_pad('Template: ', 20), $this->get_template());
 
         if ($this->minify_reject_reason) {
             $debug_info .= sprintf("%s%s\r\n", str_pad('Reject reason: ', 20), $this->minify_reject_reason);

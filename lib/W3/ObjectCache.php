@@ -391,20 +391,21 @@ class W3_ObjectCache {
             $group = 'default';
         }
 
-        $key_cache_id = $id . $group;
+        $blog_id = w3_get_blog_id();
+        $key_cache_id = $blog_id . $group . $id;
 
         if (isset($this->_key_cache[$key_cache_id])) {
             $key = $this->_key_cache[$key_cache_id];
         } else {
             $host = w3_get_host();
 
-            if (!in_array($group, $this->global_groups)) {
-                $prefix = w3_get_blogname();
+            if (in_array($group, $this->global_groups)) {
+                $host_id = $host;
             } else {
-                $prefix = '';
+                $host_id = sprintf('%s_%d', $host, $blog_id);
             }
 
-            $key = sprintf('w3tc_%s_object_%s', md5($host), md5($prefix . $group . $id));
+            $key = sprintf('w3tc_%s_object_%s', $host_id, md5($group . $id));
 
             $this->_key_cache[$key_cache_id] = $key;
         }

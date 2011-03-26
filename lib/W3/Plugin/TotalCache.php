@@ -3509,19 +3509,8 @@ class W3_Plugin_TotalCache extends W3_Plugin {
     function support_request() {
         require_once W3TC_LIB_W3_DIR . '/Request.php';
 
-        $required = array(
-            'bug_report' => 'url,name,email,subject,description',
-            'new_feature' => 'url,name,email,subject,description',
-            'email_support' => 'url,name,email,subject,description',
-            'phone_support' => 'url,name,email,subject,description,phone',
-            'plugin_config' => 'url,name,email,subject,description,wp_login,wp_password',
-            'theme_config' => 'url,name,email,subject,description,wp_login,wp_password,ftp_host,ftp_login,ftp_password',
-            'linux_config' => 'url,name,email,subject,description,wp_login,wp_password,ftp_host,ftp_login,ftp_password'
-        );
-
         $request_type = W3_Request::get_string('request_type');
         $payment = W3_Request::get_boolean('payment');
-        $request_type_text = (isset($this->_request_types[$request_type]) ? $this->_request_types[$request_type] : 'Unknown');
         $request_id = W3_Request::get_string('request_id');
         $url = W3_Request::get_string('url');
         $name = W3_Request::get_string('name');
@@ -3561,79 +3550,84 @@ class W3_Plugin_TotalCache extends W3_Plugin {
             $params[$template_key] = $template;
         }
 
+        if (!isset($this->_request_types[$request_type])) {
+            $this->redirect(array_merge($params, array(
+                'w3tc_error' => 'support_request_type'
+            )));
+        }
+
+        $required = array(
+            'bug_report' => 'url,name,email,subject,description',
+            'new_feature' => 'url,name,email,subject,description',
+            'email_support' => 'url,name,email,subject,description',
+            'phone_support' => 'url,name,email,subject,description,phone',
+            'plugin_config' => 'url,name,email,subject,description,wp_login,wp_password',
+            'theme_config' => 'url,name,email,subject,description,wp_login,wp_password,ftp_host,ftp_login,ftp_password',
+            'linux_config' => 'url,name,email,subject,description,wp_login,wp_password,ftp_host,ftp_login,ftp_password'
+        );
+
         if (strstr($required[$request_type], 'url') !== false && $url == '') {
             $this->redirect(array_merge($params, array(
-                'request_type' => $request_type,
                 'w3tc_error' => 'support_request_url'
             )));
         }
 
         if (strstr($required[$request_type], 'name') !== false && $name == '') {
             $this->redirect(array_merge($params, array(
-                'request_type' => $request_type,
                 'w3tc_error' => 'support_request_name'
             )));
         }
 
         if (strstr($required[$request_type], 'email') !== false && !preg_match('~^[a-z0-9_\-\.]+@[a-z0-9-\.]+\.[a-z]{2,5}$~', $email)) {
             $this->redirect(array_merge($params, array(
-                'request_type' => $request_type,
                 'w3tc_error' => 'support_request_email'
             )));
         }
 
         if (strstr($required[$request_type], 'phone') !== false && !preg_match('~^[0-9\-\.\ \(\)\+]+$~', $phone)) {
             $this->redirect(array_merge($params, array(
-                'request_type' => $request_type,
                 'w3tc_error' => 'support_request_phone'
             )));
         }
 
         if (strstr($required[$request_type], 'subject') !== false && $subject == '') {
             $this->redirect(array_merge($params, array(
-                'request_type' => $request_type,
                 'w3tc_error' => 'support_request_subject'
             )));
         }
 
         if (strstr($required[$request_type], 'description') !== false && $description == '') {
             $this->redirect(array_merge($params, array(
-                'request_type' => $request_type,
                 'w3tc_error' => 'support_request_description'
             )));
         }
 
         if (strstr($required[$request_type], 'wp_login') !== false && $wp_login == '') {
             $this->redirect(array_merge($params, array(
-                'request_type' => $request_type,
                 'w3tc_error' => 'support_request_wp_login'
             )));
         }
 
         if (strstr($required[$request_type], 'wp_password') !== false && $wp_password == '') {
             $this->redirect(array_merge($params, array(
-                'request_type' => $request_type,
                 'w3tc_error' => 'support_request_wp_password'
             )));
         }
 
         if (strstr($required[$request_type], 'ftp_host') !== false && $ftp_host == '') {
             $this->redirect(array_merge($params, array(
-                'request_type' => $request_type,
                 'w3tc_error' => 'support_request_ftp_host'
             )));
         }
 
         if (strstr($required[$request_type], 'ftp_login') !== false && $ftp_login == '') {
             $this->redirect(array_merge($params, array(
-                'request_type' => $request_type,
                 'w3tc_error' => 'support_request_ftp_login'
             )));
         }
 
         if (strstr($required[$request_type], 'ftp_password') !== false && $ftp_password == '') {
             $this->redirect(array_merge($params, array(
-                'request_type' => $request_type,
                 'w3tc_error' => 'support_request_ftp_password'
             )));
         }
@@ -3776,7 +3770,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
         /**
          * Send email
          */
-        $subject = sprintf('[W3TC %s] #%s: %s', $request_type_text, $request_id, $subject);
+        $subject = sprintf('[W3TC %s] #%s: %s', $this->_request_types[$request_type], $request_id, $subject);
 
         $headers = array(
             sprintf('From: "%s" <%s>', addslashes($name), $email),

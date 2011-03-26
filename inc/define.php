@@ -598,6 +598,15 @@ function w3_get_blogname_from_uri($uri) {
 }
 
 /**
+ * Returns current blog ID
+ *
+ * @return integer
+ */
+function w3_get_blog_id() {
+    return (isset($GLOBALS['blog_id']) ? (int) $GLOBALS['blog_id'] : 0);
+}
+
+/**
  * Returns URL regexp from URL
  *
  * @param string $url
@@ -929,11 +938,10 @@ function w3_get_host_id() {
     static $host_id = null;
 
     if ($host_id === null) {
-        $host_id = w3_get_blogname();
+        $host = w3_get_host();
+        $blog_id = w3_get_blog_id();
 
-        if (!$host_id) {
-            $host_id = w3_get_host();
-        }
+        $host_id = sprintf('%s_%d', $host, $blog_id);
     }
 
     return $host_id;

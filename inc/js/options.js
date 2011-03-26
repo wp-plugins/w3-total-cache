@@ -780,7 +780,7 @@ jQuery(function() {
     jQuery('#cdn_form').submit(function() {
         var cnames = [], ret = true;
 
-        jQuery('#cdn_cnames input[type=text]').each(function(index) {
+        jQuery('#cdn_cnames input[type=text]').each(function() {
             var cname = jQuery(this).val();
 
             if (cname) {
@@ -792,11 +792,6 @@ jQuery(function() {
                 } else {
                     cnames.push(cname);
                 }
-            } else {
-                alert('Empty CNAME #' + (index + 1) + '.');
-                ret = false;
-
-                return false;
             }
         });
 

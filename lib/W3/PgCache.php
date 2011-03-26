@@ -1247,7 +1247,7 @@ class W3_PgCache {
 
             $key .= '_index';
         } else {
-            $key = sprintf('w3tc_%s_page_%s', md5(w3_get_host_id()), md5($key));
+            $key = sprintf('w3tc_%s_page_%s', w3_get_host_id(), md5($key));
         }
 
         /**
