@@ -110,6 +110,13 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
         }
 
         /**
+         * Check if id is empty
+         */
+        if (!$this->_config->get_string('browsercache.replace.id')) {
+            return false;
+        }
+
+        /**
          * Skip if admin
          */
         if (defined('WP_ADMIN')) {

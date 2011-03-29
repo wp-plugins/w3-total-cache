@@ -525,14 +525,18 @@ class W3_Plugin_Cdn extends W3_Plugin {
             if ($this->can_cdn2($buffer)) {
                 $regexps = array();
                 $site_path = w3_get_site_path();
-                $upload_info = w3_upload_info();
                 $domain_url_regexp = w3_get_domain_url_regexp();
 
-                if ($upload_info) {
-                    if (preg_match('~' . $domain_url_regexp . '~i', $upload_info['baseurl'])) {
-                        $regexps[] = '~(["\'])((' . $domain_url_regexp . ')?(' . w3_preg_quote($upload_info['baseurlpath']) . '([^"\'>]+)))~';
-                    } else {
-                        $regexps[] = '~(["\'])((' . w3_preg_quote($upload_info['baseurl']) . ')(([^"\'>]+)))~';
+
+                if ($this->_config->get_boolean('cdn.uploads.enable')) {
+                    $upload_info = w3_upload_info();
+
+                    if ($upload_info) {
+                        if (preg_match('~' . $domain_url_regexp . '~i', $upload_info['baseurl'])) {
+                            $regexps[] = '~(["\'])((' . $domain_url_regexp . ')?(' . w3_preg_quote($upload_info['baseurlpath']) . '([^"\'>]+)))~';
+                        } else {
+                            $regexps[] = '~(["\'])((' . w3_preg_quote($upload_info['baseurl']) . ')(([^"\'>]+)))~';
+                        }
                     }
                 }
 

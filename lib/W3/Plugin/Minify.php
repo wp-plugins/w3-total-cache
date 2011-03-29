@@ -419,6 +419,7 @@ class W3_Plugin_Minify extends W3_Plugin {
         $theme = $this->get_theme();
         $template = $this->get_template();
 
+        $files = array();
         $groups = $this->_config->get_array('minify.css.groups');
 
         if (isset($groups[$theme]['default'][$location]['files'])) {
@@ -443,6 +444,7 @@ class W3_Plugin_Minify extends W3_Plugin {
         $theme = $this->get_theme();
         $template = $this->get_template();
 
+        $files = array();
         $groups = $this->_config->get_array('minify.js.groups');
 
         if (isset($groups[$theme]['default'][$location]['files'])) {

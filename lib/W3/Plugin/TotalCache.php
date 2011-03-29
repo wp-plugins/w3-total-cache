@@ -2869,156 +2869,284 @@ class W3_Plugin_TotalCache extends W3_Plugin {
      */
     function config_save(&$old_config, &$new_config, $preview = null) {
         /**
-         * Handle settings change that require pgcache and minify empty
+         * Show need empty page cache notification
          */
-        $pgcache_dependencies = array(
-            'pgcache.debug',
-            'dbcache.enabled',
-            'minify.enabled',
-            'cdn.enabled',
-            'mobile.enabled',
-            'referrer.enabled'
-        );
+        if ($new_config->get_boolean('pgcache.enabled')) {
+            $pgcache_dependencies = array(
+                'pgcache.debug',
+                'dbcache.enabled',
+                'objectcache.enabled',
+                'minify.enabled',
+                'cdn.enabled',
+                'mobile.enabled',
+                'referrer.enabled'
+            );
 
-        $minify_dependencies = array();
-        $cdn_dependencies = array();
-        $browsercache_dependencies = array();
+            if ($new_config->get_boolean('dbcache.enabled')) {
+                $pgcache_dependencies = array_merge($pgcache_dependencies, array(
+                    'dbcache.debug'
+                ));
+            }
 
-        if ($new_config->get_boolean('dbcache.enabled')) {
-            $pgcache_dependencies = array_merge($pgcache_dependencies, array(
-                'dbcache.debug'
-            ));
+            if ($new_config->get_boolean('objectcache.enabled')) {
+                $pgcache_dependencies = array_merge($pgcache_dependencies, array(
+                    'objectcache.debug'
+                ));
+            }
+
+            if ($new_config->get_boolean('minify.enabled')) {
+                $pgcache_dependencies = array_merge($pgcache_dependencies, array(
+                    'minify.auto',
+                    'minify.debug',
+                    'minify.rewrite',
+                    'minify.html.enable',
+                    'minify.html.engine',
+                    'minify.html.inline.css',
+                    'minify.html.inline.js',
+                    'minify.html.strip.crlf',
+                    'minify.html.comments.ignore',
+                    'minify.css.enable',
+                    'minify.css.groups',
+                    'minify.js.enable',
+                    'minify.js.groups',
+                    'minify.htmltidy.options.clean',
+                    'minify.htmltidy.options.hide-comments',
+                    'minify.htmltidy.options.wrap',
+                    'minify.reject.logged',
+                    'minify.reject.ua',
+                    'minify.reject.uri'
+                ));
+            }
+
+            if ($new_config->get_boolean('cdn.enabled')) {
+                $pgcache_dependencies = array_merge($pgcache_dependencies, array(
+                    'cdn.debug',
+                    'cdn.engine',
+                    'cdn.uploads.enable',
+                    'cdn.includes.enable',
+                    'cdn.includes.files',
+                    'cdn.theme.enable',
+                    'cdn.theme.files',
+                    'cdn.minify.enable',
+                    'cdn.custom.enable',
+                    'cdn.custom.files',
+                    'cdn.mirror.domain',
+                    'cdn.mirror.ssl',
+                    'cdn.netdna.domain',
+                    'cdn.netdna.ssl',
+                    'cdn.cotendo.domain',
+                    'cdn.cotendo.ssl',
+                    'cdn.ftp.domain',
+                    'cdn.ftp.ssl',
+                    'cdn.s3.cname',
+                    'cdn.s3.ssl',
+                    'cdn.cf.cname',
+                    'cdn.cf.ssl',
+                    'cdn.cf2.cname',
+                    'cdn.cf2.ssl',
+                    'cdn.rscf.cname',
+                    'cdn.rscf.ssl',
+                    'cdn.azure.cname',
+                    'cdn.azure.ssl',
+                    'cdn.reject.admins',
+                    'cdn.reject.ua',
+                    'cdn.reject.uri',
+                    'cdn.reject.files'
+                ));
+            }
+
+            if ($new_config->get_boolean('browsercache.enabled')) {
+                $pgcache_dependencies = array_merge($pgcache_dependencies, array(
+                    'browsercache.replace'
+                ));
+
+                if ($new_config->get_boolean('browsercache.replace')) {
+                    $pgcache_dependencies = array_merge($pgcache_dependencies, array(
+                        'browsercache.cssjs.compression',
+                        'browsercache.cssjs.expires',
+                        'browsercache.cssjs.lifetime',
+                        'browsercache.cssjs.cache.control',
+                        'browsercache.cssjs.cache.policy',
+                        'browsercache.cssjs.etag',
+                        'browsercache.cssjs.w3tc',
+                        'browsercache.html.compression',
+                        'browsercache.html.expires',
+                        'browsercache.html.lifetime',
+                        'browsercache.html.cache.control',
+                        'browsercache.html.cache.policy',
+                        'browsercache.html.etag',
+                        'browsercache.html.w3tc',
+                        'browsercache.other.compression',
+                        'browsercache.other.expires',
+                        'browsercache.other.lifetime',
+                        'browsercache.other.cache.control',
+                        'browsercache.other.cache.policy',
+                        'browsercache.other.etag',
+                        'browsercache.other.w3tc'
+                    ));
+                }
+
+                if ($new_config->get_boolean('mobile.enabled')) {
+                    $pgcache_dependencies = array_merge($pgcache_dependencies, array(
+                        'mobile.rgroups'
+                    ));
+                }
+
+                if ($new_config->get_boolean('referrer.enabled')) {
+                    $pgcache_dependencies = array_merge($pgcache_dependencies, array(
+                        'referrer.rgroups'
+                    ));
+                }
+
+                $old_pgcache_dependencies_values = array();
+                $new_pgcache_dependencies_values = array();
+
+                foreach ($pgcache_dependencies as $pgcache_dependency) {
+                    $old_pgcache_dependencies_values[] = $old_config->get($pgcache_dependency);
+                    $new_pgcache_dependencies_values[] = $new_config->get($pgcache_dependency);
+                }
+
+                if (serialize($old_pgcache_dependencies_values) != serialize($new_pgcache_dependencies_values)) {
+                    $new_config->set('notes.need_empty_pgcache', true);
+                }
+            }
         }
 
-        if ($new_config->get_boolean('objectcache.enabled')) {
-            $pgcache_dependencies = array_merge($pgcache_dependencies, array(
-                'objectcache.debug'
-            ));
-        }
-
-        if ($new_config->get_boolean('minify.enabled')) {
-            $pgcache_dependencies = array_merge($pgcache_dependencies, array(
-                'minify.auto',
-                'minify.debug',
-                'minify.rewrite',
-                'minify.options',
-                'minify.html.enable',
-                'minify.html.engine',
-                'minify.html.inline.css',
-                'minify.html.inline.js',
-                'minify.html.strip.crlf',
-                'minify.html.comments.ignore',
-                'minify.css.enable',
-                'minify.css.groups',
-                'minify.js.enable',
-                'minify.js.groups',
-                'minify.htmltidy.options.clean',
-                'minify.htmltidy.options.hide-comments',
-                'minify.htmltidy.options.wrap'
-            ));
-        }
-
-        if ($new_config->get_boolean('cdn.enabled')) {
-            $pgcache_dependencies = array_merge($pgcache_dependencies, array(
-                'cdn.debug',
-                'cdn.engine',
-                'cdn.includes.enable',
-                'cdn.includes.files',
-                'cdn.theme.enable',
-                'cdn.theme.files',
-                'cdn.minify.enable',
-                'cdn.custom.enable',
-                'cdn.custom.files',
-                'cdn.ftp.domain',
-                'cdn.s3.bucket',
-                'cdn.cf.id',
-                'cdn.cf.cname'
-            ));
-        }
-
-        if ($new_config->get_boolean('mobile.enabled')) {
-            $pgcache_dependencies = array_merge($pgcache_dependencies, array(
-                'mobile.rgroups'
-            ));
-        }
-
-        if ($new_config->get_boolean('referrer.enabled')) {
-            $pgcache_dependencies = array_merge($pgcache_dependencies, array(
-                'referrer.rgroups'
-            ));
-        }
-
-        if (($new_config->get_boolean('minify.css.enable') && ($new_config->get_boolean('minify.auto') || count($new_config->get_array('minify.css.groups')))) || ($new_config->get_boolean('minify.js.enable') && ($new_config->get_boolean('minify.auto') || count($new_config->get_array('minify.js.groups'))))) {
+        /**
+         * Show need empty minify notification
+         */
+        if ($new_config->get_boolean('minify.enabled') && (($new_config->get_boolean('minify.css.enable') && ($new_config->get_boolean('minify.auto') || count($new_config->get_array('minify.css.groups')))) || ($new_config->get_boolean('minify.js.enable') && ($new_config->get_boolean('minify.auto') || count($new_config->get_array('minify.js.groups')))))) {
             $minify_dependencies = array(
                 'minify.auto',
                 'minify.debug',
+                'minify.options',
                 'minify.symlinks',
-                'minify.css.engine',
-                'minify.css.combine',
-                'minify.css.strip.comments',
-                'minify.css.strip.crlf',
-                'minify.css.imports',
-                'minify.css.groups',
-                'minify.js.engine' => 'string',
-                'minify.js.combine.header',
-                'minify.js.combine.body',
-                'minify.js.combine.footer',
-                'minify.js.strip.comments',
-                'minify.js.strip.crlf',
-                'minify.js.groups',
-                'minify.yuijs.options.line-break',
-                'minify.yuijs.options.nomunge',
-                'minify.yuijs.options.preserve-semi',
-                'minify.yuijs.options.disable-optimizations',
-                'minify.yuicss.options.line-break',
-                'minify.ccjs.options.compilation_level',
-                'minify.ccjs.options.formatting',
-                'minify.csstidy.options.remove_bslash',
-                'minify.csstidy.options.compress_colors',
-                'minify.csstidy.options.compress_font-weight',
-                'minify.csstidy.options.lowercase_s',
-                'minify.csstidy.options.optimise_shorthands',
-                'minify.csstidy.options.remove_last_;',
-                'minify.csstidy.options.case_properties',
-                'minify.csstidy.options.sort_properties',
-                'minify.csstidy.options.sort_selectors',
-                'minify.csstidy.options.merge_selectors',
-                'minify.csstidy.options.discard_invalid_properties',
-                'minify.csstidy.options.css_level',
-                'minify.csstidy.options.preserve_css',
-                'minify.csstidy.options.timestamp',
-                'minify.csstidy.options.template'
+                'minify.css.enable',
+                'minify.js.enable'
             );
+
+            if ($new_config->get_boolean('minify.css.enable') && ($new_config->get_boolean('minify.auto') || count($new_config->get_array('minify.css.groups')))) {
+                $minify_dependencies = array_merge($minify_dependencies, array(
+                    'minify.css.engine',
+                    'minify.css.combine',
+                    'minify.css.strip.comments',
+                    'minify.css.strip.crlf',
+                    'minify.css.imports',
+                    'minify.css.groups',
+                    'minify.yuicss.path.java',
+                    'minify.yuicss.path.jar',
+                    'minify.yuicss.options.line-break',
+                    'minify.csstidy.options.remove_bslash',
+                    'minify.csstidy.options.compress_colors',
+                    'minify.csstidy.options.compress_font-weight',
+                    'minify.csstidy.options.lowercase_s',
+                    'minify.csstidy.options.optimise_shorthands',
+                    'minify.csstidy.options.remove_last_;',
+                    'minify.csstidy.options.case_properties',
+                    'minify.csstidy.options.sort_properties',
+                    'minify.csstidy.options.sort_selectors',
+                    'minify.csstidy.options.merge_selectors',
+                    'minify.csstidy.options.discard_invalid_properties',
+                    'minify.csstidy.options.css_level',
+                    'minify.csstidy.options.preserve_css',
+                    'minify.csstidy.options.timestamp',
+                    'minify.csstidy.options.template'
+                ));
+            }
+
+            if ($new_config->get_boolean('minify.js.enable') && ($new_config->get_boolean('minify.auto') || count($new_config->get_array('minify.js.groups')))) {
+                $minify_dependencies = array_merge($minify_dependencies, array(
+                    'minify.js.engine',
+                    'minify.js.combine.header',
+                    'minify.js.combine.body',
+                    'minify.js.combine.footer',
+                    'minify.js.strip.comments',
+                    'minify.js.strip.crlf',
+                    'minify.js.groups',
+                    'minify.yuijs.path.java',
+                    'minify.yuijs.path.jar',
+                    'minify.yuijs.options.line-break',
+                    'minify.yuijs.options.nomunge',
+                    'minify.yuijs.options.preserve-semi',
+                    'minify.yuijs.options.disable-optimizations',
+                    'minify.ccjs.path.java',
+                    'minify.ccjs.path.jar',
+                    'minify.ccjs.options.compilation_level',
+                    'minify.ccjs.options.formatting'
+                ));
+            }
+
+            $old_minify_dependencies_values = array();
+            $new_minify_dependencies_values = array();
+
+            foreach ($minify_dependencies as $minify_dependency) {
+                $old_minify_dependencies_values[] = $old_config->get($minify_dependency);
+                $new_minify_dependencies_values[] = $new_config->get($minify_dependency);
+            }
+
+            if (serialize($old_minify_dependencies_values) != serialize($new_minify_dependencies_values)) {
+                $new_config->set('notes.need_empty_minify', true);
+            }
         }
 
-        if ($new_config->get_boolean('cdn.enabled')) {
+        if ($new_config->get_boolean('cdn.enabled') && !w3_is_cdn_mirror($new_config->get_string('cdn.engine'))) {
+            /**
+             * Show notification when CDN enabled
+             */
+            if (!$old_config->get_boolean('cdn.enabled')) {
+                $new_config->set('notes.cdn_upload', true);
+            }
+
+            /**
+             * Show notification when Browser Cache settings changes
+             */
             $cdn_dependencies = array(
-                'browsercache.enabled',
-                'browsercache.cssjs.compression',
-                'browsercache.cssjs.expires',
-                'browsercache.cssjs.lifetime',
-                'browsercache.cssjs.cache.control',
-                'browsercache.cssjs.cache.policy',
-                'browsercache.cssjs.etag',
-                'browsercache.cssjs.w3tc',
-                'browsercache.html.compression',
-                'browsercache.html.expires',
-                'browsercache.html.lifetime',
-                'browsercache.html.cache.control',
-                'browsercache.html.cache.policy',
-                'browsercache.html.etag',
-                'browsercache.html.w3tc',
-                'browsercache.other.compression',
-                'browsercache.other.expires',
-                'browsercache.other.lifetime',
-                'browsercache.other.cache.control',
-                'browsercache.other.cache.policy',
-                'browsercache.other.etag',
-                'browsercache.other.w3tc'
+                'browsercache.enabled'
             );
+
+            if ($new_config->get_boolean('cdn.enabled')) {
+                $cdn_dependencies = array(
+                    'browsercache.cssjs.compression',
+                    'browsercache.cssjs.expires',
+                    'browsercache.cssjs.lifetime',
+                    'browsercache.cssjs.cache.control',
+                    'browsercache.cssjs.cache.policy',
+                    'browsercache.cssjs.etag',
+                    'browsercache.cssjs.w3tc',
+                    'browsercache.html.compression',
+                    'browsercache.html.expires',
+                    'browsercache.html.lifetime',
+                    'browsercache.html.cache.control',
+                    'browsercache.html.cache.policy',
+                    'browsercache.html.etag',
+                    'browsercache.html.w3tc',
+                    'browsercache.other.compression',
+                    'browsercache.other.expires',
+                    'browsercache.other.lifetime',
+                    'browsercache.other.cache.control',
+                    'browsercache.other.cache.policy',
+                    'browsercache.other.etag',
+                    'browsercache.other.w3tc'
+                );
+            }
+
+            $old_cdn_dependencies_values = array();
+            $new_cdn_dependencies_values = array();
+
+            foreach ($cdn_dependencies as $cdn_dependency) {
+                $old_cdn_dependencies_values[] = $old_config->get($cdn_dependency);
+                $new_cdn_dependencies_values[] = $new_config->get($cdn_dependency);
+            }
+
+            if (serialize($old_cdn_dependencies_values) != serialize($new_cdn_dependencies_values)) {
+                $new_config->set('notes.cdn_reupload', true);
+            }
         }
 
-        if ($new_config->get_boolean('browsercache.enabled')) {
+        /**
+         * Set new cache ID if browsercache settings changes
+         */
+        if ($new_config->get_boolean('browsercache.enabled') && $new_config->get_boolean('browsercache.replace')) {
             $browsercache_dependencies = array(
                 'browsercache.cssjs.compression',
                 'browsercache.cssjs.expires',
@@ -3042,80 +3170,18 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                 'browsercache.other.etag',
                 'browsercache.other.w3tc'
             );
-        }
 
-        $old_pgcache_dependencies_values = array();
-        $new_pgcache_dependencies_values = array();
+            $old_browsercache_dependencies_values = array();
+            $new_browsercache_dependencies_values = array();
 
-        $old_minify_dependencies_values = array();
-        $new_minify_dependencies_values = array();
-
-        $old_cdn_dependencies_values = array();
-        $new_cdn_dependencies_values = array();
-
-        $old_browsercache_dependencies_values = array();
-        $new_browsercache_dependencies_values = array();
-
-        foreach ($pgcache_dependencies as $pgcache_dependency) {
-            $old_pgcache_dependencies_values[] = $old_config->get($pgcache_dependency);
-            $new_pgcache_dependencies_values[] = $new_config->get($pgcache_dependency);
-        }
-
-        foreach ($minify_dependencies as $minify_dependency) {
-            $old_minify_dependencies_values[] = $old_config->get($minify_dependency);
-            $new_minify_dependencies_values[] = $new_config->get($minify_dependency);
-        }
-
-        foreach ($cdn_dependencies as $cdn_dependency) {
-            $old_cdn_dependencies_values[] = $old_config->get($cdn_dependency);
-            $new_cdn_dependencies_values[] = $new_config->get($cdn_dependency);
-        }
-
-        foreach ($cdn_dependencies as $cdn_dependency) {
-            $old_cdn_dependencies_values[] = $old_config->get($cdn_dependency);
-            $new_cdn_dependencies_values[] = $new_config->get($cdn_dependency);
-        }
-
-        foreach ($browsercache_dependencies as $browsercache_dependency) {
-            $old_browsercache_dependencies_values[] = $old_config->get($browsercache_dependency);
-            $new_browsercache_dependencies_values[] = $new_config->get($browsercache_dependency);
-        }
-
-        /**
-         * Show need empty page cache notification
-         */
-        if ($new_config->get_boolean('pgcache.enabled') && serialize($old_pgcache_dependencies_values) != serialize($new_pgcache_dependencies_values)) {
-            $new_config->set('notes.need_empty_pgcache', true);
-        }
-
-        /**
-         * Show need empty minify notification
-         */
-        if ($new_config->get_boolean('minify.enabled') && serialize($old_minify_dependencies_values) != serialize($new_minify_dependencies_values)) {
-            $new_config->set('notes.need_empty_minify', true);
-        }
-
-        if ($new_config->get_boolean('cdn.enabled') && !w3_is_cdn_mirror($new_config->get_string('cdn.engine'))) {
-            /**
-             * Show notification when CDN enabled
-             */
-            if (!$old_config->get_boolean('cdn.enabled')) {
-                $new_config->set('notes.cdn_upload', true);
+            foreach ($browsercache_dependencies as $browsercache_dependency) {
+                $old_browsercache_dependencies_values[] = $old_config->get($browsercache_dependency);
+                $new_browsercache_dependencies_values[] = $new_config->get($browsercache_dependency);
             }
 
-            /**
-             * Show notification when Browser Cache settings changed
-             */
-            if (serialize($old_cdn_dependencies_values) != serialize($new_cdn_dependencies_values)) {
-                $new_config->set('notes.cdn_reupload', true);
+            if (serialize($old_browsercache_dependencies_values) != serialize($new_browsercache_dependencies_values)) {
+                $new_config->set('browsercache.replace.id', rand(10000, 99999));
             }
-        }
-
-        /**
-         * Set new browsercache ID
-         */
-        if ($new_config->get_boolean('browsercache.enabled') && $new_config->get_boolean('browsercache.replace') && serialize($old_browsercache_dependencies_values) != serialize($new_browsercache_dependencies_values)) {
-            $new_config->set('browsercache.replace.id', rand(10000, 99999));
         }
 
         /**

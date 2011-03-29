@@ -17,8 +17,7 @@
 <?php else: ?>
 <p>
 	Prepare the <acronym title="Content Delivery Network">CDN</acronym> by:
-	<input id="cdn_import_library" class="button" type="button" value="importing attachments into the Media Library" /> then
-	<input id="cdn_export_library" class="button" type="button" value="exporting media library to CDN" />.
+	<input id="cdn_import_library" class="button" type="button" value="importing attachments into the Media Library" />.
 	Check <input id="cdn_queue" class="button" type="button" value="unsuccessful file transfers" /> if some objects appear to be missing.
     <?php if (w3_can_cdn_purge($cdn_engine)): ?>
     <input id="cdn_purge" class="button" type="button" value="Purge" /> objects from the <acronym title="Content Delivery Network">CDN</acronym> if needed.
@@ -31,8 +30,20 @@
     <div class="metabox-holder">
 		<?php echo $this->postbox_header('General'); ?>
         <table class="form-table">
+            <tr>
+                <th<?php if ($cdn_mirror): ?> colspan="2"<?php else: ?> style="width: 300px;"<?php endif; ?>>
+                    <input type="hidden" name="cdn.uploads.enable" value="0" />
+                    <label><input type="checkbox" name="cdn.uploads.enable" value="1"<?php checked($this->_config->get_boolean('cdn.uploads.enable'), true); ?> /> Host attachments</label><br />
+                    <span class="description">If checked, all attachments will be hosted with the <acronym title="Content Delivery Network">CDN</acronym>.</span>
+                </th>
+                <?php if (! $cdn_mirror): ?>
+                <td>
+	                <input id="cdn_export_library" class="button" type="button" value="Upload attachments" />
+                </td>
+                <?php endif; ?>
+            </tr>
         	<tr>
-        		<th<?php if ($cdn_mirror): ?> colspan="2"<?php else: ?> style="width: 300px;"<?php endif; ?>>
+        		<th<?php if ($cdn_mirror): ?> colspan="2"<?php endif; ?>>
         			<input type="hidden" name="cdn.includes.enable" value="0" />
         			<label><input type="checkbox" name="cdn.includes.enable" value="1"<?php checked($this->_config->get_boolean('cdn.includes.enable'), true); ?> /> Host wp-includes/ files</label><br />
     				<span class="description">If checked, WordPress static core file types specified in the "wp-includes file types to upload" field below will be hosted with the <acronym title="Content Delivery Network">CDN</acronym>.</span>

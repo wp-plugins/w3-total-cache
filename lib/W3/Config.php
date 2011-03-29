@@ -163,6 +163,7 @@ class W3_Config {
         'cdn.enabled' => 'boolean',
         'cdn.debug' => 'boolean',
         'cdn.engine' => 'string',
+        'cdn.uploads.enable' => 'boolean',
         'cdn.includes.enable' => 'boolean',
         'cdn.includes.files' => 'string',
         'cdn.theme.enable' => 'boolean',
@@ -188,7 +189,6 @@ class W3_Config {
         'cdn.cotendo.zones' => 'array',
         'cdn.cotendo.domain' => 'array',
         'cdn.cotendo.ssl' => 'string',
-        'cdn.netdna.ssl' => 'string',
         'cdn.ftp.host' => 'string',
         'cdn.ftp.port' => 'integer',
         'cdn.ftp.user' => 'string',
@@ -497,6 +497,7 @@ class W3_Config {
         'cdn.enabled' => false,
         'cdn.debug' => false,
         'cdn.engine' => 'ftp',
+        'cdn.uploads.enable' => true,
         'cdn.includes.enable' => true,
         'cdn.includes.files' => '*.css;*.js;*.gif;*.png;*.jpg',
         'cdn.theme.enable' => true,
@@ -580,7 +581,7 @@ class W3_Config {
 
         'browsercache.enabled' => true,
         'browsercache.replace' => false,
-        'browsercache.replace.id' => '12345',
+        'browsercache.replace.id' => '',
         'browsercache.no404wp' => false,
         'browsercache.no404wp.exceptions' => array(
             'robots\.txt',
