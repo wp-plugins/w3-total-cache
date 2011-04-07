@@ -36,7 +36,7 @@ minify_templates['<?php echo addslashes($theme_key); ?>']['<?php echo addslashes
         	<tr>
         		<th colspan="2">
         			<input type="hidden" name="minify.rewrite" value="0" />
-        			<label><input type="checkbox" name="minify.rewrite" value="1"<?php checked($this->_config->get_boolean('minify.rewrite'), true); ?> /> Rewrite <acronym title="Uniform Resource Locator">URL</acronym> structure</label><br />
+        			<label><input type="checkbox" name="minify.rewrite" value="1"<?php checked($this->_config->get_boolean('minify.rewrite'), true); ?><?php if (!w3_can_check_rules()): ?> disabled="disabled"<?php endif; ?> /> Rewrite <acronym title="Uniform Resource Locator">URL</acronym> structure</label><br />
     				<span class="description">If disabled, <acronym title="Cascading Style Sheet">CSS</acronym> and <acronym title="JavaScript">JS</acronym> embeddings will use GET variables instead of "fancy" links.</span>
         		</th>
         	</tr>

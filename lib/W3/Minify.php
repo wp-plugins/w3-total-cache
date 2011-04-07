@@ -116,8 +116,7 @@ class W3_Minify {
         ));
 
         if ($hash) {
-            $files = $this->get_custom_files($hash, $type);
-            $_GET['f'] = implode(',', $files);
+            $_GET['f'] = $this->get_files($hash, $type);
         } else {
             $serve_options['minApp']['groups'] = $this->get_groups($theme, $template, $type);
         }
@@ -147,7 +146,7 @@ class W3_Minify {
         } elseif ($type == 'css') {
             $minifier_type = 'text/css';
 
-            if (($files || $location == 'include') && $this->_config->get_boolean('minify.css.combine')) {
+            if (($hash || $location == 'include') && $this->_config->get_boolean('minify.css.combine')) {
                 $engine = 'combinecss';
             } else {
                 $engine = $this->_config->get_string('minify.css.engine');
@@ -162,10 +161,6 @@ class W3_Minify {
 
         $serve_options['minifiers'][$minifier_type] = $w3_minifier->get_minifier($engine);
         $serve_options['minifierOptions'][$minifier_type] = $w3_minifier->get_options($engine);
-
-        if ($browsercache && $this->_config->get_boolean('browsercache.replace')) {
-            $serve_options['minifierOptions'][$minifier_type]['browserCacheId'] = $this->_config->get_integer('browsercache.replace.id');
-        }
 
         if ($hash) {
             $id = $this->get_id_custom($hash, $type);
@@ -224,6 +219,20 @@ class W3_Minify {
         $data = sprintf("[%s] [%s] [%s] %s\n", date('r'), $_SERVER['REQUEST_URI'], $label, $object);
 
         return @file_put_contents(W3TC_MINIFY_LOG_FILE, $data, FILE_APPEND);
+    }
+
+    /**
+     * Returns files array
+     *
+     * @param string $hash
+     * @param string $type
+     * @return string
+     */
+    function get_files($hash, $type) {
+        $files = $this->get_custom_files($hash, $type);
+        $files = implode(',', $files);
+
+        return $files;
     }
 
     /**
@@ -510,8 +519,10 @@ class W3_Minify {
      */
     function get_custom_files($hash, $type) {
         $key = $this->get_custom_files_key($hash, $type);
+        $files = (array) $this->_cache_get($key);
+        $files = array_map('w3_normalize_file_minify2', $files);
 
-        return (array) $this->_cache_get($key);
+        return $files;
     }
 
     /**

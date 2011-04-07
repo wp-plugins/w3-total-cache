@@ -10,13 +10,6 @@ require_once W3TC_LIB_W3_DIR . '/Plugin.php';
  */
 class W3_Plugin_BrowserCache extends W3_Plugin {
     /**
-     * Cache ID
-     *
-     * @var string
-     */
-    var $_id = '';
-
-    /**
      * Runs plugin
      */
     function run() {
@@ -105,14 +98,7 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
         /**
          * Replace feature should be enabled
          */
-        if (!$this->_config->get_boolean('browsercache.replace')) {
-            return false;
-        }
-
-        /**
-         * Check if id is empty
-         */
-        if (!$this->_config->get_string('browsercache.replace.id')) {
+        if (!$this->_config->get_boolean('browsercache.cssjs.replace') && !$this->_config->get_boolean('browsercache.html.replace') && !$this->_config->get_boolean('browsercache.other.replace')) {
             return false;
         }
 
@@ -171,8 +157,6 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
         global $wpdb;
 
         if ($buffer != '' && w3_is_xml($buffer)) {
-            $this->_id = $this->_config->get_integer('browsercache.replace.id');
-
             $domain_url_regexp = w3_get_domain_url_regexp();
 
             $buffer = preg_replace_callback('~(href|src|action)=[\'"]((' . $domain_url_regexp . ')?(/.*?\.([a-z-_]+?)(\?.*?)?))[\'"]~', array(
@@ -192,25 +176,38 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
      * @return string
      */
     function link_replace_callback($matches) {
-        static $types = null;
+        static $id = null, $extensions = null;
 
-        if ($types === null) {
+        if ($id === null) {
+            $id = $this->_config->get_integer('browsercache.id', date('Ymd'));
+        }
+
+        if ($extensions === null) {
             $types = array();
-            $extensions = array_keys(array_merge(
-                $this->get_cssjs_types(),
-                $this->get_html_types(),
-                $this->get_other_types()
-            ));
+            $extensions = array();
 
-            foreach ($extensions as $extension) {
-                $types = array_merge($types, explode('|', $extension));
+            if ($this->_config->get_boolean('browsercache.cssjs.replace')) {
+                $types = array_merge($types, array_keys($this->get_cssjs_types()));
+            }
+
+            if ($this->_config->get_boolean('browsercache.html.replace')) {
+                $types = array_merge($types, array_keys($this->get_html_types()));
+            }
+
+            if ($this->_config->get_boolean('browsercache.other.replace')) {
+                $types = array_merge($types, array_keys($this->get_other_types()));
+            }
+
+            foreach ($types as $type) {
+                $extensions = array_merge($extensions, explode('|', $type));
             }
         }
 
-        list ($match, $attr, $url, , , , $ext) = $matches;
+        list ($match, $attr, $url, , , , $extension) = $matches;
 
-        if (in_array($ext, $types)) {
-            $url .= (strstr($url, '?') !== false ? '&' : '?') . $this->_id;
+        if (in_array($extension, $extensions)) {
+            $url = w3_remove_wp_query($url);
+            $url .= (strstr($url, '?') !== false ? '&' : '?') . $id;
 
             return sprintf('%s="%s"', $attr, $url);
         }
@@ -764,9 +761,9 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
         $rules = $this->generate_rules_cache();
 
         if ($replace_start !== false) {
-            $data = trim(substr_replace($data, $rules, $replace_start, $replace_length));
+            $data = w3_trim_rules(substr_replace($data, $rules, $replace_start, $replace_length));
         } else {
-            $data = trim($data . $rules);
+            $data = w3_trim_rules($data . $rules);
         }
 
         return @file_put_contents($path, $data);
@@ -821,9 +818,9 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
         $rules = $this->generate_rules_no404wp();
 
         if ($replace_start !== false) {
-            $data = trim(substr_replace($data, $rules, $replace_start, $replace_length));
+            $data = w3_trim_rules(substr_replace($data, $rules, $replace_start, $replace_length));
         } else {
-            $data = trim($data . $rules);
+            $data = w3_trim_rules($data . $rules);
         }
 
         return @file_put_contents($path, $data);
@@ -836,7 +833,7 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
      * @return string
      */
     function erase_rules_cache($data) {
-        $data = w3_erase_text($data, W3TC_MARKER_BEGIN_BROWSERCACHE_CACHE, W3TC_MARKER_END_BROWSERCACHE_CACHE);
+        $data = w3_erase_rules($data, W3TC_MARKER_BEGIN_BROWSERCACHE_CACHE, W3TC_MARKER_END_BROWSERCACHE_CACHE);
 
         return $data;
     }
@@ -848,7 +845,7 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
      * @return string
      */
     function erase_rules_no404wp($data) {
-        $data = w3_erase_text($data, W3TC_MARKER_BEGIN_BROWSERCACHE_NO404WP, W3TC_MARKER_END_BROWSERCACHE_NO404WP);
+        $data = w3_erase_rules($data, W3TC_MARKER_BEGIN_BROWSERCACHE_NO404WP, W3TC_MARKER_END_BROWSERCACHE_NO404WP);
 
         return $data;
     }

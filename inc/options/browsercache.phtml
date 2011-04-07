@@ -42,16 +42,15 @@
             </tr>
             <tr>
                 <th colspan="2">
-                    <input type="hidden" name="browsercache.no404wp" value="0" />
-                    <label><input type="checkbox" name="browsercache.no404wp" value="1"<?php checked($this->_config->get_boolean('browsercache.no404wp'), true); ?> /> Do not process 404 errors for static objects with WordPress</label>
-                    <br /><span class="description">Reduce server load by allowing the web server to handle 404 (not found) errors for static files (images etc).</span>
+                    <label><input id="browsercache_replace" type="checkbox" name="replace" value="1"<?php checked($browsercache_replace, true); ?> /> Prevent caching of objects after settings change</label>
+                    <br /><span class="description">Whenever settings are changed, a new query string will be generated and appended to objects allowing the new policy to be applied.</span>
                 </th>
             </tr>
             <tr>
                 <th colspan="2">
-                    <input type="hidden" name="browsercache.replace" value="0" />
-                    <label><input type="checkbox" name="browsercache.replace" value="1"<?php checked($this->_config->get_boolean('browsercache.replace'), true); ?> /> Prevent caching of objects after settings change</label>
-                    <br /><span class="description">Whenever settings are changed, a new query string will be generated and appended to objects allowing the new policy to be applied.</span>
+                    <input type="hidden" name="browsercache.no404wp" value="0" />
+                    <label><input type="checkbox" name="browsercache.no404wp" value="1"<?php checked($this->_config->get_boolean('browsercache.no404wp'), true); ?><?php if (!w3_can_check_rules()): ?> disabled="disabled"<?php endif; ?> /> Do not process 404 errors for static objects with WordPress</label>
+                    <br /><span class="description">Reduce server load by allowing the web server to handle 404 (not found) errors for static files (images etc).</span>
                 </th>
             </tr>
         	<tr>
@@ -128,6 +127,13 @@
                     <input type="hidden" name="browsercache.cssjs.compression" value="0" />
                     <label><input class="browsercache_compression" type="checkbox" name="browsercache.cssjs.compression" value="1"<?php checked($this->_config->get_boolean('browsercache.cssjs.compression'), true); ?> /> Enable <acronym title="Hypertext Transfer Protocol">HTTP</acronym> (gzip) compression</label>
                     <br /><span class="description">Reduce the download time for text-based files.</span>
+                </th>
+            </tr>
+            <tr>
+                <th colspan="2">
+                    <input type="hidden" name="browsercache.cssjs.replace" value="0" />
+                    <label><input class="browsercache_replace" type="checkbox" name="browsercache.cssjs.replace" value="1"<?php checked($this->_config->get_boolean('browsercache.cssjs.replace'), true); ?> /> Prevent caching of objects after settings change</label>
+                    <br /><span class="description">Whenever settings are changed, a new query string will be generated and appended to objects allowing the new policy to be applied.</span>
                 </th>
             </tr>
         </table>
@@ -264,6 +270,13 @@
                     <input type="hidden" name="browsercache.other.compression" value="0" />
                     <label><input class="browsercache_compression" type="checkbox" name="browsercache.other.compression" value="1"<?php checked($this->_config->get_boolean('browsercache.other.compression'), true); ?> /> Enable <acronym title="Hypertext Transfer Protocol">HTTP</acronym> (gzip) compression</label>
                     <br /><span class="description">Reduce the download time for text-based files.</span>
+                </th>
+            </tr>
+            <tr>
+                <th colspan="2">
+                    <input type="hidden" name="browsercache.other.replace" value="0" />
+                    <label><input class="browsercache_replace" type="checkbox" name="browsercache.other.replace" value="1"<?php checked($this->_config->get_boolean('browsercache.other.replace'), true); ?> /> Prevent caching of objects after settings change</label>
+                    <br /><span class="description">Whenever settings are changed, a new query string will be generated and appended to objects allowing the new policy to be applied.</span>
                 </th>
             </tr>
         </table>

@@ -1,0 +1,11 @@
+<h4>Page Speed results for <a href="<?php echo htmlspecialchars($results['url']); ?>"><?php echo htmlspecialchars($results['title']); ?></a></h4>
+
+<?php foreach ($results['results'] as $result): ?>
+<p>
+    <?php echo htmlspecialchars($result['name']); ?> <strong><?php echo $result['score']; ?> <?php echo $result['impact']; ?></strong>
+</p>
+<?php endforeach; ?>
+
+<p>
+    Total score: <?php echo $results['score']; ?>
+</p>

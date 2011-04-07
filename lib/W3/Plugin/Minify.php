@@ -340,7 +340,7 @@ class W3_Plugin_Minify extends W3_Plugin {
      * @return array
      */
     function filter_files($files) {
-        $files = array_map('w3_normalize_file_minify2', $files);
+        $files = array_map('w3_normalize_file_minify', $files);
         $files = array_filter($files, create_function('$el', 'return !w3_is_url($el);'));
         $files = array_values(array_unique($files));
 
@@ -740,12 +740,12 @@ class W3_Plugin_Minify extends W3_Plugin {
 
         $id = $w3_minify->get_id_group($theme, $template, $location, $type);
 
-        $site_url_ssl = w3_get_site_url_ssl();
+        $home_url_ssl = w3_get_home_url_ssl();
 
         if ($this->_config->get_boolean('minify.rewrite')) {
-            $url = sprintf('%s/%s/%s/%s.%s.%d.%s', $site_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $theme, $template, $location, $id, $type);
+            $url = sprintf('%s/%s/%s/%s.%s.%d.%s', $home_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $theme, $template, $location, $id, $type);
         } else {
-            $url = sprintf('%s/%s/?tt=%s&gg=%s&g=%s&t=%s&m=%d', $site_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $theme, $template, $location, $type, $id);
+            $url = sprintf('%s/%s/?tt=%s&gg=%s&g=%s&t=%s&m=%d', $home_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $theme, $template, $location, $type, $id);
         }
 
         return $url;
@@ -766,12 +766,12 @@ class W3_Plugin_Minify extends W3_Plugin {
         $hash = $w3_minify->get_custom_files_hash($files);
         $id = $w3_minify->get_id_custom($hash, $type);
 
-        $site_url_ssl = w3_get_site_url_ssl();
+        $home_url_ssl = w3_get_home_url_ssl();
 
         if ($this->_config->get_boolean('minify.rewrite')) {
-            $url = sprintf('%s/%s/%s.%d.%s', $site_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $hash, $id, $type);
+            $url = sprintf('%s/%s/%s.%d.%s', $home_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $hash, $id, $type);
         } else {
-            $url = sprintf('%s/%s/?h=%s&t=%s&m=%s', $site_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $hash, $type, $id);
+            $url = sprintf('%s/%s/?h=%s&t=%s&m=%s', $home_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $hash, $type, $id);
         }
 
         return $url;
@@ -1428,9 +1428,9 @@ class W3_Plugin_Minify extends W3_Plugin {
         $rules = $this->generate_rules_core();
 
         if ($replace_start !== false) {
-            $data = trim(substr_replace($data, $rules, $replace_start, $replace_length));
+            $data = w3_trim_rules(substr_replace($data, $rules, $replace_start, $replace_length));
         } else {
-            $data = trim($data . $rules);
+            $data = w3_trim_rules($data . $rules);
         }
 
         return @file_put_contents($path, $data);
@@ -1485,9 +1485,9 @@ class W3_Plugin_Minify extends W3_Plugin {
         $rules = $this->generate_rules_cache();
 
         if ($replace_start !== false) {
-            $data = trim(substr_replace($data, $rules, $replace_start, $replace_length));
+            $data = w3_trim_rules(substr_replace($data, $rules, $replace_start, $replace_length));
         } else {
-            $data = trim($data . $rules);
+            $data = w3_trim_rules($data . $rules);
         }
 
         return @file_put_contents($path, $data);
@@ -1500,7 +1500,7 @@ class W3_Plugin_Minify extends W3_Plugin {
      * @return string
      */
     function erase_rules_core($data) {
-        $data = w3_erase_text($data, W3TC_MARKER_BEGIN_MINIFY_CORE, W3TC_MARKER_END_MINIFY_CORE);
+        $data = w3_erase_rules($data, W3TC_MARKER_BEGIN_MINIFY_CORE, W3TC_MARKER_END_MINIFY_CORE);
 
         return $data;
     }
@@ -1512,7 +1512,7 @@ class W3_Plugin_Minify extends W3_Plugin {
      * @return string
      */
     function erase_rules_cache($data) {
-        $data = w3_erase_text($data, W3TC_MARKER_BEGIN_MINIFY_CACHE, W3TC_MARKER_END_MINIFY_CACHE);
+        $data = w3_erase_rules($data, W3TC_MARKER_BEGIN_MINIFY_CACHE, W3TC_MARKER_END_MINIFY_CACHE);
 
         return $data;
     }

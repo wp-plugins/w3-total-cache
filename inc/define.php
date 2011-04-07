@@ -739,18 +739,6 @@ function w3_get_site_url() {
 }
 
 /**
- * Returns SSL site url
- *
- * @return string
- */
-function w3_get_site_url_ssl() {
-    $site_url = w3_get_site_url();
-    $ssl = w3_get_url_ssl($site_url);
-
-    return $ssl;
-}
-
-/**
  * Returns absolute path to document root
  *
  * No trailing slash!
@@ -971,11 +959,15 @@ function w3_get_nginx_rules_path() {
  * @return string
  */
 function w3_get_pgcache_rules_core_path() {
-    if (w3_is_nginx()) {
-        return w3_get_nginx_rules_path();
+    switch (true) {
+        case w3_is_apache():
+            return w3_get_home_root() . '/.htaccess';
+
+        case w3_is_nginx():
+            return w3_get_nginx_rules_path();
     }
 
-    return w3_get_home_root() . '/.htaccess';
+    return false;
 }
 
 /**
@@ -984,11 +976,15 @@ function w3_get_pgcache_rules_core_path() {
  * @return string
  */
 function w3_get_pgcache_rules_cache_path() {
-    if (w3_is_nginx()) {
-        return w3_get_nginx_rules_path();
+    switch (true) {
+        case w3_is_apache():
+            return W3TC_CACHE_FILE_PGCACHE_DIR . '/.htaccess';
+
+        case w3_is_nginx():
+            return w3_get_nginx_rules_path();
     }
 
-    return W3TC_CACHE_FILE_PGCACHE_DIR . '/.htaccess';
+    return false;
 }
 
 /**
@@ -997,11 +993,15 @@ function w3_get_pgcache_rules_cache_path() {
  * @return string
  */
 function w3_get_browsercache_rules_cache_path() {
-    if (w3_is_nginx()) {
-        return w3_get_nginx_rules_path();
+    switch (true) {
+        case w3_is_apache():
+            return w3_get_home_root() . '/.htaccess';
+
+        case w3_is_nginx():
+            return w3_get_nginx_rules_path();
     }
 
-    return w3_get_home_root() . '/.htaccess';
+    return false;
 }
 
 /**
@@ -1010,11 +1010,15 @@ function w3_get_browsercache_rules_cache_path() {
  * @return string
  */
 function w3_get_browsercache_rules_no404wp_path() {
-    if (w3_is_nginx()) {
-        return w3_get_nginx_rules_path();
+    switch (true) {
+        case w3_is_apache():
+            return w3_get_home_root() . '/.htaccess';
+
+        case w3_is_nginx():
+            return w3_get_nginx_rules_path();
     }
 
-    return w3_get_home_root() . '/.htaccess';
+    return false;
 }
 
 /**
@@ -1023,11 +1027,15 @@ function w3_get_browsercache_rules_no404wp_path() {
  * @return string
  */
 function w3_get_minify_rules_core_path() {
-    if (w3_is_nginx()) {
-        return w3_get_nginx_rules_path();
+    switch (true) {
+        case w3_is_apache():
+            return W3TC_CACHE_FILE_MINIFY_DIR . '/.htaccess';
+
+        case w3_is_nginx():
+            return w3_get_nginx_rules_path();
     }
 
-    return W3TC_CACHE_FILE_MINIFY_DIR . '/.htaccess';
+    return false;
 }
 
 /**
@@ -1036,11 +1044,15 @@ function w3_get_minify_rules_core_path() {
  * @return string
  */
 function w3_get_minify_rules_cache_path() {
-    if (w3_is_nginx()) {
-        return w3_get_nginx_rules_path();
+    switch (true) {
+        case w3_is_apache():
+            return W3TC_CACHE_FILE_MINIFY_DIR . '/.htaccess';
+
+        case w3_is_nginx():
+            return w3_get_nginx_rules_path();
     }
 
-    return W3TC_CACHE_FILE_MINIFY_DIR . '/.htaccess';
+    return false;
 }
 
 /**
@@ -1105,6 +1117,15 @@ function w3_get_cdn_rules_path() {
     }
 
     return false;
+}
+
+/**
+ * Returns true if we can check rules
+ *
+ * @return bool
+ */
+function w3_can_check_rules() {
+    return (w3_is_apache() || w3_is_nginx());
 }
 
 /**
@@ -1225,7 +1246,7 @@ function w3_normalize_file_minify($file) {
  * @return string
  */
 function w3_normalize_file_minify2($file) {
-    $file = preg_replace('~\?.*$~', '', $file);
+    $file = w3_remove_wp_query($file);
     $file = w3_normalize_file_minify($file);
     $file = w3_translate_file($file);
 
@@ -1247,6 +1268,18 @@ function w3_translate_file($file) {
     }
 
     return $file;
+}
+
+/**
+ * Remove WP query string from URL
+ *
+ * @param string $url
+ * @return string
+ */
+function w3_remove_wp_query($url) {
+    $url = preg_replace('~[&\?]?ver=[a-z0-9-_\.]*~i', '', $url);
+
+    return $url;
 }
 
 /**
@@ -1867,6 +1900,23 @@ if (!function_exists('file_put_contents')) {
 }
 
 /**
+ * Trim rules
+ *
+ * @param string $rules
+ * @return string
+ */
+function w3_trim_rules($rules)
+{
+    $rules = trim($rules);
+
+    if ($rules != '') {
+        $rules .= "\n";
+    }
+
+    return $rules;
+}
+
+/**
  * Cleanup rewrite rules
  *
  * @param string $rules
@@ -1875,7 +1925,7 @@ if (!function_exists('file_put_contents')) {
 function w3_clean_rules($rules) {
     $rules = preg_replace('~[\r\n]+~', "\n", $rules);
     $rules = preg_replace('~^\s+~m', '', $rules);
-    $rules = trim($rules);
+    $rules = w3_trim_rules($rules);
 
     return $rules;
 }
@@ -1883,20 +1933,16 @@ function w3_clean_rules($rules) {
 /**
  * Erases text from start to end
  *
- * @param string $text
+ * @param string $rules
  * @param string $start
  * @param string $end
  * @return string
  */
-function w3_erase_text($text, $start, $end) {
-    $text = preg_replace('~' . w3_preg_quote($start) . '.*?' . w3_preg_quote($end) . "\n*~s", '', $text);
-    $text = trim($text);
+function w3_erase_rules($rules, $start, $end) {
+    $rules = preg_replace('~' . w3_preg_quote($start) . '.*?' . w3_preg_quote($end) . "\n*~s", '', $rules);
+    $rules = w3_trim_rules($rules);
 
-    if ($text != '') {
-        $text .= "\n";
-    }
-
-    return $text;
+    return $rules;
 }
 
 /**

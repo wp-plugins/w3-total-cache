@@ -281,6 +281,7 @@ jQuery(function() {
     w3tc_toggle('browsercache_etag');
     w3tc_toggle('browsercache_w3tc');
     w3tc_toggle('browsercache_compression');
+    w3tc_toggle('browsercache_replace');
 
     // minify page
     w3tc_input_enable('.html_enabled', jQuery('#html_enabled:checked').size());

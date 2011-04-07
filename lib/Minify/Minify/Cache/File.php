@@ -11,6 +11,7 @@ class Minify_Cache_File {
             require_once W3TC_LIB_MINIFY_DIR . '/Solar/Dir.php';
             $path = rtrim(Solar_Dir::tmp(), DIRECTORY_SEPARATOR);
         }
+
         $this->_locking = $fileLocking;
         $this->_path = $path;
     }
@@ -25,11 +26,11 @@ class Minify_Cache_File {
      * @return bool success
      */
     public function store($id, $data) {
-        $flag = $this->_locking
-                ? LOCK_EX
-                : null;
-        if (is_file($this->_path . '/' . $id)) {
-            @unlink($this->_path . '/' . $id);
+        $path = $this->_path . '/' . $id;
+        $flag = $this->_locking ? LOCK_EX : null;
+
+        if (is_file($path)) {
+            @unlink($path);
         }
 
         $dir = dirname($id);
@@ -38,14 +39,17 @@ class Minify_Cache_File {
             w3_mkdir($dir, 0777, $this->_path);
         }
 
-        if (!@file_put_contents($this->_path . '/' . $id, $data, $flag)) {
+        if (!@file_put_contents($path, $data, $flag)) {
             return false;
         }
+
         // write control
         if ($data != $this->fetch($id)) {
-            @unlink($this->_path . '/' . $id);
+            @unlink($path);
+
             return false;
         }
+
         return true;
     }
 
@@ -57,7 +61,9 @@ class Minify_Cache_File {
      * @return int size in bytes
      */
     public function getSize($id) {
-        return filesize($this->_path . '/' . $id);
+        $path = $this->_path . '/' . $id;
+
+        return filesize($path);
     }
 
     /**
@@ -70,8 +76,9 @@ class Minify_Cache_File {
      * @return bool exists
      */
     public function isValid($id, $srcMtime) {
-        $file = $this->_path . '/' . $id;
-        return (is_file($file) && (filemtime($file) >= $srcMtime));
+        $path = $this->_path . '/' . $id;
+
+        return (is_file($path) && (filemtime($path) >= $srcMtime));
     }
 
     /**
@@ -80,15 +87,24 @@ class Minify_Cache_File {
      * @param string $id cache id (e.g. a filename)
      */
     public function display($id) {
+        $path = $this->_path . '/' . $id;
+
         if ($this->_locking) {
-            $fp = fopen($this->_path . '/' . $id, 'rb');
-            flock($fp, LOCK_SH);
-            fpassthru($fp);
-            flock($fp, LOCK_UN);
-            fclose($fp);
+            $fp = @fopen($path, 'rb');
+
+            if ($fp) {
+                @flock($fp, LOCK_SH);
+                @fpassthru($fp);
+                @flock($fp, LOCK_UN);
+                @fclose($fp);
+
+                return true;
+            }
         } else {
-            readfile($this->_path . '/' . $id);
+            return @readfile($path);
         }
+
+        return false;
     }
 
     /**
@@ -99,16 +115,28 @@ class Minify_Cache_File {
      * @return string
      */
     public function fetch($id) {
-        if ($this->_locking) {
-            $fp = fopen($this->_path . '/' . $id, 'rb');
-            flock($fp, LOCK_SH);
-            $ret = stream_get_contents($fp);
-            flock($fp, LOCK_UN);
-            fclose($fp);
-            return $ret;
-        } else {
-            return file_get_contents($this->_path . '/' . $id);
+        $path = $this->_path . '/' . $id;
+
+        if (is_readable($path)) {
+            if ($this->_locking) {
+                $fp = @fopen($path, 'rb');
+
+                if ($fp) {
+                    @flock($fp, LOCK_SH);
+
+                    $ret = @stream_get_contents($fp);
+
+                    @flock($fp, LOCK_UN);
+                    @fclose($fp);
+
+                    return $ret;
+                }
+            } else {
+                return @file_get_contents($path);
+            }
         }
+
+        return false;
     }
 
     /**

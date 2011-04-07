@@ -67,7 +67,7 @@
                 <td>
                     <select name="pgcache.engine">
                         <optgroup label="Shared Server (disk enhanced is best):">
-                            <option value="file_pgcache"<?php selected($this->_config->get_string('pgcache.engine'), 'file_pgcache'); ?>>Disk (enhanced)</option>
+                            <option value="file_pgcache"<?php selected($this->_config->get_string('pgcache.engine'), 'file_pgcache'); ?><?php if (! $check_rules): ?> disabled="disabled"<?php endif; ?>>Disk (enhanced)</option>
                             <option value="file"<?php selected($this->_config->get_string('pgcache.engine'), 'file'); ?>>Disk (basic)</option>
                         </optgroup>
                         <optgroup label="Dedicated / Virtual Server:">
@@ -272,7 +272,7 @@
                 </td>
             </tr>
             <tr>
-                <th>Zone:</th>
+                <th>Domain:</th>
                 <td>
                     <input id="cloudflare_zone" type="text" name="cloudflare.zone" value="<?php echo htmlspecialchars($this->_config->get_string('cloudflare.zone', w3_get_host())); ?>" size="40" />
                 </td>

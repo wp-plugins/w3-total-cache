@@ -239,8 +239,7 @@ class W3_Config {
         'varnish.servers' => 'array',
 
         'browsercache.enabled' => 'boolean',
-        'browsercache.replace' => 'boolean',
-        'browsercache.replace.id' => 'string',
+        'browsercache.id' => 'string',
         'browsercache.no404wp' => 'boolean',
         'browsercache.no404wp.exceptions' => 'array',
         'browsercache.cssjs.compression' => 'boolean',
@@ -250,6 +249,7 @@ class W3_Config {
         'browsercache.cssjs.cache.policy' => 'string',
         'browsercache.cssjs.etag' => 'boolean',
         'browsercache.cssjs.w3tc' => 'boolean',
+        'browsercache.cssjs.replace' => 'boolean',
         'browsercache.html.compression' => 'boolean',
         'browsercache.html.expires' => 'boolean',
         'browsercache.html.lifetime' => 'integer',
@@ -257,6 +257,7 @@ class W3_Config {
         'browsercache.html.cache.policy' => 'string',
         'browsercache.html.etag' => 'boolean',
         'browsercache.html.w3tc' => 'boolean',
+        'browsercache.html.replace' => 'boolean',
         'browsercache.other.compression' => 'boolean',
         'browsercache.other.expires' => 'boolean',
         'browsercache.other.lifetime' => 'integer',
@@ -264,6 +265,7 @@ class W3_Config {
         'browsercache.other.cache.policy' => 'string',
         'browsercache.other.etag' => 'boolean',
         'browsercache.other.w3tc' => 'boolean',
+        'browsercache.other.replace' => 'boolean',
 
         'mobile.enabled' => 'boolean',
         'mobile.rgroups' => 'array',
@@ -580,8 +582,7 @@ class W3_Config {
         'varnish.servers' => array(),
 
         'browsercache.enabled' => true,
-        'browsercache.replace' => false,
-        'browsercache.replace.id' => '',
+        'browsercache.id' => '',
         'browsercache.no404wp' => false,
         'browsercache.no404wp.exceptions' => array(
             'robots\.txt',
@@ -594,6 +595,7 @@ class W3_Config {
         'browsercache.cssjs.cache.policy' => 'cache_maxage',
         'browsercache.cssjs.etag' => false,
         'browsercache.cssjs.w3tc' => true,
+        'browsercache.cssjs.replace' => false,
         'browsercache.html.compression' => true,
         'browsercache.html.expires' => false,
         'browsercache.html.lifetime' => 3600,
@@ -601,6 +603,7 @@ class W3_Config {
         'browsercache.html.cache.policy' => 'cache_maxage',
         'browsercache.html.etag' => false,
         'browsercache.html.w3tc' => true,
+        'browsercache.html.replace' => false,
         'browsercache.other.compression' => true,
         'browsercache.other.expires' => false,
         'browsercache.other.lifetime' => 31536000,
@@ -608,6 +611,7 @@ class W3_Config {
         'browsercache.other.cache.policy' => 'cache_maxage',
         'browsercache.other.etag' => false,
         'browsercache.other.w3tc' => true,
+        'browsercache.other.replace' => false,
 
         'mobile.enabled' => true,
         'mobile.rgroups' => array(
@@ -878,6 +882,7 @@ class W3_Config {
             case 'minify.engine':
             case 'objectcache.engine':
                 switch (true) {
+                    case ($value == 'file_pgcache' && !w3_can_check_rules()):
                     case ($value == 'apc' && !function_exists('apc_store')):
                     case ($value == 'eaccelerator' && !function_exists('eaccelerator_put')):
                     case ($value == 'xcache' && !function_exists('xcache_set')):
@@ -919,6 +924,15 @@ class W3_Config {
              */
             case 'minify.enabled':
                 if (!W3TC_PHP5) {
+                    return false;
+                }
+                break;
+
+            /**
+             * Disable minify rewrite when server rules are not supported
+             */
+            case 'minify.rewrite':
+                if (!w3_can_check_rules()) {
                     return false;
                 }
                 break;
@@ -1024,6 +1038,15 @@ class W3_Config {
                  */
                 if ($value == 'netdna' && !function_exists('hash') && !function_exists('mhash')) {
                     return 'mirror';
+                }
+                break;
+
+            /**
+             * Disable no 404 wp feature when server rules are not supported
+             */
+            case 'browsercache.no404wp':
+                if (!w3_can_check_rules()) {
+                    return false;
                 }
                 break;
         }

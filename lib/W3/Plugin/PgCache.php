@@ -552,7 +552,8 @@ class W3_Plugin_PgCache extends W3_Plugin {
         $is_vhost = w3_is_subdomain_install();
 
         $base_path = w3_get_base_path();
-        $home_path = ($is_multisite ? $base_path : w3_get_home_path());
+        $home_path = w3_get_home_path();
+        $rewrite_base = ($is_multisite ? $base_path : $home_path);
         $cache_dir = w3_path(W3TC_CACHE_FILE_PGCACHE_DIR);
 
         /**
@@ -612,8 +613,8 @@ class W3_Plugin_PgCache extends W3_Plugin {
         $rules .= W3TC_MARKER_BEGIN_PGCACHE_CORE . "\n";
         $rules .= "<IfModule mod_rewrite.c>\n";
         $rules .= "    RewriteEngine On\n";
-        $rules .= "    RewriteBase " . $home_path . "\n";
-        $rules .= "    RewriteRule ^w3tc_rewrite_test$ " . $home_path . "?w3tc_rewrite_test=1 [L]\n";
+        $rules .= "    RewriteBase " . $rewrite_base . "\n";
+        $rules .= "    RewriteRule ^(.*\\/)?w3tc_rewrite_test$ $1?w3tc_rewrite_test=1 [L]\n";
 
         /**
          * Check for mobile redirect
@@ -773,17 +774,17 @@ class W3_Plugin_PgCache extends W3_Plugin {
             $rules .= "    RewriteCond %{HTTP_USER_AGENT} !(" . implode('|', array_map('w3_preg_quote', $reject_user_agents)) . ") [NC]\n";
         }
 
-        $cache_path = $base_path . ltrim(str_replace(w3_get_site_root(), '', $cache_dir), '/') . $home_path;
+        $cache_path = str_replace(w3_get_document_root(), '', $cache_dir);
 
         /**
          * Check if cache file exists
          */
-        $rules .= "    RewriteCond \"%{DOCUMENT_ROOT}" . $cache_path . "$1/_index%{ENV:W3TC_UA}%{ENV:W3TC_REF}%{ENV:W3TC_SSL}.html%{ENV:W3TC_ENC}\" -f\n";
+        $rules .= "    RewriteCond \"%{DOCUMENT_ROOT}" . $cache_path . "/%{REQUEST_URI}/_index%{ENV:W3TC_UA}%{ENV:W3TC_REF}%{ENV:W3TC_SSL}.html%{ENV:W3TC_ENC}\" -f\n";
 
         /**
          * Make final rewrite
          */
-        $rules .= "    RewriteRule (.*) \"" . $cache_path . "$1/_index%{ENV:W3TC_UA}%{ENV:W3TC_REF}%{ENV:W3TC_SSL}.html%{ENV:W3TC_ENC}\" [L]\n";
+        $rules .= "    RewriteRule .* \"" . $cache_path . "/%{REQUEST_URI}/_index%{ENV:W3TC_UA}%{ENV:W3TC_REF}%{ENV:W3TC_SSL}.html%{ENV:W3TC_ENC}\" [L]\n";
         $rules .= "</IfModule>\n";
         $rules .= W3TC_MARKER_END_PGCACHE_CORE . "\n";
 
@@ -800,7 +801,6 @@ class W3_Plugin_PgCache extends W3_Plugin {
         $is_vhost = w3_is_subdomain_install();
 
         $base_path = w3_get_base_path();
-        $home_path = ($is_multisite ? $base_path : w3_get_home_path());
         $cache_dir = w3_path(W3TC_CACHE_FILE_PGCACHE_DIR);
 
         /**
@@ -858,7 +858,7 @@ class W3_Plugin_PgCache extends W3_Plugin {
          */
         $rules = '';
         $rules .= W3TC_MARKER_BEGIN_PGCACHE_CORE . "\n";
-        $rules .= "rewrite ^" . $home_path . "w3tc_rewrite_test$ " . $home_path . "?w3tc_rewrite_test=1 last;\n";
+        $rules .= "rewrite ^(.*\\/)?w3tc_rewrite_test$ $1?w3tc_rewrite_test=1 last;\n";
 
         /**
          * Check for mobile redirect
@@ -1030,14 +1030,14 @@ class W3_Plugin_PgCache extends W3_Plugin {
             $rules .= "}\n";
         }
 
-        $cache_path = $base_path . ltrim(str_replace(w3_get_site_root(), '', $cache_dir), '/') . $home_path;
+        $cache_path = str_replace(w3_get_document_root(), '', $cache_dir);
 
-        $rules .= "if (!-f \"\$document_root" . $cache_path . "\$request_uri/_index\$w3tc_ua\$w3tc_ref\$w3tc_ssl.html\$w3tc_enc\") {\n";
+        $rules .= "if (!-f \"\$document_root" . $cache_path . "/\$request_uri/_index\$w3tc_ua\$w3tc_ref\$w3tc_ssl.html\$w3tc_enc\") {\n";
         $rules .= "    set \$w3tc_rewrite 0;\n";
         $rules .= "}\n";
 
         $rules .= "if (\$w3tc_rewrite = 1) {\n";
-        $rules .= "    rewrite (.*) \"" . $cache_path . "\$1/_index\$w3tc_ua\$w3tc_ref\$w3tc_ssl.html\$w3tc_enc\" last;\n";
+        $rules .= "    rewrite .* \"" . $cache_path . "/\$request_uri/_index\$w3tc_ua\$w3tc_ref\$w3tc_ssl.html\$w3tc_enc\" last;\n";
         $rules .= "}\n";
         $rules .= W3TC_MARKER_END_PGCACHE_CORE . "\n";
 
@@ -1282,9 +1282,9 @@ class W3_Plugin_PgCache extends W3_Plugin {
         $rules = $this->generate_rules_core();
 
         if ($replace_start !== false) {
-            $data = trim(substr_replace($data, $rules, $replace_start, $replace_length));
+            $data = w3_trim_rules(substr_replace($data, $rules, $replace_start, $replace_length));
         } else {
-            $data = trim($data . $rules);
+            $data = w3_trim_rules($data . $rules);
         }
 
         return @file_put_contents($path, $data);
@@ -1339,9 +1339,9 @@ class W3_Plugin_PgCache extends W3_Plugin {
         $rules = $this->generate_rules_cache();
 
         if ($replace_start !== false) {
-            $data = trim(substr_replace($data, $rules, $replace_start, $replace_length));
+            $data = w3_trim_rules(substr_replace($data, $rules, $replace_start, $replace_length));
         } else {
-            $data = trim($data . $rules);
+            $data = w3_trim_rules($data . $rules);
         }
 
         return @file_put_contents($path, $data);
@@ -1354,7 +1354,7 @@ class W3_Plugin_PgCache extends W3_Plugin {
      * @return string
      */
     function erase_rules_core($data) {
-        $data = w3_erase_text($data, W3TC_MARKER_BEGIN_PGCACHE_CORE, W3TC_MARKER_END_PGCACHE_CORE);
+        $data = w3_erase_rules($data, W3TC_MARKER_BEGIN_PGCACHE_CORE, W3TC_MARKER_END_PGCACHE_CORE);
 
         return $data;
     }
@@ -1366,7 +1366,7 @@ class W3_Plugin_PgCache extends W3_Plugin {
      * @return string
      */
     function erase_rules_cache($data) {
-        $data = w3_erase_text($data, W3TC_MARKER_BEGIN_PGCACHE_CACHE, W3TC_MARKER_END_PGCACHE_CACHE);
+        $data = w3_erase_rules($data, W3TC_MARKER_BEGIN_PGCACHE_CACHE, W3TC_MARKER_END_PGCACHE_CACHE);
 
         return $data;
     }
@@ -1378,7 +1378,7 @@ class W3_Plugin_PgCache extends W3_Plugin {
      * @return string
      */
     function erase_rules_wpsc($data) {
-        $data = w3_erase_text($data, W3TC_MARKER_BEGIN_SUPERCACHE, W3TC_MARKER_END_SUPERCACHE);
+        $data = w3_erase_rules($data, W3TC_MARKER_BEGIN_SUPERCACHE, W3TC_MARKER_END_SUPERCACHE);
 
         return $data;
     }
