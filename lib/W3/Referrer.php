@@ -61,7 +61,7 @@ class W3_Referrer {
         } elseif (isset($_SERVER['HTTP_REFERER'])) {
             $http_referrer = $_SERVER['HTTP_REFERER'];
 
-            setcookie(W3TC_REFERRER_COOKIE_NAME, $http_referrer, 0, w3_get_home_path());
+            setcookie(W3TC_REFERRER_COOKIE_NAME, $http_referrer, 0, w3_get_base_path());
         }
 
         return $http_referrer;

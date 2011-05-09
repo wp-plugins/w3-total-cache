@@ -19,7 +19,7 @@ if (!@is_dir(W3TC_DIR) || !file_exists(W3TC_DIR . '/inc/define.php')) {
 }
 
 require_once W3TC_DIR . '/inc/define.php';
-require_once W3TC_DIR . '/lib/W3/Minify.php';
+require_once W3TC_LIB_W3_DIR . '/Minify.php';
 
 $w3_minify = & W3_Minify::instance();
 $w3_minify->process();

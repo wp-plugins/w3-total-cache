@@ -698,6 +698,21 @@ var W3tc_Popup_Cdn_Rename_Domain = {
     }
 };
 
+function w3tc_ps_expand(expand) {
+    jQuery('.ps-rule').each(function() {
+        var e = jQuery(this).find('.ps-expander');
+        var a = jQuery(this).find('.ps-expand a');
+
+        if (!expand) {
+            e.hide();
+            a.html('+');
+        } else {
+            e.show();
+            a.html('-');
+        }
+    });
+}
+
 jQuery(function() {
     jQuery('.tab').click(function() {
         jQuery('.tab').removeClass('tab-selected');
@@ -712,5 +727,36 @@ jQuery(function() {
 
     jQuery('.cdn_queue_empty').click(function() {
         return confirm('Are you sure you want to empty the queue?');
+    });
+
+    jQuery('.ps-rule').click(function() {
+        var e = jQuery(this).find('.ps-expander');
+        var a = jQuery(this).find('.ps-expand a');
+
+        if (e.is(':visible')) {
+            e.hide();
+            a.html('+');
+        } else {
+            e.show();
+            a.html('-');
+        }
+
+        return false;
+    });
+
+    jQuery('.ps-rule p a,.ps-expander').click(function(event) {
+        event.stopPropagation();
+    });
+
+    jQuery('.ps-expand-all').click(function() {
+        w3tc_ps_expand(1);
+    });
+
+    jQuery('.ps-collapse-all').click(function() {
+        w3tc_ps_expand(0);
+    });
+
+    jQuery('.ps-refresh').click(function() {
+        document.location.href = 'admin.php?page=w3tc_general&w3tc_action=pagespeed_results&force=1';
     });
 });

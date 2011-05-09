@@ -282,6 +282,8 @@ class W3_Config {
 
         'widget.latest.enabled' => 'boolean',
         'widget.latest.items' => 'integer',
+        'widget.pagespeed.enabled' => 'boolean',
+        'widget.pagespeed.key' => 'string',
 
         'notes.wp_content_perms' => 'boolean',
         'notes.php_is_old' => 'boolean',
@@ -795,6 +797,8 @@ class W3_Config {
 
         'widget.latest.enabled' => true,
         'widget.latest.items' => 3,
+        'widget.pagespeed.enabled' => true,
+        'widget.pagespeed.key' => '',
 
         'notes.wp_content_perms' => true,
         'notes.php_is_old' => true,

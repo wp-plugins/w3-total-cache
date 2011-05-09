@@ -1065,7 +1065,6 @@ class W3_Plugin_Minify extends W3_Plugin {
         $cache_dir = str_replace(w3_get_document_root(), '', w3_path(W3TC_CACHE_FILE_MINIFY_DIR));
 
         $engine = $this->_config->get_string('minify.engine');
-        $auto = $this->_config->get_boolean('minify.auto');
         $browsercache = $this->_config->get_integer('browsercache.enabled');
         $compression = ($browsercache && $this->_config->get_boolean('browsercache.cssjs.compression'));
 
@@ -1086,11 +1085,7 @@ class W3_Plugin_Minify extends W3_Plugin {
             $rules .= "    RewriteRule (.*) $1%{ENV:APPEND_EXT} [L]\n";
         }
 
-        if ($auto) {
-            $rules .= "    RewriteRule ^([a-f0-9]+)\\.[0-9]+\\.(css|js)$ index.php?h=$1&t=$2 [L]\n";
-        } else {
-            $rules .= "    RewriteRule ^([a-f0-9]+)\\/(.+)\\.(include(\\-(footer|body))?(-nb)?)\\.[0-9]+\\.(css|js)$ index.php?tt=$1&gg=$2&g=$3&t=$7 [L]\n";
-        }
+        $rules .= "    RewriteRule (.*) index.php?file=$1 [L]\n";
 
         $rules .= "</IfModule>\n";
         $rules .= W3TC_MARKER_END_MINIFY_CORE . "\n";
@@ -1107,17 +1102,15 @@ class W3_Plugin_Minify extends W3_Plugin {
         $is_network = w3_is_network();
 
         $cache_root = w3_path(W3TC_CACHE_FILE_MINIFY_DIR);
-        $cache_dir = rtrim(str_replace(w3_get_document_root(), '', $cache_root), '/');
+        $cache_dir_condition = $cache_dir_rewrite = rtrim(str_replace(w3_get_document_root(), '', $cache_root), '/');
+        $offset = 1;
 
         if ($is_network) {
-            $cache_dir_condition = preg_replace('~/w3tc.*?/~', '/w3tc(.*?)/', $cache_dir, 1);
-            $cache_dir_rewrite = preg_replace('~/w3tc.*?/~', '/w3tc\$1/', $cache_dir, 1);
-        } else {
-            $cache_dir_condition = $cache_dir_rewrite = $cache_dir;
+            $cache_dir_condition = preg_replace('~/w3tc.*?/~', '/w3tc(.*?)/', $cache_dir_condition, 1);
+            $cache_dir_rewrite = preg_replace('~/w3tc.*?/~', '/w3tc\$' . $offset++ . '/', $cache_dir_rewrite, 1);
         }
 
         $engine = $this->_config->get_string('minify.engine');
-        $auto = $this->_config->get_boolean('minify.auto');
         $browsercache = $this->_config->get_integer('browsercache.enabled');
         $compression = ($browsercache && $this->_config->get_boolean('browsercache.cssjs.compression'));
 
@@ -1139,20 +1132,7 @@ class W3_Plugin_Minify extends W3_Plugin {
             $rules .= "}\n";
         }
 
-        if ($is_network) {
-            if ($auto) {
-                $rules .= "rewrite ^" . $cache_dir_condition . "/([a-f0-9]+)\\.[0-9]+\\.(css|js)$ " . $cache_dir_rewrite . "/index.php?h=$2&t=$3 last;\n";
-            } else {
-                $rules .= "rewrite ^" . $cache_dir_condition . "/([a-f0-9]+)\\/(.+)\\.(include(\\-(footer|body))?(-nb)?)\\.[0-9]+\\.(css|js)$ " . $cache_dir_rewrite . "/index.php?tt=$2&gg=$3&g=$4&t=$8 last;\n";
-            }
-        } else {
-            if ($auto) {
-                $rules .= "rewrite ^" . $cache_dir_condition . "/([a-f0-9]+)\\.[0-9]+\\.(css|js)$ " . $cache_dir_rewrite . "/index.php?h=$1&t=$2 last;\n";
-            } else {
-                $rules .= "rewrite ^" . $cache_dir_condition . "/([a-f0-9]+)\\/(.+)\\.(include(\\-(footer|body))?(-nb)?)\\.[0-9]+\\.(css|js)$ " . $cache_dir_rewrite . "/index.php?tt=$1&gg=$2&g=$3&t=$7 last;\n";
-            }
-        }
-
+        $rules .= "rewrite ^" . $cache_dir_condition . "/(.+)$ " . $cache_dir_rewrite . "/index.php?file=$" . $offset . " last;\n";
         $rules .= W3TC_MARKER_END_MINIFY_CORE . "\n";
 
         return $rules;

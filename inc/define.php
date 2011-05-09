@@ -679,12 +679,7 @@ function w3_get_home_url() {
     static $home_url = null;
 
     if ($home_url === null) {
-        if (function_exists('get_option')) {
-            $home_url = get_option('home');
-        } else {
-            $home_url = w3_get_site_url();
-        }
-
+        $home_url = get_option('home');
         $home_url = rtrim($home_url, '/');
     }
 
@@ -726,12 +721,7 @@ function w3_get_site_url() {
     static $site_url = null;
 
     if ($site_url === null) {
-        if (function_exists('get_option')) {
-            $site_url = get_option('siteurl');
-        } else {
-            $site_url = sprintf('http://%s%s', w3_get_host(), w3_get_base_path());
-        }
-
+        $site_url = get_option('siteurl');
         $site_url = rtrim($site_url, '/');
     }
 
@@ -1167,11 +1157,9 @@ function w3_parse_path($path) {
     $path = str_replace(array(
         '%BLOG_ID%',
         '%POST_ID%',
-        '%BLOG_NAME%',
+        '%BLOGNAME%',
         '%HOST%',
         '%DOMAIN%',
-        '%SITE_PATH%',
-        '%HOME_PATH%',
         '%BASE_PATH%'
     ), array(
         (isset($GLOBALS['blog_id']) ? (int) $GLOBALS['blog_id'] : 0),
@@ -1179,8 +1167,6 @@ function w3_parse_path($path) {
         w3_get_blogname(),
         w3_get_host(),
         w3_get_domain(w3_get_host()),
-        trim(w3_get_site_path(), '/'),
-        trim(w3_get_home_path(), '/'),
         trim(w3_get_base_path(), '/')
     ), $path);
 
@@ -1402,7 +1388,7 @@ function w3_http_request($method, $url, $data = '', $auth = '', $check_status = 
         curl_setopt($ch, CURLOPT_FORBID_REUSE, true);
         curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 180);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 60);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
@@ -1461,6 +1447,8 @@ function w3_http_request($method, $url, $data = '', $auth = '', $check_status = 
             if (!$fp) {
                 return false;
             }
+
+            @stream_set_timeout($fp, 60);
 
             $response = '';
             @fputs($fp, $request);
@@ -1580,39 +1568,40 @@ function w3_upload_info() {
 }
 
 /**
- * Redirects to URL
- *
+ * Formats URL
  * @param string $url
- * @param string $params
+ * @param array $params
+ * @param boolean $skip_empty
  * @return string
  */
-function w3_redirect($url = '', $params = array()) {
-    $fragment = '';
-
-    if ($url != '' && ($parse_url = @parse_url($url))) {
+function w3_url_format($url = '', $params = array(), $skip_empty = false, $separator = '&') {
+    if ($url != '') {
+        $parse_url = @parse_url($url);
         $url = '';
 
         if (!empty($parse_url['scheme'])) {
             $url .= $parse_url['scheme'] . '://';
-        }
 
-        if (!empty($parse_url['user'])) {
-            $url .= $parse_url['user'];
+            if (!empty($parse_url['user'])) {
+                $url .= $parse_url['user'];
 
-            if (!empty($parse_url['pass'])) {
-                $url .= ':' . $parse_url['pass'];
+                if (!empty($parse_url['pass'])) {
+                    $url .= ':' . $parse_url['pass'];
+                }
+            }
+
+            if (!empty($parse_url['host'])) {
+                $url .= $parse_url['host'];
+            }
+
+            if (!empty($parse_url['port']) && $parse_url['port'] != 80) {
+                $url .= ':' . (int) $parse_url['port'];
             }
         }
 
-        if (!empty($parse_url['host'])) {
-            $url .= $parse_url['host'];
+        if (!empty($parse_url['path'])) {
+            $url .= $parse_url['path'];
         }
-
-        if (!empty($parse_url['port']) && $parse_url['port'] != 80) {
-            $url .= ':' . (int) $parse_url['port'];
-        }
-
-        $url .= (!empty($parse_url['path']) ? $parse_url['path'] : '/');
 
         if (!empty($parse_url['query'])) {
             $old_params = array();
@@ -1621,27 +1610,73 @@ function w3_redirect($url = '', $params = array()) {
             $params = array_merge($old_params, $params);
         }
 
+        $query = w3_url_query($params);
+
+        if ($query != '') {
+            $url .= '?' . $query;
+        }
+
         if (!empty($parse_url['fragment'])) {
-            $fragment = '#' . $parse_url['fragment'];
+            $url .= '#' . $parse_url['fragment'];
         }
     } else {
-        $parse_url = array();
+        $query = w3_url_query($params, $skip_empty, $separator);
+
+        if ($query != '') {
+            $url = '?' . $query;
+        }
     }
 
-    if (($count = count($params))) {
-        $query = '';
+    return $url;
+}
 
-        foreach ($params as $param => $value) {
-            $count--;
-            $query .= urlencode($param) . (!empty($value) ? '=' . urlencode($value) : '') . ($count ? '&' : '');
+/**
+ * Formats query string
+ *
+ * @param array $params
+ * @param boolean $skip_empty
+ * @param string $separator
+ * @return string
+ */
+function w3_url_query($params = array(), $skip_empty = false, $separator = '&') {
+    $str = '';
+    static $stack = array();
+
+    foreach ((array) $params as $key => $value) {
+        if ($skip_empty === true && empty($value)) {
+            continue;
         }
 
-        $url .= (strpos($url, '?') === false ? '?' : '&') . $query;
+        array_push($stack, $key);
+
+        if (is_array($value)) {
+            if (count($value)) {
+                $str .= ($str != '' ? '&' : '') . w3_url_query($value, $skip_empty, $key);
+            }
+        } else {
+            $name = '';
+            foreach ($stack as $key) {
+                $name .= ($name != '' ? '[' . $key . ']' : $key);
+            }
+            $str .= ($str != '' ? $separator : '') . $name . '=' . rawurlencode($value);
+        }
+
+        array_pop($stack);
     }
 
-    if ($fragment != '') {
-        $url .= $fragment;
-    }
+    return $str;
+}
+
+
+/**
+ * Redirects to URL
+ *
+ * @param string $url
+ * @param string $params
+ * @return string
+ */
+function w3_redirect($url = '', $params = array()) {
+    $url = w3_url_format($url, $params);
 
     @header('Location: ' . $url);
     exit();
@@ -1905,8 +1940,7 @@ if (!function_exists('file_put_contents')) {
  * @param string $rules
  * @return string
  */
-function w3_trim_rules($rules)
-{
+function w3_trim_rules($rules) {
     $rules = trim($rules);
 
     if ($rules != '') {

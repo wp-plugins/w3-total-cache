@@ -48,40 +48,21 @@ class W3_Minify {
             exit();
         }
 
-        /**
-         * Request variables:
-         *
-         * h - files hash
-         * tt - theme name in format template:stylesheet
-         * gg - template
-         * g - location (include, include-footer, etc...)
-         * t - type (js or css)
-         * m - ID
-         */
-        $hash = W3_Request::get_string('h');
-        $theme = W3_Request::get_string('tt');
-        $template = W3_Request::get_string('gg');
-        $location = W3_Request::get_string('g');
-        $type = W3_Request::get_string('t');
+        $file = W3_Request::get_string('file');
 
-        if (!$hash && !$theme && !$template && !$location && !$type) {
-            die('Params (h, tt, gg, g, t) are missing.');
-        } elseif (!$hash) {
-            if (!$theme) {
-                die('Theme param (tt) is missing.');
-            }
+        if (!$file) {
+            die('File param is missing.');
+        }
 
-            if (!$template) {
-                die('Template param (gg) is missing.');
-            }
+        $hash = '';
+        $matches = null;
 
-            if (!$location) {
-                die('Location param (g) is missing.');
-            }
-
-            if (!$type) {
-                die('Type param (t) is missing.');
-            }
+        if (preg_match('~^([a-f0-9]+)\\.[0-9]+\\.(css|js)$~', $file, $matches)) {
+            list(, $hash, $type) = $matches;
+        } elseif (preg_match('~^([a-f0-9]+)\\/(.+)\\.(include(\\-(footer|body))?(-nb)?)\\.[0-9]+\\.(css|js)$~', $file, $matches)) {
+            list(, $theme, $template, $location, , , , $type) = $matches;
+        } else {
+            die('Bad file param format.');
         }
 
         require_once W3TC_LIB_MINIFY_DIR . '/Minify.php';
@@ -118,6 +99,7 @@ class W3_Minify {
         if ($hash) {
             $_GET['f'] = $this->get_files($hash, $type);
         } else {
+            $_GET['g'] = $location;
             $serve_options['minApp']['groups'] = $this->get_groups($theme, $template, $type);
         }
 

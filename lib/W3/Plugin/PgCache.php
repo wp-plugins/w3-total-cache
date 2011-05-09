@@ -548,12 +548,12 @@ class W3_Plugin_PgCache extends W3_Plugin {
      * @return string
      */
     function generate_rules_core_apache() {
-        $is_multisite = w3_is_network();
+        $is_network = w3_is_network();
         $is_vhost = w3_is_subdomain_install();
 
         $base_path = w3_get_base_path();
         $home_path = w3_get_home_path();
-        $rewrite_base = ($is_multisite ? $base_path : $home_path);
+        $rewrite_base = ($is_network ? $base_path : $home_path);
         $cache_dir = w3_path(W3TC_CACHE_FILE_PGCACHE_DIR);
 
         /**
@@ -655,7 +655,7 @@ class W3_Plugin_PgCache extends W3_Plugin {
         /**
          * Network mode rules
          */
-        if ($is_multisite) {
+        if ($is_network) {
             /**
              * Detect domain
              */
@@ -797,7 +797,7 @@ class W3_Plugin_PgCache extends W3_Plugin {
      * @return string
      */
     function generate_rules_core_nginx() {
-        $is_multisite = w3_is_network();
+        $is_network = w3_is_network();
         $is_vhost = w3_is_subdomain_install();
 
         $base_path = w3_get_base_path();
@@ -946,7 +946,7 @@ class W3_Plugin_PgCache extends W3_Plugin {
         /**
          * Network mode rules
          */
-        if ($is_multisite) {
+        if ($is_network) {
             /**
              * Detect domain
              */

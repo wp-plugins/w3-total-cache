@@ -141,7 +141,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
             'in_plugin_update_message'
         ));
 
-        if ($this->_config->get_boolean('widget.latest.enabled')) {
+        if ($this->_config->get_boolean('widget.latest.enabled') || $this->_config->get_boolean('widget.pagespeed.enabled')) {
             add_action('wp_dashboard_setup', array(
                 &$this,
                 'wp_dashboard_setup'
@@ -228,35 +228,35 @@ class W3_Plugin_TotalCache extends W3_Plugin {
         /**
          * Run DbCache plugin
          */
-        require_once W3TC_DIR . '/lib/W3/Plugin/DbCache.php';
+        require_once W3TC_LIB_W3_DIR . '/Plugin/DbCache.php';
         $w3_plugin_dbcache = & W3_Plugin_DbCache::instance();
         $w3_plugin_dbcache->run();
 
         /**
          * Run ObjectCache plugin
          */
-        require_once W3TC_DIR . '/lib/W3/Plugin/ObjectCache.php';
+        require_once W3TC_LIB_W3_DIR . '/Plugin/ObjectCache.php';
         $w3_plugin_objectcache = & W3_Plugin_ObjectCache::instance();
         $w3_plugin_objectcache->run();
 
         /**
          * Run PgCache plugin
          */
-        require_once W3TC_DIR . '/lib/W3/Plugin/PgCache.php';
+        require_once W3TC_LIB_W3_DIR . '/Plugin/PgCache.php';
         $w3_plugin_pgcache = & W3_Plugin_PgCache::instance();
         $w3_plugin_pgcache->run();
 
         /**
          * Run CDN plugin
          */
-        require_once W3TC_DIR . '/lib/W3/Plugin/Cdn.php';
+        require_once W3TC_LIB_W3_DIR . '/Plugin/Cdn.php';
         $w3_plugin_cdn = & W3_Plugin_Cdn::instance();
         $w3_plugin_cdn->run();
 
         /**
          * Run BrowserCache plugin
          */
-        require_once W3TC_DIR . '/lib/W3/Plugin/BrowserCache.php';
+        require_once W3TC_LIB_W3_DIR . '/Plugin/BrowserCache.php';
         $w3_plugin_browsercache = & W3_Plugin_BrowserCache::instance();
         $w3_plugin_browsercache->run();
 
@@ -264,7 +264,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
          * Run Minify plugin
          */
         if (W3TC_PHP5) {
-            require_once W3TC_DIR . '/lib/W3/Plugin/Minify.php';
+            require_once W3TC_LIB_W3_DIR . '/Plugin/Minify.php';
             $w3_plugin_minify = & W3_Plugin_Minify::instance();
             $w3_plugin_minify->run();
         }
@@ -855,13 +855,28 @@ class W3_Plugin_TotalCache extends W3_Plugin {
      * Dashboard setup action
      */
     function wp_dashboard_setup() {
-        wp_add_dashboard_widget('w3tc_latest', 'The Latest from W3 EDGE', array(
-            &$this,
-            'widget_latest'
-        ), array(
-            &$this,
-            'widget_latest_control'
-        ));
+        wp_enqueue_style('w3tc-widget');
+        wp_enqueue_script('w3tc-widget');
+
+        if ($this->_config->get_boolean('widget.latest.enabled')) {
+            wp_add_dashboard_widget('w3tc_latest', 'The Latest from W3 EDGE', array(
+                &$this,
+                'widget_latest'
+            ), array(
+                &$this,
+                'widget_latest_control'
+            ));
+        }
+
+        if ($this->_config->get_boolean('widget.pagespeed.enabled')) {
+            wp_add_dashboard_widget('w3tc_pagespeed', 'W3 Total Cache: Google Page Speed Report', array(
+                &$this,
+                'widget_pagespeed'
+            ), array(
+                &$this,
+                'widget_pagespeed_control'
+            ));
+        }
     }
 
     /**
@@ -907,10 +922,45 @@ class W3_Plugin_TotalCache extends W3_Plugin {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             require_once W3TC_LIB_W3_DIR . '/Request.php';
 
-            $this->_config->set('widget.latest.items', W3_Request::get_integer('w3tc_latest_items', 3));
+            $this->_config->set('widget.latest.items', W3_Request::get_integer('w3tc_widget_latest_items', 3));
             $this->_config->save();
         } else {
             include W3TC_DIR . '/inc/widget/latest_control.phtml';
+        }
+    }
+
+    /**
+     * PageSpeed widget
+     *
+     * @return void
+     */
+    function widget_pagespeed() {
+        require_once W3TC_LIB_W3_DIR . '/PageSpeed.php';
+        require_once W3TC_LIB_W3_DIR . '/Request.php';
+
+        $key = $this->_config->get_string('widget.pagespeed.key');
+        $force = W3_Request::get_boolean('w3tc_widget_pagespeed_force');
+        $results = null;
+
+        if ($key) {
+            $w3_pagespeed = new W3_PageSpeed();
+            $results = $w3_pagespeed->analyze(w3_get_home_url(), $force);
+        }
+
+        include W3TC_DIR . '/inc/widget/pagespeed.phtml';
+    }
+
+    /**
+     * Latest widget control
+     */
+    function widget_pagespeed_control($widget_id, $form_inputs = array()) {
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            require_once W3TC_LIB_W3_DIR . '/Request.php';
+
+            $this->_config->set('widget.pagespeed.key', W3_Request::get_string('w3tc_widget_pagespeed_key'));
+            $this->_config->save();
+        } else {
+            include W3TC_DIR . '/inc/widget/pagespeed_control.phtml';
         }
     }
 
@@ -920,9 +970,11 @@ class W3_Plugin_TotalCache extends W3_Plugin {
     function admin_init() {
         wp_register_style('w3tc-options', plugins_url('inc/css/options.css', W3TC_FILE));
         wp_register_style('w3tc-lightbox', plugins_url('inc/css/lightbox.css', W3TC_FILE));
+        wp_register_style('w3tc-widget', plugins_url('inc/css/widget.css', W3TC_FILE));
 
         wp_register_script('w3tc-options', plugins_url('inc/js/options.js', W3TC_FILE));
         wp_register_script('w3tc-lightbox', plugins_url('inc/js/lightbox.js', W3TC_FILE));
+        wp_register_script('w3tc-widget', plugins_url('inc/js/widget.js', W3TC_FILE));
     }
 
     /**
@@ -1103,7 +1155,8 @@ class W3_Plugin_TotalCache extends W3_Plugin {
      */
     function admin_print_styles() {
         wp_enqueue_style('w3tc-options');
-        wp_enqueue_style('w3tc-lightbox');
+
+        ('w3tc-lightbox');
     }
 
     /**
@@ -4493,7 +4546,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
      */
     function pgcache_purge_post() {
         require_once W3TC_LIB_W3_DIR . '/Request.php';
-        require_once W3TC_DIR . '/lib/W3/PgCache.php';
+        require_once W3TC_LIB_W3_DIR . '/PgCache.php';
 
         $post_id = W3_Request::get_integer('post_id');
 
@@ -4515,7 +4568,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
      */
     function pgcache_purge_page() {
         require_once W3TC_LIB_W3_DIR . '/Request.php';
-        require_once W3TC_DIR . '/lib/W3/PgCache.php';
+        require_once W3TC_LIB_W3_DIR . '/PgCache.php';
 
         $post_id = W3_Request::get_integer('post_id');
 
@@ -4817,7 +4870,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
      * Flush page cache
      */
     function flush_pgcache() {
-        require_once W3TC_DIR . '/lib/W3/PgCache.php';
+        require_once W3TC_LIB_W3_DIR . '/PgCache.php';
         $w3_pgcache = & W3_PgCache::instance();
         $w3_pgcache->flush();
     }
@@ -4826,7 +4879,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
      * Flush page cache
      */
     function flush_dbcache() {
-        require_once W3TC_DIR . '/lib/W3/Db.php';
+        require_once W3TC_LIB_W3_DIR . '/Db.php';
         $w3_db = & W3_Db::instance();
         $w3_db->flush_cache();
     }
@@ -4835,7 +4888,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
      * Flush page cache
      */
     function flush_objectcache() {
-        require_once W3TC_DIR . '/lib/W3/ObjectCache.php';
+        require_once W3TC_LIB_W3_DIR . '/ObjectCache.php';
         $w3_objectcache = & W3_ObjectCache::instance();
         $w3_objectcache->flush();
     }
@@ -4845,7 +4898,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
      */
     function flush_minify() {
         if (W3TC_PHP5) {
-            require_once W3TC_DIR . '/lib/W3/Minify.php';
+            require_once W3TC_LIB_W3_DIR . '/Minify.php';
             $w3_minify = & W3_Minify::instance();
             $w3_minify->flush();
         }
@@ -5762,7 +5815,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
          * Replace CDN hosts to local host
          */
         if ($this->_config->get_boolean('cdn.enabled')) {
-            require_once W3TC_DIR . '/lib/W3/Plugin/Cdn.php';
+            require_once W3TC_LIB_W3_DIR . '/Plugin/Cdn.php';
 
             $w3_plugin_cdn = & W3_Plugin_Cdn::instance();
             $cdn = & $w3_plugin_cdn->get_cdn();
@@ -6125,6 +6178,30 @@ class W3_Plugin_TotalCache extends W3_Plugin {
         );
 
         echo json_encode($return);
+    }
+
+    /**
+     * Page Speed results popup
+     *
+     * @return void
+     */
+    function pagespeed_results() {
+        require_once W3TC_LIB_W3_DIR . '/Request.php';
+        require_once W3TC_LIB_W3_DIR . '/PageSpeed.php';
+
+        $force = W3_Request::get_boolean('force');
+        $title = 'Google Page Speed';
+
+        $w3_pagespeed = new W3_PageSpeed();
+        $results = $w3_pagespeed->analyze(w3_get_home_url(), $force);
+
+        if ($force) {
+            $this->redirect(array(
+                'w3tc_action' => 'pagespeed_results'
+            ));
+        }
+
+        include W3TC_DIR . '/inc/popup/pagespeed_results.phtml';
     }
 
     /**

@@ -18,7 +18,7 @@ if (!@is_dir(W3TC_DIR) || !file_exists(W3TC_DIR . '/inc/define.php')) {
 } else {
 
     require_once W3TC_DIR . '/inc/define.php';
-    require_once W3TC_DIR . '/lib/W3/Db.php';
+    require_once W3TC_LIB_W3_DIR . '/Db.php';
 
     $GLOBALS['wpdb'] = & W3_Db::instance();
 }

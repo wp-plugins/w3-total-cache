@@ -247,7 +247,7 @@
         <?php echo $this->postbox_header('Network Performance &amp; Security powered by CloudFlare'); ?>
         <p>
             CloudFlare protects and accelerates websites. <a href="https://www.cloudflare.com/sign-up.html?affiliate=w3edge&amp;seed_domain=<?php echo w3_get_host(); ?>&amp;email=<?php echo htmlspecialchars($cloudflare_signup_email); ?>&amp;username=<?php echo htmlspecialchars($cloudflare_signup_user); ?>" target="_blank">Sign up now for free</a> to get started,
-            or if you have an account simply log in to obtain your API key from the <a href="https://www.cloudflare.com/my-account.html">Account Page</a> to enter it below.
+            or if you have an account simply log in to obtain your <acronym title="Application Programming Interface">API</acronym> key from the <a href="https://www.cloudflare.com/my-account.html">Account Page</a> to enter it below.
             Contact the CloudFlare <a href="http://www.cloudflare.com/help.html" target="_blank">support team</a> with any questions.
         </p>
 
@@ -473,9 +473,24 @@
             <tr>
                 <th colspan="2">
                     <input type="hidden" name="widget.latest.enabled" value="0" />
-                    <label><input type="checkbox" name="widget.latest.enabled" value="1"<?php checked($this->_config->get_boolean('widget.latest.enabled'), true); ?> /> Enable dashboard news widget</label>
+                    <label><input type="checkbox" name="widget.latest.enabled" value="1"<?php checked($this->_config->get_boolean('widget.latest.enabled'), true); ?> /> Enable news dashboard widget</label>
                     <br /><span class="description">Display latest tweets and support tips on the WordPress dashboard.</span>
                 </th>
+            </tr>
+            <tr>
+                <th colspan="2">
+                    <input type="hidden" name="widget.pagespeed.enabled" value="0" />
+                    <label><input type="checkbox" name="widget.pagespeed.enabled" value="1"<?php checked($this->_config->get_boolean('widget.latest.enabled'), true); ?> />  Enable Google Page Speed dashboard widget</label>
+                    <br /><span class="description">Display Google Page Speed results on the WordPress dashboard.</span>
+                </th>
+            </tr>
+            <tr>
+                <th><label for="widget_pagespeed_key">Page Speed <acronym title="Application Programming Interface">API</acronym> Key:</label></th>
+                <td>
+                    <input id="widget_pagespeed_key" type="text" name="widget.pagespeed.key" value="<?php echo $this->_config->get_string('widget.pagespeed.key'); ?>" size="60" /><br />
+                    <span class="description">To acquire an <acronym title="Application Programming Interface">API</acronym> key, visit the <a href="https://code.google.com/apis/console" target="_blank"><acronym title="Application Programming Interface">API</acronym>s Console</a>. Go to the Project Home tab, activate the Page Speed Online <acronym title="Application Programming Interface">API</acronym>, and accept the Terms of Service.
+                    Then go to the <acronym title="Application Programming Interface">API</acronym> Access tab. The <acronym title="Application Programming Interface">API</acronym> key is in the Simple <acronym title="Application Programming Interface">API</acronym> Access section.</span>
+                </td>
             </tr>
         </table>
 
