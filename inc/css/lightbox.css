@@ -1,0 +1,85 @@
+#overlay {
+    background: #666;
+}
+
+.lightbox {
+    position: absolute;
+    background: #fdfdfd;
+    padding: 10px 20px;
+    border: 1px solid #bbb;
+    border-radius: 11px;
+    -webkit-border-radius: 11px;
+    -moz-border-radius: 11px;
+}
+
+.lightbox-close {
+    cursor: pointer;
+    position: absolute;
+    text-decoration: underline;
+    top: 25px;
+    right: 20px;
+}
+
+.lightbox-loader {
+    background-image: url(../images/loader.gif);
+    background-position: center center;
+    background-repeat: no-repeat;
+}
+
+#recom_container {
+    overflow: auto;
+    height: 475px;
+}
+
+.minify-files li {
+    padding: 2px;
+    cursor: ns-resize;
+    list-style: none;
+}
+
+.minify-files li:hover {
+    background: #f9f9f9;
+}
+
+.minify-files th, .minify-files td {
+    line-height: normal;
+    border: 0;
+    padding: 0;
+    margin: 0;
+}
+
+.minify-files th {
+    width: auto;
+    color: #aaa !important;
+    font-size: 10px;
+    font-weight: normal;
+    text-align: left;
+}
+
+.minify-files td {
+    font-size: 13px;
+}
+
+th.minify-files-add, td.minify-files-add {
+    width: 40px;
+    text-align: center;
+}
+
+.minify-files-exists input, .minify-files-exists select {
+    color: red;
+}
+
+#w3tc-self-test {
+    height: 490px;
+    overflow: auto;
+}
+
+#w3tc-self-test ul {
+    list-style: none;
+}
+
+.w3tc-self-test-hint {
+    font-size: 0.8em;
+    font-style: italic;
+    color: #999;
+}
