@@ -422,7 +422,7 @@ class W3_Config {
         'pgcache.prime.sitemap' => '',
 
         'minify.enabled' => false,
-        'minify.auto' => true,
+        'minify.auto' => false,
         'minify.debug' => false,
         'minify.engine' => 'file',
         'minify.file.gc' => 86400,
@@ -1327,6 +1327,7 @@ class W3_Config {
     function set_defaults() {
         $this->set('pgcache.enabled', true);
         $this->set('minify.enabled', true);
+        $this->set('minify.auto', true);
         $this->set('browsercache.enabled', true);
     }
 
