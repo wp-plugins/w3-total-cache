@@ -1375,7 +1375,7 @@ class W3_Plugin_Cdn extends W3_Plugin {
     function get_files_minify() {
         $files = array();
 
-        if (W3TC_PHP5 && $this->_config->get_boolean('minify.rewrite')) {
+        if (W3TC_PHP5 && $this->_config->get_boolean('minify.rewrite') && (!$this->_config->get_boolean('minify.auto') || w3_is_cdn_mirror($this->_config->get_string('cdn.engine')))) {
             require_once W3TC_LIB_W3_DIR . '/Plugin/Minify.php';
             $minify = & W3_Plugin_Minify::instance();
 

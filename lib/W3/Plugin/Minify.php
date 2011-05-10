@@ -740,12 +740,12 @@ class W3_Plugin_Minify extends W3_Plugin {
 
         $id = $w3_minify->get_id_group($theme, $template, $location, $type);
 
-        $home_url_ssl = w3_get_home_url_ssl();
+        $site_url_ssl = w3_get_site_url_ssl();
 
         if ($this->_config->get_boolean('minify.rewrite')) {
-            $url = sprintf('%s/%s/%s/%s.%s.%d.%s', $home_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $theme, $template, $location, $id, $type);
+            $url = sprintf('%s/%s/%s/%s.%s.%d.%s', $site_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $theme, $template, $location, $id, $type);
         } else {
-            $url = sprintf('%s/%s/?tt=%s&gg=%s&g=%s&t=%s&m=%d', $home_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $theme, $template, $location, $type, $id);
+            $url = sprintf('%s/%s/?tt=%s&gg=%s&g=%s&t=%s&m=%d', $site_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $theme, $template, $location, $type, $id);
         }
 
         return $url;
@@ -766,12 +766,12 @@ class W3_Plugin_Minify extends W3_Plugin {
         $hash = $w3_minify->get_custom_files_hash($files);
         $id = $w3_minify->get_id_custom($hash, $type);
 
-        $home_url_ssl = w3_get_home_url_ssl();
+        $site_url_ssl = w3_get_site_url_ssl();
 
         if ($this->_config->get_boolean('minify.rewrite')) {
-            $url = sprintf('%s/%s/%s.%d.%s', $home_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $hash, $id, $type);
+            $url = sprintf('%s/%s/%s.%d.%s', $site_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $hash, $id, $type);
         } else {
-            $url = sprintf('%s/%s/?h=%s&t=%s&m=%s', $home_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $hash, $type, $id);
+            $url = sprintf('%s/%s/?h=%s&t=%s&m=%s', $site_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $hash, $type, $id);
         }
 
         return $url;

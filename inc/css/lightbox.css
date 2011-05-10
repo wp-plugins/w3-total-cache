@@ -31,35 +31,6 @@
     height: 475px;
 }
 
-.minify-files li {
-    padding: 2px;
-    cursor: ns-resize;
-    list-style: none;
-}
-
-.minify-files li:hover {
-    background: #f9f9f9;
-}
-
-.minify-files th, .minify-files td {
-    line-height: normal;
-    border: 0;
-    padding: 0;
-    margin: 0;
-}
-
-.minify-files th {
-    width: auto;
-    color: #aaa !important;
-    font-size: 10px;
-    font-weight: normal;
-    text-align: left;
-}
-
-.minify-files td {
-    font-size: 13px;
-}
-
 th.minify-files-add, td.minify-files-add {
     width: 40px;
     text-align: center;

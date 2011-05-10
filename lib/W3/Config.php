@@ -1007,7 +1007,7 @@ class W3_Config {
              * Disable CDN minify when PHP5 is not installed or minify is disabled
              */
             case 'cdn.minify.enable':
-                if (!W3TC_PHP5 || !$this->get_boolean('minify.rewrite')) {
+                if (!W3TC_PHP5 || !$this->get_boolean('minify.rewrite') || ($this->get_boolean('minify.auto') && !w3_is_cdn_mirror($this->get_string('cdn.engine')))) {
                     return false;
                 }
                 break;

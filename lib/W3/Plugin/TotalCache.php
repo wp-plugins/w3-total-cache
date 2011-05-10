@@ -1155,8 +1155,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
      */
     function admin_print_styles() {
         wp_enqueue_style('w3tc-options');
-
-        ('w3tc-lightbox');
+        wp_enqueue_style('w3tc-lightbox');
     }
 
     /**
@@ -1382,7 +1381,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
              * Show notification if upload queue is not empty
              */
             if (!$this->is_queue_empty()) {
-                $errors[] = 'The <input id="cdn_queue" class="button" type="button" value="unsuccessful transfer queue" /> has unresolved errors. Empty the queue to restore normal operation.';
+                $errors[] = sprintf('The %s has unresolved errors. Empty the queue to restore normal operation.', $this->button_popup('unsuccessful transfer queue', 'cdn_queue'));
             }
         }
 
@@ -2275,7 +2274,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
         $cdn_engine = $this->_config->get_string('cdn.engine');
         $cdn_mirror = w3_is_cdn_mirror($cdn_engine);
 
-        $minify_enabled = $this->_config->get_boolean('minify.enabled');
+        $minify_enabled = (W3TC_PHP5 && $this->_config->get_boolean('minify.enabled') && $this->_config->get_boolean('minify.rewrite') && (!$this->_config->get_boolean('minify.auto') || w3_is_cdn_mirror($this->_config->get_string('cdn.engine'))));
 
         $cookie_domain = $this->get_cookie_domain();
         $set_cookie_domain = $this->is_cookie_domain_enabled();
@@ -4732,9 +4731,16 @@ class W3_Plugin_TotalCache extends W3_Plugin {
 
         if ($result === false) {
             $data = w3_http_get($url);
-            $result = (int) ($data == 'OK');
 
-            set_transient($key, $result, 30);
+            if ($data !== false) {
+                $result = ($data == 'OK');
+            } else {
+                $result = true;
+            }
+
+            if ($result) {
+                set_transient($key, $result, 30);
+            }
         }
 
         return $result;

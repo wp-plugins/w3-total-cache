@@ -729,6 +729,19 @@ function w3_get_site_url() {
 }
 
 /**
+ * Returns SSL site URL
+ *
+ * @return string
+ */
+function w3_get_site_url_ssl() {
+    $site_url = w3_get_site_url();
+    $ssl = w3_get_url_ssl($site_url);
+
+    return $ssl;
+
+}
+
+/**
  * Returns absolute path to document root
  *
  * No trailing slash!

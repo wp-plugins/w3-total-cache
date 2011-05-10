@@ -234,6 +234,34 @@
     background: none;
 }
 
+.minify-files {
+    margin-bottom: 1em;
+}
+
+.minify-files li {
+    padding: 2px;
+    list-style: none;
+    background: #f9f9f9;
+    cursor: ns-resize;
+    border-radius: 8px;
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    line-height: 100%;
+}
+
+.minify-files li:hover {
+    background: #f3f3f3;
+}
+
+.minify-files th,
+.minify-files td {
+    width: auto;
+    line-height: 100%;
+    padding: 3px 5px;
+    font-weight: normal;
+    text-align: left;
+}
+
 #support_loading {
     height: 32px;
     background: url(../images/loader.gif) left center no-repeat;

@@ -3,9 +3,9 @@ Contributors: fredericktownes
 Tags: user experience, cache, caching, page cache, css cache, js cache, db cache, disk cache, disk caching, database cache, http compression, gzip, deflate, minify, cdn, content delivery network, media library, performance, speed, multiple hosts, css, merge, combine, unobtrusive javascript, compress, optimize, optimizer, javascript, js, cascading style sheet, plugin, yslow, yui, google, google rank, google page speed, mod_pagespeed, s3, cloudfront, aws, amazon web services, cloud files, rackspace, cotendo, max cdn, limelight, cloudflare, microsoft, microsoft azure, iis, nginx, apache, varnish, xcache, apc, eacclerator, wincache, mysql, w3 total cache, batcache, wp cache, wp super cache, buddypress
 Requires at least: 2.8
 Tested up to: 3.2
-Stable tag: 0.9.2
+Stable tag: 0.9.2.1
 
-Improve WordPress' performance and user experience of your site via caching: browser, page, object, database, minify and content delivery network.
+Improve site performance and user experience via caching: browser, page, object, database, minify and content delivery network support.
 
 == Description ==
 
@@ -13,7 +13,7 @@ The **most complete** WordPress performance framework.
 
 Recommended by web hosts like: MediaTemple, Host Gator, Page.ly and WP Engine and countless more.
 
-Trusted by countless sites like: mattcutts.com, mashable.com, smashingmagazine.com, makeuseof.com, yoast.com, kiss925.com, pearsonified.com, lockergnome.com, johnchow.com, ilovetypography.com, webdesignerdepot.com, css-tricks.com and thousands of others
+Trusted by countless sites like: mattcutts.com, mashable.com, smashingmagazine.com, makeuseof.com, yoast.com, kiss925.com, pearsonified.com, lockergnome.com, johnchow.com, ilovetypography.com, webdesignerdepot.com, css-tricks.com and tens of thousands of others.
 
 W3 Total Cache improves the user experience of your site by improving your server performance, caching every aspect of your site, reducing the download times and providing transparent content delivery network (CDN) integration.
 
@@ -255,6 +255,7 @@ Install the plugin to read the full FAQ.
 
 **April 2011:**
 
+* [Setting Up and Optimizing W3 Total Cache](http://tentblogger.com/w3-total-cache/), John Saddington
 * [How To Configure The Various W3TC Plugin Settings For Your WordPress Blog](http://www.makeuseof.com/tag/configure-w3tc-plugin-wordpress/), James Bruce
 * [Speeding Up Your WordPress Website: 11 Ways to Improve Your Load Time](http://wpmu.org/speeding-up-your-wordpress-website-11-ways-to-improve-your-load-time/), Siobhan Ambrose
 * [Recipe for Baked WordPress](http://carpeaqua.com/2011/04/05/recipe-for-baked-wordpress/), Justin Williams
@@ -437,6 +438,13 @@ It's quite difficult to recall all of the innovators that have shared their thou
 Please reach out to all of these people and support their projects if you're so inclined.
 
 == Changelog ==
+
+= 0.9.2.1 =
+* Fixed bug with existing installation upgrades: set minify to manual mode by default
+* Fixed bug with unsuccessful transfer queue button
+* Fixed bug with background in lightbox
+* Fixed bug with handling of local http requests being blocked on some hosts
+* Disabled CDN for minify files when auto mode is selected and the CDN method is origin push
 
 = 0.9.2 =
 * Added support for nginx web server
