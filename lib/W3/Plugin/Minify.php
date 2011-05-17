@@ -1085,7 +1085,7 @@ class W3_Plugin_Minify extends W3_Plugin {
             $rules .= "    RewriteRule (.*) $1%{ENV:APPEND_EXT} [L]\n";
         }
 
-        $rules .= "    RewriteRule (.*) index.php?file=$1 [L]\n";
+        $rules .= "    RewriteRule ^(.+\\.(css|js))$ index.php?file=$1 [L]\n";
 
         $rules .= "</IfModule>\n";
         $rules .= W3TC_MARKER_END_MINIFY_CORE . "\n";
@@ -1132,7 +1132,7 @@ class W3_Plugin_Minify extends W3_Plugin {
             $rules .= "}\n";
         }
 
-        $rules .= "rewrite ^" . $cache_dir_condition . "/(.+)$ " . $cache_dir_rewrite . "/index.php?file=$" . $offset . " last;\n";
+        $rules .= "rewrite ^" . $cache_dir_condition . "/(.+\\.(css|js))$ " . $cache_dir_rewrite . "/index.php?file=$" . $offset . " last;\n";
         $rules .= W3TC_MARKER_END_MINIFY_CORE . "\n";
 
         return $rules;
