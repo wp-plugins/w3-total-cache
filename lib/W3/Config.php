@@ -303,7 +303,6 @@ class W3_Config {
         'notes.no_zlib' => 'boolean',
         'notes.zlib_output_compression' => 'boolean',
         'notes.no_permalink_rules' => 'boolean',
-        'notes.no_trailing_slash' => 'boolean',
         'notes.browsercache_rules_cache' => 'boolean',
         'notes.browsercache_rules_no404wp' => 'boolean',
         'notes.minify_error' => 'boolean',
@@ -357,15 +356,19 @@ class W3_Config {
             'users',
             'userlogins',
             'usermeta',
+            'user_meta',
+            'site-transient',
             'site-options',
             'site-lookup',
             'blog-lookup',
             'blog-details',
-            'rss'
+            'rss',
+            'global-posts'
         ),
         'objectcache.groups.nonpersistent' => array(
             'comment',
-            'counts'
+            'counts',
+            'plugins'
         ),
         'objectcache.lifetime' => 180,
 
@@ -818,7 +821,6 @@ class W3_Config {
         'notes.no_zlib' => true,
         'notes.zlib_output_compression' => true,
         'notes.no_permalink_rules' => true,
-        'notes.no_trailing_slash' => true,
         'notes.browsercache_rules_cache' => true,
         'notes.browsercache_rules_no404wp' => true,
         'notes.minify_error' => false,

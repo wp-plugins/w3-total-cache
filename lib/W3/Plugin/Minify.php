@@ -620,16 +620,16 @@ class W3_Plugin_Minify extends W3_Plugin {
         static $non_blocking_function = false;
 
         if ($blocking) {
-            return '<script src="' . str_replace('&', '&amp;', $url) . '"></script>';
+            return '<script type="text/javascript" src="' . str_replace('&', '&amp;', $url) . '"></script>';
         } else {
             $script = '';
 
             if (!$non_blocking_function) {
                 $non_blocking_function = true;
-                $script = "<script>function w3tc_load_js(u){var d=document,p=d.getElementsByTagName('HEAD')[0],c=d.createElement('script');c.type='text/javascript';c.src=u;p.appendChild(c);}</script>";
+                $script = "<script type=\"text/javascript\">function w3tc_load_js(u){var d=document,p=d.getElementsByTagName('HEAD')[0],c=d.createElement('script');c.type='text/javascript';c.src=u;p.appendChild(c);}</script>";
             }
 
-            $script .= "<script>w3tc_load_js('" . $url . "');</script>";
+            $script .= "<script type=\"text/javascript\">w3tc_load_js('" . $url . "');</script>";
 
             return $script;
         }
@@ -832,7 +832,7 @@ class W3_Plugin_Minify extends W3_Plugin {
             $debug_info .= "\r\nReplaced CSS files:\r\n";
 
             foreach ($this->replaced_styles as $index => $file) {
-                $debug_info .= sprintf("%d. %s\r\n", $index + 1, $file);
+                $debug_info .= sprintf("%d. %s\r\n", $index + 1, w3_escape_comment($file));
             }
         }
 
@@ -840,7 +840,7 @@ class W3_Plugin_Minify extends W3_Plugin {
             $debug_info .= "\r\nReplaced JavaScript files:\r\n";
 
             foreach ($this->replaced_scripts as $index => $file) {
-                $debug_info .= sprintf("%d. %s\r\n", $index + 1, $file);
+                $debug_info .= sprintf("%d. %s\r\n", $index + 1, w3_escape_comment($file));
             }
         }
 

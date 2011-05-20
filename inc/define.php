@@ -2054,6 +2054,20 @@ function w3_extract_css($content) {
 }
 
 /**
+ * Escapes HTML comment
+ *
+ * @param string $comment
+ * @return mixed
+ */
+function w3_escape_comment($comment) {
+    while (strstr($comment, '--') !== false) {
+        $comment = str_replace('--', '- -', $comment);
+    }
+
+    return $comment;
+}
+
+/**
  * Loads plugins
  *
  * @return void

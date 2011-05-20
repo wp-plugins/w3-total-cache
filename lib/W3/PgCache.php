@@ -1349,7 +1349,7 @@ class W3_PgCache {
             $debug_info .= "Header info:\r\n";
 
             foreach ($headers as $header_name => $header_value) {
-                $debug_info .= sprintf("%s%s\r\n", str_pad($header_name . ': ', 20), $header_value);
+                $debug_info .= sprintf("%s%s\r\n", str_pad($header_name . ': ', 20), w3_escape_comment($header_value));
             }
         }
 
