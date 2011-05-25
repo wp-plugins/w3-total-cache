@@ -148,7 +148,7 @@ class W3_Plugin_PgCache extends W3_Plugin {
                 w3_writable_error(W3TC_ADDIN_FILE_ADVANCED_CACHE);
             }
 
-            if (!$this->enable_wp_cache()) {
+            if ((!defined('WP_CACHE') || !WP_CACHE) && !$this->enable_wp_cache()) {
                 $activate_url = wp_nonce_url('plugins.php?action=activate&plugin=' . W3TC_FILE, 'activate-plugin_' . W3TC_FILE);
                 $reactivate_button = sprintf('<input type="button" value="re-activate plugin" onclick="top.location.href = \'%s\'" />', addslashes($activate_url));
                 $error = sprintf('<strong>%swp-config.php</strong> could not be written, please edit config and add:<br /><strong style="color:#f00;">define(\'WP_CACHE\', true);</strong> before <strong style="color:#f00;">require_once(ABSPATH . \'wp-settings.php\');</strong><br />then %s.', ABSPATH, $reactivate_button);

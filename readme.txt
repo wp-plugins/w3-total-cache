@@ -442,6 +442,14 @@ Please reach out to all of these people and support their projects if you're so 
 
 == Changelog ==
 
+= 0.9.2.2 =
+* Fixed bug with minify directives causing minify caching to fail
+* Fixed bug with HTTP compression when using CloudFlare
+* Fixed bug with HTML validation with JavaScript embed tags
+* Fixed bug with fancy permalinks, sites with or without trailing slashes can now cache pages using disk enhanced
+* Fixed bug with appending WP_CACHE define into wp-config.php for some users
+* Fixed bug with path to JSON.php
+
 = 0.9.2.1 =
 * Fixed bug with existing installation upgrades: set minify to manual mode by default
 * Fixed bug with unsuccessful transfer queue button

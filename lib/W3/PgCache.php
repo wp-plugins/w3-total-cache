@@ -517,7 +517,7 @@ class W3_PgCache {
             if ($this->_config->get_boolean('pgcache.purge.author') && $post) {
                 $posts_number = count_user_posts($post->post_author);
                 $posts_per_page = get_option('posts_per_page');
-                $posts_pages_number = ceil($posts_number / $posts_per_page);
+                $posts_pages_number = @ceil($posts_number / $posts_per_page);
 
                 $author_link = get_author_link(false, $post->post_author);
                 $author_uri = str_replace($domain_url, '', $author_link);
@@ -561,7 +561,7 @@ class W3_PgCache {
 
                 $posts_per_page = get_option('posts_per_page');
                 $posts_number = $this->_get_archive_posts_count($post_year, $post_month, $post_day);
-                $posts_pages_number = ceil($posts_number / $posts_per_page);
+                $posts_pages_number = @ceil($posts_number / $posts_per_page);
 
                 $day_link = get_day_link($post_year, $post_month, $post_day);
                 $day_uri = str_replace($domain_url, '', $day_link);

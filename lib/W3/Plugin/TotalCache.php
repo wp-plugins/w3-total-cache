@@ -3753,6 +3753,11 @@ class W3_Plugin_TotalCache extends W3_Plugin {
 
         $attach_files = array(
             /**
+             * Attach WP config file
+             */
+            w3_get_wp_config_path(),
+
+            /**
              * Attach config files
              */
             W3TC_CONFIG_PATH,
@@ -6063,7 +6068,8 @@ class W3_Plugin_TotalCache extends W3_Plugin {
 
                 $comment = get_comment($id);
 
-                $value = array('a' => $comment->comment_author,
+                $value = array(
+                    'a' => $comment->comment_author,
                     'am' => $comment->comment_author_email,
                     'ip' => $comment->comment_author_IP,
                     'con' => substr($comment->comment_content, 0, 100)
