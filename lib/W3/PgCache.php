@@ -763,15 +763,6 @@ class W3_PgCache {
         }
 
         /**
-         * Check for request URI trailing slash
-         */
-        if ($this->_enhanced_mode && substr($this->_request_uri, -1) !== '/') {
-            $this->cache_reject_reason = 'request URI doesn\'t have a trailing slash';
-
-            return false;
-        }
-
-        /**
          * Check request URI
          */
         if (!in_array($_SERVER['PHP_SELF'], $this->_config->get_array('pgcache.accept.files')) && !$this->_check_request_uri()) {
@@ -822,6 +813,29 @@ class W3_PgCache {
          */
         if (!$this->_caching) {
             return false;
+        }
+
+        /**
+         * Check for request URI trailing slash
+         */
+        if ($this->_enhanced_mode) {
+            $permalink_structure = get_option('permalink_structure');
+            $permalink_structure_slash = (substr($permalink_structure, -1) == '/');
+            $request_uri_slash = (substr($this->_request_uri, -1) == '/');
+
+            if ($permalink_structure_slash != $request_uri_slash) {
+                if ($permalink_structure_slash) {
+                    if (!$this->_check_accept_uri()) {
+                        $this->cache_reject_reason = 'request URI doesn\'t have a trailing slash';
+
+                        return false;
+                    }
+                } else {
+                    $this->cache_reject_reason = 'request URI has a trailing slash';
+
+                    return false;
+                }
+            }
         }
 
         /**
@@ -956,6 +970,25 @@ class W3_PgCache {
         }
 
         return true;
+    }
+
+    /**
+     * Checks accept URI
+     *
+     * @return boolean
+     */
+    function _check_accept_uri() {
+        $accept_uri = $this->_config->get_array('pgcache.accept.uri');
+        $accept_uri = array_map('w3_parse_path', $accept_uri);
+
+        foreach ($accept_uri as $expr) {
+            $expr = trim($expr);
+            if ($expr != '' && preg_match('~' . $expr . '~i', $this->_request_uri)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

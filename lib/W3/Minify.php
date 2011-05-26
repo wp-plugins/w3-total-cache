@@ -98,6 +98,7 @@ class W3_Minify {
 
         if ($hash) {
             $_GET['f'] = $this->get_files($hash, $type);
+            print_r($_GET['f']);die();
         } else {
             $_GET['g'] = $location;
             $serve_options['minApp']['groups'] = $this->get_groups($theme, $template, $type);

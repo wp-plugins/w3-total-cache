@@ -65,6 +65,7 @@ class W3_Config {
         'pgcache.cache.404' => 'boolean',
         'pgcache.cache.flush' => 'boolean',
         'pgcache.cache.headers' => 'array',
+        'pgcache.accept.uri' => 'array',
         'pgcache.accept.files' => 'array',
         'pgcache.reject.logged' => 'boolean',
         'pgcache.reject.uri' => 'array',
@@ -391,6 +392,9 @@ class W3_Config {
             'Content-Type',
             'X-Pingback',
             'P3P'
+        ),
+        'pgcache.accept.uri' => array(
+            'sitemap\.xml(\.gz)?'
         ),
         'pgcache.accept.files' => array(
             'wp-comments-popup.php',

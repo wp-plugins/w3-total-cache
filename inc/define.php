@@ -753,11 +753,11 @@ function w3_get_document_root() {
 
     if ($document_root === null) {
         if (!empty($_SERVER['SCRIPT_FILENAME'])) {
-            $document_root = substr($_SERVER['SCRIPT_FILENAME'], 0, -strlen($_SERVER['PHP_SELF']));
+            $document_root = substr(w3_path($_SERVER['SCRIPT_FILENAME']), 0, -strlen(w3_path($_SERVER['PHP_SELF'])));
         } elseif (!empty($_SERVER['PATH_TRANSLATED'])) {
-            $document_root = substr($_SERVER['PATH_TRANSLATED'], 0, -strlen($_SERVER['PHP_SELF']));
+            $document_root = substr(w3_path($_SERVER['PATH_TRANSLATED']), 0, -strlen(w3_path($_SERVER['PHP_SELF'])));
         } elseif (!empty($_SERVER['DOCUMENT_ROOT'])) {
-            $document_root = $_SERVER['DOCUMENT_ROOT'];
+            $document_root = w3_path($_SERVER['DOCUMENT_ROOT']);
         } else {
             $document_root = w3_get_site_root();
         }

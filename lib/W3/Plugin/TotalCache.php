@@ -2146,6 +2146,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
 
         $default_feed = get_default_feed();
         $pgcache_enabled = $this->_config->get_boolean('pgcache.enabled');
+        $permalink_structure = get_option('permalink_structure');
 
         include W3TC_DIR . '/inc/options/pgcache.phtml';
     }
@@ -5013,7 +5014,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                         $append = (is_user_logged_in() ? ' (user is logged in)' : '');
 
                         if ($wpdb->query_hits) {
-                            $strings[] = sprintf("Database Caching %d/%d queries in %.3f seconds using %s%s\r\n", $wpdb->query_hits, $wpdb->query_total, $wpdb->time_total, w3_get_engine_name($this->_config->get_string('dbcache.engine')), $append);
+                            $strings[] = sprintf("Database Caching %d/%d queries in %.3f seconds using %s%s", $wpdb->query_hits, $wpdb->query_total, $wpdb->time_total, w3_get_engine_name($this->_config->get_string('dbcache.engine')), $append);
                         } else {
                             $strings[] = sprintf("Database Caching using %s%s", w3_get_engine_name($this->_config->get_string('dbcache.engine')), $append);
                         }

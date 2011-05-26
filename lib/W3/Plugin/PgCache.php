@@ -599,6 +599,7 @@ class W3_Plugin_PgCache extends W3_Plugin {
         $reject_uris = array_merge($reject_uris, $this->_config->get_array('pgcache.reject.uri'));
         $reject_uris = array_map('w3_parse_path', $reject_uris);
         $reject_user_agents = $this->_config->get_array('pgcache.reject.ua');
+        $accept_uris = $this->_config->get_array('pgcache.accept.uri');
         $accept_files = $this->_config->get_array('pgcache.accept.files');
 
         /**
@@ -742,7 +743,14 @@ class W3_Plugin_PgCache extends W3_Plugin {
          * Check permalink structure trailing slash
          */
         if (substr($permalink_structure, -1) == '/') {
-            $rules .= "    RewriteCond %{REQUEST_URI} \\/$\n";
+            $rules .= "    RewriteCond %{REQUEST_URI} \\/$";
+
+            if (count($accept_uris)) {
+                $rules .= " [OR]\n";
+                $rules .= "    RewriteCond %{REQUEST_URI} (" . implode('|', $accept_uris) . ") [NC]\n";
+            } else {
+                $rules .= "\n";
+            }
         } else {
             $rules .= "    RewriteCond %{REQUEST_URI} [^\\/]$\n";
         }
@@ -851,6 +859,7 @@ class W3_Plugin_PgCache extends W3_Plugin {
         $reject_uris = array_merge($reject_uris, $this->_config->get_array('pgcache.reject.uri'));
         $reject_uris = array_map('w3_parse_path', $reject_uris);
         $reject_user_agents = $this->_config->get_array('pgcache.reject.ua');
+        $accept_uris = $this->_config->get_array('pgcache.accept.uri');
         $accept_files = $this->_config->get_array('pgcache.accept.files');
 
         /**
@@ -917,9 +926,24 @@ class W3_Plugin_PgCache extends W3_Plugin {
          * Check permalink structure trailing slash
          */
         if (substr($permalink_structure, -1) == '/') {
-            $rules .= "if (\$request_uri !~ \\/$) {\n";
-            $rules .= "    set \$w3tc_rewrite 0;\n";
-            $rules .= "}\n";
+            if (!count($accept_uris)) {
+                $rules .= "if (\$request_uri !~ \\/$) {\n";
+                $rules .= "    set \$w3tc_rewrite 0;\n";
+                $rules .= "}\n";
+            } else {
+                $rules .= "set \$w3tc_rewrite2 1;\n";
+                $rules .= "if (\$request_uri !~ \\/$) {\n";
+                $rules .= "    set \$w3tc_rewrite2 0;\n";
+                $rules .= "}\n";
+
+                $rules .= "if (\$request_uri ~* \"(" . implode('|', $accept_uris) . ")\") {\n";
+                $rules .= "    set \$w3tc_rewrite2 1;\n";
+                $rules .= "}\n";
+
+                $rules .= "if (\$w3tc_rewrite2 != 1) {\n";
+                $rules .= "    set \$w3tc_rewrite 0;\n";
+                $rules .= "}\n";
+            }
         } else {
             $rules .= "if (\$request_uri !~ [^\\/]$) {\n";
             $rules .= "    set \$w3tc_rewrite 0;\n";
@@ -934,16 +958,16 @@ class W3_Plugin_PgCache extends W3_Plugin {
             $rules .= "    set \$w3tc_rewrite 0;\n";
             $rules .= "}\n";
         } else {
-            $rules .= "set \$w3tc_rewrite2 1;\n";
+            $rules .= "set \$w3tc_rewrite3 1;\n";
             $rules .= "if (\$request_uri ~* \"(" . implode('|', $reject_uris) . ")\") {\n";
-            $rules .= "    set \$w3tc_rewrite2 0;\n";
+            $rules .= "    set \$w3tc_rewrite3 0;\n";
             $rules .= "}\n";
 
             $rules .= "if (\$request_uri ~* \"(" . implode('|', array_map('w3_preg_quote', $accept_files)) . ")\") {\n";
-            $rules .= "    set \$w3tc_rewrite2 1;\n";
+            $rules .= "    set \$w3tc_rewrite3 1;\n";
             $rules .= "}\n";
 
-            $rules .= "if (\$w3tc_rewrite2 != 1) {\n";
+            $rules .= "if (\$w3tc_rewrite3 != 1) {\n";
             $rules .= "    set \$w3tc_rewrite 0;\n";
             $rules .= "}\n";
         }
