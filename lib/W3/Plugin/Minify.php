@@ -745,7 +745,7 @@ class W3_Plugin_Minify extends W3_Plugin {
         if ($this->_config->get_boolean('minify.rewrite')) {
             $url = sprintf('%s/%s/%s/%s.%s.%d.%s', $site_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $theme, $template, $location, $id, $type);
         } else {
-            $url = sprintf('%s/%s/%s/index.php?file=%s.%s.%d.%s', $site_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $theme, $template, $location, $id, $type);
+            $url = sprintf('%s/%s/index.php?file=%s/%s.%s.%d.%s', $site_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $theme, $template, $location, $id, $type);
         }
 
         return $url;

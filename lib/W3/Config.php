@@ -595,7 +595,7 @@ class W3_Config {
         'browsercache.no404wp' => false,
         'browsercache.no404wp.exceptions' => array(
             'robots\.txt',
-            'sitemap\.xml(\.gz)?'
+            'sitemap(_index|[0-9]+)?\.xml(\.gz)?'
         ),
         'browsercache.cssjs.compression' => true,
         'browsercache.cssjs.expires' => false,
