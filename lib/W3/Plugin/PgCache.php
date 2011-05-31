@@ -329,6 +329,8 @@ class W3_Plugin_PgCache extends W3_Plugin {
      * @return void
      */
     function prime($start = 0) {
+        $start = (int) $start;
+
         /**
          * Don't start cache prime if queues are still scheduled
          */
@@ -348,32 +350,73 @@ class W3_Plugin_PgCache extends W3_Plugin {
 
         $interval = $this->_config->get_integer('pgcache.prime.interval');
         $limit = $this->_config->get_integer('pgcache.prime.limit');
-        $sitemap_url = $this->_config->get_string('pgcache.prime.sitemap');
-        $sitemap_xml = w3_http_get($sitemap_url);
-
-        $queue = array();
+        $sitemap = $this->_config->get_string('pgcache.prime.sitemap');
 
         /**
          * Parse XML sitemap
          */
-        if ($sitemap_xml) {
-            $url_matches = null;
+        $urls = $this->parse_sitemap($sitemap);
 
-            if (preg_match_all('~<url>(.*)</url>~Uis', $sitemap_xml, $url_matches)) {
+        /**
+         * Queue URLs
+         */
+        $queue = array_slice($urls, $start, $limit);
+
+        if (count($urls) > ($start + $limit)) {
+            wp_schedule_single_event(time() + $interval, 'w3_pgcache_prime', array(
+                $start + $limit
+            ));
+        }
+
+        /**
+         * Make HTTP requests and prime cache
+         */
+        foreach ($queue as $url) {
+            w3_http_get($url);
+        }
+    }
+
+    /**
+     * Parses sitemap
+     *
+     * @param string $xml
+     * @return array
+     */
+    function parse_sitemap($url) {
+        $urls = array();
+
+        $xml = w3_http_get($url);
+
+        if ($xml) {
+            $url_matches = null;
+            $sitemap_matches = null;
+
+            if (preg_match_all('~<sitemap>(.*?)</sitemap>~is', $xml, $sitemap_matches)) {
+                $loc_matches = null;
+
+                foreach ($sitemap_matches[1] as $sitemap_match) {
+                    if (preg_match('~<loc>(.*?)</loc>~is', $sitemap_match, $loc_matches)) {
+                        $loc = trim($loc_matches[1]);
+
+                        if ($loc) {
+                            $urls = array_merge($urls, $this->parse_sitemap($loc));
+                        }
+                    }
+                }
+            } elseif (preg_match_all('~<url>(.*?)</url>~is', $xml, $url_matches)) {
+                $locs = array();
                 $loc_matches = null;
                 $priority_matches = null;
-
-                $locs = array();
 
                 foreach ($url_matches[1] as $url_match) {
                     $loc = '';
                     $priority = 0;
 
-                    if (preg_match('~<loc>(.*)</loc>~is', $url_match, $loc_matches)) {
+                    if (preg_match('~<loc>(.*?)</loc>~is', $url_match, $loc_matches)) {
                         $loc = trim($loc_matches[1]);
                     }
 
-                    if (preg_match('~<priority>(.*)</priority>~is', $url_match, $priority_matches)) {
+                    if (preg_match('~<priority>(.*?)</priority>~is', $url_match, $priority_matches)) {
                         $priority = (double) trim($priority_matches[1]);
                     }
 
@@ -384,27 +427,11 @@ class W3_Plugin_PgCache extends W3_Plugin {
 
                 arsort($locs);
 
-                $queue = array_keys($locs);
+                $urls = array_keys($locs);
             }
         }
 
-        /**
-         * Queue URLs
-         */
-        $urls = array_slice($queue, $start, $limit);
-
-        if (count($queue) > ($start + $limit)) {
-            wp_schedule_single_event(time() + $interval, 'w3_pgcache_prime', array(
-                $start + $limit
-            ));
-        }
-
-        /**
-         * Make HTTP requests and prime cache
-         */
-        foreach ($urls as $url) {
-            w3_http_get($url);
-        }
+        return $urls;
     }
 
     /**

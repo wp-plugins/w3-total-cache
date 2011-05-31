@@ -1,10 +1,10 @@
 <?php
 
-define('W3TC_VERSION', '0.9.2.2');
+define('W3TC_VERSION', '0.9.2.2b');
 define('W3TC_POWERED_BY', 'W3 Total Cache/' . W3TC_VERSION);
 define('W3TC_EMAIL', 'w3tc@w3-edge.com');
 define('W3TC_PAYPAL_URL', 'https://www.paypal.com/cgi-bin/webscr');
-define('W3TC_PAYPAL_BUSINESS', 'w3tc@w3-edge.com');
+define('W3TC_PAYPAL_BUSINESS', 'w3tc-team@w3-edge.com');
 define('W3TC_LINK_URL', 'http://www.w3-edge.com/wordpress-plugins/');
 define('W3TC_LINK_NAME', 'WordPress Plugins');
 define('W3TC_FEED_URL', 'http://feeds.feedburner.com/W3TOTALCACHE');
