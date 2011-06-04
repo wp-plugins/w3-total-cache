@@ -154,8 +154,6 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
      * @return mixed
      */
     function ob_callback(&$buffer) {
-        global $wpdb;
-
         if ($buffer != '' && w3_is_xml($buffer)) {
             $domain_url_regexp = w3_get_domain_url_regexp();
 
@@ -827,7 +825,7 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
     }
 
     /**
-     * Erases rules
+     * Erases cache rules
      *
      * @param string $data
      * @return string
@@ -839,7 +837,7 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
     }
 
     /**
-     * Erases rules
+     * Erases no404wp rules
      *
      * @param string $data
      * @return string
@@ -851,7 +849,7 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
     }
 
     /**
-     * Removes rules
+     * Removes cache rules
      *
      * @return boolean
      */
@@ -872,7 +870,7 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
     }
 
     /**
-     * Removes rules
+     * Removes no404wp rules
      *
      * @return boolean
      */
@@ -905,7 +903,7 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
     }
 
     /**
-     * Check 404 rules
+     * Check no404wp rules
      *
      * @return boolean
      */

@@ -305,8 +305,6 @@ class W3_Plugin_Cdn extends W3_Plugin {
      * @param integer $attachment_id
      */
     function delete_attachment($attachment_id) {
-        $files = array();
-
         $files = $this->get_attachment_files($attachment_id);
         $files = apply_filters('w3tc_cdn_delete_attachment', $files);
 
@@ -372,7 +370,7 @@ class W3_Plugin_Cdn extends W3_Plugin {
     /**
      * Cron schedules filter
      *
-     * @paran array $schedules
+     * @param array $schedules
      * @return array
      */
     function cron_schedules($schedules) {
@@ -436,7 +434,7 @@ class W3_Plugin_Cdn extends W3_Plugin {
     /**
      * Returns array of files from sizes array
      *
-     * @param string $base_dir
+     * @param string $attached_file
      * @param array $sizes
      * @return array
      */
@@ -1008,7 +1006,7 @@ class W3_Plugin_Cdn extends W3_Plugin {
 
                                 if (preg_match($regexp, $check_src)) {
                                     /**
-                                     * Check for alredy uploaded attachment
+                                     * Check for already uploaded attachment
                                      */
                                     if (isset($attachments[$src])) {
                                         list($dst, $dst_url) = $attachments[$src];
@@ -1335,6 +1333,8 @@ class W3_Plugin_Cdn extends W3_Plugin {
 
     /**
      * Exports includes to CDN
+     *
+     * @return array
      */
     function get_files_includes() {
         $includes_root = w3_path(ABSPATH . WPINC);
@@ -1348,6 +1348,8 @@ class W3_Plugin_Cdn extends W3_Plugin {
 
     /**
      * Exports theme to CDN
+     *
+     * @return array
      */
     function get_files_theme() {
         /**
@@ -1371,6 +1373,8 @@ class W3_Plugin_Cdn extends W3_Plugin {
 
     /**
      * Exports min files to CDN
+     *
+     * @return array
      */
     function get_files_minify() {
         $files = array();
@@ -1420,6 +1424,8 @@ class W3_Plugin_Cdn extends W3_Plugin {
 
     /**
      * Exports custom files to CDN
+     *
+     * @return array
      */
     function get_files_custom() {
         $files = array();
@@ -1519,6 +1525,7 @@ class W3_Plugin_Cdn extends W3_Plugin {
      * Search files
      *
      * @param string $search_dir
+     * @param string $base_dir
      * @param string $mask
      * @param boolean $recursive
      * @return array
@@ -1821,8 +1828,8 @@ class W3_Plugin_Cdn extends W3_Plugin {
     /**
      * Returns true if we can do CDN logic
      *
+     * @param $buffer
      * @return string
-     * @return boolean
      */
     function can_cdn2(&$buffer) {
         /**

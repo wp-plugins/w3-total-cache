@@ -120,6 +120,7 @@ class W3_Cdn_Ftp extends W3_Cdn_Base {
      * Sends MDTM command
      *
      * @param string $remote_file
+     * @param integer $mtime
      * @return boolean
      */
     function _mdtm($remote_file, $mtime) {

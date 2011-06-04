@@ -24,6 +24,7 @@ define('W3TC_LIB_CSSTIDY_DIR', W3TC_LIB_DIR . '/CSSTidy');
 define('W3TC_LIB_MICROSOFT_DIR', W3TC_LIB_DIR . '/Microsoft');
 define('W3TC_LIB_NUSOAP_DIR', W3TC_LIB_DIR . '/Nusoap');
 define('W3TC_PLUGINS_DIR', W3TC_DIR . '/plugins');
+define('W3TC_DB_DIR', W3TC_DIR . '/db');
 define('W3TC_INSTALL_DIR', W3TC_DIR . '/wp-content');
 define('W3TC_INSTALL_MINIFY_DIR', W3TC_INSTALL_DIR . '/w3tc/min');
 
@@ -56,22 +57,26 @@ define('W3TC_CDN_LOG_FILE', W3TC_LOG_DIR . '/cdn.log');
 define('W3TC_VARNISH_LOG_FILE', W3TC_LOG_DIR . '/varnish.log');
 
 define('W3TC_MARKER_BEGIN_WORDPRESS', '# BEGIN WordPress');
-define('W3TC_MARKER_BEGIN_SUPERCACHE', '# BEGIN WPSuperCache');
 define('W3TC_MARKER_BEGIN_PGCACHE_CORE', '# BEGIN W3TC Page Cache core');
 define('W3TC_MARKER_BEGIN_PGCACHE_CACHE', '# BEGIN W3TC Page Cache cache');
+define('W3TC_MARKER_BEGIN_PGCACHE_LEGACY', '# BEGIN W3TC Page Cache');
+define('W3TC_MARKER_BEGIN_PGCACHE_WPSC', '# BEGIN WPSuperCache');
 define('W3TC_MARKER_BEGIN_BROWSERCACHE_CACHE', '# BEGIN W3TC Browser Cache');
 define('W3TC_MARKER_BEGIN_BROWSERCACHE_NO404WP', '# BEGIN W3TC Skip 404 error handling by WordPress for static files');
 define('W3TC_MARKER_BEGIN_MINIFY_CORE', '# BEGIN W3TC Minify core');
 define('W3TC_MARKER_BEGIN_MINIFY_CACHE', '# BEGIN W3TC Minify cache');
+define('W3TC_MARKER_BEGIN_MINIFY_LEGACY', '# BEGIN W3TC Minify');
 
 define('W3TC_MARKER_END_WORDPRESS', '# END WordPress');
-define('W3TC_MARKER_END_SUPERCACHE', '# END WPSuperCache');
 define('W3TC_MARKER_END_PGCACHE_CORE', '# END W3TC Page Cache core');
 define('W3TC_MARKER_END_PGCACHE_CACHE', '# END W3TC Page Cache cache');
+define('W3TC_MARKER_END_PGCACHE_LEGACY', '# END W3TC Page Cache');
+define('W3TC_MARKER_END_PGCACHE_WPSC', '# END WPSuperCache');
 define('W3TC_MARKER_END_BROWSERCACHE_CACHE', '# END W3TC Browser Cache');
 define('W3TC_MARKER_END_BROWSERCACHE_NO404WP', '# END W3TC Skip 404 error handling by WordPress for static files');
 define('W3TC_MARKER_END_MINIFY_CORE', '# END W3TC Minify core');
 define('W3TC_MARKER_END_MINIFY_CACHE', '# END W3TC Minify cache');
+define('W3TC_MARKER_END_MINIFY_LEGACY', '# END W3TC Minify');
 
 define('W3TC_INSTALL_FILE_ADVANCED_CACHE', W3TC_INSTALL_DIR . '/advanced-cache.php');
 define('W3TC_INSTALL_FILE_DB', W3TC_INSTALL_DIR . '/db.php');
@@ -178,7 +183,7 @@ function w3_microtime() {
  *
  * @param string $path
  * @param integer $mask
- * @param string
+ * @param string $curr_path
  * @return boolean
  */
 function w3_mkdir($path, $mask = 0777, $curr_path = '') {
@@ -208,6 +213,7 @@ function w3_mkdir($path, $mask = 0777, $curr_path = '') {
  *
  * @param string $path
  * @param array $exclude
+ * @param bool $remove
  * @return void
  */
 function w3_rmdir($path, $exclude = array(), $remove = true) {
@@ -384,7 +390,7 @@ function w3_is_preview_mode() {
 /**
  * Check if file is write-able
  *
- * @param string $path
+ * @param string $file
  * @return boolean
  */
 function w3_is_writable($file) {
@@ -571,7 +577,7 @@ function w3_get_blogname() {
  * Returns blogname from URI
  *
  * @param string $uri
- * @param string
+ * @return string
  */
 function w3_get_blogname_from_uri($uri) {
     $blogname = '';
@@ -1138,16 +1144,20 @@ function w3_can_check_rules() {
  * @return boolean
  */
 function w3_can_modify_rules($path) {
-    if (w3_is_apache()) {
-        switch ($path) {
-            case w3_get_pgcache_rules_cache_path():
-            case w3_get_minify_rules_core_path():
-            case w3_get_minify_rules_cache_path():
-                return true;
+    if (w3_is_network()) {
+        if (w3_is_apache()) {
+            switch ($path) {
+                case w3_get_pgcache_rules_cache_path():
+                case w3_get_minify_rules_core_path():
+                case w3_get_minify_rules_cache_path():
+                    return true;
+            }
         }
+
+        return false;
     }
 
-    return false;
+    return true;
 }
 
 /**
@@ -1298,6 +1308,7 @@ function w3_path($path) {
  * Returns realpath of given path
  *
  * @param string $path
+ * @return string
  */
 function w3_realpath($path) {
     $path = w3_path($path);
@@ -1495,6 +1506,7 @@ function w3_http_request($method, $url, $data = '', $auth = '', $check_status = 
  * @param string $url
  * @param string $auth
  * $param boolean $check_status
+ * @param bool $check_status
  * @return string
  */
 function w3_http_get($url, $auth = '', $check_status = true) {
@@ -1516,9 +1528,11 @@ function w3_http_post($url, $data = '', $auth = '', $check_status = true) {
 
 /**
  * Send PURGE request to Varnish server
+ *
  * @param string $url
  * @param string $auth
  * $param boolean $check_status
+ * @param bool $check_status
  * @return string
  */
 function w3_http_purge($url, $auth = '', $check_status = true) {
@@ -1582,9 +1596,11 @@ function w3_upload_info() {
 
 /**
  * Formats URL
+ *
  * @param string $url
  * @param array $params
  * @param boolean $skip_empty
+ * @param string $separator
  * @return string
  */
 function w3_url_format($url = '', $params = array(), $skip_empty = false, $separator = '&') {
@@ -1685,7 +1701,7 @@ function w3_url_query($params = array(), $skip_empty = false, $separator = '&') 
  * Redirects to URL
  *
  * @param string $url
- * @param string $params
+ * @param array $params
  * @return string
  */
 function w3_redirect($url = '', $params = array()) {
@@ -1883,7 +1899,8 @@ function w3_get_mime_type($file) {
 /**
  * Quotes regular expression string
  *
- * @param string $regexp
+ * @param string $string
+ * @param string $delimiter
  * @return string
  */
 function w3_preg_quote($string, $delimiter = null) {
@@ -1986,10 +2003,22 @@ function w3_clean_rules($rules) {
  * @return string
  */
 function w3_erase_rules($rules, $start, $end) {
-    $rules = preg_replace('~' . w3_preg_quote($start) . '.*?' . w3_preg_quote($end) . "\n*~s", '', $rules);
+    $rules = preg_replace('~' . w3_preg_quote($start) . "\n.*?" . w3_preg_quote($end) . "\n*~s", '', $rules);
     $rules = w3_trim_rules($rules);
 
     return $rules;
+}
+
+/**
+ * Check if rules exist
+ *
+ * @param string $rules
+ * @param string $start
+ * @param string $end
+ * @return int
+ */
+function w3_has_rules($rules, $start, $end) {
+    return preg_match('~' . w3_preg_quote($start) . "\n.*?" . w3_preg_quote($end) . "\n*~s", $rules);
 }
 
 /**

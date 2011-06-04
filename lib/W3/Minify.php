@@ -167,6 +167,8 @@ class W3_Minify {
 
     /**
      * Flushes cache
+     *
+     * @return boolean
      */
     function flush() {
         $cache = & $this->_get_cache();

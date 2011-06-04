@@ -48,8 +48,7 @@ class W3_Cache_File extends W3_Cache_Base {
     /**
      * PHP4 constructor
      *
-     * @paran array $config
-     * @return W3_Cache_File
+     * @param array $config
      */
     function W3_Cache_File($config = array()) {
         $this->__construct($config);

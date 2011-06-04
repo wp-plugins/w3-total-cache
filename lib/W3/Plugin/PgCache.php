@@ -437,7 +437,7 @@ class W3_Plugin_PgCache extends W3_Plugin {
     /**
      * Cron schedules filter
      *
-     * @paran array $schedules
+     * @param array $schedules
      * @return array
      */
     function cron_schedules($schedules) {
@@ -1315,6 +1315,7 @@ class W3_Plugin_PgCache extends W3_Plugin {
             $data = @file_get_contents($path);
 
             if ($data !== false) {
+                $data = $this->erase_rules_legacy($data);
                 $data = $this->erase_rules_wpsc($data);
             } else {
                 return false;
@@ -1420,7 +1421,7 @@ class W3_Plugin_PgCache extends W3_Plugin {
     }
 
     /**
-     * Erases W3TC directives from config
+     * Erases Page Cache core directives
      *
      * @param string $data
      * @return string
@@ -1432,7 +1433,7 @@ class W3_Plugin_PgCache extends W3_Plugin {
     }
 
     /**
-     * Erases W3TC directives from config
+     * Erases Page Cache cache directives
      *
      * @param string $data
      * @return string
@@ -1444,19 +1445,31 @@ class W3_Plugin_PgCache extends W3_Plugin {
     }
 
     /**
-     * Erases WP Super Cache rules directives config
+     * Erases Page Cache legacy directives
      *
      * @param string $data
      * @return string
      */
-    function erase_rules_wpsc($data) {
-        $data = w3_erase_rules($data, W3TC_MARKER_BEGIN_SUPERCACHE, W3TC_MARKER_END_SUPERCACHE);
+    function erase_rules_legacy($data) {
+        $data = w3_erase_rules($data, W3TC_MARKER_BEGIN_PGCACHE_LEGACY, W3TC_MARKER_END_PGCACHE_LEGACY);
 
         return $data;
     }
 
     /**
-     * Removes W3TC directives from WP .htaccess
+     * Erases WP Super Cache rules directives
+     *
+     * @param string $data
+     * @return string
+     */
+    function erase_rules_wpsc($data) {
+        $data = w3_erase_rules($data, W3TC_MARKER_BEGIN_PGCACHE_WPSC, W3TC_MARKER_END_PGCACHE_WPSC);
+
+        return $data;
+    }
+
+    /**
+     * Removes Page Cache core directives
      *
      * @return boolean
      */
@@ -1477,7 +1490,7 @@ class W3_Plugin_PgCache extends W3_Plugin {
     }
 
     /**
-     * Removes W3TC directives from file cache dir
+     * Removes Page Cache cache directives
      *
      * @return boolean
      */
@@ -1498,7 +1511,49 @@ class W3_Plugin_PgCache extends W3_Plugin {
     }
 
     /**
-     * Checks core directives
+     * Removes Page Cache legacy directives
+     *
+     * @return boolean
+     */
+    function remove_rules_legacy() {
+        $path = w3_get_pgcache_rules_core_path();
+
+        if (file_exists($path)) {
+            if (($data = @file_get_contents($path)) !== false) {
+                $data = $this->erase_rules_legacy($data);
+
+                return @file_put_contents($path, $data);
+            }
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Removes WPSC directives
+     *
+     * @return boolean
+     */
+    function remove_rules_wpsc() {
+        $path = w3_get_pgcache_rules_core_path();
+
+        if (file_exists($path)) {
+            if (($data = @file_get_contents($path)) !== false) {
+                $data = $this->erase_rules_wpsc($data);
+
+                return @file_put_contents($path, $data);
+            }
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Checks if core rules exists
      *
      * @return boolean
      */
@@ -1510,7 +1565,7 @@ class W3_Plugin_PgCache extends W3_Plugin {
     }
 
     /**
-     * Checks cache directives
+     * Checks if cache rules exists
      *
      * @return boolean
      */
@@ -1519,5 +1574,27 @@ class W3_Plugin_PgCache extends W3_Plugin {
         $search = $this->generate_rules_cache();
 
         return (($data = @file_get_contents($path)) && strstr(w3_clean_rules($data), w3_clean_rules($search)) !== false);
+    }
+
+    /**
+     * Check if legacy rules exists
+     *
+     * @return boolean
+     */
+    function check_rules_legacy() {
+        $path = w3_get_pgcache_rules_core_path();
+
+        return (($data = @file_get_contents($path)) && w3_has_rules(w3_clean_rules($data), W3TC_MARKER_BEGIN_PGCACHE_LEGACY, W3TC_MARKER_END_PGCACHE_LEGACY));
+    }
+
+    /**
+     * Check if WPSC rules exists
+     *
+     * @return boolean
+     */
+    function check_rules_wpsc() {
+        $path = w3_get_pgcache_rules_core_path();
+
+        return (($data = @file_get_contents($path)) && w3_has_rules(w3_clean_rules($data), W3TC_MARKER_BEGIN_PGCACHE_WPSC, W3TC_MARKER_END_PGCACHE_WPSC));
     }
 }

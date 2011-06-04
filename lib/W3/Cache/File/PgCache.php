@@ -20,7 +20,6 @@ class W3_Cache_File_PgCache extends W3_Cache_File {
      * PHP5 style constructor
      *
      * @param array $config
-     * @return void
      */
     function __construct($config = array()) {
         parent::__construct($config);
@@ -34,8 +33,8 @@ class W3_Cache_File_PgCache extends W3_Cache_File {
 
     /**
      * PHP4 style constructor
+     *
      * @param array $config
-     * @return void
      */
     function W3_Cache_File_PgCache($config = array()) {
         $this->__construct($config);
