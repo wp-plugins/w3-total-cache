@@ -240,7 +240,6 @@ class W3_Config {
         'varnish.servers' => 'array',
 
         'browsercache.enabled' => 'boolean',
-        'browsercache.id' => 'string',
         'browsercache.no404wp' => 'boolean',
         'browsercache.no404wp.exceptions' => 'array',
         'browsercache.cssjs.compression' => 'boolean',
@@ -594,7 +593,6 @@ class W3_Config {
         'varnish.servers' => array(),
 
         'browsercache.enabled' => true,
-        'browsercache.id' => '',
         'browsercache.no404wp' => false,
         'browsercache.no404wp.exceptions' => array(
             'robots\.txt',

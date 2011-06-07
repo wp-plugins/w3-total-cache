@@ -3071,11 +3071,57 @@ class W3_Plugin_TotalCache extends W3_Plugin {
      * @return void
      */
     function config_save(&$old_config, &$new_config, $preview = null) {
+        $browsercache_dependencies = array();
+
+        if ($new_config->get_boolean('browsercache.enabled')) {
+            $browsercache_dependencies = array_merge($browsercache_dependencies, array(
+                'browsercache.cssjs.replace',
+                'browsercache.html.replace',
+                'browsercache.other.replace'
+            ));
+
+            if ($new_config->get_boolean('browsercache.cssjs.replace')) {
+                $browsercache_dependencies = array_merge($browsercache_dependencies, array(
+                    'browsercache.cssjs.compression',
+                    'browsercache.cssjs.expires',
+                    'browsercache.cssjs.lifetime',
+                    'browsercache.cssjs.cache.control',
+                    'browsercache.cssjs.cache.policy',
+                    'browsercache.cssjs.etag',
+                    'browsercache.cssjs.w3tc'
+                ));
+            }
+
+            if ($new_config->get_boolean('browsercache.html.replace')) {
+                $browsercache_dependencies = array_merge($browsercache_dependencies, array(
+                    'browsercache.html.compression',
+                    'browsercache.html.expires',
+                    'browsercache.html.lifetime',
+                    'browsercache.html.cache.control',
+                    'browsercache.html.cache.policy',
+                    'browsercache.html.etag',
+                    'browsercache.html.w3tc'
+                ));
+            }
+
+            if ($new_config->get_boolean('browsercache.other.replace')) {
+                $browsercache_dependencies = array_merge($browsercache_dependencies, array(
+                    'browsercache.other.compression',
+                    'browsercache.other.expires',
+                    'browsercache.other.lifetime',
+                    'browsercache.other.cache.control',
+                    'browsercache.other.cache.policy',
+                    'browsercache.other.etag',
+                    'browsercache.other.w3tc'
+                ));
+            }
+        }
+
         /**
          * Show need empty page cache notification
          */
         if ($new_config->get_boolean('pgcache.enabled')) {
-            $pgcache_dependencies = array(
+            $pgcache_dependencies = array_merge($browsercache_dependencies, array(
                 'pgcache.debug',
                 'dbcache.enabled',
                 'objectcache.enabled',
@@ -3083,7 +3129,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                 'cdn.enabled',
                 'mobile.enabled',
                 'referrer.enabled'
-            );
+            ));
 
             if ($new_config->get_boolean('dbcache.enabled')) {
                 $pgcache_dependencies = array_merge($pgcache_dependencies, array(
@@ -3158,62 +3204,28 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                 ));
             }
 
-            if ($new_config->get_boolean('browsercache.enabled')) {
+            if ($new_config->get_boolean('mobile.enabled')) {
                 $pgcache_dependencies = array_merge($pgcache_dependencies, array(
-                    'browsercache.cssjs.replace',
-                    'browsercache.html.replace',
-                    'browsercache.other.replace'
+                    'mobile.rgroups'
                 ));
+            }
 
-                if ($new_config->get_boolean('browsercache.cssjs.replace') || $new_config->get_boolean('browsercache.html.replace') || $new_config->get_boolean('browsercache.other.replace')) {
-                    $pgcache_dependencies = array_merge($pgcache_dependencies, array(
-                        'browsercache.cssjs.compression',
-                        'browsercache.cssjs.expires',
-                        'browsercache.cssjs.lifetime',
-                        'browsercache.cssjs.cache.control',
-                        'browsercache.cssjs.cache.policy',
-                        'browsercache.cssjs.etag',
-                        'browsercache.cssjs.w3tc',
-                        'browsercache.html.compression',
-                        'browsercache.html.expires',
-                        'browsercache.html.lifetime',
-                        'browsercache.html.cache.control',
-                        'browsercache.html.cache.policy',
-                        'browsercache.html.etag',
-                        'browsercache.html.w3tc',
-                        'browsercache.other.compression',
-                        'browsercache.other.expires',
-                        'browsercache.other.lifetime',
-                        'browsercache.other.cache.control',
-                        'browsercache.other.cache.policy',
-                        'browsercache.other.etag',
-                        'browsercache.other.w3tc'
-                    ));
-                }
+            if ($new_config->get_boolean('referrer.enabled')) {
+                $pgcache_dependencies = array_merge($pgcache_dependencies, array(
+                    'referrer.rgroups'
+                ));
+            }
 
-                if ($new_config->get_boolean('mobile.enabled')) {
-                    $pgcache_dependencies = array_merge($pgcache_dependencies, array(
-                        'mobile.rgroups'
-                    ));
-                }
+            $old_pgcache_dependencies_values = array();
+            $new_pgcache_dependencies_values = array();
 
-                if ($new_config->get_boolean('referrer.enabled')) {
-                    $pgcache_dependencies = array_merge($pgcache_dependencies, array(
-                        'referrer.rgroups'
-                    ));
-                }
+            foreach ($pgcache_dependencies as $pgcache_dependency) {
+                $old_pgcache_dependencies_values[] = $old_config->get($pgcache_dependency);
+                $new_pgcache_dependencies_values[] = $new_config->get($pgcache_dependency);
+            }
 
-                $old_pgcache_dependencies_values = array();
-                $new_pgcache_dependencies_values = array();
-
-                foreach ($pgcache_dependencies as $pgcache_dependency) {
-                    $old_pgcache_dependencies_values[] = $old_config->get($pgcache_dependency);
-                    $new_pgcache_dependencies_values[] = $new_config->get($pgcache_dependency);
-                }
-
-                if (serialize($old_pgcache_dependencies_values) != serialize($new_pgcache_dependencies_values)) {
-                    $new_config->set('notes.need_empty_pgcache', true);
-                }
+            if (serialize($old_pgcache_dependencies_values) != serialize($new_pgcache_dependencies_values)) {
+                $new_config->set('notes.need_empty_pgcache', true);
             }
         }
 
@@ -3221,14 +3233,14 @@ class W3_Plugin_TotalCache extends W3_Plugin {
          * Show need empty minify notification
          */
         if ($new_config->get_boolean('minify.enabled') && (($new_config->get_boolean('minify.css.enable') && ($new_config->get_boolean('minify.auto') || count($new_config->get_array('minify.css.groups')))) || ($new_config->get_boolean('minify.js.enable') && ($new_config->get_boolean('minify.auto') || count($new_config->get_array('minify.js.groups')))))) {
-            $minify_dependencies = array(
+            $minify_dependencies = array_merge($browsercache_dependencies, array(
                 'minify.auto',
                 'minify.debug',
                 'minify.options',
                 'minify.symlinks',
                 'minify.css.enable',
                 'minify.js.enable'
-            );
+            ));
 
             if ($new_config->get_boolean('minify.css.enable') && ($new_config->get_boolean('minify.auto') || count($new_config->get_array('minify.css.groups')))) {
                 $minify_dependencies = array_merge($minify_dependencies, array(
@@ -3345,47 +3357,6 @@ class W3_Plugin_TotalCache extends W3_Plugin {
 
             if (serialize($old_cdn_dependencies_values) != serialize($new_cdn_dependencies_values)) {
                 $new_config->set('notes.cdn_reupload', true);
-            }
-        }
-
-        /**
-         * Set new cache ID if browsercache settings changes
-         */
-        if ($new_config->get_boolean('browsercache.enabled') && ($new_config->get_boolean('browsercache.cssjs.replace') || $new_config->get_boolean('browsercache.html.replace') || $new_config->get_boolean('browsercache.other.replace'))) {
-            $browsercache_dependencies = array(
-                'browsercache.cssjs.compression',
-                'browsercache.cssjs.expires',
-                'browsercache.cssjs.lifetime',
-                'browsercache.cssjs.cache.control',
-                'browsercache.cssjs.cache.policy',
-                'browsercache.cssjs.etag',
-                'browsercache.cssjs.w3tc',
-                'browsercache.html.compression',
-                'browsercache.html.expires',
-                'browsercache.html.lifetime',
-                'browsercache.html.cache.control',
-                'browsercache.html.cache.policy',
-                'browsercache.html.etag',
-                'browsercache.html.w3tc',
-                'browsercache.other.compression',
-                'browsercache.other.expires',
-                'browsercache.other.lifetime',
-                'browsercache.other.cache.control',
-                'browsercache.other.cache.policy',
-                'browsercache.other.etag',
-                'browsercache.other.w3tc'
-            );
-
-            $old_browsercache_dependencies_values = array();
-            $new_browsercache_dependencies_values = array();
-
-            foreach ($browsercache_dependencies as $browsercache_dependency) {
-                $old_browsercache_dependencies_values[] = $old_config->get($browsercache_dependency);
-                $new_browsercache_dependencies_values[] = $new_config->get($browsercache_dependency);
-            }
-
-            if (serialize($old_browsercache_dependencies_values) != serialize($new_browsercache_dependencies_values)) {
-                $new_config->set('browsercache.id', rand(10000, 99999));
             }
         }
 
@@ -6201,7 +6172,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
     function link_replace_callback($matches) {
         list (, $attr, $quote, $domain_url, , $path) = $matches;
 
-        $path .= (strstr($path, '?') !== false ? '&' : '?') . 'w3tc_preview=1';
+        $path .= (strstr($path, '?') !== false ? '&amp;' : '?') . 'w3tc_preview=1';
 
         return sprintf('%s=%s%s%s', $attr, $quote, $domain_url, $path);
     }
