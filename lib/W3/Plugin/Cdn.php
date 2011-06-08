@@ -525,7 +525,6 @@ class W3_Plugin_Cdn extends W3_Plugin {
                 $site_path = w3_get_site_path();
                 $domain_url_regexp = w3_get_domain_url_regexp();
 
-
                 if ($this->_config->get_boolean('cdn.uploads.enable')) {
                     $upload_info = w3_upload_info();
 
@@ -557,9 +556,9 @@ class W3_Plugin_Cdn extends W3_Plugin {
 
                 if ($this->_config->get_boolean('cdn.minify.enable')) {
                     if ($this->_config->get_boolean('minify.auto')) {
-                        $regexps[] = '~(["\'])((' . $domain_url_regexp . ')?(' . w3_preg_quote($site_path . W3TC_CONTENT_MINIFY_DIR_NAME) . '/[a-f0-9]+\.[0-9]+\.(css|js)))~U';
+                        $regexps[] = '~(["\'])((' . $domain_url_regexp . ')?(' . w3_preg_quote($site_path . W3TC_CONTENT_MINIFY_DIR_NAME) . '/[a-f0-9]+\.[a-f0-9]+\.(css|js)))~U';
                     } else {
-                        $regexps[] = '~(["\'])((' . $domain_url_regexp . ')?(' . w3_preg_quote($site_path . W3TC_CONTENT_MINIFY_DIR_NAME) . '/[a-f0-9]+/.+\.include(-(footer|body))?(-nb)?\.[0-9]+\.(css|js)))~U';
+                        $regexps[] = '~(["\'])((' . $domain_url_regexp . ')?(' . w3_preg_quote($site_path . W3TC_CONTENT_MINIFY_DIR_NAME) . '/[a-f0-9]+/.+\.include(-(footer|body))?(-nb)?\.[a-f0-9]+\.(css|js)))~U';
                     }
                 }
 
@@ -1460,7 +1459,7 @@ class W3_Plugin_Cdn extends W3_Plugin {
         global $wpdb;
         static $queue = null, $reject_files = null;
 
-        list($match, $quote, $url, $domain_url, $www, $path) = $matches;
+        list($match, $quote, $url, , , , $path) = $matches;
 
         $path = ltrim($path, '/');
 
@@ -1868,7 +1867,11 @@ class W3_Plugin_Cdn extends W3_Plugin {
      * @return boolean
      */
     function check_ua() {
-        foreach ($this->_config->get_array('cdn.reject.ua') as $ua) {
+        $uas = array_merge($this->_config->get_array('cdn.reject.ua'), array(
+            W3TC_POWERED_BY
+        ));
+
+        foreach ($uas as $ua) {
             if (isset($_SERVER['HTTP_USER_AGENT']) && stristr($_SERVER['HTTP_USER_AGENT'], $ua) !== false) {
                 return false;
             }

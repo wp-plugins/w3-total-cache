@@ -110,7 +110,7 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
         }
 
         /**
-         * Skip if doint AJAX
+         * Skip if doing AJAX
          */
         if (defined('DOING_AJAX')) {
             return false;
@@ -141,6 +141,13 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
          * Check for WPMU's and WP's 3.0 short init
          */
         if (defined('SHORTINIT') && SHORTINIT) {
+            return false;
+        }
+
+        /**
+         * Check User Agent
+         */
+        if (isset($_SERVER['HTTP_USER_AGENT']) && stristr($_SERVER['HTTP_USER_AGENT'], W3TC_POWERED_BY) !== false) {
             return false;
         }
 
@@ -183,7 +190,7 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
             $extensions = $this->get_replace_extensions();
         }
 
-        list ($match, $attr, $url, , , , $extension) = $matches;
+        list ($match, $attr, $url, , , , , $extension) = $matches;
 
         if (in_array($extension, $extensions)) {
             $url = w3_remove_wp_query($url);
@@ -234,7 +241,7 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
                 $values[] = $this->_config->get($key);
             }
 
-            $cache_id = substr(md5(serialize($values)), 0, 6);
+            $cache_id = substr(md5(implode('', $values)), 0, 6);
         }
 
         return $cache_id;

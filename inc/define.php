@@ -326,7 +326,7 @@ function w3_is_network() {
  * @return boolean
  */
 function w3_is_url($url) {
-    return preg_match('~^https?://~', $url);
+    return preg_match('~^(https?:)?//~', $url);
 }
 
 /**
@@ -619,10 +619,10 @@ function w3_get_blog_id() {
  * @return string
  */
 function w3_get_url_regexp($url) {
-    $url = preg_replace('~https?://~i', '', $url);
+    $url = preg_replace('~(https?:)?//~i', '', $url);
     $url = preg_replace('~^www\.~i', '', $url);
 
-    $regexp = 'https?://(www\.)?' . w3_preg_quote($url);
+    $regexp = '(https?:)?//(www\.)?' . w3_preg_quote($url);
 
     return $regexp;
 }
@@ -1556,6 +1556,10 @@ function w3_http_date($time) {
  * @return boolean
  */
 function w3_download($url, $file) {
+    if (strpos($url, '//') === 0) {
+        $url = (w3_is_https() ? 'https:' : 'http:') . $url;
+    }
+
     $data = w3_http_get($url);
 
     if ($data !== false) {
@@ -2037,7 +2041,6 @@ function w3_extract_js($content) {
         $files = $matches[1];
     }
 
-    $files = array_filter($files, create_function('$el', 'return (strstr($el, W3TC_CONTENT_MINIFY_DIR_NAME) ? false : true);'));
     $files = array_values(array_unique($files));
 
     return $files;
@@ -2076,7 +2079,6 @@ function w3_extract_css($content) {
         $files = array_merge($files, $matches[2]);
     }
 
-    $files = array_filter($files, create_function('$el', 'return (strstr($el, W3TC_CONTENT_MINIFY_DIR_NAME) ? false : true);'));
     $files = array_values(array_unique($files));
 
     return $files;

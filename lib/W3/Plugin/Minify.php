@@ -744,9 +744,9 @@ class W3_Plugin_Minify extends W3_Plugin {
         $site_url_ssl = w3_get_site_url_ssl();
 
         if ($this->_config->get_boolean('minify.rewrite')) {
-            $url = sprintf('%s/%s/%s/%s.%s.%d.%s', $site_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $theme, $template, $location, $id, $type);
+            $url = sprintf('%s/%s/%s/%s.%s.%s.%s', $site_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $theme, $template, $location, $id, $type);
         } else {
-            $url = sprintf('%s/%s/index.php?file=%s/%s.%s.%d.%s', $site_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $theme, $template, $location, $id, $type);
+            $url = sprintf('%s/%s/index.php?file=%s/%s.%s.%s.%s', $site_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $theme, $template, $location, $id, $type);
         }
 
         return $url;
@@ -770,9 +770,9 @@ class W3_Plugin_Minify extends W3_Plugin {
         $site_url_ssl = w3_get_site_url_ssl();
 
         if ($this->_config->get_boolean('minify.rewrite')) {
-            $url = sprintf('%s/%s/%s.%d.%s', $site_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $hash, $id, $type);
+            $url = sprintf('%s/%s/%s.%s.%s', $site_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $hash, $id, $type);
         } else {
-            $url = sprintf('%s/%s/index.php?file=%s.%d.%s', $site_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $hash, $id, $type);
+            $url = sprintf('%s/%s/index.php?file=%s.%s.%s', $site_url_ssl, W3TC_CONTENT_MINIFY_DIR_NAME, $hash, $id, $type);
         }
 
         return $url;
@@ -985,7 +985,11 @@ class W3_Plugin_Minify extends W3_Plugin {
      * @return boolean
      */
     function check_ua() {
-        foreach ($this->_config->get_array('minify.reject.ua') as $ua) {
+        $uas = array_merge($this->_config->get_array('minify.reject.ua'), array(
+            W3TC_POWERED_BY
+        ));
+
+        foreach ($uas as $ua) {
             if (isset($_SERVER['HTTP_USER_AGENT']) && stristr($_SERVER['HTTP_USER_AGENT'], $ua) !== false) {
                 return false;
             }

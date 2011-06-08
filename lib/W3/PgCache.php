@@ -997,7 +997,11 @@ class W3_PgCache {
      * @return boolean
      */
     function _check_ua() {
-        foreach ($this->_config->get_array('pgcache.reject.ua') as $ua) {
+        $uas = array_merge($this->_config->get_array('pgcache.reject.ua'), array(
+            W3TC_POWERED_BY
+        ));
+
+        foreach ($uas as $ua) {
             if (isset($_SERVER['HTTP_USER_AGENT']) && stristr($_SERVER['HTTP_USER_AGENT'], $ua) !== false) {
                 return false;
             }

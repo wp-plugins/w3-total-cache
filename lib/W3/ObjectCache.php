@@ -636,6 +636,13 @@ class W3_ObjectCache {
             return false;
         }
 
+        /**
+         * Check User Agent
+         */
+        if (isset($_SERVER['HTTP_USER_AGENT']) && stristr($_SERVER['HTTP_USER_AGENT'], W3TC_POWERED_BY) !== false) {
+            return false;
+        }
+
         return true;
     }
 

@@ -2686,7 +2686,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
         /**
          * Minify tab
          */
-        if ($this->_page == 'w3tc_minify') {
+        if ($this->_page == 'w3tc_minify' && !$this->_config->get_boolean('minify.auto')) {
             $js_groups = array();
             $css_groups = array();
 
@@ -4752,7 +4752,8 @@ class W3_Plugin_TotalCache extends W3_Plugin {
      */
     function is_memcache_available($servers) {
         static $results = array();
-        $key = md5(serialize($servers));
+
+        $key = md5(implode('', $servers));
 
         if (!isset($results[$key])) {
             require_once W3TC_LIB_W3_DIR . '/Cache/Memcached.php';
@@ -5294,6 +5295,13 @@ class W3_Plugin_TotalCache extends W3_Plugin {
          * Check for WPMU's and WP's 3.0 short init
          */
         if (defined('SHORTINIT') && SHORTINIT) {
+            return false;
+        }
+
+        /**
+         * Check User Agent
+         */
+        if (isset($_SERVER['HTTP_USER_AGENT']) && stristr($_SERVER['HTTP_USER_AGENT'], W3TC_POWERED_BY) !== false) {
             return false;
         }
 
@@ -6013,32 +6021,6 @@ class W3_Plugin_TotalCache extends W3_Plugin {
      */
     function _get_theme_recommendations($groups) {
         /**
-         * Replace CDN hosts to local host
-         */
-        if ($this->_config->get_boolean('cdn.enabled')) {
-            require_once W3TC_LIB_W3_DIR . '/Plugin/Cdn.php';
-
-            $w3_plugin_cdn = & W3_Plugin_Cdn::instance();
-            $cdn = & $w3_plugin_cdn->get_cdn();
-
-            $search = array();
-            $domains = $cdn->get_domains();
-
-            foreach ($domains as $domain) {
-                $_domains = array_map('trim', explode(',', $domain));
-                $search = array_merge($search, $_domains);
-            }
-
-            $replace = w3_get_domain(w3_get_host());
-
-            foreach ($groups as $template => $files) {
-                foreach ($files as $index => $file) {
-                    $groups[$template][$index] = str_replace($search, $replace, $file);
-                }
-            }
-        }
-
-        /**
          * First calculate file usage count
          */
         $all_files = array();
@@ -6170,7 +6152,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
      * @return string
      */
     function link_replace_callback($matches) {
-        list (, $attr, $quote, $domain_url, , $path) = $matches;
+        list (, $attr, $quote, $domain_url, , , $path) = $matches;
 
         $path .= (strstr($path, '?') !== false ? '&amp;' : '?') . 'w3tc_preview=1';
 

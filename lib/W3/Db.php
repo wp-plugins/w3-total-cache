@@ -436,6 +436,13 @@ class W3_Db extends W3_Db_Driver {
             return false;
         }
 
+        /**
+         * Check User Agent
+         */
+        if (isset($_SERVER['HTTP_USER_AGENT']) && stristr($_SERVER['HTTP_USER_AGENT'], W3TC_POWERED_BY) !== false) {
+            return false;
+        }
+
         return true;
     }
 
