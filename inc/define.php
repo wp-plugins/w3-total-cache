@@ -221,14 +221,22 @@ function w3_rmdir($path, $exclude = array(), $remove = true) {
 
     if ($dir) {
         while (($entry = @readdir($dir)) !== false) {
-            $full_path = $path . '/' . $entry;
+            if ($entry == '.' || $entry == '..') {
+                continue;
+            }
 
-            if ($entry != '.' && $entry != '..' && !in_array($full_path, $exclude)) {
-                if (@is_dir($full_path)) {
-                    w3_rmdir($full_path, $exclude);
-                } else {
-                    @unlink($full_path);
+            foreach ($exclude as $mask) {
+                if (fnmatch($mask, basename($entry))) {
+                    continue 2;
                 }
+            }
+
+            $full_path = $path . DIRECTORY_SEPARATOR . $entry;
+
+            if (@is_dir($full_path)) {
+                w3_rmdir($full_path, $exclude);
+            } else {
+                @unlink($full_path);
             }
         }
 
@@ -1747,7 +1755,7 @@ function w3_get_engine_name($engine) {
             $engine_name = 'disk';
             break;
 
-        case 'file_pgcache':
+        case 'file_generic':
             $engine_name = 'disk (enhanced)';
             break;
 

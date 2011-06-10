@@ -29,7 +29,7 @@ class W3_Plugin_PgCache extends W3_Plugin {
         ));
 
         if ($this->_config->get_boolean('pgcache.enabled')) {
-            if ($this->_config->get_string('pgcache.engine') == 'file' || $this->_config->get_string('pgcache.engine') == 'file_pgcache') {
+            if ($this->_config->get_string('pgcache.engine') == 'file' || $this->_config->get_string('pgcache.engine') == 'file_generic') {
                 add_action('w3_pgcache_cleanup', array(
                     &$this,
                     'cleanup'
@@ -123,9 +123,9 @@ class W3_Plugin_PgCache extends W3_Plugin {
      * Activate plugin action
      */
     function activate() {
-        if ($this->_config->get_boolean('pgcache.enabled') && $this->_config->get_string('pgcache.engine') == 'file_pgcache') {
+        if ($this->_config->get_boolean('pgcache.enabled') && $this->_config->get_string('pgcache.engine') == 'file_generic') {
             /**
-             * Disable enchanged mode if permalink structure is disabled
+             * Disable enhanced mode if permalink structure is disabled
              */
             $permalink_structure = get_option('permalink_structure');
 
@@ -186,7 +186,7 @@ class W3_Plugin_PgCache extends W3_Plugin {
      * Schedules events
      */
     function schedule() {
-        if ($this->_config->get_boolean('pgcache.enabled') && ($this->_config->get_string('pgcache.engine') == 'file' || $this->_config->get_string('pgcache.engine') == 'file_pgcache')) {
+        if ($this->_config->get_boolean('pgcache.enabled') && ($this->_config->get_string('pgcache.engine') == 'file' || $this->_config->get_string('pgcache.engine') == 'file_generic')) {
             if (!wp_next_scheduled('w3_pgcache_cleanup')) {
                 wp_schedule_event(time(), 'w3_pgcache_cleanup', 'w3_pgcache_cleanup');
             }
@@ -298,26 +298,29 @@ class W3_Plugin_PgCache extends W3_Plugin {
 
         switch ($engine) {
             case 'file':
-                require_once W3TC_LIB_W3_DIR . '/Cache/File/Manager.php';
+                require_once W3TC_LIB_W3_DIR . '/Cache/File/Cleaner.php';
 
-                $w3_cache_file_manager = & new W3_Cache_File_Manager(array(
+                $w3_cache_file_cleaner = & new W3_Cache_File_Cleaner(array(
                     'cache_dir' => W3TC_CACHE_FILE_PGCACHE_DIR,
                     'clean_timelimit' => $this->_config->get_integer('timelimit.cache_gc')
                 ));
 
-                $w3_cache_file_manager->clean();
+                $w3_cache_file_cleaner->clean();
                 break;
 
-            case 'file_pgcache':
-                require_once W3TC_LIB_W3_DIR . '/Cache/File/PgCache/Manager.php';
+            case 'file_generic':
+                require_once W3TC_LIB_W3_DIR . '/Cache/File/Cleaner/Generic.php';
 
-                $w3_cache_file_pgcache_manager = & new W3_Cache_File_PgCache_Manager(array(
+                $w3_cache_file_cleaner_generic = & new W3_Cache_File_Cleaner_Generic(array(
+                    'exclude' => array(
+                        '.htaccess'
+                    ),
                     'cache_dir' => W3TC_CACHE_FILE_PGCACHE_DIR,
                     'expire' => $this->_config->get_integer('browsercache.html.lifetime'),
                     'clean_timelimit' => $this->_config->get_integer('timelimit.cache_gc')
                 ));
 
-                $w3_cache_file_pgcache_manager->clean();
+                $w3_cache_file_cleaner_generic->clean();
                 break;
         }
     }

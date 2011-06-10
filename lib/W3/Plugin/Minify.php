@@ -178,15 +178,20 @@ class W3_Plugin_Minify extends W3_Plugin {
      * @return void
      */
     function cleanup() {
-        require_once W3TC_LIB_W3_DIR . '/Cache/File/Minify/Manager.php';
+        require_once W3TC_LIB_W3_DIR . '/Cache/File/Cleaner/Generic.php';
 
-        $w3_cache_file_minify_manager = & new W3_Cache_File_Minify_Manager(array(
+        $w3_cache_file_cleaner_generic = & new W3_Cache_File_Cleaner_Generic(array(
+            'exclude' => array(
+                '*.files',
+                '.htaccess',
+                'index.php'
+            ),
             'cache_dir' => W3TC_CACHE_FILE_MINIFY_DIR,
             'expire' => $this->_config->get_integer('minify.file.gc'),
             'clean_timelimit' => $this->_config->get_integer('timelimit.cache_gc')
         ));
 
-        $w3_cache_file_minify_manager->clean();
+        $w3_cache_file_cleaner_generic->clean();
     }
 
     /**

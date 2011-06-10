@@ -1758,7 +1758,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                 $this->_errors[] = sprintf('Page caching is not available. The current add-in %s is either an incorrect file or an old version. De-activate the plugin, remove the file, then activate the plugin again.', W3TC_ADDIN_FILE_ADVANCED_CACHE);
             } elseif (!defined('WP_CACHE') || !WP_CACHE) {
                 $this->_errors[] = sprintf('Page caching is not available: please add: <strong>define(\'WP_CACHE\', true);</strong> to <strong>%swp-config.php</strong>. This error message will automatically disappear once the change is successfully made.', ABSPATH);
-            } elseif ($this->_config->get_string('pgcache.engine') == 'file_pgcache' && $this->_config->get_boolean('config.check') && w3_can_check_rules()) {
+            } elseif ($this->_config->get_string('pgcache.engine') == 'file_generic' && $this->_config->get_boolean('config.check') && w3_can_check_rules()) {
                 require_once W3TC_LIB_W3_DIR . '/Plugin/PgCache.php';
                 $w3_plugin_pgcache = & W3_Plugin_PgCache::instance();
 
@@ -1990,7 +1990,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
         /**
          * Check permalinks
          */
-        if ($this->_config->get_boolean('notes.no_permalink_rules') && (($this->_config->get_boolean('pgcache.enabled') && $this->_config->get_string('pgcache.engine') == 'file_pgcache') || ($this->_config->get_boolean('browsercache.enabled') && $this->_config->get_boolean('browsercache.no404wp'))) && !w3_is_permalink_rules()) {
+        if ($this->_config->get_boolean('notes.no_permalink_rules') && (($this->_config->get_boolean('pgcache.enabled') && $this->_config->get_string('pgcache.engine') == 'file_generic') || ($this->_config->get_boolean('browsercache.enabled') && $this->_config->get_boolean('browsercache.no404wp'))) && !w3_is_permalink_rules()) {
             $this->_errors[] = sprintf('The required directives for fancy permalinks could not be detected, please confirm they are available: <a href="http://codex.wordpress.org/Using_Permalinks#Creating_and_editing_.28.htaccess.29">Creating and editing</a> %s', $this->button_hide_note('Hide this message', 'no_permalink_rules'));
         }
 
@@ -2195,7 +2195,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
 
         $file_engines = array(
             'file',
-            'file_pgcache'
+            'file_generic'
         );
 
         $can_empty_memcache = ($pgcache_enabled && $pgcache_engine == 'memcached');
@@ -2676,7 +2676,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
             /**
              * Check permalinks for page cache
              */
-            if ($config->get_boolean('pgcache.enabled') && $config->get_string('pgcache.engine') == 'file_pgcache' && !get_option('permalink_structure')) {
+            if ($config->get_boolean('pgcache.enabled') && $config->get_string('pgcache.engine') == 'file_generic' && !get_option('permalink_structure')) {
                 $this->redirect(array(
                     'w3tc_error' => 'fancy_permalinks_disabled_pgcache'
                 ));
@@ -3480,7 +3480,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
             /**
              * Write page cache rewrite rules
              */
-            if ($new_config->get_boolean('pgcache.enabled') && $new_config->get_string('pgcache.engine') == 'file_pgcache') {
+            if ($new_config->get_boolean('pgcache.enabled') && $new_config->get_string('pgcache.engine') == 'file_generic') {
                 if (w3_can_modify_rules(w3_get_pgcache_rules_core_path())) {
                     $w3_plugin_pgcache->write_rules_core();
                 }
@@ -5031,7 +5031,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
      */
     function flush_file() {
         $this->flush('file');
-        $this->flush('file_pgcache');
+        $this->flush('file_generic');
     }
 
     /**

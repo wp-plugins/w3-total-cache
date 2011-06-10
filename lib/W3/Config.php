@@ -377,7 +377,7 @@ class W3_Config {
 
         'pgcache.enabled' => false,
         'pgcache.debug' => false,
-        'pgcache.engine' => 'file_pgcache',
+        'pgcache.engine' => 'file_generic',
         'pgcache.file.gc' => 3600,
         'pgcache.file.locking' => false,
         'pgcache.memcached.servers' => array(
@@ -895,8 +895,15 @@ class W3_Config {
             case 'dbcache.engine':
             case 'minify.engine':
             case 'objectcache.engine':
+                /**
+                 * Legacy support
+                 */
+                if ($value == 'file_pgcache') {
+                    $value = 'file_generic';
+                }
+
                 switch (true) {
-                    case ($value == 'file_pgcache' && !w3_can_check_rules()):
+                    case ($value == 'file_generic' && !w3_can_check_rules()):
                     case ($value == 'apc' && !function_exists('apc_store')):
                     case ($value == 'eaccelerator' && !function_exists('eaccelerator_put')):
                     case ($value == 'xcache' && !function_exists('xcache_set')):
@@ -919,7 +926,7 @@ class W3_Config {
              * Disabled some page cache options when enhanced mode enabled
              */
             case 'pgcache.cache.query':
-                if ($this->get_string('pgcache.engine') == 'file_pgcache') {
+                if ($this->get_string('pgcache.engine') == 'file_generic') {
                     return false;
                 }
                 break;

@@ -31,8 +31,8 @@ if (!defined('W3TC_CACHE_FILE')) {
     define('W3TC_CACHE_FILE', 'file');
 }
 
-if (!defined('W3TC_CACHE_FILE_PGCACHE')) {
-    define('W3TC_CACHE_FILE_PGCACHE', 'file_pgcache');
+if (!defined('W3TC_CACHE_FILE_GENERIC')) {
+    define('W3TC_CACHE_FILE_GENERIC', 'file_generic');
 }
 
 /**
@@ -83,9 +83,9 @@ class W3_Cache {
                     $instances[$instance_key] = & new W3_Cache_File($config);
                     break;
 
-                case W3TC_CACHE_FILE_PGCACHE:
-                    require_once W3TC_LIB_W3_DIR . '/Cache/File/PgCache.php';
-                    $instances[$instance_key] = & new W3_Cache_File_PgCache($config);
+                case W3TC_CACHE_FILE_GENERIC:
+                    require_once W3TC_LIB_W3_DIR . '/Cache/File/Generic.php';
+                    $instances[$instance_key] = & new W3_Cache_File_Generic($config);
                     break;
 
                 default:

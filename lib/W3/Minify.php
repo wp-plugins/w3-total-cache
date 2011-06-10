@@ -622,6 +622,10 @@ class W3_Minify {
 
                     $cache[0] = & new Minify_Cache_File(
                         W3TC_CACHE_FILE_MINIFY_DIR,
+                        array(
+                            '.htaccess',
+                            'index.php'
+                        ),
                         $this->_config->get_boolean('minify.file.locking'),
                         $this->_config->get_integer('timelimit.cache_flush')
                     );
