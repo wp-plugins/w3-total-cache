@@ -357,12 +357,11 @@ class W3_Plugin_Cdn extends W3_Plugin {
      * Upload _wp_attached_file, _wp_attachment_metadata, _wp_attachment_backup_sizes
      *
      * @param integer $attachment_id
+     * @param array $results
      * @return boolean
      */
-    function purge_attachment($attachment_id) {
+    function purge_attachment($attachment_id, &$results) {
         $files = $this->get_attachment_files($attachment_id);
-
-        $results = array();
 
         return $this->purge($files, false, $results);
     }
@@ -745,7 +744,7 @@ class W3_Plugin_Cdn extends W3_Plugin {
      * @param array $files
      * @param boolean $queue_failed
      * @param array $results
-     * @return void
+     * @return boolean
      */
     function upload($files, $queue_failed, &$results) {
         $cdn = & $this->get_cdn();
@@ -753,15 +752,17 @@ class W3_Plugin_Cdn extends W3_Plugin {
 
         @set_time_limit($this->_config->get_integer('timelimit.cdn_upload'));
 
-        $cdn->upload($files, $results, $force_rewrite);
+        $return = $cdn->upload($files, $results, $force_rewrite);
 
-        if ($queue_failed) {
+        if (!$return && $queue_failed) {
             foreach ($results as $result) {
                 if ($result['result'] != W3TC_CDN_RESULT_OK) {
                     $this->queue_add($result['local_path'], $result['remote_path'], W3TC_CDN_COMMAND_UPLOAD, $result['error']);
                 }
             }
         }
+
+        return $return;
     }
 
     /**
@@ -770,22 +771,24 @@ class W3_Plugin_Cdn extends W3_Plugin {
      * @param array $files
      * @param boolean $queue_failed
      * @param array $results
-     * @return void
+     * @return boolean
      */
     function delete($files, $queue_failed, &$results) {
         $cdn = & $this->get_cdn();
 
         @set_time_limit($this->_config->get_integer('timelimit.cdn_delete'));
 
-        $cdn->delete($files, $results);
+        $return = $cdn->delete($files, $results);
 
-        if ($queue_failed) {
+        if (!$return && $queue_failed) {
             foreach ($results as $result) {
                 if ($result['result'] != W3TC_CDN_RESULT_OK) {
                     $this->queue_add($result['local_path'], $result['remote_path'], W3TC_CDN_COMMAND_DELETE, $result['error']);
                 }
             }
         }
+
+        return $return;
     }
 
     /**
@@ -817,15 +820,17 @@ class W3_Plugin_Cdn extends W3_Plugin {
 
         @set_time_limit($this->_config->get_integer('timelimit.cdn_purge'));
 
-        $cdn->purge($files, $results);
+        $return = $cdn->purge($files, $results);
 
-        if ($queue_failed) {
+        if (!$return && $queue_failed) {
             foreach ($results as $result) {
                 if ($result['result'] != W3TC_CDN_RESULT_OK) {
                     $this->queue_add($result['local_path'], $result['remote_path'], W3TC_CDN_COMMAND_PURGE, $result['error']);
                 }
             }
         }
+
+        return $return;
     }
 
     /**

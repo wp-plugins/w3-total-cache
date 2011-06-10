@@ -1255,7 +1255,7 @@ function w3_normalize_file_minify($file) {
  * @return string
  */
 function w3_normalize_file_minify2($file) {
-    $file = w3_remove_wp_query($file);
+    $file = w3_remove_query($file);
     $file = w3_normalize_file_minify($file);
     $file = w3_translate_file($file);
 
@@ -1285,8 +1285,8 @@ function w3_translate_file($file) {
  * @param string $url
  * @return string
  */
-function w3_remove_wp_query($url) {
-    $url = preg_replace('~[&\?]?ver=[a-z0-9-_\.]*~i', '', $url);
+function w3_remove_query($url) {
+    $url = preg_replace('~[&\?]+(ver=[a-z0-9-_\.]+|[0-9-]+)~i', '', $url);
 
     return $url;
 }
@@ -1305,7 +1305,7 @@ function w3_path($path) {
 }
 
 /**
- * Returns realpath of given path
+ * Returns real path of given path
  *
  * @param string $path
  * @return string

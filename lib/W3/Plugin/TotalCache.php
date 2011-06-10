@@ -4494,7 +4494,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
     }
 
     /**
-     * Uploads browsercache .htaccess to FTP
+     * Uploads Browser Cache .htaccess to FTP
      *
      * @return void
      */
@@ -4521,7 +4521,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
     }
 
     /**
-     * Deletes browsercache .htaccess to FTP
+     * Deletes Browser Cache .htaccess from FTP
      *
      * @return void
      */
@@ -4661,11 +4661,12 @@ class W3_Plugin_TotalCache extends W3_Plugin {
         require_once W3TC_LIB_W3_DIR . '/Request.php';
         require_once W3TC_LIB_W3_DIR . '/Plugin/Cdn.php';
 
+        $results = array();
         $attachment_id = W3_Request::get_integer('attachment_id');
 
         $w3_plugin_cdn = & W3_Plugin_Cdn::instance();
 
-        if ($w3_plugin_cdn->purge_attachment($attachment_id)) {
+        if ($w3_plugin_cdn->purge_attachment($attachment_id, $results)) {
             $this->redirect(array(
                 'w3tc_note' => 'cdn_purge_attachment'
             ), true);

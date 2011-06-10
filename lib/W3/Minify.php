@@ -51,7 +51,7 @@ class W3_Minify {
         $file = W3_Request::get_string('file');
 
         if (!$file) {
-            $this->error('File param is missing.');
+            $this->error('File param is missing');
         }
 
         $hash = '';
@@ -62,7 +62,7 @@ class W3_Minify {
         } elseif (preg_match('~^([a-f0-9]+)\\/(.+)\\.(include(\\-(footer|body))?(-nb)?)\\.[a-f0-9]+\\.(css|js)$~', $file, $matches)) {
             list(, $theme, $template, $location, , , , $type) = $matches;
         } else {
-            $this->error('Bad file param format.');
+            $this->error(sprintf('Bad file param format: "%s"', $file));
         }
 
         require_once W3TC_LIB_MINIFY_DIR . '/Minify.php';
@@ -221,7 +221,7 @@ class W3_Minify {
      * @return bool
      */
     function log($msg) {
-        $data = sprintf("[%s] [%s] %s\n", date('r'), $_SERVER['REQUEST_URI'], $msg);
+        $data = sprintf("[%s] [%s] [%s] %s\n", date('r'), $_SERVER['REQUEST_URI'], (!empty($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '-'), $msg);
 
         return @file_put_contents(W3TC_MINIFY_LOG_FILE, $data, FILE_APPEND);
     }
@@ -285,7 +285,7 @@ class W3_Minify {
                         if ($precached_file) {
                             $result[$location][$file] = $precached_file;
                         } else {
-                            $this->error(sprintf('Unable to cache remote file: "%s".', $file));
+                            $this->error(sprintf('Unable to cache remote file: "%s"', $file));
                         }
                     } else {
                         $path = w3_get_document_root() . '/' . $file;
@@ -293,7 +293,7 @@ class W3_Minify {
                         if (file_exists($path)) {
                             $result[$location][$file] = '//' . $file;
                         } else {
-                            $this->error(sprintf('File "%s" doesn\'t exist.', $path));
+                            $this->error(sprintf('File "%s" doesn\'t exist', $path));
                         }
                     }
                 }
@@ -501,8 +501,13 @@ class W3_Minify {
      */
     function get_custom_files($hash, $type) {
         $key = $this->get_custom_files_key($hash, $type);
-        $files = (array) $this->_cache_get($key);
-        $files = array_map('w3_normalize_file_minify2', $files);
+        $files = $this->_cache_get($key);
+
+        if ($files) {
+            $files = array_map('w3_normalize_file_minify2', (array) $files);
+        } else {
+            $files = array();
+        }
 
         return $files;
     }
@@ -514,14 +519,24 @@ class W3_Minify {
      * @return void
      */
     function error($error) {
-        $this->_handle_error();
+        $debug = $this->_config->get_boolean('minify.debug');
 
-        if ($this->_config->get_boolean('minify.debug')) {
+        if ($debug) {
             $this->log($error);
         }
 
+        $this->_handle_error();
+
         header('HTTP/1.0 400 Bad Request');
-        echo sprintf('<h1>W3TC Minify Error</h1><p>%s</p>', $error);
+
+        echo '<h1>W3TC Minify Error</h1>';
+
+        if ($debug) {
+            echo sprintf('<p>%s.</p>', $error);
+        } else {
+            echo '<p>Enable debug mode to see error message.</p>';
+        }
+
         die();
     }
 

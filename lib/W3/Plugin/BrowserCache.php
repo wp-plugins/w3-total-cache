@@ -193,7 +193,7 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
         list ($match, $attr, $url, , , , , $extension) = $matches;
 
         if (in_array($extension, $extensions)) {
-            $url = w3_remove_wp_query($url);
+            $url = w3_remove_query($url);
             $url .= (strstr($url, '?') !== false ? '&amp;' : '?') . $id;
 
             return sprintf('%s="%s"', $attr, $url);
