@@ -346,10 +346,36 @@ class W3_Plugin_Minify extends W3_Plugin {
      */
     function filter_files($files) {
         $files = array_map('w3_normalize_file_minify2', $files);
-        $files = array_filter($files, create_function('$el', 'return !w3_is_url($el);'));
+        $files = array_filter($files, array(&$this, '_filter_files'));
         $files = array_values(array_unique($files));
 
         return $files;
+    }
+
+    /**
+     * URL file filter
+     *
+     * @param string $file
+     * @return bool
+     */
+    function _filter_files($file) {
+        if (w3_is_url($file)) {
+            return false;
+        }
+
+        $ext = strrchr($file, '.');
+
+        if ($ext != '.js' && $ext != '.css') {
+            return false;
+        }
+
+        $path = w3_get_document_root() . '/' . $file;
+
+        if (!file_exists($path)) {
+            return false;
+        }
+
+        return true;
     }
 
     /**

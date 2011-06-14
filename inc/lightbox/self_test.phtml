@@ -272,6 +272,15 @@
         </li>
 
         <li>
+            URL rewrite:
+            <?php if (w3_can_check_rules()): ?>
+            <code>Enabled</code>
+            <?php else: ?>
+            <code>Disabled</code>
+            <?php endif; ?>
+        </li>
+
+        <li>
             Network mode:
             <?php if (w3_is_network()): ?>
             <code>Yes (<?php echo (w3_is_subdomain_install() ? 'subdomain' : 'subdir'); ?>)</code>

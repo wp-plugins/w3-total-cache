@@ -294,6 +294,7 @@ class W3_Config {
         'notes.cdn_reupload' => 'boolean',
         'notes.need_empty_pgcache' => 'boolean',
         'notes.need_empty_minify' => 'boolean',
+        'notes.need_empty_objectcache' => 'boolean',
         'notes.pgcache_rules_core' => 'boolean',
         'notes.pgcache_rules_cache' => 'boolean',
         'notes.pgcache_rules_legacy' => 'boolean',
@@ -501,7 +502,7 @@ class W3_Config {
         'minify.htmltidy.options.clean' => false,
         'minify.htmltidy.options.hide-comments' => true,
         'minify.htmltidy.options.wrap' => 0,
-        'minify.reject.logged' => true,
+        'minify.reject.logged' => false,
         'minify.reject.ua' => array(),
         'minify.reject.uri' => array(),
         'minify.error.notification' => '',
@@ -817,6 +818,7 @@ class W3_Config {
         'notes.cdn_reupload' => false,
         'notes.need_empty_pgcache' => false,
         'notes.need_empty_minify' => false,
+        'notes.need_empty_objectcache' => false,
         'notes.pgcache_rules_core' => true,
         'notes.pgcache_rules_cache' => true,
         'notes.pgcache_rules_legacy' => true,
@@ -1343,7 +1345,6 @@ class W3_Config {
      */
     function set_defaults() {
         $this->set('pgcache.enabled', true);
-        $this->set('minify.enabled', true);
         $this->set('minify.auto', true);
         $this->set('browsercache.enabled', true);
     }

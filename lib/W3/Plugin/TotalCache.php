@@ -582,6 +582,14 @@ class W3_Plugin_TotalCache extends W3_Plugin {
         if (isset($_REQUEST['flush_objectcache'])) {
             $this->flush_objectcache();
 
+            $this->_config->set('notes.need_empty_objectcache', false);
+
+            if (!$this->_config->save()) {
+                $this->redirect(array(
+                    'w3tc_error' => 'config_save'
+                ), true);
+            }
+
             $this->redirect(array(
                 'w3tc_note' => 'flush_objectcache'
             ), true);
@@ -1503,6 +1511,13 @@ class W3_Plugin_TotalCache extends W3_Plugin {
         }
 
         /**
+         * Show notification when object cache needs to be emptied
+         */
+        if ($this->_config->get_boolean('objectcache.enabled') && $this->_config->get('notes.need_empty_objectcache') && !w3_is_preview_config()) {
+            $notes[] = sprintf('The setting change(s) made either invalidate the cached data or modify the behavior of the site. %s now to provide a consistent user experience.', $this->button_link('Empty the object cache', sprintf('admin.php?page=%s&flush_objectcache', $this->_page)));
+        }
+
+        /**
          * Minify notifications
          */
         if ($this->_config->get_boolean('minify.enabled')) {
@@ -1817,7 +1832,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                 }
 
                 if ($this->_config->get_boolean('notes.minify_rules_legacy') && $w3_plugin_minify->check_rules_legacy()) {
-                    $this->_errors[] = sprintf('Legacy Minify rewrite rules have been found. To remove them manually, edit the configuration file (<strong>%s</strong>) and remove all lines between and including <strong>%s</strong> and <strong>%s</strong> markers inclusive. Or if permission allow this can be done automatically, by clicking here: %s. %s', w3_get_minify_rules_core_path(), W3TC_MARKER_BEGIN_PGCACHE_LEGACY, W3TC_MARKER_END_PGCACHE_LEGACY, $this->button_link('auto-remove', sprintf('admin.php?page=%s&minify_remove_rules_legacy', $this->_page)), $this->button_hide_note('Hide this message', 'minify_rules_legacy'));
+                    $this->_errors[] = sprintf('Legacy Minify rewrite rules have been found. To remove them manually, edit the configuration file (<strong>%s</strong>) and remove all lines between and including <strong>%s</strong> and <strong>%s</strong> markers inclusive. Or if permission allow this can be done automatically, by clicking here: %s. %s', w3_get_minify_rules_core_path(), W3TC_MARKER_BEGIN_MINIFY_LEGACY, W3TC_MARKER_END_MINIFY_LEGACY, $this->button_link('auto-remove', sprintf('admin.php?page=%s&minify_remove_rules_legacy', $this->_page)), $this->button_hide_note('Hide this message', 'minify_rules_legacy'));
                 }
 
                 if ($this->_config->get_string('minify.engine') == 'file' && $this->_config->get_boolean('notes.minify_rules_cache') && !$w3_plugin_minify->check_rules_cache()) {
@@ -3361,6 +3376,30 @@ class W3_Plugin_TotalCache extends W3_Plugin {
         }
 
         /**
+         * Show need empty object cache notification
+         */
+        if ($this->_config->get_boolean('objectcache.enabled')) {
+            $objectcache_dependencies = array(
+                'objectcache.reject.admin',
+                'objectcache.reject.uri',
+                'objectcache.groups.global',
+                'objectcache.groups.nonpersistent'
+            );
+
+            $old_objectcache_dependencies_values = array();
+            $new_objectcache_dependencies_values = array();
+
+            foreach ($objectcache_dependencies as $objectcache_dependency) {
+                $old_objectcache_dependencies_values[] = $old_config->get($objectcache_dependency);
+                $new_objectcache_dependencies_values[] = $new_config->get($objectcache_dependency);
+            }
+
+            if (serialize($old_objectcache_dependencies_values) != serialize($new_objectcache_dependencies_values)) {
+                $new_config->set('notes.need_empty_objectcache', true);
+            }
+        }
+
+        /**
          * Save config
          */
         if ($new_config->save($preview)) {
@@ -4899,7 +4938,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
             $data = w3_http_get($url);
 
             if ($data !== false) {
-                $result = ($data == 'OK');
+                $result = (trim($data) == 'OK');
             } else {
                 $result = true;
             }

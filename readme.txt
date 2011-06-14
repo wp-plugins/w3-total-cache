@@ -278,7 +278,7 @@ Install the plugin to read the full FAQ.
 **February 2011:**
 
 * [Optimizing WordPress with Nginx, Varnish, W3 Total Cache, Amazon S3, and Memcached (With Benchmarks)](http://danielmiessler.com/blog/optimizing-wordpress-with-nginx-varnish-w3-total-cache-amazon-s3-and-memcached), Daniel Miessler
-* [My WordPress site loads in 2 seconds… does yours?](http://labsecrets.com/blog/2011/02/14/my-wordpress-site-loads-in-two-seconds-does-yours/)
+* [My WordPress site loads in 2 seconds... does yours?](http://labsecrets.com/blog/2011/02/14/my-wordpress-site-loads-in-two-seconds-does-yours/)
 
 **January 2011:**
 
@@ -290,14 +290,14 @@ Install the plugin to read the full FAQ.
 **December 2010:**
 
 * [Best blog plugins](http://www.blog.web6.org/best-blog-plugins/)
-* [How To Make Your WordPress Blog Load Faster(http://www.johnchow.com/how-to-make-your-wordpress-blog-load-faster/), John Chow
+* [How To Make Your WordPress Blog Load Faster](http://www.johnchow.com/how-to-make-your-wordpress-blog-load-faster/), John Chow
 * [Unleash the Power of WordPress Using Plugin Combos](http://freelancefolder.com/unleash-the-power-of-wordpress-using-plugin-combos/), Paul de Wouters
 * [Rackspace Cloud Files for WordPress](http://sporkmarketing.com/blog/1095/rackspace-cloud-files-wordpress/), Jason Lancaster
 
 **November 2010:**
 
 * [Make your blog super fast with W3 Total Cache plugin](http://laspas.gr/2010/11/26/make-blog-super-fast-w3-total-cache-plugin/), Stratos Laspas
-* [10 WordPress Plugins I’m Thankful For (And Cannot Live Without)](http://wpmu.org/10-wordpress-plugins-im-thankful-for-and-cannot-live-without/), Sarah Gooding
+* [10 WordPress Plugins I'm Thankful For (And Cannot Live Without)](http://wpmu.org/10-wordpress-plugins-im-thankful-for-and-cannot-live-without/), Sarah Gooding
 * [Subjective Results of Installing W3 Total Cache Plugin](http://www.codyhatch.com/administriva/subjective-results-of-installing-w3-total-cache-plugin/), Cody Hatch
 * [13 Plugins Your WordPress Site Might Need](http://www.jonbishop.com/2010/11/13-plugins-your-wordpress-site-might-need/), Jon Bishop
 * [Best WordPress Plugins that Marketers Use](http://www.nicoleonthenet.com/6390/best-wordpress-plugins-marketers-use/), Nicole Dean
