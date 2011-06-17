@@ -106,6 +106,29 @@ class W3_Cdn_Mirror_Netdna extends W3_Cdn_Mirror {
     }
 
     /**
+     * Tests NetDNA
+     *
+     * @param string $error
+     * @return bool
+     */
+    function test(&$error) {
+        if (!parent::test($error)) {
+            return false;
+        }
+
+        $results = array();
+        $files = array('' => 'purge_test_' . time());
+
+        if (!$this->purge($files, $results) && isset($results[0]['error'])) {
+            $error = $results[0]['error'];
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Returns SHA 256 hash of string
      *
      * @param string $string

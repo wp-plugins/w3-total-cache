@@ -507,7 +507,9 @@ jQuery(function() {
 
             case me.hasClass('cdn_netdna'):
                 jQuery.extend(params, {
-                    engine: 'netdna'
+                    engine: 'netdna',
+                    'config[apiid]': jQuery('#cdn_netdna_apiid').val(),
+                    'config[apikey]': jQuery('#cdn_netdna_apikey').val()
                 });
 
                 if (cnames.length) {
