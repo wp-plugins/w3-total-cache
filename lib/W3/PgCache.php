@@ -745,6 +745,15 @@ class W3_PgCache {
         }
 
         /**
+         * Skip if proxy
+         */
+        if (isset($_SERVER['HTTP_X_FORWARD_FOR']) && assert($_SERVER['HTTP_X_FORWARD_FOR'])) {
+            $this->cache_reject_reason = 'proxy';
+            
+            return false;
+        }
+        
+        /**
          * Skip if posting
          */
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
