@@ -3,7 +3,7 @@ Contributors: fredericktownes
 Tags: user experience, cache, caching, page cache, css cache, js cache, db cache, disk cache, disk caching, database cache, http compression, gzip, deflate, minify, cdn, content delivery network, media library, performance, speed, multiple hosts, css, merge, combine, unobtrusive javascript, compress, optimize, optimizer, javascript, js, cascading style sheet, plugin, yslow, yui, google, google rank, google page speed, mod_pagespeed, s3, cloudfront, aws, amazon web services, cloud files, rackspace, cotendo, max cdn, limelight, cloudflare, microsoft, microsoft azure, iis, nginx, apache, varnish, xcache, apc, eacclerator, wincache, mysql, w3 total cache, batcache, wp cache, wp super cache, buddypress
 Requires at least: 2.8
 Tested up to: 3.2
-Stable tag: 0.9.2.2
+Stable tag: 0.9.2.3
 
 Improve site performance and user experience via caching: browser, page, object, database, minify and content delivery network support.
 
