@@ -102,7 +102,7 @@ class W3_PgCache {
         $this->_debug = $this->_config->get_boolean('pgcache.debug');
         $this->_request_uri = $_SERVER['REQUEST_URI'];
         $this->_lifetime = $this->_config->get_integer('browsercache.html.lifetime');
-        $this->_enhanced_mode = ($this->_config->get_string('pgcache.engine') == 'file_generic');
+        $this->_enhanced_mode = ($this->_config->get_string('pgcache.engine') == 'file_pgcache');
 
         if ($this->_config->get_boolean('mobile.enabled')) {
             require_once W3TC_LIB_W3_DIR . '/Mobile.php';
@@ -745,15 +745,6 @@ class W3_PgCache {
         }
 
         /**
-         * Skip if proxy
-         */
-        if (isset($_SERVER['HTTP_X_FORWARD_FOR']) && assert($_SERVER['HTTP_X_FORWARD_FOR'])) {
-            $this->cache_reject_reason = 'proxy';
-            
-            return false;
-        }
-        
-        /**
          * Skip if posting
          */
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -931,14 +922,11 @@ class W3_PgCache {
                     );
                     break;
 
-                case 'file_generic':
+                case 'file_pgcache':
                     $engineConfig = array(
-                        'exclude' => array(
-                            '.htaccess'
-                        ),
-                        'expire' => $this->_lifetime,
                         'cache_dir' => W3TC_CACHE_FILE_PGCACHE_DIR,
                         'locking' => $this->_config->get_boolean('pgcache.file.locking'),
+                        'expire' => $this->_lifetime,
                         'flush_timelimit' => $this->_config->get_integer('timelimit.cache_flush')
                     );
                     break;
@@ -1009,11 +997,7 @@ class W3_PgCache {
      * @return boolean
      */
     function _check_ua() {
-        $uas = array_merge($this->_config->get_array('pgcache.reject.ua'), array(
-            W3TC_POWERED_BY
-        ));
-
-        foreach ($uas as $ua) {
+        foreach ($this->_config->get_array('pgcache.reject.ua') as $ua) {
             if (isset($_SERVER['HTTP_USER_AGENT']) && stristr($_SERVER['HTTP_USER_AGENT'], $ua) !== false) {
                 return false;
             }
