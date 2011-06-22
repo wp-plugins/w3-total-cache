@@ -447,6 +447,16 @@ Please reach out to all of these people and support their projects if you're so 
 
 == Changelog ==
 
+= 0.9.2.3 =
+* Added additional CloudFlare IP range
+* Fixed bug in html tidy encoding
+* Fixed bug with NetDNA / MaxCDN purging
+* Improved handling of markers in .htaccess files - easier upgrades
+* Improved cache busting logic
+* Improved numerous notifications and user interface behaviors
+* Improved AWS S3 and Cloudfront reliability
+* Improved reliability of minify auto mode
+
 = 0.9.2.2 =
 * Fixed bug with minify directives, e.g.: "File param is missing," causing minify caching to fail
 * Fixed bug with document root detection for IIS server
