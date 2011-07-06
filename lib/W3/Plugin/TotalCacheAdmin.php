@@ -819,7 +819,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
              * Minify error occured
              */
             if ($this->_config->get('notes.minify_error')) {
-                $errors[] = sprintf('Recently an error occurred while creating the CSS / JS minify cache: Some files were unavailable, please check the settings to ensure the site is working as intended. %s', $this->button_hide_note('Hide this message', 'minify_error'));
+                $errors[] = sprintf('Recently an error occurred while creating the CSS / JS minify cache: %s. %s', $this->_config->get_string('minify.error.last'), $this->button_hide_note('Hide this message', 'minify_error'));
             }
 
             /**

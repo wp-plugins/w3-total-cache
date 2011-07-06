@@ -26,7 +26,6 @@ class W3_Minify {
 
     /**
      * PHP4 constructor
-     * @return W3_Minify
      */
     function W3_Minify() {
         $this->__construct();
@@ -34,6 +33,8 @@ class W3_Minify {
 
     /**
      * Runs minify
+     *
+     * @return void
      */
     function process() {
         require_once W3TC_LIB_W3_DIR . '/Request.php';
@@ -52,6 +53,7 @@ class W3_Minify {
 
         if (!$file) {
             $this->error('File param is missing');
+            return;
         }
 
         $hash = '';
@@ -63,6 +65,7 @@ class W3_Minify {
             list(, $theme, $template, $location, , , , $type) = $matches;
         } else {
             $this->error(sprintf('Bad file param format: "%s"', $file));
+            return;
         }
 
         require_once W3TC_LIB_MINIFY_DIR . '/Minify.php';
@@ -422,8 +425,14 @@ class W3_Minify {
 
         if ($id === false) {
             $sources = $this->get_sources_custom($hash, $type);
-            $id = $this->_generate_id($sources, $type);
-            $this->_cache_set($key, $id);
+
+            if (count($sources)) {
+                $id = $this->_generate_id($sources, $type);
+
+                if ($id) {
+                    $this->_cache_set($key, $id);
+                }
+            }
         }
 
         return $id;
@@ -444,8 +453,14 @@ class W3_Minify {
 
         if ($id === false) {
             $sources = $this->get_sources_group($theme, $template, $location, $type);
-            $id = $this->_generate_id($sources, $type);
-            $this->_cache_set($key, $id);
+
+            if (count($sources)) {
+                $id = $this->_generate_id($sources, $type);
+
+                if ($id) {
+                    $this->_cache_set($key, $id);
+                }
+            }
         }
 
         return $id;
@@ -506,6 +521,7 @@ class W3_Minify {
         if ($files) {
             $files = array_map('w3_normalize_file_minify2', (array) $files);
         } else {
+            $this->error(sprintf('Unable to fetch custom files list: "%s.%s"', $hash, $type));
             $files = array();
         }
 
@@ -525,19 +541,21 @@ class W3_Minify {
             $this->log($error);
         }
 
-        $this->_handle_error();
+        $this->_handle_error($error);
 
-        header('HTTP/1.0 400 Bad Request');
+        if (defined('W3TC_IN_MINIFY')) {
+            header('HTTP/1.0 400 Bad Request');
 
-        echo '<h1>W3TC Minify Error</h1>';
+            echo '<h1>W3TC Minify Error</h1>';
 
-        if ($debug) {
-            echo sprintf('<p>%s.</p>', $error);
-        } else {
-            echo '<p>Enable debug mode to see error message.</p>';
+            if ($debug) {
+                echo sprintf('<p>%s.</p>', $error);
+            } else {
+                echo '<p>Enable debug mode to see error message.</p>';
+            }
+
+            die();
         }
-
-        die();
     }
 
     /**
@@ -639,13 +657,15 @@ class W3_Minify {
     /**
      * Handle minify error
      *
+     * @param string
      * @return void
      */
-    function _handle_error() {
+    function _handle_error($error) {
         $notification = $this->_config->get_string('minify.error.notification');
 
         if ($notification) {
             if (stristr($notification, 'admin') !== false) {
+                $this->_config->set('minify.error.last', $error);
                 $this->_config->set('notes.minify_error', true);
             }
 
@@ -706,7 +726,7 @@ class W3_Minify {
                 if ($data !== false) {
                     $values[] = md5($data);
                 } else {
-                    $values[] = false;
+                    return false;
                 }
             }
         }
@@ -807,9 +827,15 @@ class W3_Minify {
     function _cache_get($key) {
         $cache =& $this->_get_cache();
 
-        $value = @unserialize($cache->fetch($key));
+        $data = $cache->fetch($key);
 
-        return $value;
+        if ($data) {
+            $value = @unserialize($data);
+
+            return $value;
+        }
+
+        return false;
     }
 
     /**

@@ -158,6 +158,7 @@ class W3_Config {
         'minify.reject.logged' => 'boolean',
         'minify.reject.ua' => 'array',
         'minify.reject.uri' => 'array',
+        'minify.error.last' => 'string',
         'minify.error.notification' => 'string',
         'minify.error.notification.last' => 'integer',
 
@@ -506,6 +507,7 @@ class W3_Config {
         'minify.reject.logged' => false,
         'minify.reject.ua' => array(),
         'minify.reject.uri' => array(),
+        'minify.error.last' => '',
         'minify.error.notification' => '',
         'minify.error.notification.last' => 0,
 
@@ -1268,7 +1270,7 @@ class W3_Config {
         if (is_numeric($key) && (string) (int) $key === (string) $key) {
             @fputs($fp, sprintf("%d => ", $key));
         } else {
-            @fputs($fp, sprintf("'%s' => ", addslashes($key)));
+            @fputs($fp, sprintf("'%s' => ", addcslashes($key, "'\\")));
         }
 
         switch (gettype($value)) {
@@ -1301,7 +1303,7 @@ class W3_Config {
 
             default:
             case 'string':
-                $data = "'" . addslashes((string) $value) . "'";
+                $data = "'" . addcslashes($value, "'\\") . "'";
                 break;
         }
 
