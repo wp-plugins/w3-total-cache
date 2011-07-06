@@ -31,6 +31,9 @@
  * @license    http://phpazure.codeplex.com/license
  * @version    $Id: SharedKeyCredentials.php 14561 2009-05-07 08:05:12Z unknown $
  */
+if (!defined('W3TC')) {
+    die();
+}
 
 /**
  * @see Microsoft_WindowsAzure_Credentials_CredentialsAbstract
@@ -57,7 +60,7 @@ require_once 'Microsoft/WindowsAzure/Credentials/Exception.php';
  * @package    Microsoft_WindowsAzure
  * @copyright  Copyright (c) 2009 - 2010, RealDolmen (http://www.realdolmen.com)
  * @license    http://phpazure.codeplex.com/license
- */ 
+ */
 class Microsoft_WindowsAzure_Credentials_SharedKeyLite
     extends Microsoft_WindowsAzure_Credentials_CredentialsAbstract
 {
@@ -76,7 +79,7 @@ class Microsoft_WindowsAzure_Credentials_SharedKeyLite
 	) {
 	    return $requestUrl;
 	}
-	
+
 	/**
 	 * Sign request headers with credentials
 	 *
@@ -104,7 +107,7 @@ class Microsoft_WindowsAzure_Credentials_SharedKeyLite
 		if (!$forTableStorage) {
 			throw new Microsoft_WindowsAzure_Credentials_Exception('The Windows Azure SDK for PHP does not support SharedKeyLite authentication on blob or queue storage. Use SharedKey authentication instead.');
 		}
-		
+
 		// Determine path
 		if ($this->_usePathStyleUri) {
 			$path = substr($path, strpos($path, '/'));
@@ -131,7 +134,7 @@ class Microsoft_WindowsAzure_Credentials_SharedKeyLite
 		    $requestDate = gmdate('D, d M Y H:i:s', time()) . ' GMT'; // RFC 1123
 		}
 
-		// Create string to sign   
+		// Create string to sign
 		$stringToSign   = array();
     	$stringToSign[] = $requestDate; // Date
     	$stringToSign[] = $canonicalizedResource;		 			// Canonicalized resource
@@ -141,14 +144,14 @@ class Microsoft_WindowsAzure_Credentials_SharedKeyLite
     	// Sign request
     	$headers[Microsoft_WindowsAzure_Credentials_CredentialsAbstract::PREFIX_STORAGE_HEADER . 'date'] = $requestDate;
     	$headers['Authorization'] = 'SharedKeyLite ' . $this->_accountName . ':' . $signString;
-    	
+
     	// Return headers
     	return $headers;
 	}
-	
+
 	/**
 	 * Prepare query string for signing
-	 * 
+	 *
 	 * @param  string $value Original query string
 	 * @return string        Query string for signing
 	 */
@@ -159,11 +162,11 @@ class Microsoft_WindowsAzure_Credentials_SharedKeyLite
 	        // If not found, no query string needed
 	        return '';
 	    } else {
-	        // If found, make sure it is the only parameter being used      
+	        // If found, make sure it is the only parameter being used
     		if (strlen($value) > 0 && strpos($value, '?') === 0) {
     			$value = substr($value, 1);
     		}
-    		
+
     		// Split parts
     		$queryParts = explode('&', $value);
     		foreach ($queryParts as $queryPart) {

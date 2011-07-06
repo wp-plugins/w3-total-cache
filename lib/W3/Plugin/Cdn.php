@@ -3,6 +3,10 @@
 /**
  * W3 Total Cache CDN Plugin
  */
+if (!defined('W3TC')) {
+    die();
+}
+
 require_once W3TC_LIB_W3_DIR . '/Plugin.php';
 
 /**

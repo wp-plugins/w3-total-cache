@@ -1,5 +1,24 @@
 <?php
 
+if (!function_exists('file_put_contents')) {
+    if (!defined('FILE_APPEND')) {
+        define('FILE_APPEND', 8);
+    }
+
+    function file_put_contents($filename, $data, $flags = 0) {
+        $fp = fopen($filename, ($flags & FILE_APPEND ? 'a' : 'w'));
+
+        if ($fp) {
+            fputs($fp, $data);
+            fclose($fp);
+
+            return true;
+        }
+
+        return false;
+    }
+}
+
 if (!function_exists('json_encode')) {
     function json_encode($string) {
         global $json;

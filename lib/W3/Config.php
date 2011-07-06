@@ -397,7 +397,8 @@ class W3_Config {
             'P3P'
         ),
         'pgcache.accept.uri' => array(
-            'sitemap\.xml(\.gz)?'
+            'sitemap(_index)?\.xml(\.gz)?',
+            '[a-z0-9_\-]+-sitemap([0-9]+)?\.xml(\.gz)?'
         ),
         'pgcache.accept.files' => array(
             'wp-comments-popup.php',
@@ -597,7 +598,8 @@ class W3_Config {
         'browsercache.no404wp' => false,
         'browsercache.no404wp.exceptions' => array(
             'robots\.txt',
-            'sitemap(_index|[0-9]+)?\.xml(\.gz)?'
+            'sitemap(_index)?\.xml(\.gz)?',
+            '[a-z0-9_\-]+-sitemap([0-9]+)?\.xml(\.gz)?'
         ),
         'browsercache.cssjs.compression' => true,
         'browsercache.cssjs.expires' => false,

@@ -1,5 +1,9 @@
 <?php
 
+if (!defined('W3TC')) {
+    die();
+}
+
 class Minify_Inline_JavaScript extends Minify_Inline {
     public static function minify($content, $minifier, $options = array()) {
         $inline = new self;

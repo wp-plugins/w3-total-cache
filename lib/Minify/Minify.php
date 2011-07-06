@@ -3,6 +3,9 @@
  * Class Minify
  * @package Minify
  */
+if (!defined('W3TC')) {
+    die();
+}
 
 /**
  * Minify_Source

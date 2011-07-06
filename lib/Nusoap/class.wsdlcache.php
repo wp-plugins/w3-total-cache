@@ -6,14 +6,17 @@ http://sourceforge.net/projects/nusoap/
 The primary support for NuSOAP is the mailing list:
 nusoap-general@lists.sourceforge.net
 */
+if (!defined('W3TC')) {
+    die();
+}
 
 /**
 * caches instances of the wsdl class
-* 
+*
 * @author   Scott Nichol <snichol@users.sourceforge.net>
 * @author	Ingo Fischer <ingo@apollon.de>
 * @version  $Id: class.wsdlcache.php,v 1.7 2007/04/17 16:34:03 snichol Exp $
-* @access public 
+* @access public
 */
 class nusoap_wsdlcache {
 	/**

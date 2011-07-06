@@ -3,6 +3,10 @@
 /**
  * W3 DbCache plugin
  */
+if (!defined('W3TC')) {
+    die();
+}
+
 require_once W3TC_LIB_W3_DIR . '/Plugin.php';
 
 /**

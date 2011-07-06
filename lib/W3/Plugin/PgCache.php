@@ -3,6 +3,10 @@
 /**
  * W3 PgCache plugin
  */
+if (!defined('W3TC')) {
+    die();
+}
+
 require_once W3TC_LIB_W3_DIR . '/Plugin.php';
 
 /**
@@ -149,8 +153,8 @@ class W3_Plugin_PgCache extends W3_Plugin {
             }
 
             if ((!defined('WP_CACHE') || !WP_CACHE) && !$this->enable_wp_cache()) {
-                $activate_url = wp_nonce_url('plugins.php?action=activate&plugin=' . W3TC_FILE, 'activate-plugin_' . W3TC_FILE);
-                $reactivate_button = sprintf('<input type="button" value="re-activate plugin" onclick="top.location.href = \'%s\'" />', addslashes($activate_url));
+                $reactivate_url = wp_nonce_url('plugins.php?action=activate&plugin=' . W3TC_FILE, 'activate-plugin_' . W3TC_FILE);
+                $reactivate_button = sprintf('<input type="button" value="re-activate plugin" onclick="top.location.href = \'%s\'" />', addslashes($reactivate_url));
                 $error = sprintf('<strong>%swp-config.php</strong> could not be written, please edit config and add:<br /><strong style="color:#f00;">define(\'WP_CACHE\', true);</strong> before <strong style="color:#f00;">require_once(ABSPATH . \'wp-settings.php\');</strong><br />then %s.', ABSPATH, $reactivate_button);
 
                 w3_activate_error($error);
@@ -781,8 +785,6 @@ class W3_Plugin_PgCache extends W3_Plugin {
             } else {
                 $rules .= "\n";
             }
-        } else {
-            $rules .= "    RewriteCond %{REQUEST_URI} [^\\/]$\n";
         }
 
         /**
@@ -816,7 +818,7 @@ class W3_Plugin_PgCache extends W3_Plugin {
         /**
          * Check if cache file exists
          */
-        $rules .= "    RewriteCond \"%{DOCUMENT_ROOT}" . $cache_path . "/%{REQUEST_URI}/_index%{ENV:W3TC_UA}%{ENV:W3TC_REF}%{ENV:W3TC_SSL}.html%{ENV:W3TC_ENC}\" -f\n";
+        $rules .= "    RewriteCond \"%{DOCUMENT_ROOT}" . $cache_path . "/%{REQUEST_URI}/_index%{ENV:W3TC_UA}%{ENV:W3TC_REF}%{ENV:W3TC_SSL}.html%{ENV:W3TC_ENC}\" -" . ($this->_config->get_boolean('pgcache.file.locking') ? 'F' : 'f') . "\n";
 
         /**
          * Make final rewrite
@@ -974,10 +976,6 @@ class W3_Plugin_PgCache extends W3_Plugin {
                 $rules .= "    set \$w3tc_rewrite 0;\n";
                 $rules .= "}\n";
             }
-        } else {
-            $rules .= "if (\$request_uri !~ [^\\/]$) {\n";
-            $rules .= "    set \$w3tc_rewrite 0;\n";
-            $rules .= "}\n";
         }
 
         /**

@@ -32,6 +32,9 @@
  * @license    http://phpazure.codeplex.com/license
  * @version    $Id: BlobContainer.php 24352 2009-07-24 06:44:32Z unknown $
  */
+if (!defined('W3TC')) {
+    die();
+}
 
 /**
  * @see Microsoft_WindowsAzure_Exception
@@ -49,7 +52,7 @@ require_once 'Microsoft/WindowsAzure/Storage/StorageEntityAbstract.php';
  * @subpackage Storage
  * @copyright  Copyright (c) 2009 - 2010, RealDolmen (http://www.realdolmen.com)
  * @license    http://phpazure.codeplex.com/license
- * 
+ *
  * @property string $Id           Id for the signed identifier
  * @property string $Start        The time at which the Shared Access Signature becomes valid.
  * @property string $Expiry       The time at which the Shared Access Signature becomes invalid.
@@ -60,13 +63,13 @@ class Microsoft_WindowsAzure_Storage_SignedIdentifier
 {
     /**
      * Constructor
-     * 
+     *
      * @param string $id           Id for the signed identifier
      * @param string $start        The time at which the Shared Access Signature becomes valid.
      * @param string $expiry       The time at which the Shared Access Signature becomes invalid.
      * @param string $permissions  Signed permissions - read (r), write (w), delete (d) and list (l)
      */
-    public function __construct($id = '', $start = '', $expiry = '', $permissions = '') 
+    public function __construct($id = '', $start = '', $expiry = '', $permissions = '')
     {
         $this->_data = array(
             'id'           => $id,

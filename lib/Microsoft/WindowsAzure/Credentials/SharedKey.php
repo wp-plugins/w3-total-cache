@@ -31,6 +31,9 @@
  * @license    http://phpazure.codeplex.com/license
  * @version    $Id$
  */
+if (!defined('W3TC')) {
+    die();
+}
 
 /**
  * @see Microsoft_WindowsAzure_Credentials_CredentialsAbstract
@@ -57,7 +60,7 @@ require_once 'Microsoft/WindowsAzure/Credentials/Exception.php';
  * @package    Microsoft_WindowsAzure
  * @copyright  Copyright (c) 2009 - 2010, RealDolmen (http://www.realdolmen.com)
  * @license    http://phpazure.codeplex.com/license
- */ 
+ */
 class Microsoft_WindowsAzure_Credentials_SharedKey
     extends Microsoft_WindowsAzure_Credentials_CredentialsAbstract
 {
@@ -76,7 +79,7 @@ class Microsoft_WindowsAzure_Credentials_SharedKey
 	) {
 	    return $requestUrl;
 	}
-	
+
 	/**
 	 * Sign request headers with credentials
 	 *
@@ -106,7 +109,7 @@ class Microsoft_WindowsAzure_Credentials_SharedKey
 		if ($forTableStorage) {
 			throw new Microsoft_WindowsAzure_Credentials_Exception('The Windows Azure SDK for PHP does not support SharedKey authentication on table storage. Use SharedKeyLite authentication instead.');
 		}
-		
+
 		// Determine path
 		if ($this->_usePathStyleUri) {
 			$path = substr($path, strpos($path, '/'));
@@ -114,10 +117,10 @@ class Microsoft_WindowsAzure_Credentials_SharedKey
 
 		// Determine query
 		$queryString = $this->_prepareQueryStringForSigning($queryString);
-	
+
 		// Canonicalized headers
 		$canonicalizedHeaders = array();
-		
+
 		// Request date
 		$requestDate = '';
 		if (isset($headers[Microsoft_WindowsAzure_Credentials_CredentialsAbstract::PREFIX_STORAGE_HEADER . 'date'])) {
@@ -126,7 +129,7 @@ class Microsoft_WindowsAzure_Credentials_SharedKey
 		    $requestDate = gmdate('D, d M Y H:i:s', time()) . ' GMT'; // RFC 1123
 		    $canonicalizedHeaders[] = Microsoft_WindowsAzure_Credentials_CredentialsAbstract::PREFIX_STORAGE_HEADER . 'date:' . $requestDate;
 		}
-		
+
 		// Build canonicalized headers
 		if (!is_null($headers)) {
 			foreach ($headers as $header => $value) {
@@ -154,20 +157,20 @@ class Microsoft_WindowsAzure_Credentials_SharedKey
 		    	$canonicalizedResource .= "\n" . strtolower($key) . ':' . $value;
 		    }
 		}
-		
+
 		// Content-Length header
 		$contentLength = '';
 		if (strtoupper($httpVerb) != Microsoft_Http_Client::GET
 			 && strtoupper($httpVerb) != Microsoft_Http_Client::DELETE
 			 && strtoupper($httpVerb) != Microsoft_Http_Client::HEAD) {
 			$contentLength = 0;
-			
+
 			if (!is_null($rawData)) {
 				$contentLength = strlen($rawData);
 			}
 		}
 
-		// Create string to sign   
+		// Create string to sign
 		$stringToSign   = array();
 		$stringToSign[] = strtoupper($httpVerb); 									// VERB
     	$stringToSign[] = $this->_issetOr($headers, 'Content-Encoding', '');		// Content-Encoding
@@ -181,11 +184,11 @@ class Microsoft_WindowsAzure_Credentials_SharedKey
     	$stringToSign[] = $this->_issetOr($headers, 'If-None-Match', '');			// If-None-Match
     	$stringToSign[] = $this->_issetOr($headers, 'If-Unmodified-Since', '');		// If-Unmodified-Since
     	$stringToSign[] = $this->_issetOr($headers, 'Range', '');					// Range
-    	
+
     	if (!$forTableStorage && count($canonicalizedHeaders) > 0) {
     		$stringToSign[] = implode("\n", $canonicalizedHeaders); // Canonicalized headers
     	}
-    		
+
     	$stringToSign[] = $canonicalizedResource;		 			// Canonicalized resource
     	$stringToSign   = implode("\n", $stringToSign);
     	$signString     = base64_encode(hash_hmac('sha256', $stringToSign, $this->_accountKey, true));
@@ -193,7 +196,7 @@ class Microsoft_WindowsAzure_Credentials_SharedKey
     	// Sign request
     	$headers[Microsoft_WindowsAzure_Credentials_CredentialsAbstract::PREFIX_STORAGE_HEADER . 'date'] = $requestDate;
     	$headers['Authorization'] = 'SharedKey ' . $this->_accountName . ':' . $signString;
-    	
+
     	// Return headers
     	return $headers;
 	}

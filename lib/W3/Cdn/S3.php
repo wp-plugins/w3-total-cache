@@ -3,11 +3,15 @@
 /**
  * Amazon S3 CDN engine
  */
-require_once W3TC_LIB_W3_DIR . '/Cdn/Base.php';
+if (!defined('ABSPATH')) {
+    die();
+}
 
 if (!class_exists('S3')) {
     require_once W3TC_LIB_DIR . '/S3.php';
 }
+
+require_once W3TC_LIB_W3_DIR . '/Cdn/Base.php';
 
 /**
  * Class W3_Cdn_S3

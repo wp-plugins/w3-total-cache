@@ -32,6 +32,9 @@
  * @license    http://phpazure.codeplex.com/license
  * @version    $Id: Storage.php 45989 2010-05-03 12:19:10Z unknown $
  */
+if (!defined('W3TC')) {
+    die();
+}
 
 /**
  * @see Microsoft_WindowsAzure_Storage_Blob
@@ -59,21 +62,21 @@ class Microsoft_WindowsAzure_Diagnostics_Manager
 {
 	/**
 	 * Blob storage client
-	 * 
+	 *
 	 * @var Microsoft_WindowsAzure_Storage_Blob
 	 */
 	protected $_blobStorageClient = null;
-	
+
 	/**
 	 * Control container name
-	 * 
+	 *
 	 * @var string
 	 */
 	protected $_controlContainer = '';
 
 	/**
 	 * Create a new instance of Microsoft_WindowsAzure_Diagnostics_Manager
-	 * 
+	 *
 	 * @param Microsoft_WindowsAzure_Storage_Blob $blobStorageClient Blob storage client
 	 * @param string $controlContainer Control container name
 	 */
@@ -94,20 +97,20 @@ class Microsoft_WindowsAzure_Diagnostics_Manager
 			$this->_blobStorageClient->createContainer($this->_controlContainer);
 		}
 	}
-	
+
 	/**
 	 * Get default configuration values
-	 * 
+	 *
 	 * @return Microsoft_WindowsAzure_Diagnostics_ConfigurationInstance
 	 */
 	public function getDefaultConfiguration()
 	{
 		return new Microsoft_WindowsAzure_Diagnostics_ConfigurationInstance();
 	}
-	
+
 	/**
 	 * Checks if a configuration for a specific role instance exists.
-	 * 
+	 *
 	 * @param string $roleInstance Role instance name, can be found in $_SERVER['RdRoleId'] when hosted on Windows Azure.
 	 * @return boolean
 	 * @throws Microsoft_WindowsAzure_Diagnostics_Exception
@@ -120,10 +123,10 @@ class Microsoft_WindowsAzure_Diagnostics_Manager
 
 		return $this->_blobStorageClient->blobExists($this->_controlContainer, $roleInstance);
 	}
-	
+
 	/**
 	 * Checks if a configuration for current role instance exists. Only works on Development Fabric or Windows Azure Fabric.
-	 * 
+	 *
 	 * @return boolean
 	 * @throws Microsoft_WindowsAzure_Diagnostics_Exception
 	 */
@@ -135,10 +138,10 @@ class Microsoft_WindowsAzure_Diagnostics_Manager
 
 		return $this->_blobStorageClient->blobExists($this->_controlContainer, $this->_getCurrentRoleInstanceId());
 	}
-	
+
 	/**
 	 * Get configuration for current role instance. Only works on Development Fabric or Windows Azure Fabric.
-	 * 
+	 *
 	 * @return Microsoft_WindowsAzure_Diagnostics_ConfigurationInstance
 	 * @throws Microsoft_WindowsAzure_Diagnostics_Exception
 	 */
@@ -149,10 +152,10 @@ class Microsoft_WindowsAzure_Diagnostics_Manager
 		}
 		return $this->getConfigurationForRoleInstance($this->_getCurrentRoleInstanceId());
 	}
-	
+
 	/**
 	 * Get the current role instance ID. Only works on Development Fabric or Windows Azure Fabric.
-	 * 
+	 *
 	 * @return string
 	 * @throws Microsoft_WindowsAzure_Diagnostics_Exception
 	 */
@@ -161,7 +164,7 @@ class Microsoft_WindowsAzure_Diagnostics_Manager
 		if (!isset($_SERVER['RdRoleId'])) {
 			throw new Microsoft_WindowsAzure_Diagnostics_Exception('Server variable \'RdRoleId\' is unknown. Please verify the application is running in Development Fabric or Windows Azure Fabric.');
 		}
-		
+
 		if (strpos($_SERVER['RdRoleId'], 'deployment(') === false) {
 			return $_SERVER['RdRoleId'];
 		} else {
@@ -169,10 +172,10 @@ class Microsoft_WindowsAzure_Diagnostics_Manager
 			return $roleIdParts[0] . '/' . $roleIdParts[2] . '/' . $_SERVER['RdRoleId'];
 		}
 	}
-	
+
 	/**
 	 * Set configuration for current role instance. Only works on Development Fabric or Windows Azure Fabric.
-	 * 
+	 *
 	 * @param Microsoft_WindowsAzure_Diagnostics_ConfigurationInstance $configuration Configuration to apply
 	 * @throws Microsoft_WindowsAzure_Diagnostics_Exception
 	 */
@@ -181,13 +184,13 @@ class Microsoft_WindowsAzure_Diagnostics_Manager
 		if (!isset($_SERVER['RdRoleId'])) {
 			throw new Microsoft_WindowsAzure_Diagnostics_Exception('Server variable \'RdRoleId\' is unknown. Please verify the application is running in Development Fabric or Windows Azure Fabric.');
 		}
-		
+
 		$this->setConfigurationForRoleInstance($this->_getCurrentRoleInstanceId(), $configuration);
 	}
-	
+
 	/**
 	 * Get configuration for a specific role instance
-	 * 
+	 *
 	 * @param string $roleInstance Role instance name, can be found in $_SERVER['RdRoleId'] when hosted on Windows Azure.
 	 * @return Microsoft_WindowsAzure_Diagnostics_ConfigurationInstance
 	 * @throws Microsoft_WindowsAzure_Diagnostics_Exception
@@ -206,10 +209,10 @@ class Microsoft_WindowsAzure_Diagnostics_Manager
 
 		return new Microsoft_WindowsAzure_Diagnostics_ConfigurationInstance();
 	}
-	
+
 	/**
 	 * Set configuration for a specific role instance
-	 * 
+	 *
 	 * @param string $roleInstance Role instance name, can be found in $_SERVER['RdRoleId'] when hosted on Windows Azure.
 	 * @param Microsoft_WindowsAzure_Diagnostics_ConfigurationInstance $configuration Configuration to apply
 	 * @throws Microsoft_WindowsAzure_Diagnostics_Exception

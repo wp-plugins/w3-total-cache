@@ -32,6 +32,9 @@
  * @license    http://phpazure.codeplex.com/license
  * @version    $Id: BlobInstance.php 45390 2010-04-19 08:28:21Z unknown $
  */
+if (!defined('W3TC')) {
+    die();
+}
 
 /**
  * @see Microsoft_WindowsAzure_Exception
@@ -49,7 +52,7 @@ require_once 'Microsoft/WindowsAzure/Storage/StorageEntityAbstract.php';
  * @subpackage Storage
  * @copyright  Copyright (c) 2009 - 2010, RealDolmen (http://www.realdolmen.com)
  * @license    http://phpazure.codeplex.com/license
- * 
+ *
  * @property int  $start   Page range start
  * @property int  $end     Page range end
  */
@@ -58,12 +61,12 @@ class Microsoft_WindowsAzure_Storage_PageRegionInstance
 {
     /**
      * Constructor
-     * 
+     *
      * @param int  $start   Page range start
      * @param int  $end     Page range end
      */
-    public function __construct($start = 0, $end = 0) 
-    {	        
+    public function __construct($start = 0, $end = 0)
+    {
         $this->_data = array(
             'start'        => $start,
             'end'             => $end

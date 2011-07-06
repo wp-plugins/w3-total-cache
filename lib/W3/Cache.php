@@ -7,33 +7,13 @@
 /**
  * W3 Cache engine types
  */
-if (!defined('W3TC_CACHE_MEMCACHED')) {
-    define('W3TC_CACHE_MEMCACHED', 'memcached');
-}
-
-if (!defined('W3TC_CACHE_APC')) {
-    define('W3TC_CACHE_APC', 'apc');
-}
-
-if (!defined('W3TC_CACHE_EACCELERATOR')) {
-    define('W3TC_CACHE_EACCELERATOR', 'eaccelerator');
-}
-
-if (!defined('W3TC_CACHE_XCACHE')) {
-    define('W3TC_CACHE_XCACHE', 'xcache');
-}
-
-if (!defined('W3TC_CACHE_WINCACHE')) {
-    define('W3TC_CACHE_WINCACHE', 'wincache');
-}
-
-if (!defined('W3TC_CACHE_FILE')) {
-    define('W3TC_CACHE_FILE', 'file');
-}
-
-if (!defined('W3TC_CACHE_FILE_GENERIC')) {
-    define('W3TC_CACHE_FILE_GENERIC', 'file_generic');
-}
+define('W3TC_CACHE_MEMCACHED', 'memcached');
+define('W3TC_CACHE_APC', 'apc');
+define('W3TC_CACHE_EACCELERATOR', 'eaccelerator');
+define('W3TC_CACHE_XCACHE', 'xcache');
+define('W3TC_CACHE_WINCACHE', 'wincache');
+define('W3TC_CACHE_FILE', 'file');
+define('W3TC_CACHE_FILE_GENERIC', 'file_generic');
 
 /**
  * Class W3_Cache

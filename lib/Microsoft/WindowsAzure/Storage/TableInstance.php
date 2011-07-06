@@ -32,6 +32,9 @@
  * @license    http://phpazure.codeplex.com/license
  * @version    $Id: BlobInstance.php 14561 2009-05-07 08:05:12Z unknown $
  */
+if (!defined('W3TC')) {
+    die();
+}
 
 /**
  * @see Microsoft_WindowsAzure_Exception
@@ -49,7 +52,7 @@ require_once 'Microsoft/WindowsAzure/Storage/StorageEntityAbstract.php';
  * @subpackage Storage
  * @copyright  Copyright (c) 2009 - 2010, RealDolmen (http://www.realdolmen.com)
  * @license    http://phpazure.codeplex.com/license
- * 
+ *
  * @property string  $Id              Id
  * @property string  $Name            Name
  * @property string  $Href            Href
@@ -60,14 +63,14 @@ class Microsoft_WindowsAzure_Storage_TableInstance
 {
     /**
      * Constructor
-     * 
+     *
      * @param string  $id              Id
      * @param string  $name            Name
      * @param string  $href            Href
      * @param string  $updated         Updated
      */
-    public function __construct($id, $name, $href, $updated) 
-    {	        
+    public function __construct($id, $name, $href, $updated)
+    {
         $this->_data = array(
             'id'               => $id,
             'name'             => $name,

@@ -3,6 +3,10 @@
 /**
  * W3 Total Cache Database module
  */
+if (!defined('ABSPATH')) {
+    die();
+}
+
 if (!defined('W3TC_DIR')) {
     define('W3TC_DIR', WP_CONTENT_DIR . '/plugins/w3-total-cache');
 }

@@ -3,6 +3,9 @@
  * Class Minify_Controller_Groups
  * @package Minify
  */
+if (!defined('W3TC')) {
+    die();
+}
 
 require_once W3TC_LIB_MINIFY_DIR . '/Minify/Controller/Base.php';
 

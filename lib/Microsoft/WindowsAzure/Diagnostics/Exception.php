@@ -32,6 +32,9 @@
  * @license    http://phpazure.codeplex.com/license
  * @version    $Id: Storage.php 45989 2010-05-03 12:19:10Z unknown $
  */
+if (!defined('W3TC')) {
+    die();
+}
 
 /**
  * @see Microsoft_WindowsAzure_Exception

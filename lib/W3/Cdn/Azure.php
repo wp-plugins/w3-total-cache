@@ -3,6 +3,10 @@
 /**
  * Windows Azure Storage CDN engine
  */
+if (!defined('W3TC')) {
+    die();
+}
+
 require_once W3TC_LIB_W3_DIR . '/Cdn/Base.php';
 
 /**

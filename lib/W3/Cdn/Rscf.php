@@ -3,6 +3,10 @@
 /**
  * Rackspace Cloud Files CDN engine
  */
+if (!defined('ABSPATH')) {
+    die();
+}
+
 require_once W3TC_LIB_W3_DIR . '/Cdn/Base.php';
 require_once W3TC_LIB_CF_DIR . '/cloudfiles.php';
 

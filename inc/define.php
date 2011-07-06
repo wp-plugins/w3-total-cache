@@ -1,6 +1,11 @@
 <?php
 
-define('W3TC_VERSION', '0.9.2.3');
+if (!defined('ABSPATH')) {
+    die();
+}
+
+define('W3TC', true);
+define('W3TC_VERSION', '0.9.2.4b');
 define('W3TC_POWERED_BY', 'W3 Total Cache/' . W3TC_VERSION);
 define('W3TC_EMAIL', 'w3tc@w3-edge.com');
 define('W3TC_PAYPAL_URL', 'https://www.paypal.com/cgi-bin/webscr');
@@ -130,7 +135,7 @@ function w3_activation_cleanup() {
 function w3_activate_error($error) {
     w3_activation_cleanup();
 
-    include W3TC_DIR . '/inc/error.phtml';
+    include W3TC_DIR . '/inc/error.php';
     exit();
 }
 
@@ -141,8 +146,8 @@ function w3_activate_error($error) {
  * @return string
  */
 function w3_writable_error($path) {
-    $activate_url = wp_nonce_url('plugins.php?action=activate&plugin=' . W3TC_FILE, 'activate-plugin_' . W3TC_FILE);
-    $reactivate_button = sprintf('<input type="button" value="re-activate plugin" onclick="top.location.href = \'%s\'" />', addslashes($activate_url));
+    $reactivate_url = wp_nonce_url('plugins.php?action=activate&plugin=' . W3TC_FILE, 'activate-plugin_' . W3TC_FILE);
+    $reactivate_button = sprintf('<input type="button" value="re-activate plugin" onclick="top.location.href = \'%s\'" />', addslashes($reactivate_url));
 
     if (w3_check_open_basedir($path)) {
         $error = sprintf('<strong>%s</strong> could not be created, please run following command:<br /><strong style="color: #f00;">chmod 777 %s</strong><br />then %s.', $path, (file_exists($path) ? $path : dirname($path)), $reactivate_button);
@@ -160,7 +165,7 @@ function w3_writable_error($path) {
  */
 function w3_network_activate_error() {
     w3_activation_cleanup();
-    wp_redirect(plugins_url('inc/network_activation.php', W3TC_FILE));
+    wp_redirect(plugins_url('pub/network_activation.php', W3TC_FILE));
 
     echo '<p><strong>W3 Total Cache Error:</strong> plugin cannot be activated network-wide.</p>';
     echo '<p><a href="javascript:history.back(-1);">Back</a>';
@@ -274,7 +279,7 @@ function w3_is_xml($content) {
         $content = preg_replace('~<!--.*?-->~s', '', $content);
     }
 
-    $content = ltrim($content);
+    $content = ltrim($content, "\x00\x09\x0A\x0D\x20\xBB\xBF\xEF");
 
     return (stripos($content, '<?xml') === 0 || stripos($content, '<html') === 0 || stripos($content, '<!DOCTYPE') === 0);
 }
@@ -1947,33 +1952,6 @@ function w3_stripslashes($var) {
     }
 
     return $var;
-}
-
-if (!function_exists('file_put_contents')) {
-    if (!defined('FILE_APPEND')) {
-        define('FILE_APPEND', 8);
-    }
-
-    /**
-     * Puts contents to the file
-     *
-     * @param string $filename
-     * @param string $data
-     * @param integer $flags
-     * @return boolean
-     */
-    function file_put_contents($filename, $data, $flags = 0) {
-        $fp = fopen($filename, ($flags & FILE_APPEND ? 'a' : 'w'));
-
-        if ($fp) {
-            fputs($fp, $data);
-            fclose($fp);
-
-            return true;
-        }
-
-        return false;
-    }
 }
 
 /**

@@ -3,18 +3,9 @@
 /**
  * W3 CDN Base class
  */
-
-if (!defined('W3TC_CDN_RESULT_HALT')) {
-    define('W3TC_CDN_RESULT_HALT', -1);
-}
-
-if (!defined('W3TC_CDN_RESULT_ERROR')) {
-    define('W3TC_CDN_RESULT_ERROR', 0);
-}
-
-if (!defined('W3TC_CDN_RESULT_OK')) {
-    define('W3TC_CDN_RESULT_OK', 1);
-}
+define('W3TC_CDN_RESULT_HALT', -1);
+define('W3TC_CDN_RESULT_ERROR', 0);
+define('W3TC_CDN_RESULT_OK', 1);
 
 /**
  * Class W3_Cdn_Base

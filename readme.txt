@@ -249,6 +249,10 @@ Install the plugin to read the full FAQ.
 
 == Press: Mentions, Tutorials &amp; Reviews ==
 
+**July 2011:**
+
+* [22 WordPress Plugins for Content Marketers](http://www.business2community.com/content-marketing/22-wordpress-plugins-for-content-marketers-040787), Brody Dorland
+
 **June 2011:**
 
 * [WordPress Optimization Results: Varnish/Nginx/APC + W3 Total Cache + Amazon S3 + CloudFlare](http://danielmiessler.com/blog/wordpress-optimization-results-varnishnginxapc-w3-total-cache-amazon-s3-cloudflare), Daniel Miessler

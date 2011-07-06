@@ -32,6 +32,9 @@
  * @license    http://phpazure.codeplex.com/license
  * @version    $Id: BlobContainer.php 45989 2010-05-03 12:19:11Z unknown $
  */
+if (!defined('W3TC')) {
+    die();
+}
 
 /**
  * @see Microsoft_WindowsAzure_Exception
@@ -49,7 +52,7 @@ require_once 'Microsoft/WindowsAzure/Storage/StorageEntityAbstract.php';
  * @subpackage Storage
  * @copyright  Copyright (c) 2009 - 2010, RealDolmen (http://www.realdolmen.com)
  * @license    http://phpazure.codeplex.com/license
- * 
+ *
  * @property string $Name          Name of the container
  * @property string $Etag          Etag of the container
  * @property string $LastModified  Last modified date of the container
@@ -59,20 +62,20 @@ class Microsoft_WindowsAzure_Storage_BlobContainer
 {
     /**
      * Data
-     * 
+     *
      * @var array
      */
     protected $_data = null;
-    
+
     /**
      * Constructor
-     * 
+     *
      * @param string $name          Name
      * @param string $etag          Etag
      * @param string $lastModified  Last modified date
      * @param array  $metadata      Key/value pairs of meta data
      */
-    public function __construct($name, $etag, $lastModified, $metadata = array()) 
+    public function __construct($name, $etag, $lastModified, $metadata = array())
     {
         $this->_data = array(
             'name'         => $name,
@@ -81,10 +84,10 @@ class Microsoft_WindowsAzure_Storage_BlobContainer
             'metadata'     => $metadata
         );
     }
-    
+
     /**
      * Magic overload for setting properties
-     * 
+     *
      * @param string $name     Name of the property
      * @param string $value    Value to set
      */
@@ -99,7 +102,7 @@ class Microsoft_WindowsAzure_Storage_BlobContainer
 
     /**
      * Magic overload for getting properties
-     * 
+     *
      * @param string $name     Name of the property
      */
     public function __get($name) {

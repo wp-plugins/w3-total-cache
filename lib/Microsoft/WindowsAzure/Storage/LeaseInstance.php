@@ -32,6 +32,9 @@
  * @license    http://phpazure.codeplex.com/license
  * @version    $Id: BlobInstance.php 45390 2010-04-19 08:28:21Z unknown $
  */
+if (!defined('W3TC')) {
+    die();
+}
 
 /**
  * @see Microsoft_WindowsAzure_Exception
@@ -49,7 +52,7 @@ require_once 'Microsoft/WindowsAzure/Storage/StorageEntityAbstract.php';
  * @subpackage Storage
  * @copyright  Copyright (c) 2009 - 2010, RealDolmen (http://www.realdolmen.com)
  * @license    http://phpazure.codeplex.com/license
- * 
+ *
  * @property string  $Container       Container name
  * @property string  $Name            Name
  * @property string  $LeaseId         Lease id
@@ -60,14 +63,14 @@ class Microsoft_WindowsAzure_Storage_LeaseInstance
 {
     /**
      * Constructor
-     * 
+     *
      * @param string  $containerName   Container name
      * @param string  $name            Name
      * @param string  $leaseId         Lease id
      * @param string  $leaseTime       Time remaining in the lease period, in seconds. This header is returned only for a successful request to break the lease. It provides an approximation as to when the lease period will expire.
      */
-    public function __construct($containerName, $name, $leaseId, $leaseTime) 
-    {	        
+    public function __construct($containerName, $name, $leaseId, $leaseTime)
+    {
         $this->_data = array(
             'container'        => $containerName,
             'name'             => $name,

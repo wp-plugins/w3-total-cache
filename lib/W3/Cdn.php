@@ -3,42 +3,15 @@
 /**
  * W3 CDN Class
  */
-
-if (!defined('W3TC_CDN_FTP')) {
-    define('W3TC_CDN_FTP', 'ftp');
-}
-
-if (!defined('W3TC_CDN_S3')) {
-    define('W3TC_CDN_S3', 's3');
-}
-
-if (!defined('W3TC_CDN_CF_S3')) {
-    define('W3TC_CDN_CF_S3', 'cf');
-}
-
-if (!defined('W3TC_CDN_CF_CUSTOM')) {
-    define('W3TC_CDN_CF_CUSTOM', 'cf2');
-}
-
-if (!defined('W3TC_CDN_MIRROR')) {
-    define('W3TC_CDN_MIRROR', 'mirror');
-}
-
-if (!defined('W3TC_CDN_NETDNA')) {
-    define('W3TC_CDN_NETDNA', 'netdna');
-}
-
-if (!defined('W3TC_CDN_COTENDO')) {
-    define('W3TC_CDN_COTENDO', 'cotendo');
-}
-
-if (!defined('W3TC_CDN_RSCF')) {
-    define('W3TC_CDN_RSCF', 'rscf');
-}
-
-if (!defined('W3TC_CDN_AZURE')) {
-    define('W3TC_CDN_AZURE', 'azure');
-}
+define('W3TC_CDN_FTP', 'ftp');
+define('W3TC_CDN_S3', 's3');
+define('W3TC_CDN_CF_S3', 'cf');
+define('W3TC_CDN_CF_CUSTOM', 'cf2');
+define('W3TC_CDN_MIRROR', 'mirror');
+define('W3TC_CDN_NETDNA', 'netdna');
+define('W3TC_CDN_COTENDO', 'cotendo');
+define('W3TC_CDN_RSCF', 'rscf');
+define('W3TC_CDN_AZURE', 'azure');
 
 /**
  * Class W3_Cdn

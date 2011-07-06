@@ -32,6 +32,9 @@
  * @license    http://phpazure.codeplex.com/license
  * @version    $Id: Storage.php 21617 2009-06-12 10:46:31Z unknown $
  */
+if (!defined('W3TC')) {
+    die();
+}
 
 /**
  * @see Microsoft_WindowsAzure_Storage
@@ -72,17 +75,17 @@ require_once 'Microsoft/Http/Response.php';
  */
 abstract class Microsoft_WindowsAzure_Storage_BatchStorageAbstract
     extends Microsoft_WindowsAzure_Storage
-{	
+{
     /**
      * Current batch
-     * 
+     *
      * @var Microsoft_WindowsAzure_Storage_Batch
      */
     protected $_currentBatch = null;
-    
+
     /**
      * Set current batch
-     * 
+     *
      * @param Microsoft_WindowsAzure_Storage_Batch $batch Current batch
      * @throws Microsoft_WindowsAzure_Exception
      */
@@ -93,30 +96,30 @@ abstract class Microsoft_WindowsAzure_Storage_BatchStorageAbstract
         }
         $this->_currentBatch = $batch;
     }
-    
+
     /**
      * Get current batch
-     * 
+     *
      * @return Microsoft_WindowsAzure_Storage_Batch
      */
     public function getCurrentBatch()
     {
         return $this->_currentBatch;
     }
-    
+
     /**
      * Is there a current batch?
-     * 
+     *
      * @return boolean
      */
     public function isInBatch()
     {
         return !is_null($this->_currentBatch);
     }
-    
+
     /**
      * Starts a new batch operation set
-     * 
+     *
      * @return Microsoft_WindowsAzure_Storage_Batch
      * @throws Microsoft_WindowsAzure_Exception
      */
@@ -124,7 +127,7 @@ abstract class Microsoft_WindowsAzure_Storage_BatchStorageAbstract
     {
         return new Microsoft_WindowsAzure_Storage_Batch($this, $this->getBaseUrl());
     }
-	
+
 	/**
 	 * Perform batch using Microsoft_Http_Client channel, combining all batch operations into one request
 	 *
@@ -140,42 +143,42 @@ abstract class Microsoft_WindowsAzure_Storage_BatchStorageAbstract
 	    // Generate boundaries
 	    $batchBoundary = 'batch_' . md5(time() . microtime());
 	    $changesetBoundary = 'changeset_' . md5(time() . microtime());
-	    
+
 	    // Set headers
 	    $headers = array();
-	    
+
 		// Add version header
 		$headers['x-ms-version'] = $this->_apiVersion;
-		
+
 		// Add dataservice headers
 		$headers['DataServiceVersion'] = '1.0;NetFx';
 		$headers['MaxDataServiceVersion'] = '1.0;NetFx';
-		
+
 		// Add content-type header
 		$headers['Content-Type'] = 'multipart/mixed; boundary=' . $batchBoundary;
 
 		// Set path and query string
 		$path           = '/$batch';
 		$queryString    = '';
-		
+
 		// Set verb
 		$httpVerb = Microsoft_Http_Client::POST;
-		
+
 		// Generate raw data
     	$rawData = '';
-    		
+
 		// Single select?
 		if ($isSingleSelect) {
 		    $operation = $operations[0];
 		    $rawData .= '--' . $batchBoundary . "\n";
             $rawData .= 'Content-Type: application/http' . "\n";
             $rawData .= 'Content-Transfer-Encoding: binary' . "\n\n";
-            $rawData .= $operation; 
+            $rawData .= $operation;
             $rawData .= '--' . $batchBoundary . '--';
 		} else {
     		$rawData .= '--' . $batchBoundary . "\n";
     		$rawData .= 'Content-Type: multipart/mixed; boundary=' . $changesetBoundary . "\n\n";
-    		
+
         		// Add operations
         		foreach ($operations as $operation)
         		{
@@ -185,7 +188,7 @@ abstract class Microsoft_WindowsAzure_Storage_BatchStorageAbstract
                 	$rawData .= $operation;
         		}
         		$rawData .= '--' . $changesetBoundary . '--' . "\n";
-    		    		    
+
     		$rawData .= '--' . $batchBoundary . '--';
 		}
 
@@ -198,7 +201,7 @@ abstract class Microsoft_WindowsAzure_Storage_BatchStorageAbstract
 		$this->_httpClientChannel->setUri($requestUrl);
 		$this->_httpClientChannel->setHeaders($requestHeaders);
 		$this->_httpClientChannel->setRawData($rawData);
-		
+
 		// Execute request
 		$response = $this->_retryPolicy->execute(
 		    array($this->_httpClientChannel, 'request'),

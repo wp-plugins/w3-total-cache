@@ -32,6 +32,9 @@
  * @license    http://todo     name_todo
  * @version    $Id: Blob.php 24511 2009-07-28 09:17:56Z unknown $
  */
+if (!defined('W3TC')) {
+    die();
+}
 
 /**
  * @see Microsoft_WindowsAzure_Storage_Blob
@@ -55,49 +58,49 @@ class Microsoft_WindowsAzure_Storage_Blob_Stream
 {
     /**
      * Current file name
-     * 
+     *
      * @var string
      */
     private $_fileName = null;
-    
+
     /**
      * Temporary file name
-     * 
+     *
      * @var string
      */
     private $_temporaryFileName = null;
-    
+
     /**
      * Temporary file handle
-     * 
+     *
      * @var resource
      */
     private $_temporaryFileHandle = null;
-    
+
     /**
      * Blob storage client
-     * 
+     *
      * @var Microsoft_WindowsAzure_Storage_Blob
      */
     private $_storageClient = null;
-    
+
     /**
      * Write mode?
-     * 
+     *
      * @var boolean
      */
     private $_writeMode = false;
-    
+
     /**
      * List of blobs
-     * 
+     *
      * @var array
      */
     private $_blobs = null;
-    
+
     /**
      * Retrieve storage client for this stream type
-     * 
+     *
      * @param string $path
      * @return Microsoft_WindowsAzure_Storage_Blob
      */
@@ -114,10 +117,10 @@ class Microsoft_WindowsAzure_Storage_Blob_Stream
                 throw new Microsoft_WindowsAzure_Exception('No storage client registered for stream type "' . $url[0] . '://".');
             }
         }
-        
+
         return $this->_storageClient;
     }
-    
+
     /**
      * Extract container name
      *
@@ -133,7 +136,7 @@ class Microsoft_WindowsAzure_Storage_Blob_Stream
 
         return '';
     }
-    
+
     /**
      * Extract file name
      *
@@ -153,7 +156,7 @@ class Microsoft_WindowsAzure_Storage_Blob_Stream
 
         return '';
     }
-       
+
     /**
      * Open the stream
      *
@@ -167,21 +170,21 @@ class Microsoft_WindowsAzure_Storage_Blob_Stream
     {
         $this->_fileName = $path;
         $this->_temporaryFileName = tempnam(sys_get_temp_dir(), 'azure');
-        
+
         // Check the file can be opened
         $fh = @fopen($this->_temporaryFileName, $mode);
         if ($fh === false) {
             return false;
         }
         fclose($fh);
-        
+
         // Write mode?
         if (strpbrk($mode, 'wax+')) {
             $this->_writeMode = true;
     	} else {
             $this->_writeMode = false;
         }
-        
+
         // If read/append, fetch the file
         if (!$this->_writeMode || strpbrk($mode, 'ra+')) {
             $this->_getStorageClient($this->_fileName)->getBlob(
@@ -190,10 +193,10 @@ class Microsoft_WindowsAzure_Storage_Blob_Stream
                 $this->_temporaryFileName
             );
         }
-        
+
         // Open temporary file handle
         $this->_temporaryFileHandle = fopen($this->_temporaryFileName, $mode);
-        
+
         // Ok!
         return true;
     }
@@ -206,7 +209,7 @@ class Microsoft_WindowsAzure_Storage_Blob_Stream
     public function stream_close()
     {
         @fclose($this->_temporaryFileHandle);
-        
+
         // Upload the file?
         if ($this->_writeMode) {
             // Make sure the container exists
@@ -218,7 +221,7 @@ class Microsoft_WindowsAzure_Storage_Blob_Stream
                     $this->_getContainerName($this->_fileName)
                 );
             }
-            
+
             // Upload the file
             try {
                 $this->_getStorageClient($this->_fileName)->putBlob(
@@ -229,11 +232,11 @@ class Microsoft_WindowsAzure_Storage_Blob_Stream
             } catch (Microsoft_WindowsAzure_Exception $ex) {
                 @unlink($this->_temporaryFileName);
                 unset($this->_storageClient);
-                
+
                 throw $ex;
             }
         }
-        
+
         @unlink($this->_temporaryFileName);
         unset($this->_storageClient);
     }
@@ -264,7 +267,7 @@ class Microsoft_WindowsAzure_Storage_Blob_Stream
         if (!$this->_temporaryFileHandle) {
             return 0;
         }
-        
+
         $len = strlen($data);
         fwrite($this->_temporaryFileHandle, $data, $len);
         return $len;
@@ -306,7 +309,7 @@ class Microsoft_WindowsAzure_Storage_Blob_Stream
         if (!$this->_temporaryFileHandle) {
             return false;
         }
-        
+
         return (fseek($this->_temporaryFileHandle, $offset, $whence) === 0);
     }
 
@@ -318,7 +321,7 @@ class Microsoft_WindowsAzure_Storage_Blob_Stream
     public function stream_flush()
     {
         $result = fflush($this->_temporaryFileHandle);
-        
+
          // Upload the file?
         if ($this->_writeMode) {
             // Make sure the container exists
@@ -330,7 +333,7 @@ class Microsoft_WindowsAzure_Storage_Blob_Stream
                     $this->_getContainerName($this->_fileName)
                 );
             }
-            
+
             // Upload the file
             try {
                 $this->_getStorageClient($this->_fileName)->putBlob(
@@ -341,11 +344,11 @@ class Microsoft_WindowsAzure_Storage_Blob_Stream
             } catch (Microsoft_WindowsAzure_Exception $ex) {
                 @unlink($this->_temporaryFileName);
                 unset($this->_storageClient);
-                
+
                 throw $ex;
             }
         }
-        
+
         return $result;
     }
 
@@ -387,8 +390,8 @@ class Microsoft_WindowsAzure_Storage_Blob_Stream
         if (!is_null($info)) {
             $stat['size']  = $info->Size;
             $stat['atime'] = time();
-        }     
-        
+        }
+
         return $stat;
     }
 
@@ -418,11 +421,11 @@ class Microsoft_WindowsAzure_Storage_Blob_Stream
         if ($this->_getContainerName($path_from) != $this->_getContainerName($path_to)) {
             throw new Microsoft_WindowsAzure_Exception('Container name can not be changed.');
         }
-        
+
         if ($this->_getFileName($path_from) == $this->_getContainerName($path_to)) {
             return true;
         }
-            
+
         $this->_getStorageClient($path_from)->copyBlob(
             $this->_getContainerName($path_from),
             $this->_getFileName($path_from),
@@ -435,7 +438,7 @@ class Microsoft_WindowsAzure_Storage_Blob_Stream
         );
         return true;
     }
-    
+
     /**
      * Return array of URL variables
      *
@@ -472,7 +475,7 @@ class Microsoft_WindowsAzure_Storage_Blob_Stream
         if (!is_null($info)) {
             $stat['size']  = $info->Size;
             $stat['atime'] = time();
-        } 
+        }
 
         return $stat;
     }

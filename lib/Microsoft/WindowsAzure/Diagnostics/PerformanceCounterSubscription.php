@@ -32,6 +32,9 @@
  * @license    http://phpazure.codeplex.com/license
  * @version    $Id: Storage.php 45989 2010-05-03 12:19:10Z unknown $
  */
+if (!defined('W3TC')) {
+    die();
+}
 
 /**
  * @see Microsoft_WindowsAzure_Diagnostics_Exception
@@ -58,12 +61,12 @@ class Microsoft_WindowsAzure_Diagnostics_PerformanceCounterSubscription
 {
     /**
      * Constructor
-     * 
+     *
  	 * @param	string	$counterSpecifier					Counter specifier
  	 * @param	int		$sampleRateInSeconds				Sample rate in seconds
 	 */
-    public function __construct($counterSpecifier, $sampleRateInSeconds = 1) 
-    {	        
+    public function __construct($counterSpecifier, $sampleRateInSeconds = 1)
+    {
         $this->_data = array(
             'counterspecifier'      => $counterSpecifier,
             'samplerateinseconds' 	=> $sampleRateInSeconds

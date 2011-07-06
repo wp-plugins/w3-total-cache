@@ -3,6 +3,10 @@
 /**
  * W3 Database object
  */
+if (!defined('ABSPATH')) {
+    die();
+}
+
 if (!class_exists('W3_Db_Driver')) {
     require_once ABSPATH . 'wp-includes/wp-db.php';
 
@@ -79,9 +83,9 @@ class W3_Db extends W3_Db_Driver {
 
         if ($this->_can_ob()) {
             ob_start(array(
-                    &$this,
-                    'ob_callback'
-                ));
+                &$this,
+                'ob_callback'
+            ));
         }
 
         parent::__construct($dbuser, $dbpassword, $dbname, $dbhost);
@@ -602,7 +606,7 @@ class W3_Db extends W3_Db_Driver {
                     str_pad($index + 1, 5, ' ', STR_PAD_LEFT),
                     str_pad(round($query['time_total'], 4), 8, ' ', STR_PAD_LEFT),
                     str_pad(($query['caching'] ? 'enabled'
-                                : sprintf('disabled (%s)', $query['reason'])), 30, ' ', STR_PAD_BOTH),
+                            : sprintf('disabled (%s)', $query['reason'])), 30, ' ', STR_PAD_BOTH),
                     str_pad(($query['cached'] ? 'cached' : 'not cached'), 10, ' ', STR_PAD_BOTH),
                     str_pad($query['data_size'], 13, ' ', STR_PAD_LEFT),
                     w3_escape_comment(trim($query['query'])));

@@ -745,15 +745,6 @@ class W3_PgCache {
         }
 
         /**
-         * Skip if proxy
-         */
-        if (isset($_SERVER['HTTP_X_FORWARD_FOR']) && assert($_SERVER['HTTP_X_FORWARD_FOR'])) {
-            $this->cache_reject_reason = 'proxy';
-            
-            return false;
-        }
-        
-        /**
          * Skip if posting
          */
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -822,29 +813,6 @@ class W3_PgCache {
          */
         if (!$this->_caching) {
             return false;
-        }
-
-        /**
-         * Check for request URI trailing slash
-         */
-        if ($this->_enhanced_mode) {
-            $permalink_structure = get_option('permalink_structure');
-            $permalink_structure_slash = (substr($permalink_structure, -1) == '/');
-            $request_uri_slash = (substr($this->_request_uri, -1) == '/');
-
-            if ($permalink_structure_slash != $request_uri_slash) {
-                if ($permalink_structure_slash) {
-                    if (!$this->_check_accept_uri()) {
-                        $this->cache_reject_reason = 'Requested URI doesn\'t have a trailing slash';
-
-                        return false;
-                    }
-                } else {
-                    $this->cache_reject_reason = 'Requested URI has a trailing slash';
-
-                    return false;
-                }
-            }
         }
 
         /**

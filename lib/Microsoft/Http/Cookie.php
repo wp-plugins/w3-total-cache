@@ -20,6 +20,9 @@
  * @version    $Id: Cookie.php 17131 2009-07-26 10:03:39Z shahar $
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
+if (!defined('W3TC')) {
+    die();
+}
 
 /**
  * @see Microsoft_Uri_Http

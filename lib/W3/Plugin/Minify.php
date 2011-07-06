@@ -3,6 +3,10 @@
 /**
  * W3 Minify plugin
  */
+if (!defined('W3TC')) {
+    die();
+}
+
 require_once W3TC_LIB_W3_DIR . '/Plugin.php';
 
 /**
@@ -1119,7 +1123,7 @@ class W3_Plugin_Minify extends W3_Plugin {
                 $rules .= "    RewriteRule .* - [E=APPEND_EXT:.gzip]\n";
             }
 
-            $rules .= "    RewriteCond %{REQUEST_FILENAME}%{ENV:APPEND_EXT} -f\n";
+            $rules .= "    RewriteCond %{REQUEST_FILENAME}%{ENV:APPEND_EXT} -" . ($this->_config->get_boolean('minify.file.locking') ? 'F' : 'f') . "\n";
             $rules .= "    RewriteRule (.*) $1%{ENV:APPEND_EXT} [L]\n";
         }
 

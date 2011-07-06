@@ -20,6 +20,9 @@
  * @copyright  Copyright (c) 2005-2009 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
+if (!defined('W3TC')) {
+    die();
+}
 
 /**
  * Microsoft_Http_Response represents an HTTP 1.0 / 1.1 response message. It

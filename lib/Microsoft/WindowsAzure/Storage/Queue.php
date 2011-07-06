@@ -32,6 +32,9 @@
  * @license    http://todo     name_todo
  * @version    $Id: Blob.php 24241 2009-07-22 09:43:13Z unknown $
  */
+if (!defined('W3TC')) {
+    die();
+}
 
 /**
  * @see Microsoft_WindowsAzure_Credentials_SharedKey
@@ -87,12 +90,12 @@ class Microsoft_WindowsAzure_Storage_Queue extends Microsoft_WindowsAzure_Storag
 	 * Maximal message size (in bytes)
 	 */
 	const MAX_MESSAGE_SIZE = 8388608;
-	
+
 	/**
 	 * Maximal message ttl (in seconds)
 	 */
 	const MAX_MESSAGE_TTL = 604800;
-	
+
 	/**
 	 * Creates a new Microsoft_WindowsAzure_Storage_Queue instance
 	 *
@@ -105,14 +108,14 @@ class Microsoft_WindowsAzure_Storage_Queue extends Microsoft_WindowsAzure_Storag
 	public function __construct($host = Microsoft_WindowsAzure_Storage::URL_DEV_QUEUE, $accountName = Microsoft_WindowsAzure_Credentials_CredentialsAbstract::DEVSTORE_ACCOUNT, $accountKey = Microsoft_WindowsAzure_Credentials_CredentialsAbstract::DEVSTORE_KEY, $usePathStyleUri = false, Microsoft_WindowsAzure_RetryPolicy_RetryPolicyAbstract $retryPolicy = null)
 	{
 		parent::__construct($host, $accountName, $accountKey, $usePathStyleUri, $retryPolicy);
-		
+
 		// API version
 		$this->_apiVersion = '2009-09-19';
 	}
-	
+
 	/**
 	 * Check if a queue exists
-	 * 
+	 *
 	 * @param string $queueName Queue name
 	 * @return boolean
 	 */
@@ -124,7 +127,7 @@ class Microsoft_WindowsAzure_Storage_Queue extends Microsoft_WindowsAzure_Storag
 		if (!self::isValidQueueName($queueName)) {
 		    throw new Microsoft_WindowsAzure_Exception('Queue name does not adhere to queue naming conventions. See http://msdn.microsoft.com/en-us/library/dd179349.aspx for more information.');
 		}
-			
+
 		// List queues
         $queues = $this->listQueues($queueName, 1);
         foreach ($queues as $queue) {
@@ -132,10 +135,10 @@ class Microsoft_WindowsAzure_Storage_Queue extends Microsoft_WindowsAzure_Storag
                 return true;
             }
         }
-        
+
         return false;
 	}
-	
+
 	/**
 	 * Create queue
 	 *
@@ -152,13 +155,13 @@ class Microsoft_WindowsAzure_Storage_Queue extends Microsoft_WindowsAzure_Storag
 		if (!self::isValidQueueName($queueName)) {
 		    throw new Microsoft_WindowsAzure_Exception('Queue name does not adhere to queue naming conventions. See http://msdn.microsoft.com/en-us/library/dd179349.aspx for more information.');
 		}
-			
+
 		// Create metadata headers
 		$headers = array();
-		$headers = array_merge($headers, $this->_generateMetadataHeaders($metadata)); 
-		
+		$headers = array_merge($headers, $this->_generateMetadataHeaders($metadata));
+
 		// Perform request
-		$response = $this->_performRequest($queueName, '', Microsoft_Http_Client::PUT, $headers);	
+		$response = $this->_performRequest($queueName, '', Microsoft_Http_Client::PUT, $headers);
 		if ($response->isSuccessful()) {
 		    return new Microsoft_WindowsAzure_Storage_QueueInstance(
 		        $queueName,
@@ -168,7 +171,7 @@ class Microsoft_WindowsAzure_Storage_Queue extends Microsoft_WindowsAzure_Storag
 			throw new Microsoft_WindowsAzure_Exception($this->_getErrorMessage($response, 'Resource could not be accessed.'));
 		}
 	}
-	
+
 	/**
 	 * Create queue if it does not exist
 	 *
@@ -182,10 +185,10 @@ class Microsoft_WindowsAzure_Storage_Queue extends Microsoft_WindowsAzure_Storag
 			$this->createQueue($queueName, $metadata);
 		}
 	}
-	
+
 	/**
 	 * Get queue
-	 * 
+	 *
 	 * @param string $queueName  Queue name
 	 * @return Microsoft_WindowsAzure_Storage_QueueInstance
 	 * @throws Microsoft_WindowsAzure_Exception
@@ -198,9 +201,9 @@ class Microsoft_WindowsAzure_Storage_Queue extends Microsoft_WindowsAzure_Storag
 		if (!self::isValidQueueName($queueName)) {
 		    throw new Microsoft_WindowsAzure_Exception('Queue name does not adhere to queue naming conventions. See http://msdn.microsoft.com/en-us/library/dd179349.aspx for more information.');
 		}
-		    
+
 		// Perform request
-		$response = $this->_performRequest($queueName, '?comp=metadata', Microsoft_Http_Client::GET);	
+		$response = $this->_performRequest($queueName, '?comp=metadata', Microsoft_Http_Client::GET);
 		if ($response->isSuccessful()) {
 		    // Parse metadata
 		    $metadata = $this->_parseMetadataHeaders($response->getHeaders());
@@ -216,10 +219,10 @@ class Microsoft_WindowsAzure_Storage_Queue extends Microsoft_WindowsAzure_Storag
 		    throw new Microsoft_WindowsAzure_Exception($this->_getErrorMessage($response, 'Resource could not be accessed.'));
 		}
 	}
-	
+
 	/**
 	 * Get queue metadata
-	 * 
+	 *
 	 * @param string $queueName  Queue name
 	 * @return array Key/value pairs of meta data
 	 * @throws Microsoft_WindowsAzure_Exception
@@ -232,13 +235,13 @@ class Microsoft_WindowsAzure_Storage_Queue extends Microsoft_WindowsAzure_Storag
 		if (!self::isValidQueueName($queueName)) {
 		    throw new Microsoft_WindowsAzure_Exception('Queue name does not adhere to queue naming conventions. See http://msdn.microsoft.com/en-us/library/dd179349.aspx for more information.');
 		}
-			
+
 	    return $this->getQueue($queueName)->Metadata;
 	}
-	
+
 	/**
 	 * Set queue metadata
-	 * 
+	 *
 	 * Calling the Set Queue Metadata operation overwrites all existing metadata that is associated with the queue. It's not possible to modify an individual name/value pair.
 	 *
 	 * @param string $queueName  Queue name
@@ -256,11 +259,11 @@ class Microsoft_WindowsAzure_Storage_Queue extends Microsoft_WindowsAzure_Storag
 		if (count($metadata) == 0) {
 		    return;
 		}
-		    
+
 		// Create metadata headers
 		$headers = array();
-		$headers = array_merge($headers, $this->_generateMetadataHeaders($metadata)); 
-		
+		$headers = array_merge($headers, $this->_generateMetadataHeaders($metadata));
+
 		// Perform request
 		$response = $this->_performRequest($queueName, '?comp=metadata', Microsoft_Http_Client::PUT, $headers);
 
@@ -268,7 +271,7 @@ class Microsoft_WindowsAzure_Storage_Queue extends Microsoft_WindowsAzure_Storag
 			throw new Microsoft_WindowsAzure_Exception($this->_getErrorMessage($response, 'Resource could not be accessed.'));
 		}
 	}
-	
+
 	/**
 	 * Delete queue
 	 *
@@ -283,14 +286,14 @@ class Microsoft_WindowsAzure_Storage_Queue extends Microsoft_WindowsAzure_Storag
 		if (!self::isValidQueueName($queueName)) {
 		    throw new Microsoft_WindowsAzure_Exception('Queue name does not adhere to queue naming conventions. See http://msdn.microsoft.com/en-us/library/dd179349.aspx for more information.');
 		}
-			
+
 		// Perform request
 		$response = $this->_performRequest($queueName, '', Microsoft_Http_Client::DELETE);
 		if (!$response->isSuccessful()) {
 			throw new Microsoft_WindowsAzure_Exception($this->_getErrorMessage($response, 'Resource could not be accessed.'));
 		}
 	}
-	
+
 	/**
 	 * List queues
 	 *
@@ -319,9 +322,9 @@ class Microsoft_WindowsAzure_Storage_Queue extends Microsoft_WindowsAzure_Storag
 	        $queryString[] = 'include=' . $include;
 	    }
 	    $queryString = self::createQueryStringFromArray($queryString);
-	        
+
 		// Perform request
-		$response = $this->_performRequest('', $queryString, Microsoft_Http_Client::GET);	
+		$response = $this->_performRequest('', $queryString, Microsoft_Http_Client::GET);
 		if ($response->isSuccessful()) {
 			$xmlQueues = $this->_parseResponse($response)->Queues->Queue;
 			$xmlMarker = (string)$this->_parseResponse($response)->NextMarker;
@@ -344,13 +347,13 @@ class Microsoft_WindowsAzure_Storage_Queue extends Microsoft_WindowsAzure_Storag
 			if (!is_null($maxResults) && count($queues) > $maxResults) {
 			    $queues = array_slice($queues, 0, $maxResults);
 			}
-			    
+
 			return $queues;
 		} else {
 			throw new Microsoft_WindowsAzure_Exception($this->_getErrorMessage($response, 'Resource could not be accessed.'));
 		}
 	}
-	
+
 	/**
 	 * Put message into queue
 	 *
@@ -376,20 +379,20 @@ class Microsoft_WindowsAzure_Storage_Queue extends Microsoft_WindowsAzure_Storag
 		if (!is_null($ttl) && ($ttl <= 0 || $ttl > self::MAX_MESSAGE_SIZE)) {
 		    throw new Microsoft_WindowsAzure_Exception('Message TTL is invalid. Maximal TTL is 7 days (' . self::MAX_MESSAGE_SIZE . ' seconds) and should be greater than zero.');
 		}
-		    
+
 	    // Build query string
 		$queryString = array();
         if (!is_null($ttl)) {
 	        $queryString[] = 'messagettl=' . $ttl;
         }
 	    $queryString = self::createQueryStringFromArray($queryString);
-	        
+
 	    // Build body
 	    $rawData = '';
 	    $rawData .= '<QueueMessage>';
 	    $rawData .= '    <MessageText>' . base64_encode($message) . '</MessageText>';
 	    $rawData .= '</QueueMessage>';
-	        
+
 		// Perform request
 		$response = $this->_performRequest($queueName . '/messages', $queryString, Microsoft_Http_Client::POST, array(), false, $rawData);
 
@@ -397,7 +400,7 @@ class Microsoft_WindowsAzure_Storage_Queue extends Microsoft_WindowsAzure_Storag
 			throw new Microsoft_WindowsAzure_Exception('Error putting message into queue.');
 		}
 	}
-	
+
 	/**
 	 * Get queue messages
 	 *
@@ -422,7 +425,7 @@ class Microsoft_WindowsAzure_Storage_Queue extends Microsoft_WindowsAzure_Storag
 		if (!is_null($visibilityTimeout) && ($visibilityTimeout <= 0 || $visibilityTimeout > 7200)) {
 		    throw new Microsoft_WindowsAzure_Exception('Visibility timeout is invalid. Maximum value is 2 hours (7200 seconds) and should be greater than zero.');
 		}
-		    
+
 	    // Build query string
 		$queryString = array();
     	if ($peek) {
@@ -433,11 +436,11 @@ class Microsoft_WindowsAzure_Storage_Queue extends Microsoft_WindowsAzure_Storag
     	}
     	if (!$peek && !is_null($visibilityTimeout)) {
 	        $queryString[] = 'visibilitytimeout=' . $visibilityTimeout;
-    	}   
+    	}
 	    $queryString = self::createQueryStringFromArray($queryString);
-	        
+
 		// Perform request
-		$response = $this->_performRequest($queueName . '/messages', $queryString, Microsoft_Http_Client::GET);	
+		$response = $this->_performRequest($queueName . '/messages', $queryString, Microsoft_Http_Client::GET);
 		if ($response->isSuccessful()) {
 		    // Parse results
 			$result = $this->_parseResponse($response);
@@ -464,13 +467,13 @@ class Microsoft_WindowsAzure_Storage_Queue extends Microsoft_WindowsAzure_Storag
 					base64_decode((string)$xmlMessages[$i]->MessageText)
 			    );
 			}
-			    
+
 			return $messages;
 		} else {
 			throw new Microsoft_WindowsAzure_Exception($this->_getErrorMessage($response, 'Resource could not be accessed.'));
 		}
 	}
-	
+
 	/**
 	 * Peek queue messages
 	 *
@@ -483,7 +486,7 @@ class Microsoft_WindowsAzure_Storage_Queue extends Microsoft_WindowsAzure_Storag
 	{
 	    return $this->getMessages($queueName, $numOfMessages, null, true);
 	}
-	
+
 	/**
 	 * Clear queue messages
 	 *
@@ -500,12 +503,12 @@ class Microsoft_WindowsAzure_Storage_Queue extends Microsoft_WindowsAzure_Storag
 		}
 
 		// Perform request
-		$response = $this->_performRequest($queueName . '/messages', '', Microsoft_Http_Client::DELETE);	
+		$response = $this->_performRequest($queueName . '/messages', '', Microsoft_Http_Client::DELETE);
 		if (!$response->isSuccessful()) {
 			throw new Microsoft_WindowsAzure_Exception('Error clearing messages from queue.');
 		}
 	}
-	
+
 	/**
 	 * Delete queue message
 	 *
@@ -526,12 +529,12 @@ class Microsoft_WindowsAzure_Storage_Queue extends Microsoft_WindowsAzure_Storag
 		}
 
 		// Perform request
-		$response = $this->_performRequest($queueName . '/messages/' . $message->MessageId, '?popreceipt=' . $message->PopReceipt, Microsoft_Http_Client::DELETE);	
+		$response = $this->_performRequest($queueName . '/messages/' . $message->MessageId, '?popreceipt=' . $message->PopReceipt, Microsoft_Http_Client::DELETE);
 		if (!$response->isSuccessful()) {
 			throw new Microsoft_WindowsAzure_Exception($this->_getErrorMessage($response, 'Resource could not be accessed.'));
 		}
 	}
-	
+
 	/**
 	 * Is valid queue name?
 	 *
@@ -543,29 +546,29 @@ class Microsoft_WindowsAzure_Storage_Queue extends Microsoft_WindowsAzure_Storag
         if (preg_match("/^[a-z0-9][a-z0-9-]*$/", $queueName) === 0) {
             return false;
         }
-    
+
         if (strpos($queueName, '--') !== false) {
             return false;
         }
-    
+
         if (strtolower($queueName) != $queueName) {
             return false;
         }
-    
+
         if (strlen($queueName) < 3 || strlen($queueName) > 63) {
             return false;
         }
-            
+
         if (substr($queueName, -1) == '-') {
             return false;
         }
-    
+
         return true;
     }
-    
+
 	/**
 	 * Get error message from Microsoft_Http_Response
-	 * 
+	 *
 	 * @param Microsoft_Http_Response $response Repsonse
 	 * @param string $alternativeError Alternative error message
 	 * @return string

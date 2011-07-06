@@ -32,6 +32,9 @@
  * @license    http://phpazure.codeplex.com/license
  * @version    $Id: Storage.php 45989 2010-05-03 12:19:10Z unknown $
  */
+if (!defined('W3TC')) {
+    die();
+}
 
 /**
  * @see Microsoft_WindowsAzure_Diagnostics_Exception
@@ -87,11 +90,11 @@ class Microsoft_WindowsAzure_Diagnostics_ConfigurationDataSources
 {
     /**
      * Constructor
-     * 
+     *
 	 * @param	int	$overallQuotaInMB				Overall quota in MB
 	 */
-    public function __construct($overallQuotaInMB = 0) 
-    {	        
+    public function __construct($overallQuotaInMB = 0)
+    {
         $this->_data = array(
             'overallquotainmb'        		=> $overallQuotaInMB,
             'logs'             				=> new Microsoft_WindowsAzure_Diagnostics_ConfigurationLogs(),

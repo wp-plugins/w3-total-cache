@@ -32,6 +32,9 @@
  * @copyright  Copyright (c) 2009 - 2010, RealDolmen (http://www.realdolmen.com)
  * @license    http://phpazure.codeplex.com/license
  */
+if (!defined('W3TC')) {
+    die();
+}
 
 /**
  * @see Microsoft_WindowsAzure_RetryPolicy_RetryPolicyAbstract
@@ -49,7 +52,7 @@ class Microsoft_WindowsAzure_RetryPolicy_NoRetry extends Microsoft_WindowsAzure_
 {
     /**
      * Execute function under retry policy
-     * 
+     *
      * @param string|array $function       Function to execute
      * @param array        $parameters     Parameters for function call
      * @return mixed
@@ -57,7 +60,7 @@ class Microsoft_WindowsAzure_RetryPolicy_NoRetry extends Microsoft_WindowsAzure_
     public function execute($function, $parameters = array())
     {
         $returnValue = null;
-        
+
         try
         {
             $returnValue = call_user_func_array($function, $parameters);

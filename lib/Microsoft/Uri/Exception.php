@@ -18,6 +18,9 @@
  * @license   http://framework.zend.com/license/new-bsd     New BSD License
  * @version   $Id: Exception.php 16208 2009-06-21 19:19:26Z thomas $
  */
+if (!defined('W3TC')) {
+    die();
+}
 
 /**
  * @see Microsoft_Exception

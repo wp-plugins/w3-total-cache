@@ -18,6 +18,9 @@
  * @license   http://framework.zend.com/license/new-bsd     New BSD License
  * @version   $Id: Http.php 19041 2009-11-19 15:19:07Z sgehrig $
  */
+if (!defined('W3TC')) {
+    die();
+}
 
 /**
  * @see Microsoft_Uri
@@ -437,7 +440,7 @@ class Microsoft_Uri_Http extends Microsoft_Uri
         if (strlen($host) === 0) {
             return false;
         }
-        
+
         return true;
     }
 

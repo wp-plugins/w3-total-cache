@@ -20,6 +20,9 @@
  * @copyright  Copyright (c) 2005-2009 Zend Technologies USA Inc. (http://www.zend.com)
  * @license    http://framework.zend.com/license/new-bsd     New BSD License
  */
+if (!defined('W3TC')) {
+    die();
+}
 
 /**
  * @see Microsoft_Uri_Http
@@ -62,11 +65,11 @@ class Microsoft_Http_Client_Adapter_Socket implements Microsoft_Http_Client_Adap
 
     /**
      * Stream for storing output
-     * 
+     *
      * @var resource
      */
     protected $out_stream = null;
-    
+
     /**
      * Parameters array
      *
@@ -286,13 +289,13 @@ class Microsoft_Http_Client_Adapter_Socket implements Microsoft_Http_Client_Adap
             // Add the request body
             $request .= "\r\n" . $body;
         }
-        
+
         // Send the request
         if (! @fwrite($this->socket, $request)) {
             require_once 'Microsoft/Http/Client/Adapter/Exception.php';
             throw new Microsoft_Http_Client_Adapter_Exception('Error writing request to server');
         }
-        
+
         if(is_resource($body)) {
             if(stream_copy_to_stream($body, $this->socket) == 0) {
                 require_once 'Microsoft/Http/Client/Adapter/Exception.php';
@@ -322,7 +325,7 @@ class Microsoft_Http_Client_Adapter_Socket implements Microsoft_Http_Client_Adap
                 if (rtrim($line) === '') break;
             }
         }
-        
+
         $this->_checkSocketReadTimeout();
 
         $statusCode = Microsoft_Http_Response::extractCode($response);
@@ -349,7 +352,7 @@ class Microsoft_Http_Client_Adapter_Socket implements Microsoft_Http_Client_Adap
 
         // If we got a 'transfer-encoding: chunked' header
         if (isset($headers['transfer-encoding'])) {
-            
+
             if (strtolower($headers['transfer-encoding']) == 'chunked') {
 
                 do {
@@ -380,7 +383,7 @@ class Microsoft_Http_Client_Adapter_Socket implements Microsoft_Http_Client_Adap
                         if($this->out_stream) {
                             if(stream_copy_to_stream($this->socket, $this->out_stream, $read_to - $current_pos) == 0) {
                               $this->_checkSocketReadTimeout();
-                              break;   
+                              break;
                              }
                         } else {
                             $line = @fread($this->socket, $read_to - $current_pos);
@@ -404,7 +407,7 @@ class Microsoft_Http_Client_Adapter_Socket implements Microsoft_Http_Client_Adap
                 throw new Microsoft_Http_Client_Adapter_Exception('Cannot handle "' .
                     $headers['transfer-encoding'] . '" transfer encoding');
             }
-            
+
             // We automatically decode chunked-messages when writing to a stream
             // this means we have to disallow the Microsoft_Http_Response to do it again
             if ($this->out_stream) {
@@ -423,7 +426,7 @@ class Microsoft_Http_Client_Adapter_Socket implements Microsoft_Http_Client_Adap
                  if($this->out_stream) {
                      if(@stream_copy_to_stream($this->socket, $this->out_stream, $read_to - $current_pos) == 0) {
                           $this->_checkSocketReadTimeout();
-                          break;   
+                          break;
                      }
                  } else {
                     $chunk = @fread($this->socket, $read_to - $current_pos);
@@ -446,7 +449,7 @@ class Microsoft_Http_Client_Adapter_Socket implements Microsoft_Http_Client_Adap
                 if($this->out_stream) {
                     if(@stream_copy_to_stream($this->socket, $this->out_stream) == 0) {
                           $this->_checkSocketReadTimeout();
-                          break;   
+                          break;
                      }
                 }  else {
                     $buff = @fread($this->socket, 8192);
@@ -503,19 +506,19 @@ class Microsoft_Http_Client_Adapter_Socket implements Microsoft_Http_Client_Adap
             }
         }
     }
-    
+
     /**
      * Set output stream for the response
-     * 
+     *
      * @param resource $stream
      * @return Microsoft_Http_Client_Adapter_Socket
      */
-    public function setOutputStream($stream) 
+    public function setOutputStream($stream)
     {
         $this->out_stream = $stream;
         return $this;
     }
-    
+
     /**
      * Destructor: make sure the socket is disconnected
      *

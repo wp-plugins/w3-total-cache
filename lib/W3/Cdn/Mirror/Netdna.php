@@ -3,10 +3,14 @@
 /**
  * W3 CDN Netdna Class
  */
-require_once W3TC_LIB_W3_DIR . '/Cdn/Mirror.php';
+if (!defined('ABSPATH')) {
+    die();
+}
 
 define('W3TC_CDN_MIRROR_NETDNA_TZ', 'America/Los_Angeles');
 define('W3TC_CDN_MIRROR_NETDNA_URL', 'http://api.netdna.com/xmlrpc/cache');
+
+require_once W3TC_LIB_W3_DIR . '/Cdn/Mirror.php';
 
 /**
  * Class W3_Cdn_Mirror_Netdna

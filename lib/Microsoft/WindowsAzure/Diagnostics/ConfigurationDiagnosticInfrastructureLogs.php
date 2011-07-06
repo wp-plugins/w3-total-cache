@@ -32,6 +32,9 @@
  * @license    http://phpazure.codeplex.com/license
  * @version    $Id: Storage.php 45989 2010-05-03 12:19:10Z unknown $
  */
+if (!defined('W3TC')) {
+    die();
+}
 
 /**
  * @see Microsoft_WindowsAzure_Diagnostics_Exception
@@ -64,13 +67,13 @@ class Microsoft_WindowsAzure_Diagnostics_ConfigurationDiagnosticInfrastructureLo
 {
     /**
      * Constructor
-     * 
+     *
 	 * @param	int		$bufferQuotaInMB					Buffer quota in MB
 	 * @param	int		$scheduledTransferPeriodInMinutes	Scheduled transfer period in minutes
 	 * @param	string	$scheduledTransferLogLevelFilter	Scheduled transfer log level filter
 	 */
-    public function __construct($bufferQuotaInMB = 0, $scheduledTransferPeriodInMinutes = 0, $scheduledTransferLogLevelFilter = Microsoft_WindowsAzure_Diagnostics_LogLevel::UNDEFINED) 
-    {	        
+    public function __construct($bufferQuotaInMB = 0, $scheduledTransferPeriodInMinutes = 0, $scheduledTransferLogLevelFilter = Microsoft_WindowsAzure_Diagnostics_LogLevel::UNDEFINED)
+    {
         $this->_data = array(
             'bufferquotainmb'        			=> $bufferQuotaInMB,
             'scheduledtransferperiodinminutes' 	=> $scheduledTransferPeriodInMinutes,

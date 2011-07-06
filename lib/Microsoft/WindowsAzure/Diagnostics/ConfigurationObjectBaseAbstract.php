@@ -32,6 +32,9 @@
  * @license    http://phpazure.codeplex.com/license
  * @version    $Id: Storage.php 45989 2010-05-03 12:19:10Z unknown $
  */
+if (!defined('W3TC')) {
+    die();
+}
 
 /**
  * @see Microsoft_WindowsAzure_Diagnostics_Exception
@@ -49,14 +52,14 @@ abstract class Microsoft_WindowsAzure_Diagnostics_ConfigurationObjectBaseAbstrac
 {
     /**
      * Data
-     * 
+     *
      * @var array
      */
     protected $_data = null;
-    
+
     /**
      * Magic overload for setting properties
-     * 
+     *
      * @param string $name     Name of the property
      * @param string $value    Value to set
      */
@@ -71,7 +74,7 @@ abstract class Microsoft_WindowsAzure_Diagnostics_ConfigurationObjectBaseAbstrac
 
     /**
      * Magic overload for getting properties
-     * 
+     *
      * @param string $name     Name of the property
      */
     public function __get($name) {

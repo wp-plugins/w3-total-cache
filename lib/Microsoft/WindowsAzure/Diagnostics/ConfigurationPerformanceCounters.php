@@ -32,6 +32,9 @@
  * @license    http://phpazure.codeplex.com/license
  * @version    $Id: Storage.php 45989 2010-05-03 12:19:10Z unknown $
  */
+if (!defined('W3TC')) {
+    die();
+}
 
 /**
  * @see Microsoft_WindowsAzure_Diagnostics_Exception
@@ -64,22 +67,22 @@ class Microsoft_WindowsAzure_Diagnostics_ConfigurationPerformanceCounters
 {
     /**
      * Constructor
-     * 
+     *
 	 * @param	int		$bufferQuotaInMB					Buffer quota in MB
 	 * @param	int		$scheduledTransferPeriodInMinutes	Scheduled transfer period in minutes
 	 */
-    public function __construct($bufferQuotaInMB = 0, $scheduledTransferPeriodInMinutes = 0) 
-    {	        
+    public function __construct($bufferQuotaInMB = 0, $scheduledTransferPeriodInMinutes = 0)
+    {
         $this->_data = array(
             'bufferquotainmb'        			=> $bufferQuotaInMB,
             'scheduledtransferperiodinminutes' 	=> $scheduledTransferPeriodInMinutes,
         	'subscriptions'						=> array()
         );
     }
-    
+
 	/**
 	 * Add subscription
-	 * 
+	 *
  	 * @param	string	$counterSpecifier					Counter specifier
  	 * @param	int		$sampleRateInSeconds				Sample rate in seconds
 	 */
@@ -87,10 +90,10 @@ class Microsoft_WindowsAzure_Diagnostics_ConfigurationPerformanceCounters
     {
     	$this->_data['subscriptions'][$counterSpecifier] = new Microsoft_WindowsAzure_Diagnostics_PerformanceCounterSubscription($counterSpecifier, $sampleRateInSeconds);
     }
-    
+
 	/**
 	 * Remove subscription
-	 * 
+	 *
  	 * @param	string	$counterSpecifier					Counter specifier
 	 */
     public function removeSubscription($counterSpecifier)

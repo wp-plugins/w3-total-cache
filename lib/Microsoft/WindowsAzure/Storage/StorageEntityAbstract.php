@@ -32,6 +32,9 @@
  * @license    http://phpazure.codeplex.com/license
  * @version    $Id: BlobInstance.php 45390 2010-04-19 08:28:21Z unknown $
  */
+if (!defined('W3TC')) {
+    die();
+}
 
 /**
  * @see Microsoft_WindowsAzure_Exception
@@ -45,20 +48,20 @@ require_once 'Microsoft/WindowsAzure/Exception.php';
  * @subpackage Storage
  * @copyright  Copyright (c) 2009 - 2010, RealDolmen (http://www.realdolmen.com)
  * @license    http://phpazure.codeplex.com/license
- * 
+ *
  */
 abstract class Microsoft_WindowsAzure_Storage_StorageEntityAbstract
 {
     /**
      * Data
-     * 
+     *
      * @var array
      */
     protected $_data = null;
-    
+
     /**
      * Magic overload for setting properties
-     * 
+     *
      * @param string $name     Name of the property
      * @param string $value    Value to set
      */
@@ -73,7 +76,7 @@ abstract class Microsoft_WindowsAzure_Storage_StorageEntityAbstract
 
     /**
      * Magic overload for getting properties
-     * 
+     *
      * @param string $name     Name of the property
      */
     public function __get($name) {

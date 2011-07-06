@@ -1,7 +1,8 @@
 <?php
 
-
-
+if (!defined('W3TC')) {
+    die();
+}
 
 /**
 * Contains information for a SOAP fault.

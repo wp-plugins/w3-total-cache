@@ -32,6 +32,9 @@
  * @license    http://phpazure.codeplex.com/license
  * @version    $Id: Storage.php 21617 2009-06-12 10:46:31Z unknown $
  */
+if (!defined('W3TC')) {
+    die();
+}
 
 /**
  * @see Microsoft_WindowsAzure_Exception
@@ -51,45 +54,45 @@ require_once 'Microsoft/WindowsAzure/Storage/BatchStorageAbstract.php';
  * @license    http://phpazure.codeplex.com/license
  */
 class Microsoft_WindowsAzure_Storage_Batch
-{	
+{
     /**
      * Storage client the batch is defined on
-     * 
+     *
      * @var Microsoft_WindowsAzure_Storage_BatchStorageAbstract
      */
     protected $_storageClient = null;
-    
+
     /**
      * For table storage?
-     * 
+     *
      * @var boolean
      */
     protected $_forTableStorage = false;
-    
+
     /**
      * Base URL
-     * 
+     *
      * @var string
      */
     protected $_baseUrl;
-    
+
     /**
      * Pending operations
-     * 
+     *
      * @var unknown_type
      */
     protected $_operations = array();
-    
+
     /**
      * Does the batch contain a single select?
-     * 
+     *
      * @var boolean
      */
     protected $_isSingleSelect = false;
-    
+
     /**
      * Creates a new Microsoft_WindowsAzure_Storage_Batch
-     * 
+     *
      * @param Microsoft_WindowsAzure_Storage_BatchStorageAbstract $storageClient Storage client the batch is defined on
      */
     public function __construct(Microsoft_WindowsAzure_Storage_BatchStorageAbstract $storageClient = null, $baseUrl = '')
@@ -98,7 +101,7 @@ class Microsoft_WindowsAzure_Storage_Batch
         $this->_baseUrl       = $baseUrl;
         $this->_beginBatch();
     }
-    
+
 	/**
 	 * Get base URL for creating requests
 	 *
@@ -108,17 +111,17 @@ class Microsoft_WindowsAzure_Storage_Batch
 	{
 		return $this->_baseUrl;
 	}
-    
+
     /**
      * Starts a new batch operation set
-     * 
+     *
      * @throws Microsoft_WindowsAzure_Exception
      */
     protected function _beginBatch()
     {
         $this->_storageClient->setCurrentBatch($this);
     }
-    
+
     /**
      * Cleanup current batch
      */
@@ -147,7 +150,7 @@ class Microsoft_WindowsAzure_Storage_Batch
 	    if ($forTableStorage) {
 	        $this->_forTableStorage = true;
 	    }
-	    
+
 	    // Set _isSingleSelect
 	    if ($httpVerb == Microsoft_Http_Client::GET) {
 	        if (count($this->_operations) > 0) {
@@ -155,29 +158,29 @@ class Microsoft_WindowsAzure_Storage_Batch
 	        }
 	        $this->_isSingleSelect = true;
 	    }
-	    
+
 	    // Clean path
 		if (strpos($path, '/') !== 0) {
 			$path = '/' . $path;
 		}
-			
+
 		// Clean headers
 		if (is_null($headers)) {
 		    $headers = array();
 		}
-		    
+
 		// URL encoding
 		$path           = Microsoft_WindowsAzure_Storage::urlencode($path);
 		$queryString    = Microsoft_WindowsAzure_Storage::urlencode($queryString);
 
 		// Generate URL
 		$requestUrl     = $this->getBaseUrl() . $path . $queryString;
-		
+
 		// Generate $rawData
 		if (is_null($rawData)) {
 		    $rawData = '';
 		}
-		    
+
 		// Add headers
 		if ($httpVerb != Microsoft_Http_Client::GET) {
     		$headers['Content-ID'] = count($this->_operations) + 1;
@@ -186,7 +189,7 @@ class Microsoft_WindowsAzure_Storage_Batch
     		}
     		$headers['Content-Length'] = strlen($rawData);
 		}
-		    
+
 		// Generate $operation
 		$operation = '';
 		$operation .= $httpVerb . ' ' . $requestUrl . ' HTTP/1.1' . "\n";
@@ -195,17 +198,17 @@ class Microsoft_WindowsAzure_Storage_Batch
 		    $operation .= $key . ': ' . $value . "\n";
 		}
 		$operation .= "\n";
-		
+
 		// Add data
 		$operation .= $rawData;
 
 		// Store operation
-		$this->_operations[] = $operation;	        
+		$this->_operations[] = $operation;
 	}
-    
+
     /**
      * Commit current batch
-     * 
+     *
      * @return Microsoft_Http_Response
      * @throws Microsoft_WindowsAzure_Exception
      */
@@ -213,23 +216,23 @@ class Microsoft_WindowsAzure_Storage_Batch
     {
         // Perform batch
         $response = $this->_storageClient->performBatch($this->_operations, $this->_forTableStorage, $this->_isSingleSelect);
-        
+
         // Dispose
         $this->_clean();
-        
+
         // Parse response
         $errors = null;
         preg_match_all('/<message (.*)>(.*)<\/message>/', $response->getBody(), $errors);
-        
+
         // Error?
         if (count($errors[2]) > 0) {
             throw new Microsoft_WindowsAzure_Exception('An error has occured while committing a batch: ' . $errors[2][0]);
         }
-        
+
         // Return
         return $response;
     }
-    
+
     /**
      * Rollback current batch
      */
@@ -238,20 +241,20 @@ class Microsoft_WindowsAzure_Storage_Batch
         // Dispose
         $this->_clean();
     }
-    
+
     /**
      * Get operation count
-     * 
+     *
      * @return integer
      */
     public function getOperationCount()
     {
         return count($this->_operations);
     }
-    
+
     /**
      * Is single select?
-     * 
+     *
      * @return boolean
      */
     public function isSingleSelect()

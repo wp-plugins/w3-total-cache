@@ -32,6 +32,9 @@
  * @license    http://phpazure.codeplex.com/license
  * @version    $Id: BlobContainer.php 17553 2009-05-15 10:40:55Z unknown $
  */
+if (!defined('W3TC')) {
+    die();
+}
 
 /**
  * @see Microsoft_WindowsAzure_Exception
@@ -49,7 +52,7 @@ require_once 'Microsoft/WindowsAzure/Storage/StorageEntityAbstract.php';
  * @subpackage Storage
  * @copyright  Copyright (c) 2009 - 2010, RealDolmen (http://www.realdolmen.com)
  * @license    http://phpazure.codeplex.com/license
- *   
+ *
  * @property string $MessageId         Message ID
  * @property string $InsertionTime     Insertion time
  * @property string $ExpirationTime    Expiration time
@@ -63,7 +66,7 @@ class Microsoft_WindowsAzure_Storage_QueueMessage
 {
     /**
      * Constructor
-     * 
+     *
      * @param string $messageId         Message ID
      * @param string $insertionTime     Insertion time
      * @param string $expirationTime    Expiration time
@@ -72,7 +75,7 @@ class Microsoft_WindowsAzure_Storage_QueueMessage
      * @param int    $dequeueCount      Number of times the message has been dequeued. This value is incremented each time the message is subsequently dequeued.
      * @param string $messageText       Message text
      */
-    public function __construct($messageId, $insertionTime, $expirationTime, $popReceipt, $timeNextVisible, $dequeueCount, $messageText) 
+    public function __construct($messageId, $insertionTime, $expirationTime, $popReceipt, $timeNextVisible, $dequeueCount, $messageText)
     {
         $this->_data = array(
             'messageid'       => $messageId,

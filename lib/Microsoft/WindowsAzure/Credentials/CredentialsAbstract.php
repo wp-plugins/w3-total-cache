@@ -31,6 +31,9 @@
  * @license    http://phpazure.codeplex.com/license
  * @version    $Id: SharedKeyCredentials.php 14561 2009-05-07 08:05:12Z unknown $
  */
+if (!defined('W3TC')) {
+    die();
+}
 
 /**
  * @see Microsoft_Http_Client
@@ -47,7 +50,7 @@ require_once 'Microsoft/WindowsAzure/Credentials/Exception.php';
  * @package    Microsoft_WindowsAzure
  * @copyright  Copyright (c) 2009 - 2010, RealDolmen (http://www.realdolmen.com)
  * @license    http://phpazure.codeplex.com/license
- */ 
+ */
 abstract class Microsoft_WindowsAzure_Credentials_CredentialsAbstract
 {
 	/**
@@ -55,14 +58,14 @@ abstract class Microsoft_WindowsAzure_Credentials_CredentialsAbstract
 	 */
 	const DEVSTORE_ACCOUNT       = "devstoreaccount1";
 	const DEVSTORE_KEY           = "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==";
-	
+
 	/**
 	 * HTTP header prefixes
 	 */
 	const PREFIX_PROPERTIES      = "x-ms-prop-";
 	const PREFIX_METADATA        = "x-ms-meta-";
 	const PREFIX_STORAGE_HEADER  = "x-ms-";
-	
+
 	/**
 	 * Permissions
 	 */
@@ -77,21 +80,21 @@ abstract class Microsoft_WindowsAzure_Credentials_CredentialsAbstract
 	 * @var string
 	 */
 	protected $_accountName = '';
-	
+
 	/**
 	 * Account key for Windows Azure
 	 *
 	 * @var string
 	 */
 	protected $_accountKey = '';
-	
+
 	/**
 	 * Use path-style URI's
 	 *
 	 * @var boolean
 	 */
 	protected $_usePathStyleUri = false;
-	
+
 	/**
 	 * Creates a new Microsoft_WindowsAzure_Credentials_CredentialsAbstract instance
 	 *
@@ -108,7 +111,7 @@ abstract class Microsoft_WindowsAzure_Credentials_CredentialsAbstract
 		$this->_accountKey = base64_decode($accountKey);
 		$this->_usePathStyleUri = $usePathStyleUri;
 	}
-	
+
 	/**
 	 * Set account name for Windows Azure
 	 *
@@ -120,7 +123,7 @@ abstract class Microsoft_WindowsAzure_Credentials_CredentialsAbstract
 		$this->_accountName = $value;
 		return $this;
 	}
-	
+
 	/**
 	 * Set account key for Windows Azure
 	 *
@@ -132,7 +135,7 @@ abstract class Microsoft_WindowsAzure_Credentials_CredentialsAbstract
 		$this->_accountKey = base64_decode($value);
 		return $this;
 	}
-	
+
 	/**
 	 * Set use path-style URI's
 	 *
@@ -144,7 +147,7 @@ abstract class Microsoft_WindowsAzure_Credentials_CredentialsAbstract
 		$this->_usePathStyleUri = $value;
 		return $this;
 	}
-	
+
 	/**
 	 * Sign request URL with credentials
 	 *
@@ -158,7 +161,7 @@ abstract class Microsoft_WindowsAzure_Credentials_CredentialsAbstract
 		$resourceType = Microsoft_WindowsAzure_Storage::RESOURCE_UNKNOWN,
 		$requiredPermission = Microsoft_WindowsAzure_Credentials_CredentialsAbstract::PERMISSION_READ
 	);
-	
+
 	/**
 	 * Sign request headers with credentials
 	 *
@@ -182,11 +185,11 @@ abstract class Microsoft_WindowsAzure_Credentials_CredentialsAbstract
 		$requiredPermission = Microsoft_WindowsAzure_Credentials_CredentialsAbstract::PERMISSION_READ,
 		$rawData = null
 	);
-	
-	
+
+
 	/**
 	 * Prepare query string for signing
-	 * 
+	 *
 	 * @param  string $value Original query string
 	 * @return string        Query string for signing
 	 */
@@ -194,13 +197,13 @@ abstract class Microsoft_WindowsAzure_Credentials_CredentialsAbstract
 	{
 	    // Return value
 	    $returnValue = array();
-	    
+
 	    // Prepare query string
 	    $queryParts = $this->_makeArrayOfQueryString($value);
 	    foreach ($queryParts as $key => $value) {
 	    	$returnValue[] = $key . '=' . $value;
 	    }
-	    
+
 	    // Return
 	    if (count($returnValue) > 0) {
 	    	return '?' . implode('&', $returnValue);
@@ -208,10 +211,10 @@ abstract class Microsoft_WindowsAzure_Credentials_CredentialsAbstract
 	    	return '';
 	    }
 	}
-	
+
 	/**
 	 * Make array of query string
-	 * 
+	 *
 	 * @param  string $value Query string
 	 * @return array         Array of key/value pairs
 	 */
@@ -219,32 +222,32 @@ abstract class Microsoft_WindowsAzure_Credentials_CredentialsAbstract
 	{
 		// Returnvalue
 		$returnValue = array();
-		
-	    // Remove front ?     
+
+	    // Remove front ?
    		if (strlen($value) > 0 && strpos($value, '?') === 0) {
     		$value = substr($value, 1);
     	}
-    		
+
     	// Split parts
     	$queryParts = explode('&', $value);
     	foreach ($queryParts as $queryPart) {
     		$queryPart = explode('=', $queryPart, 2);
-    		
+
     		if ($queryPart[0] != '') {
     			$returnValue[ $queryPart[0] ] = isset($queryPart[1]) ? $queryPart[1] : '';
     		}
     	}
-    	
+
     	// Sort
     	ksort($returnValue);
 
     	// Return
 		return $returnValue;
 	}
-	
+
 	/**
 	 * Returns an array value if the key is set, otherwide returns $valueIfNotSet
-	 * 
+	 *
 	 * @param array $array
 	 * @param mixed $key
 	 * @param mixed $valueIfNotSet

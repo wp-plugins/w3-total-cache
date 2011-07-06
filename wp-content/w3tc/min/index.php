@@ -3,6 +3,10 @@
 /**
  * W3 Total Cache Minify module
  */
+if (isset($_SERVER['SCRIPT_FILENAME']) && strstr($_SERVER['SCRIPT_FILENAME'], 'w3-total-cache') !== false) {
+    die();
+}
+
 define('W3TC_IN_MINIFY', true);
 
 if (!defined('ABSPATH')) {

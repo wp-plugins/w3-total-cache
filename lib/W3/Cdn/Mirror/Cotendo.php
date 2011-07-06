@@ -3,11 +3,15 @@
 /**
  * W3 CDN Netdna Class
  */
-require_once W3TC_LIB_W3_DIR . '/Cdn/Mirror.php';
+if (!defined('ABSPATH')) {
+    die();
+}
 
 define('W3TC_CDN_MIRROR_COTENDO_WSDL', 'https://api.cotendo.net/cws?wsdl');
 define('W3TC_CDN_MIRROR_COTENDO_ENDPOINT', 'http://api.cotendo.net/cws?ver=1.0');
 define('W3TC_CDN_MIRROR_COTENDO_NAMESPACE', 'http://api.cotendo.net/');
+
+require_once W3TC_LIB_W3_DIR . '/Cdn/Mirror.php';
 
 /**
  * Class W3_Cdn_Mirror_Cotendo

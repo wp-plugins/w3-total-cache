@@ -3,6 +3,10 @@
 /**
  * eAccelerator class
  */
+if (!defined('W3TC')) {
+    die();
+}
+
 require_once W3TC_LIB_W3_DIR . '/Cache/Base.php';
 
 /**

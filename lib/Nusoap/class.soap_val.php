@@ -1,7 +1,8 @@
 <?php
 
-
-
+if (!defined('W3TC')) {
+    die();
+}
 
 /**
 * For creating serializable abstractions of native PHP types.  This class

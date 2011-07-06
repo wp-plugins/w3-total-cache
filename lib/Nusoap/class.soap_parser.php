@@ -1,7 +1,8 @@
 <?php
 
-
-
+if (!defined('W3TC')) {
+    die();
+}
 
 /**
 *
@@ -317,7 +318,7 @@ class nusoap_parser extends nusoap_base {
 			// get unqualified name
 			$name = substr(strstr($name,':'),1);
 		}
-		
+
 		// build to native type
 		if(isset($this->body_position) && $pos > $this->body_position){
 			// deal w/ multirefs
@@ -379,7 +380,7 @@ class nusoap_parser extends nusoap_base {
 				*/
 			}
 		}
-		
+
         // for doclit
         if($this->status == 'header'){
         	if ($this->root_header != $pos) {

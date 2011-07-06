@@ -1,15 +1,20 @@
 <?php
 
-if (!defined('W3TC_CDN_CF_TYPE_S3')) {
-    define('W3TC_CDN_CF_TYPE_S3', 's3');
+/**
+ * Amazon CloudFront CDN engine
+ */
+if (!defined('ABSPATH')) {
+    die();
 }
 
-if (!defined('W3TC_CDN_CF_TYPE_CUSTOM')) {
-    define('W3TC_CDN_CF_TYPE_CUSTOM', 'custom');
-}
+define('W3TC_CDN_CF_TYPE_S3', 's3');
+define('W3TC_CDN_CF_TYPE_CUSTOM', 'custom');
 
 require_once W3TC_LIB_W3_DIR . '/Cdn/S3.php';
 
+/**
+ * Class W3_Cdn_S3_Cf
+ */
 class W3_Cdn_S3_Cf extends W3_Cdn_S3 {
     /**
      * Type

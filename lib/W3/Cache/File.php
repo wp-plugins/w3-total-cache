@@ -1,12 +1,14 @@
 <?php
 
-if (!defined('W3TC_CACHE_FILE_EXPIRE_MAX')) {
-    define('W3TC_CACHE_FILE_EXPIRE_MAX', 2592000);
-}
-
 /**
  * File class
  */
+if (!defined('W3TC')) {
+    die();
+}
+
+define('W3TC_CACHE_FILE_EXPIRE_MAX', 2592000);
+
 require_once W3TC_LIB_W3_DIR . '/Cache/Base.php';
 
 /**

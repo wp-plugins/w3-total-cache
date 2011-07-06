@@ -32,6 +32,9 @@
  * @license    http://phpazure.codeplex.com/license
  * @version    $Id: Storage.php 21617 2009-06-12 10:46:31Z unknown $
  */
+if (!defined('W3TC')) {
+    die();
+}
 
 /** Microsoft_WindowsAzure_Storage_Table */
 require_once 'Microsoft/WindowsAzure/Storage/Table.php';
@@ -52,28 +55,28 @@ class Microsoft_WindowsAzure_SessionHandler
 {
     /**
      * Table storage
-     * 
+     *
      * @var Microsoft_WindowsAzure_Storage_Table
      */
     protected $_tableStorage;
-    
+
     /**
      * Session table name
-     * 
+     *
      * @var string
      */
     protected $_sessionTable;
-    
+
     /**
      * Session table partition
-     * 
+     *
      * @var string
      */
     protected $_sessionTablePartition;
-	
+
     /**
      * Creates a new Microsoft_WindowsAzure_SessionHandler instance
-     * 
+     *
      * @param Microsoft_WindowsAzure_Storage_Table $tableStorage Table storage
      * @param string $sessionTable Session table name
      * @param string $sessionTablePartition Session table partition
@@ -85,10 +88,10 @@ class Microsoft_WindowsAzure_SessionHandler
 		$this->_sessionTable = $sessionTable;
 		$this->_sessionTablePartition = $sessionTablePartition;
 	}
-	
+
 	/**
 	 * Registers the current session handler as PHP's session handler
-	 * 
+	 *
 	 * @return boolean
 	 */
 	public function register()
@@ -101,10 +104,10 @@ class Microsoft_WindowsAzure_SessionHandler
                                         array($this, 'gc')
         );
 	}
-	
+
     /**
      * Open the session store
-     * 
+     *
      * @return bool
      */
     public function open()
@@ -114,24 +117,24 @@ class Microsoft_WindowsAzure_SessionHandler
     	if (!$tableExists) {
 		    $this->_tableStorage->createTable($this->_sessionTable);
 		}
-		
+
 		// Ok!
 		return true;
     }
 
     /**
      * Close the session store
-     * 
+     *
      * @return bool
      */
     public function close()
     {
         return true;
     }
-    
+
     /**
      * Read a specific session
-     * 
+     *
      * @param int $id Session Id
      * @return string
      */
@@ -151,10 +154,10 @@ class Microsoft_WindowsAzure_SessionHandler
             return '';
         }
     }
-    
+
     /**
      * Write a specific session
-     * 
+     *
      * @param int $id Session Id
      * @param string $serializedData Serialized PHP object
      */
@@ -163,7 +166,7 @@ class Microsoft_WindowsAzure_SessionHandler
         $sessionRecord = new Microsoft_WindowsAzure_Storage_DynamicTableEntity($this->_sessionTablePartition, $id);
         $sessionRecord->sessionExpires = time();
         $sessionRecord->serializedData = base64_encode($serializedData);
-        
+
         $sessionRecord->setAzurePropertyType('sessionExpires', 'Edm.Int32');
 
         try
@@ -175,10 +178,10 @@ class Microsoft_WindowsAzure_SessionHandler
             $this->_tableStorage->insertEntity($this->_sessionTable, $sessionRecord);
         }
     }
-    
+
     /**
      * Destroy a specific session
-     * 
+     *
      * @param int $id Session Id
      * @return boolean
      */
@@ -192,7 +195,7 @@ class Microsoft_WindowsAzure_SessionHandler
                 $id
             );
             $this->_tableStorage->deleteEntity($this->_sessionTable, $sessionRecord);
-            
+
             return true;
         }
         catch (Microsoft_WindowsAzure_Exception $ex)
@@ -200,10 +203,10 @@ class Microsoft_WindowsAzure_SessionHandler
             return false;
         }
     }
-    
+
     /**
      * Garbage collector
-     * 
+     *
      * @param int $lifeTime Session maximal lifetime
      * @see session.gc_divisor  100
      * @see session.gc_maxlifetime 1440
