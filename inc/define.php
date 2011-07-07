@@ -29,7 +29,6 @@ define('W3TC_LIB_CSSTIDY_DIR', W3TC_LIB_DIR . '/CSSTidy');
 define('W3TC_LIB_MICROSOFT_DIR', W3TC_LIB_DIR . '/Microsoft');
 define('W3TC_LIB_NUSOAP_DIR', W3TC_LIB_DIR . '/Nusoap');
 define('W3TC_PLUGINS_DIR', W3TC_DIR . '/plugins');
-define('W3TC_DB_DIR', W3TC_DIR . '/db');
 define('W3TC_INSTALL_DIR', W3TC_DIR . '/wp-content');
 define('W3TC_INSTALL_MINIFY_DIR', W3TC_INSTALL_DIR . '/w3tc/min');
 
