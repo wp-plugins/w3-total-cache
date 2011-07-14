@@ -1,5 +1,5 @@
 <?php if (!defined('W3TC')) die(); ?>
-<?php include W3TC_DIR . '/inc/options/common/header.php'; ?>
+<?php include W3TC_INC_DIR . '/options/common/header.php'; ?>
 
 <div id="about">
     <p>User experience is an important aspect of every web site and all web sites can benefit from effective caching and file size reduction. We have applied web site optimization methods typically used with high traffic sites and simplified their implementation. Coupling these methods either <a href="http://www.danga.com/memcached/" target="_blank">memcached</a> and/or opcode caching and the <acronym title="Content Delivery Network">CDN</acronym> of your choosing to provide the following features and benefits:</p>
@@ -49,4 +49,4 @@
     <p>Please reach out to all of these people and support their projects if you're so inclined.</p>
 </div>
 
-<?php include W3TC_DIR . '/inc/options/common/footer.php'; ?>
+<?php include W3TC_INC_DIR . '/options/common/footer.php'; ?>

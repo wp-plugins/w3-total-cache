@@ -94,44 +94,38 @@ class W3_Plugin_TotalCache extends W3_Plugin {
         /**
          * Run DbCache plugin
          */
-        require_once W3TC_LIB_W3_DIR . '/Plugin/DbCache.php';
-        $w3_plugin_dbcache = & W3_Plugin_DbCache::instance();
+        $w3_plugin_dbcache = & w3_instance('/Plugin/DbCache.php');
         $w3_plugin_dbcache->run();
 
         /**
          * Run ObjectCache plugin
          */
-        require_once W3TC_LIB_W3_DIR . '/Plugin/ObjectCache.php';
-        $w3_plugin_objectcache = & W3_Plugin_ObjectCache::instance();
+        $w3_plugin_objectcache = & w3_instance('/Plugin/ObjectCache.php');
         $w3_plugin_objectcache->run();
 
         /**
          * Run PgCache plugin
          */
-        require_once W3TC_LIB_W3_DIR . '/Plugin/PgCache.php';
-        $w3_plugin_pgcache = & W3_Plugin_PgCache::instance();
+        $w3_plugin_pgcache = & w3_instance('/Plugin/PgCache.php');
         $w3_plugin_pgcache->run();
 
         /**
          * Run CDN plugin
          */
-        require_once W3TC_LIB_W3_DIR . '/Plugin/Cdn.php';
-        $w3_plugin_cdn = & W3_Plugin_Cdn::instance();
+        $w3_plugin_cdn = & w3_instance('/Plugin/Cdn.php');
         $w3_plugin_cdn->run();
 
         /**
          * Run BrowserCache plugin
          */
-        require_once W3TC_LIB_W3_DIR . '/Plugin/BrowserCache.php';
-        $w3_plugin_browsercache = & W3_Plugin_BrowserCache::instance();
+        $w3_plugin_browsercache = & w3_instance('/Plugin/BrowserCache.php');
         $w3_plugin_browsercache->run();
 
         /**
          * Run Minify plugin
          */
         if (W3TC_PHP5) {
-            require_once W3TC_LIB_W3_DIR . '/Plugin/Minify.php';
-            $w3_plugin_minify = & W3_Plugin_Minify::instance();
+            $w3_plugin_minify = & w3_instance('/Plugin/Minify.php');
             $w3_plugin_minify->run();
         }
 
@@ -139,26 +133,9 @@ class W3_Plugin_TotalCache extends W3_Plugin {
          * Run admin plugin
          */
         if (is_admin()) {
-            require_once W3TC_LIB_W3_DIR . '/Plugin/TotalCacheAdmin.php';
-            $w3_plugin_totalcacheadmin = & W3_Plugin_TotalCacheAdmin::instance();
+            $w3_plugin_totalcacheadmin = & w3_instance('/Plugin/TotalCacheAdmin.php');
             $w3_plugin_totalcacheadmin->run();
         }
-    }
-
-    /**
-     * Returns plugin instance
-     *
-     * @return W3_Plugin_TotalCache
-     */
-    function &instance() {
-        static $instances = array();
-
-        if (!isset($instances[0])) {
-            $class = __CLASS__;
-            $instances[0] = & new $class();
-        }
-
-        return $instances[0];
     }
 
     /**
@@ -167,98 +144,8 @@ class W3_Plugin_TotalCache extends W3_Plugin {
      * @return void
      */
     function activate() {
-        /**
-         * Disable buggy sitewide activation in WPMU and WP 3.0
-         */
-        if ((w3_is_wpmu() && isset($_GET['sitewide'])) || (w3_is_multisite() && isset($_GET['networkwide']))) {
-            w3_network_activate_error();
-        }
-
-        /**
-         * Check installation files
-         */
-        $files = array(
-            W3TC_INSTALL_FILE_ADVANCED_CACHE,
-            W3TC_INSTALL_FILE_DB,
-            W3TC_INSTALL_FILE_OBJECT_CACHE
-        );
-
-        $nonexistent_files = array();
-
-        foreach ($files as $file) {
-            if (!file_exists($file)) {
-                $nonexistent_files[] = $file;
-            }
-        }
-
-        if (count($nonexistent_files)) {
-            $error = sprintf('Unfortunately core file(s): (<strong>%s</strong>) are missing, so activation will fail. Please re-start the installation process from the beginning.', implode(', ', $nonexistent_files));
-
-            w3_activate_error($error);
-        }
-
-        if (!@is_dir(W3TC_CONTENT_DIR) && !@mkdir(W3TC_CONTENT_DIR)) {
-            w3_writable_error(W3TC_CONTENT_DIR);
-        }
-
-        if (!@is_dir(W3TC_CACHE_FILE_DBCACHE_DIR) && !@mkdir(W3TC_CACHE_FILE_DBCACHE_DIR)) {
-            w3_writable_error(W3TC_CACHE_FILE_DBCACHE_DIR);
-        }
-
-        if (!@is_dir(W3TC_CACHE_FILE_OBJECTCACHE_DIR) && !@mkdir(W3TC_CACHE_FILE_OBJECTCACHE_DIR)) {
-            w3_writable_error(W3TC_CACHE_FILE_OBJECTCACHE_DIR);
-        }
-
-        if (!@is_dir(W3TC_CACHE_FILE_PGCACHE_DIR) && !@mkdir(W3TC_CACHE_FILE_PGCACHE_DIR)) {
-            w3_writable_error(W3TC_CACHE_FILE_PGCACHE_DIR);
-        }
-
-        if (!@is_dir(W3TC_CACHE_FILE_MINIFY_DIR) && !@mkdir(W3TC_CACHE_FILE_MINIFY_DIR)) {
-            w3_writable_error(W3TC_CACHE_FILE_MINIFY_DIR);
-        }
-
-        if (!@is_dir(W3TC_LOG_DIR) && !@mkdir(W3TC_LOG_DIR)) {
-            w3_writable_error(W3TC_LOG_DIR);
-        }
-
-        if (!@is_dir(W3TC_TMP_DIR) && !@mkdir(W3TC_TMP_DIR)) {
-            w3_writable_error(W3TC_TMP_DIR);
-        }
-
-        if (w3_is_network() && file_exists(W3TC_CONFIG_MASTER_PATH)) {
-            /**
-             * For multisite load master config
-             */
-            $this->_config->load_master();
-
-            if (!$this->_config->save(false)) {
-                w3_writable_error(W3TC_CONFIG_PATH);
-            }
-        } elseif (!file_exists(W3TC_CONFIG_PATH)) {
-            /**
-             * Set default settings
-             */
-            $this->_config->set_defaults();
-
-            /**
-             * If config doesn't exist enable preview mode
-             */
-            if (!$this->_config->save(true)) {
-                w3_writable_error(W3TC_CONFIG_PREVIEW_PATH);
-            }
-        }
-
-        /**
-         * Save blognames into file
-         */
-        if (w3_is_network() && !w3_is_subdomain_install()) {
-            if (!w3_save_blognames()) {
-                w3_writable_error(W3TC_BLOGNAMES_PATH);
-            }
-        }
-
-        delete_option('w3tc_request_data');
-        add_option('w3tc_request_data', '', null, 'no');
+        $activation_worker = & w3_instance('/Plugin/TotalCacheActivation.php');
+        $activation_worker->activate();
     }
 
     /**
@@ -267,22 +154,8 @@ class W3_Plugin_TotalCache extends W3_Plugin {
      * @return void
      */
     function deactivate() {
-        delete_option('w3tc_request_data');
-
-        // keep for other blogs
-        if (!$this->locked()) {
-            @unlink(W3TC_BLOGNAMES_PATH);
-        }
-
-        @unlink(W3TC_CONFIG_PREVIEW_PATH);
-
-        w3_rmdir(W3TC_TMP_DIR);
-        w3_rmdir(W3TC_LOG_DIR);
-        w3_rmdir(W3TC_CACHE_FILE_MINIFY_DIR);
-        w3_rmdir(W3TC_CACHE_FILE_PGCACHE_DIR);
-        w3_rmdir(W3TC_CACHE_FILE_DBCACHE_DIR);
-        w3_rmdir(W3TC_CACHE_FILE_OBJECTCACHE_DIR);
-        w3_rmdir(W3TC_CONTENT_DIR);
+        $activation_worker = & w3_instance('/Plugin/TotalCacheActivation.php');
+        $activation_worker->deactivate();
     }
 
     /**
@@ -408,16 +281,14 @@ class W3_Plugin_TotalCache extends W3_Plugin {
      * @return string
      */
     function template($template) {
-        require_once W3TC_LIB_W3_DIR . '/Mobile.php';
-        $w3_mobile = & W3_Mobile::instance();
+        $w3_mobile = & w3_instance('/Mobile.php');
 
         $mobile_template = $w3_mobile->get_template();
 
         if ($mobile_template) {
             return $mobile_template;
         } else {
-            require_once W3TC_LIB_W3_DIR . '/Referrer.php';
-            $w3_referrer = & W3_Referrer::instance();
+            $w3_referrer = & w3_instance('/Referrer.php');
 
             $referrer_template = $w3_referrer->get_template();
 
@@ -436,16 +307,14 @@ class W3_Plugin_TotalCache extends W3_Plugin {
      * @return string
      */
     function stylesheet($stylesheet) {
-        require_once W3TC_LIB_W3_DIR . '/Mobile.php';
-        $w3_mobile = & W3_Mobile::instance();
+        $w3_mobile = & w3_instance('/Mobile.php');
 
         $mobile_stylesheet = $w3_mobile->get_stylesheet();
 
         if ($mobile_stylesheet) {
             return $mobile_stylesheet;
         } else {
-            require_once W3TC_LIB_W3_DIR . '/Referrer.php';
-            $w3_referrer = & W3_Referrer::instance();
+            $w3_referrer = & w3_instance('/Referrer.php');
 
             $referrer_stylesheet = $w3_referrer->get_stylesheet();
 
@@ -541,15 +410,13 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                     $strings = array();
 
                     if ($this->_config->get_boolean('minify.enabled') && !$this->_config->get_boolean('minify.debug')) {
-                        require_once W3TC_LIB_W3_DIR . '/Plugin/Minify.php';
-                        $w3_plugin_minify = & W3_Plugin_Minify::instance();
+                        $w3_plugin_minify = & w3_instance('/Plugin/MinifyEnabled.php');
 
                         $strings[] = sprintf("Minified using %s%s", w3_get_engine_name($this->_config->get_string('minify.engine')), ($w3_plugin_minify->minify_reject_reason != '' ? sprintf(' (%s)', $w3_plugin_minify->minify_reject_reason) : ''));
                     }
 
                     if ($this->_config->get_boolean('pgcache.enabled') && !$this->_config->get_boolean('pgcache.debug')) {
-                        require_once W3TC_LIB_W3_DIR . '/PgCache.php';
-                        $w3_pgcache = & W3_PgCache::instance();
+                        $w3_pgcache = & w3_instance('/PgCache.php');
 
                         $strings[] = sprintf("Page Caching using %s%s", w3_get_engine_name($this->_config->get_string('pgcache.engine')), ($w3_pgcache->cache_reject_reason != '' ? sprintf(' (%s)', $w3_pgcache->cache_reject_reason) : ''));
                     }
@@ -565,16 +432,13 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                     }
 
                     if ($this->_config->get_boolean('objectcache.enabled') && !$this->_config->get_boolean('objectcache.debug')) {
-                        require_once W3TC_LIB_W3_DIR . '/ObjectCache.php';
-                        $w3_objectcache = & W3_ObjectCache::instance();
+                        $w3_objectcache = & w3_instance('/ObjectCache.php');
 
                         $strings[] = sprintf("Object Caching %d/%d objects using %s", $w3_objectcache->cache_hits, $w3_objectcache->cache_total, w3_get_engine_name($this->_config->get_string('objectcache.engine')));
                     }
 
                     if ($this->_config->get_boolean('cdn.enabled') && !$this->_config->get_boolean('cdn.debug')) {
-                        require_once W3TC_LIB_W3_DIR . '/Plugin/Cdn.php';
-
-                        $w3_plugin_cdn = & W3_Plugin_Cdn::instance();
+                        $w3_plugin_cdn = & w3_instance('/Plugin/CdnEnabled.php');
                         $cdn = & $w3_plugin_cdn->get_cdn();
                         $via = $cdn->get_via();
 

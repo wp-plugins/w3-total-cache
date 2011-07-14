@@ -1,4 +1,7 @@
 <?php
+
+require_once W3TC_INC_DIR . '/file.php';
+
 /**
  * Class Minify_Cache_File
  * @package Minify

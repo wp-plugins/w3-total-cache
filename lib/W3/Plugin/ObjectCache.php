@@ -103,25 +103,11 @@ class W3_Plugin_ObjectCache extends W3_Plugin {
     }
 
     /**
-     * Returns plugin instance
-     *
-     * @return W3_Plugin_ObjectCache
-     */
-    function &instance() {
-        static $instances = array();
-
-        if (!isset($instances[0])) {
-            $class = __CLASS__;
-            $instances[0] = & new $class();
-        }
-
-        return $instances[0];
-    }
-
-    /**
      * Activate plugin action
      */
     function activate() {
+        require_once W3TC_INC_DIR . '/functions/activation.php';
+
         if (!$this->locked() && !@copy(W3TC_INSTALL_FILE_OBJECT_CACHE, W3TC_ADDIN_FILE_OBJECT_CACHE)) {
             w3_writable_error(W3TC_ADDIN_FILE_OBJECT_CACHE);
         }
@@ -202,9 +188,7 @@ class W3_Plugin_ObjectCache extends W3_Plugin {
         static $flushed = false;
 
         if (!$flushed) {
-            require_once W3TC_LIB_W3_DIR . '/ObjectCache.php';
-
-            $wp_object_cache = & W3_ObjectCache::instance();
+            $wp_object_cache = & w3_instance('/ObjectCache.php');
             $wp_object_cache->flush();
         }
     }

@@ -76,9 +76,7 @@ class W3_Db extends W3_Db_Driver {
      * @param string $dbhost
      */
     function __construct($dbuser, $dbpassword, $dbname, $dbhost) {
-        require_once W3TC_LIB_W3_DIR . '/Config.php';
-
-        $this->_config = & W3_Config::instance();
+        $this->_config = & w3_instance('/Config.php');
         $this->_lifetime = $this->_config->get_integer('dbcache.lifetime');
 
         if ($this->_can_ob()) {
@@ -192,7 +190,7 @@ class W3_Db extends W3_Db_Driver {
     }
 
     /**
-     * Returns onject instance
+     * Returns onject instance. Called by WP engine
      *
      * @return W3_Db
      */

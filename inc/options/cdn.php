@@ -1,5 +1,5 @@
 <?php if (!defined('W3TC')) die(); ?>
-<?php include W3TC_DIR . '/inc/options/common/header.php'; ?>
+<?php include W3TC_INC_DIR . '/options/common/header.php'; ?>
 
 <p>
 	Content Delivery Network support via
@@ -118,18 +118,8 @@
 		<?php echo $this->postbox_header('Configuration'); ?>
         <table class="form-table">
     		<?php
-    			switch ($cdn_engine) {
-    				case 'mirror':
-    				case 'netdna':
-    				case 'cotendo':
-    				case 'ftp':
-    				case 's3':
-    				case 'cf':
-    				case 'cf2':
-    				case 'rscf':
-    				case 'azure':
-    					include W3TC_DIR . '/inc/options/cdn/' . $cdn_engine . '.php';
-    					break;
+                if (w3_is_cdn_engine($cdn_engine)) {
+                    include W3TC_INC_DIR . '/options/cdn/' . $cdn_engine . '.php';
     			}
     		?>
         </table>
@@ -258,4 +248,4 @@
     </div>
 </form>
 
-<?php include W3TC_DIR . '/inc/options/common/footer.php'; ?>
+<?php include W3TC_INC_DIR . '/options/common/footer.php'; ?>

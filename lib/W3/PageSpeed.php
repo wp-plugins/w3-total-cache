@@ -20,8 +20,7 @@ class W3_PageSpeed {
      * PHP5-style constructor
      */
     function __construct() {
-        require_once W3TC_LIB_W3_DIR . '/Config.php';
-        $config = & W3_Config::instance();
+        $config = & w3_instance('/Config.php');
 
         $this->key = $config->get_string('widget.pagespeed.key');
     }
@@ -71,14 +70,21 @@ class W3_PageSpeed {
      * @return string
      */
     function _request($url) {
+        require_once W3TC_INC_DIR . '/http.php';
+        require_once W3TC_INC_DIR . '/functions/url.php';
+
         $request_url = w3_url_format(W3TC_PAGESPEED_API_URL, array(
             'url' => $url,
             'key' => $this->key,
         ));
 
-        $json = w3_http_get($request_url);
+        $response = w3_http_get($request_url);
 
-        return $json;
+        if (!is_wp_error($response) && $response['response']['code'] == 200) {
+            return $response['response']['body'];
+        }
+
+        return false;
     }
 
     /**

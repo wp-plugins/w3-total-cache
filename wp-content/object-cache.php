@@ -20,7 +20,6 @@ if (!@is_dir(W3TC_DIR) || !file_exists(W3TC_DIR . '/inc/define.php')) {
     }
 } else {
     require_once W3TC_DIR . '/inc/define.php';
-    require_once W3TC_LIB_W3_DIR . '/ObjectCache.php';
 
     /**
      * Init cache
@@ -28,7 +27,7 @@ if (!@is_dir(W3TC_DIR) || !file_exists(W3TC_DIR . '/inc/define.php')) {
      * @return void
      */
     function wp_cache_init() {
-        $GLOBALS['wp_object_cache'] = & W3_ObjectCache::instance();
+        $GLOBALS['wp_object_cache'] = & w3_instance('/ObjectCache.php');
     }
 
     /**

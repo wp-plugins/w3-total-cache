@@ -68,7 +68,7 @@ Search engines like Google, measure and factor in the speed of web sites in thei
 
 = Why is W3 Total Cache better than other cache plugins? =
 
-**It's complete.** Most of the popular cache plugins available do a great job and serve their purpose very well. Our plugin remedies numerous performance reducing aspects of any web site going far beyond merely reducing CPU usage (load) and bandwidth consumption for HTML pages alone. Equally important, the plugin requires no theme modifications, modifications to your .htaccess (mod_rewrite rules) or programming compromises to get started. Most importantly, it's the only plugin designed to optimize all practical hosting environments small or large. The options are many and setup is easy.
+**It's a complete framework.** Many of the popular cache plugins available do a great job at achieving some performance aims. Our plugin remedies numerous performance reducing aspects of any web site going far beyond merely reducing CPU usage (load) and bandwidth consumption for HTML pages alone. Equally important, the plugin requires no theme modifications, modifications to your .htaccess (mod_rewrite rules) or programming compromises to get started. Most importantly, it's the only plugin designed to optimize all practical hosting environments small or large. The options are many and setup is easy.
 
 = I've never heard of any of this stuff; my site is fine, no one complains about the speed. Why should I install this? =
 
@@ -251,6 +251,7 @@ Install the plugin to read the full FAQ.
 
 **July 2011:**
 
+* [How to Integrate Google Page Speed with W3 Total Cache](http://geekscalling.com/google/how-to-integrate-google-page-speed-with-w3-total-cache), Anish
 * [22 WordPress Plugins for Content Marketers](http://www.business2community.com/content-marketing/22-wordpress-plugins-for-content-marketers-040787), Brody Dorland
 
 **June 2011:**

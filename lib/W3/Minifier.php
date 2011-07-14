@@ -45,8 +45,7 @@ class W3_Minifier {
      * @return void
      */
     function __construct() {
-        require_once W3TC_LIB_W3_DIR . '/Config.php';
-        $this->_config = & W3_Config::instance();
+        $this->_config = & w3_instance('/Config.php');
     }
 
     /**
@@ -56,22 +55,6 @@ class W3_Minifier {
      */
     function W3_Minifier() {
         $this->__construct();
-    }
-
-    /**
-     * Returns instance of object
-     *
-     * @return W3_Minifier
-     */
-    function &instance() {
-        static $instance = null;
-
-        if (!$instance) {
-            $class = __CLASS__;
-            $instance = & new $class();
-        }
-
-        return $instance;
     }
 
     /**
@@ -286,8 +269,7 @@ class W3_Minifier {
         }
 
         if ($this->_config->get_boolean('browsercache.enabled') && ($this->_config->get_boolean('browsercache.cssjs.replace') || $this->_config->get_boolean('browsercache.html.replace') || $this->_config->get_boolean('browsercache.other.replace'))) {
-            require_once W3TC_LIB_W3_DIR . '/Plugin/BrowserCache.php';
-            $w3_plugin_browsercache =& W3_Plugin_Browsercache::instance();
+            $w3_plugin_browsercache = & w3_instance('/Plugin/BrowserCache.php');
 
             $options = array_merge($options, array(
                 'browserCacheId' => $w3_plugin_browsercache->get_replace_id(),

@@ -1,5 +1,5 @@
 <?php if (!defined('W3TC')) die(); ?>
-<?php include W3TC_DIR . '/inc/popup/common/header.php'; ?>
+<?php include W3TC_INC_DIR . '/popup/common/header.php'; ?>
 
 <script type="text/javascript">/*<![CDATA[*/
 var files = [
@@ -51,4 +51,4 @@ jQuery(function() {
 
 <div id="cdn_export_file_log" class="log"></div>
 
-<?php include W3TC_DIR . '/inc/popup/common/footer.php'; ?>
+<?php include W3TC_INC_DIR . '/popup/common/footer.php'; ?>

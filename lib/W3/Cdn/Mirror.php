@@ -63,6 +63,29 @@ class W3_Cdn_Mirror extends W3_Cdn_Base {
     }
 
     /**
+     * Tests mirror
+     *
+     * @param string $error
+     * @return bool
+     */
+    function test(&$error) {
+        if (!parent::test($error)) {
+            return false;
+        }
+
+        $results = array();
+        $files = array('' => 'purge_test_' . time());
+
+        if (!$this->purge($files, $results) && isset($results[0]['error'])) {
+            $error = $results[0]['error'];
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Returns array of CDN domains
      *
      * @return array

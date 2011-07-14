@@ -38,7 +38,7 @@
 		<?php else: ?>
 		    &lt;account name&gt;.blob.core.windows.net
 		<?php endif; ?> or CNAME:
-		<?php $cnames = $this->_config->get_array('cdn.azure.cname'); include W3TC_DIR . '/inc/options/cdn/common/cnames.php'; ?>
+		<?php $cnames = $this->_config->get_array('cdn.azure.cname'); include W3TC_INC_DIR . '/options/cdn/common/cnames.php'; ?>
 	</td>
 </tr>
 <tr>

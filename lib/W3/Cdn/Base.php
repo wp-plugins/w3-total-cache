@@ -321,6 +321,8 @@ class W3_Cdn_Base {
      * @return array
      */
     function _get_headers($file) {
+        require_once W3TC_INC_DIR . '/functions/mime.php';
+
         $mime_type = w3_get_mime_type($file);
         $last_modified = time();
 
@@ -422,14 +424,22 @@ class W3_Cdn_Base {
             $_domains = array_map('trim', explode(',', $domain));
 
             foreach ($_domains as $_domain) {
-                if (!$_domain) {
-                    $error = 'Empty domain';
+                $matches = null;
+
+                if (preg_match('~^([a-z0-9\-\.]*)~i', $_domain, $matches)) {
+                    $hostname = $matches[1];
+                } else {
+                    $hostname = $_domain;
+                }
+
+                if (!$hostname) {
+                    $error = 'Empty hostname';
 
                     return false;
                 }
 
-                if (gethostbyname($_domain) === $_domain) {
-                    $error = sprintf('Unable to resolve domain: %s.', $_domain);
+                if (gethostbyname($hostname) === $hostname) {
+                    $error = sprintf('Unable to resolve hostname: %s.', $hostname);
 
                     return false;
                 }

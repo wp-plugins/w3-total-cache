@@ -1,5 +1,5 @@
 <?php if (!defined('W3TC')) die(); ?>
-<?php include W3TC_DIR . '/inc/popup/common/header.php'; ?>
+<?php include W3TC_INC_DIR . '/popup/common/header.php'; ?>
 
 <?php if ($results): ?>
 <h4>Page Speed Score: <?php echo $results['score']; ?>/100</h4>
@@ -53,4 +53,4 @@
 </p>
 <?php endif; ?>
 
-<?php include W3TC_DIR . '/inc/popup/common/footer.php'; ?>
+<?php include W3TC_INC_DIR . '/popup/common/footer.php'; ?>

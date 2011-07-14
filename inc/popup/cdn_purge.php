@@ -1,5 +1,5 @@
 <?php if (!defined('W3TC')) die(); ?>
-<?php include W3TC_DIR . '/inc/popup/common/header.php'; ?>
+<?php include W3TC_INC_DIR . '/popup/common/header.php'; ?>
 
 <p>
     Remove objects from the CDN by specifying the relative path on individual lines below and clicking the "Purge" button when done. For example:
@@ -45,4 +45,4 @@
     <?php endforeach; ?>
 </div>
 
-<?php include W3TC_DIR . '/inc/popup/common/footer.php'; ?>
+<?php include W3TC_INC_DIR . '/popup/common/footer.php'; ?>

@@ -1,5 +1,5 @@
 <?php if (!defined('W3TC')) die(); ?>
-<?php include W3TC_DIR . '/inc/options/common/header.php'; ?>
+<?php include W3TC_INC_DIR . '/options/common/header.php'; ?>
 
 <form action="admin.php?page=<?php echo $this->_page; ?>" method="post">
     <p>
@@ -83,4 +83,4 @@
     </div>
 </form>
 
-<?php include W3TC_DIR . '/inc/options/common/footer.php'; ?>
+<?php include W3TC_INC_DIR . '/options/common/footer.php'; ?>

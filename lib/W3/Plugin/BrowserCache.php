@@ -43,22 +43,6 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
     }
 
     /**
-     * Returns plugin instance
-     *
-     * @return W3_Plugin_BrowserCache
-     */
-    function &instance() {
-        static $instances = array();
-
-        if (!isset($instances[0])) {
-            $class = __CLASS__;
-            $instances[0] = & new $class();
-        }
-
-        return $instances[0];
-    }
-
-    /**
      * Activate plugin action
      */
     function activate() {
@@ -296,7 +280,7 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
      * @return array
      */
     function get_cssjs_types() {
-        $mime_types = include W3TC_DIR . '/inc/mime/cssjs.php';
+        $mime_types = include W3TC_INC_DIR . '/mime/cssjs.php';
 
         return $mime_types;
     }
@@ -307,7 +291,7 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
      * @return array
      */
     function get_html_types() {
-        $mime_types = include W3TC_DIR . '/inc/mime/html.php';
+        $mime_types = include W3TC_INC_DIR . '/mime/html.php';
 
         return $mime_types;
     }
@@ -318,7 +302,7 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
      * @return array
      */
     function get_other_types() {
-        $mime_types = include W3TC_DIR . '/inc/mime/other.php';
+        $mime_types = include W3TC_INC_DIR . '/mime/other.php';
 
         return $mime_types;
     }

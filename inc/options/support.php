@@ -1,5 +1,5 @@
 <?php if (!defined('W3TC')) die(); ?>
-<?php include W3TC_DIR . '/inc/options/common/header.php'; ?>
+<?php include W3TC_INC_DIR . '/options/common/header.php'; ?>
 <p>
     Request professional services, suggest a feature or submit a bug using the form below:
 </p>
@@ -18,4 +18,4 @@
     ?>
 </div>
 
-<?php include W3TC_DIR . '/inc/options/common/footer.php'; ?>
+<?php include W3TC_INC_DIR . '/options/common/footer.php'; ?>

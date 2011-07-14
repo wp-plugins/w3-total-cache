@@ -19,8 +19,7 @@ class W3_Referrer {
      * PHP5-style constructor
      */
     function __construct() {
-        require_once W3TC_LIB_W3_DIR . '/Config.php';
-        $config = & W3_Config::instance();
+        $config = & w3_instance('/Config.php');
 
         $this->groups = $config->get_array('referrer.rgroups');
     }
@@ -30,22 +29,6 @@ class W3_Referrer {
      */
     function W3_Referrer() {
         $this->__construct();
-    }
-
-    /**
-     * Returns object instance
-     *
-     * @return W3_Referrer
-     */
-    function &instance() {
-        static $instances = array();
-
-        if (!isset($instances[0])) {
-            $class = __CLASS__;
-            $instances[0] = & new $class();
-        }
-
-        return $instances[0];
     }
 
     /**

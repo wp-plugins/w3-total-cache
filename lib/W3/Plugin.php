@@ -19,8 +19,7 @@ class W3_Plugin {
      * PHP5 Constructor
      */
     function __construct() {
-        require_once W3TC_LIB_W3_DIR . '/Config.php';
-        $this->_config = & W3_Config::instance();
+        $this->_config = & w3_instance('/Config.php');
     }
 
     /**
@@ -36,22 +35,6 @@ class W3_Plugin {
      * Runs plugin
      */
     function run() {
-    }
-
-    /**
-     * Returns plugin instance
-     *
-     * @return W3_Plugin
-     */
-    function &instance() {
-        static $instances = array();
-
-        if (!isset($instances[0])) {
-            $class = __CLASS__;
-            $instances[0] = & new $class();
-        }
-
-        return $instances[0];
     }
 
     /**

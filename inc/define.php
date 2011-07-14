@@ -21,6 +21,7 @@ define('W3TC_WIN', (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN'));
 
 defined('W3TC_DIR') || define('W3TC_DIR', realpath(dirname(__FILE__) . '/..'));
 define('W3TC_FILE', 'w3-total-cache/w3-total-cache.php');
+define('W3TC_INC_DIR', W3TC_DIR . '/inc');
 define('W3TC_LIB_DIR', W3TC_DIR . '/lib');
 define('W3TC_LIB_W3_DIR', W3TC_LIB_DIR . '/W3');
 define('W3TC_LIB_MINIFY_DIR', W3TC_LIB_DIR . '/Minify');
@@ -90,86 +91,11 @@ define('W3TC_ADDIN_FILE_ADVANCED_CACHE', WP_CONTENT_DIR . '/advanced-cache.php')
 define('W3TC_ADDIN_FILE_DB', WP_CONTENT_DIR . '/db.php');
 define('W3TC_ADDIN_FILE_OBJECT_CACHE', WP_CONTENT_DIR . '/object-cache.php');
 
-require_once W3TC_DIR . '/inc/compat.php';
-require_once W3TC_DIR . '/inc/plugin.php';
+require_once W3TC_INC_DIR . '/functions/compat.php';
+require_once W3TC_INC_DIR . '/functions/plugin.php';
 
 @ini_set('pcre.backtrack_limit', 4194304);
 @ini_set('pcre.recursion_limit', 4194304);
-
-/**
- * Deactivate plugin after activation error
- *
- * @return void
- */
-function w3_activation_cleanup() {
-    $active_plugins = (array) get_option('active_plugins');
-    $active_plugins_network = (array) get_site_option('active_sitewide_plugins');
-
-    // workaround for WPMU deactivation bug
-    remove_action('deactivate_' . W3TC_FILE, 'deactivate_sitewide_plugin');
-
-    do_action('deactivate_plugin', W3TC_FILE);
-
-    $key = array_search(W3TC_FILE, $active_plugins);
-
-    if ($key !== false) {
-        array_splice($active_plugins, $key, 1);
-    }
-
-    unset($active_plugins_network[W3TC_FILE]);
-
-    do_action('deactivate_' . W3TC_FILE);
-    do_action('deactivated_plugin', W3TC_FILE);
-
-    update_option('active_plugins', $active_plugins);
-    update_site_option('active_sitewide_plugins', $active_plugins_network);
-}
-
-/**
- * W3 activate error
- *
- * @param string $error
- * @return void
- */
-function w3_activate_error($error) {
-    w3_activation_cleanup();
-
-    include W3TC_DIR . '/inc/error.php';
-    exit();
-}
-
-/**
- * W3 writable error
- *
- * @param string $path
- * @return string
- */
-function w3_writable_error($path) {
-    $reactivate_url = wp_nonce_url('plugins.php?action=activate&plugin=' . W3TC_FILE, 'activate-plugin_' . W3TC_FILE);
-    $reactivate_button = sprintf('<input type="button" value="re-activate plugin" onclick="top.location.href = \'%s\'" />', addslashes($reactivate_url));
-
-    if (w3_check_open_basedir($path)) {
-        $error = sprintf('<strong>%s</strong> could not be created, please run following command:<br /><strong style="color: #f00;">chmod 777 %s</strong><br />then %s.', $path, (file_exists($path) ? $path : dirname($path)), $reactivate_button);
-    } else {
-        $error = sprintf('<strong>%s</strong> could not be created, <strong>open_basedir</strong> restriction in effect, please check your php.ini settings:<br /><strong style="color: #f00;">open_basedir = "%s"</strong><br />then %s.', $path, ini_get('open_basedir'), $reactivate_button);
-    }
-
-    w3_activate_error($error);
-}
-
-/**
- * W3 Network activation error
- *
- * @return void
- */
-function w3_network_activate_error() {
-    w3_activation_cleanup();
-    wp_redirect(plugins_url('pub/network_activation.php', W3TC_FILE));
-
-    echo '<p><strong>W3 Total Cache Error:</strong> plugin cannot be activated network-wide.</p>';
-    echo '<p><a href="javascript:history.back(-1);">Back</a>';
-    exit();
-}
 
 /**
  * Returns current microtime
@@ -180,87 +106,6 @@ function w3_microtime() {
     list ($usec, $sec) = explode(' ', microtime());
 
     return ((double) $usec + (double) $sec);
-}
-
-/**
- * Recursive creates directory
- *
- * @param string $path
- * @param integer $mask
- * @param string $curr_path
- * @return boolean
- */
-function w3_mkdir($path, $mask = 0777, $curr_path = '') {
-    $path = w3_realpath($path);
-    $path = trim($path, '/');
-    $dirs = explode('/', $path);
-
-    foreach ($dirs as $dir) {
-        if ($dir == '') {
-            return false;
-        }
-
-        $curr_path .= ($curr_path == '' ? '' : '/') . $dir;
-
-        if (!@is_dir($curr_path)) {
-            if (!@mkdir($curr_path, $mask)) {
-                return false;
-            }
-        }
-    }
-
-    return true;
-}
-
-/**
- * Recursive remove dir
- *
- * @param string $path
- * @param array $exclude
- * @param bool $remove
- * @return void
- */
-function w3_rmdir($path, $exclude = array(), $remove = true) {
-    $dir = @opendir($path);
-
-    if ($dir) {
-        while (($entry = @readdir($dir)) !== false) {
-            if ($entry == '.' || $entry == '..') {
-                continue;
-            }
-
-            foreach ($exclude as $mask) {
-                if (fnmatch($mask, basename($entry))) {
-                    continue 2;
-                }
-            }
-
-            $full_path = $path . DIRECTORY_SEPARATOR . $entry;
-
-            if (@is_dir($full_path)) {
-                w3_rmdir($full_path, $exclude);
-            } else {
-                @unlink($full_path);
-            }
-        }
-
-        @closedir($dir);
-
-        if ($remove) {
-            @rmdir($path);
-        }
-    }
-}
-
-/**
- * Recursive empty dir
- *
- * @param string $path
- * @param array $exclude
- * @return void
- */
-function w3_emptydir($path, $exclude = array()) {
-    w3_rmdir($path, $exclude, false);
 }
 
 /**
@@ -400,42 +245,6 @@ function w3_is_preview_mode() {
 }
 
 /**
- * Check if file is write-able
- *
- * @param string $file
- * @return boolean
- */
-function w3_is_writable($file) {
-    $exists = file_exists($file);
-
-    $fp = @fopen($file, 'a');
-
-    if ($fp) {
-        fclose($fp);
-
-        if (!$exists) {
-            @unlink($file);
-        }
-
-        return true;
-    }
-
-    return false;
-}
-
-/**
- * Cehck if dir is write-able
- *
- * @param string $dir
- * @return boolean
- */
-function w3_is_writable_dir($dir) {
-    $file = $dir . '/' . uniqid(mt_rand()) . '.tmp';
-
-    return w3_is_writable($file);
-}
-
-/**
  * Returns true if server is Apache
  *
  * @return boolean
@@ -454,13 +263,23 @@ function w3_is_nginx() {
 }
 
 /**
+ * Check whether $engine is correct CDN engine
+ *
+ * @param string $engine
+ * @return boolean
+ */
+function w3_is_cdn_engine($engine) {
+    return in_array($engine, array('ftp', 's3', 'cf', 'cf2', 'rscf', 'azure', 'mirror', 'netdna', 'cotendo', 'edgecast'));
+}
+
+/**
  * Returns true if CDN engine is mirror
  *
  * @param string $engine
  * @return bool
  */
 function w3_is_cdn_mirror($engine) {
-    return in_array($engine, array('mirror', 'netdna', 'cotendo', 'cf2'));
+    return in_array($engine, array('mirror', 'netdna', 'cotendo', 'cf2', 'edgecast'));
 }
 
 /**
@@ -962,8 +781,7 @@ function w3_get_host_id() {
  * @return string
  */
 function w3_get_nginx_rules_path() {
-    require_once W3TC_LIB_W3_DIR . '/Config.php';
-    $config =& W3_Config::instance();
+    $config = & w3_instance('/Config.php');
 
     $path = $config->get_string('config.path');
 
@@ -1179,7 +997,7 @@ function w3_can_modify_rules($path) {
  * @return bool
  */
 function w3_can_cdn_purge($engine) {
-    return in_array($engine, array('ftp', 's3', 'cf', 'cf2', 'rscf', 'azure', 'netdna', 'cotendo'));
+    return in_array($engine, array('ftp', 's3', 'cf', 'cf2', 'rscf', 'azure', 'netdna', 'cotendo', 'edgecast'));
 }
 
 /**
@@ -1342,216 +1160,6 @@ function w3_realpath($path) {
 }
 
 /**
- * Returns dirname of path
- *
- * @param string $path
- * @return string
- */
-function w3_dirname($path) {
-    $dirname = dirname($path);
-
-    if ($dirname == '.' || $dirname == '/' || $dirname == '\\') {
-        $dirname = '';
-    }
-
-    return $dirname;
-}
-
-/**
- * Returns open basedirs
- *
- * @return array
- */
-function w3_get_open_basedirs() {
-    $open_basedir_ini = ini_get('open_basedir');
-    $open_basedirs = (W3TC_WIN ? preg_split('~[;,]~', $open_basedir_ini) : explode(':', $open_basedir_ini));
-    $result = array();
-
-    foreach ($open_basedirs as $open_basedir) {
-        $open_basedir = trim($open_basedir);
-        if ($open_basedir != '') {
-            $result[] = w3_realpath($open_basedir);
-        }
-    }
-
-    return $result;
-}
-
-/**
- * Checks if path is restricted by open_basedir
- *
- * @param string $path
- * @return boolean
- */
-function w3_check_open_basedir($path) {
-    $path = w3_realpath($path);
-    $open_basedirs = w3_get_open_basedirs();
-
-    if (!count($open_basedirs)) {
-        return true;
-    }
-
-    foreach ($open_basedirs as $open_basedir) {
-        if (strstr($path, $open_basedir) !== false) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-/**
- * Request URL
- *
- * @param string $method
- * @param string $url
- * @param string $data
- * @param string $auth
- * @param boolean $check_status
- * @return string
- */
-function w3_http_request($method, $url, $data = '', $auth = '', $check_status = true) {
-    $status = 0;
-    $method = strtoupper($method);
-
-    if (function_exists('curl_init')) {
-        $ch = curl_init();
-
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_USERAGENT, W3TC_POWERED_BY);
-        @curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_FORBID_REUSE, true);
-        curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 60);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-
-        switch ($method) {
-            case 'POST':
-                curl_setopt($ch, CURLOPT_POST, true);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-                break;
-
-            case 'PURGE':
-                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PURGE');
-                break;
-        }
-
-        if ($auth) {
-            curl_setopt($ch, CURLOPT_USERPWD, $auth);
-        }
-
-        $contents = curl_exec($ch);
-
-        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-        curl_close($ch);
-    } else {
-        $parse_url = @parse_url($url);
-
-        if ($parse_url && isset($parse_url['host'])) {
-            $host = $parse_url['host'];
-            $port = (isset($parse_url['port']) ? (int) $parse_url['port'] : 80);
-            $path = (!empty($parse_url['path']) ? $parse_url['path'] : '/');
-            $query = (isset($parse_url['query']) ? $parse_url['query'] : '');
-            $request_uri = $path . ($query != '' ? '?' . $query : '');
-
-            $request_headers_array = array(
-                sprintf('%s %s HTTP/1.0', $method, $request_uri),
-                sprintf('Host: %s', $host),
-                sprintf('User-Agent: %s', W3TC_POWERED_BY),
-                'Connection: close'
-            );
-
-            if (!empty($data)) {
-                $request_headers_array[] = sprintf('Content-Length: %d', strlen($data));
-            }
-
-            if (!empty($auth)) {
-                $request_headers_array[] = sprintf('Authorization: Basic %s', base64_encode($auth));
-            }
-
-            $request_headers = implode("\r\n", $request_headers_array);
-            $request = $request_headers . "\r\n\r\n" . $data;
-            $errno = null;
-            $errstr = null;
-
-            $fp = @fsockopen($host, $port, $errno, $errstr, 10);
-
-            if (!$fp) {
-                return false;
-            }
-
-            @stream_set_timeout($fp, 60);
-
-            $response = '';
-            @fputs($fp, $request);
-
-            while (!@feof($fp)) {
-                $response .= @fgets($fp, 4096);
-            }
-
-            @fclose($fp);
-
-            list ($response_headers, $contents) = explode("\r\n\r\n", $response, 2);
-
-            $matches = null;
-
-            if (preg_match('~^HTTP/1.[01] (\d+)~', $response_headers, $matches)) {
-                $status = (int) $matches[1];
-            }
-        }
-    }
-
-    if (!$check_status || $status == 200) {
-        return $contents;
-    }
-
-    return false;
-}
-
-/**
- * Download url via GET
- *
- * @param string $url
- * @param string $auth
- * $param boolean $check_status
- * @param bool $check_status
- * @return string
- */
-function w3_http_get($url, $auth = '', $check_status = true) {
-    return w3_http_request('GET', $url, null, $auth, $check_status);
-}
-
-/**
- * Send POST request to URL
- *
- * @param string $url
- * @param string $data
- * @param string $auth
- * @param boolean $check_status
- * @return string
- */
-function w3_http_post($url, $data = '', $auth = '', $check_status = true) {
-    return w3_http_request('POST', $url, $data, $auth, $check_status);
-}
-
-/**
- * Send PURGE request to Varnish server
- *
- * @param string $url
- * @param string $auth
- * $param boolean $check_status
- * @param bool $check_status
- * @return string
- */
-function w3_http_purge($url, $auth = '', $check_status = true) {
-    return w3_http_request('PURGE', $url, null, $auth, $check_status);
-}
-
-/**
  * Returns GMT date
  * @param integer $time
  * @return string
@@ -1561,157 +1169,14 @@ function w3_http_date($time) {
 }
 
 /**
- * Downloads data to a file
- *
- * @param string $url
- * @param string $file
- * @return boolean
- */
-function w3_download($url, $file) {
-    if (strpos($url, '//') === 0) {
-        $url = (w3_is_https() ? 'https:' : 'http:') . $url;
-    }
-
-    $data = w3_http_get($url);
-
-    if ($data !== false) {
-        return @file_put_contents($file, $data);
-    }
-
-    return false;
-}
-
-/**
  * Returns upload info
  *
  * @return array
  */
 function w3_upload_info() {
-    static $upload_info = null;
-
-    if ($upload_info === null) {
-        $upload_info = @wp_upload_dir();
-
-        if (empty($upload_info['error'])) {
-            $parse_url = @parse_url($upload_info['baseurl']);
-
-            if ($parse_url) {
-                $baseurlpath = (!empty($parse_url['path']) ? trim($parse_url['path'], '/') : '');
-            } else {
-                $baseurlpath = 'wp-content/uploads';
-            }
-
-            $upload_info['baseurlpath'] = '/' . $baseurlpath . '/';
-        } else {
-            $upload_info = false;
-        }
-    }
-
-    return $upload_info;
+    require_once W3TC_INC_DIR . '/http.php';
+    return w3_upload_info_dynamic();
 }
-
-/**
- * Formats URL
- *
- * @param string $url
- * @param array $params
- * @param boolean $skip_empty
- * @param string $separator
- * @return string
- */
-function w3_url_format($url = '', $params = array(), $skip_empty = false, $separator = '&') {
-    if ($url != '') {
-        $parse_url = @parse_url($url);
-        $url = '';
-
-        if (!empty($parse_url['scheme'])) {
-            $url .= $parse_url['scheme'] . '://';
-
-            if (!empty($parse_url['user'])) {
-                $url .= $parse_url['user'];
-
-                if (!empty($parse_url['pass'])) {
-                    $url .= ':' . $parse_url['pass'];
-                }
-            }
-
-            if (!empty($parse_url['host'])) {
-                $url .= $parse_url['host'];
-            }
-
-            if (!empty($parse_url['port']) && $parse_url['port'] != 80) {
-                $url .= ':' . (int) $parse_url['port'];
-            }
-        }
-
-        if (!empty($parse_url['path'])) {
-            $url .= $parse_url['path'];
-        }
-
-        if (!empty($parse_url['query'])) {
-            $old_params = array();
-            parse_str($parse_url['query'], $old_params);
-
-            $params = array_merge($old_params, $params);
-        }
-
-        $query = w3_url_query($params);
-
-        if ($query != '') {
-            $url .= '?' . $query;
-        }
-
-        if (!empty($parse_url['fragment'])) {
-            $url .= '#' . $parse_url['fragment'];
-        }
-    } else {
-        $query = w3_url_query($params, $skip_empty, $separator);
-
-        if ($query != '') {
-            $url = '?' . $query;
-        }
-    }
-
-    return $url;
-}
-
-/**
- * Formats query string
- *
- * @param array $params
- * @param boolean $skip_empty
- * @param string $separator
- * @return string
- */
-function w3_url_query($params = array(), $skip_empty = false, $separator = '&') {
-    $str = '';
-    static $stack = array();
-
-    foreach ((array) $params as $key => $value) {
-        if ($skip_empty === true && empty($value)) {
-            continue;
-        }
-
-        array_push($stack, $key);
-
-        if (is_array($value)) {
-            if (count($value)) {
-                $str .= ($str != '' ? '&' : '') . w3_url_query($value, $skip_empty, $key);
-            }
-        } else {
-            $name = '';
-            foreach ($stack as $key) {
-                $name .= ($name != '' ? '[' . $key . ']' : $key);
-            }
-            $str .= ($str != '' ? $separator : '') . $name . '=' . rawurlencode($value);
-        }
-
-        array_pop($stack);
-    }
-
-    return $str;
-}
-
 
 /**
  * Redirects to URL
@@ -1721,6 +1186,8 @@ function w3_url_query($params = array(), $skip_empty = false, $separator = '&') 
  * @return string
  */
 function w3_redirect($url = '', $params = array()) {
+    require_once W3TC_INC_DIR . '/functions/url.php';
+
     $url = w3_url_format($url, $params);
 
     @header('Location: ' . $url);
@@ -1763,18 +1230,6 @@ function w3_get_engine_name($engine) {
             $engine_name = 'disk (enhanced)';
             break;
 
-        case 'mirror':
-            $engine_name = 'mirror';
-            break;
-
-        case 'netdna':
-            $engine_name = 'netdna / maxcdn';
-            break;
-
-        case 'cotendo':
-            $engine_name = 'cotendo';
-            break;
-
         case 'ftp':
             $engine_name = 'self-hosted / file transfer protocol upload';
             break;
@@ -1797,6 +1252,22 @@ function w3_get_engine_name($engine) {
 
         case 'azure':
             $engine_name = 'microsoft azure storage';
+            break;
+
+        case 'mirror':
+            $engine_name = 'mirror';
+            break;
+
+        case 'netdna':
+            $engine_name = 'netdna / maxcdn';
+            break;
+
+        case 'cotendo':
+            $engine_name = 'cotendo';
+            break;
+
+        case 'edgecast':
+            $engine_name = 'edgecast';
             break;
 
         default:
@@ -1837,79 +1308,6 @@ function w3_to_boolean($value) {
     }
 
     return (boolean) $value;
-}
-
-/**
- * Returns file mime type
- *
- * @param string $file
- * @return string
- */
-function w3_get_mime_type($file) {
-    static $cache = array();
-
-    if (!isset($cache[$file])) {
-        $mime_type = false;
-
-        /**
-         * Try to detect by extension (fast)
-         */
-        $mime_types = include W3TC_DIR . '/inc/mime/all.php';
-
-        foreach ($mime_types as $extension => $type) {
-            if (preg_match('~\.(' . $extension . ')$~i', $file)) {
-                $mime_type = $type;
-                break;
-            }
-        }
-
-        /**
-         * Try to detect using file info function
-         */
-        if (!$mime_type && function_exists('finfo_open')) {
-            $finfo = @finfo_open(FILEINFO_MIME);
-
-            if (!$finfo) {
-                $finfo = @finfo_open(FILEINFO_MIME);
-            }
-
-            if ($finfo) {
-                $mime_type = @finfo_file($finfo, $file);
-
-                if ($mime_type) {
-                    $extra_mime_type_info = strpos($mime_type, "; ");
-
-                    if ($extra_mime_type_info) {
-                        $mime_type = substr($mime_type, 0, $extra_mime_type_info);
-                    }
-
-                    if ($mime_type == 'application/octet-stream') {
-                        $mime_type = false;
-                    }
-                }
-
-                @finfo_close($finfo);
-            }
-        }
-
-        /**
-         * Try to detect using mime type function
-         */
-        if (!$mime_type && function_exists('mime_content_type')) {
-            $mime_type = @mime_content_type($file);
-        }
-
-        /**
-         * If detection failed use default mime type
-         */
-        if (!$mime_type) {
-            $mime_type = 'application/octet-stream';
-        }
-
-        $cache[$file] = $mime_type;
-    }
-
-    return $cache[$file];
 }
 
 /**
@@ -2011,65 +1409,6 @@ function w3_has_rules($rules, $start, $end) {
 }
 
 /**
- * Extracts JS files from content
- *
- * @param string $content
- * @return array
- */
-function w3_extract_js($content) {
-    $matches = null;
-    $files = array();
-
-    $content = preg_replace('~<!--.*?-->~s', '', $content);
-
-    if (preg_match_all('~<script\s+[^<>]*src=["\']?([^"\']+)["\']?[^<>]*>\s*</script>~is', $content, $matches)) {
-        $files = $matches[1];
-    }
-
-    $files = array_values(array_unique($files));
-
-    return $files;
-}
-
-/**
- * Extract CSS files from content
- *
- * @param string $content
- * @return array
- */
-function w3_extract_css($content) {
-    $matches = null;
-    $files = array();
-
-    $content = preg_replace('~<!--.*?-->~s', '', $content);
-
-    if (preg_match_all('~<link\s+([^>]+)/?>(.*</link>)?~Uis', $content, $matches, PREG_SET_ORDER)) {
-        foreach ($matches as $match) {
-            $attrs = array();
-            $attr_matches = null;
-
-            if (preg_match_all('~(\w+)=["\']([^"\']*)["\']~', $match[1], $attr_matches, PREG_SET_ORDER)) {
-                foreach ($attr_matches as $attr_match) {
-                    $attrs[$attr_match[1]] = trim($attr_match[2]);
-                }
-            }
-
-            if (isset($attrs['href']) && isset($attrs['rel']) && stristr($attrs['rel'], 'stylesheet') !== false && (!isset($attrs['media']) || stristr($attrs['media'], 'print') === false)) {
-                $files[] = $attrs['href'];
-            }
-        }
-    }
-
-    if (preg_match_all('~@import\s+(url\s*)?\(?["\']?\s*([^"\'\)\s]+)\s*["\']?\)?[^;]*;?~is', $content, $matches)) {
-        $files = array_merge($files, $matches[2]);
-    }
-
-    $files = array_values(array_unique($files));
-
-    return $files;
-}
-
-/**
  * Escapes HTML comment
  *
  * @param string $comment
@@ -2081,6 +1420,23 @@ function w3_escape_comment($comment) {
     }
 
     return $comment;
+}
+
+/**
+ * Returns instance of singleton class
+ *
+ * @return object
+ */
+function &w3_instance($file) {
+    static $instances = array();
+
+    if (!isset($instances[$file])) {
+        require_once W3TC_LIB_W3_DIR . $file;
+        $class = 'W3_' . str_replace('/', '_', substr($file, 1, strlen($file) - 5));
+        $instances[$file] = & new $class();
+    }
+
+    return $instances[$file];
 }
 
 /**

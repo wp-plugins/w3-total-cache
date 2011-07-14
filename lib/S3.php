@@ -1277,6 +1277,8 @@ class S3 {
 	* @return string
 	*/
 	public static function __getMimeType(&$file) {
+		require_once W3TC_INC_DIR . '/functions/mime.php';
+
 		$type = w3_get_mime_type($file);
 
 		return $type;

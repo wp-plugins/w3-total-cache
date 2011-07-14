@@ -35,7 +35,7 @@ foreach ($cnames as $index => $cname):
     endif;
 ?>
 	<li>
-		<input type="text" name="cdn_cnames[]" value="<?php echo htmlspecialchars($cname); ?>" size="30" />
+		<input type="text" name="cdn_cnames[]" value="<?php echo htmlspecialchars($cname); ?>" size="60" />
 		<input class="button cdn_cname_delete" type="button" value="Delete"<?php if (!$index): ?> style="display: none;"<?php endif; ?> />
 		<span><?php echo htmlspecialchars($label); ?></span>
 	</li>

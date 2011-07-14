@@ -16,12 +16,19 @@ class W3_Minify {
     var $_config = null;
 
     /**
+     * Returns instance. for backward compatibility with 0.9.2.3 version of /wp-content files
+     *
+     * @return W3_Minify
+     */
+    function &instance() {
+        return w3_instance('/Minify.php');
+    }
+
+    /**
      * PHP5 constructor
      */
     function __construct() {
-        require_once W3TC_LIB_W3_DIR . '/Config.php';
-
-        $this->_config = & W3_Config::instance();
+        $this->_config = & w3_instance('/Config.php');
     }
 
     /**
@@ -129,8 +136,7 @@ class W3_Minify {
         /**
          * Set minifier
          */
-        require_once W3TC_LIB_W3_DIR . '/Minifier.php';
-        $w3_minifier =& W3_Minifier::instance();
+        $w3_minifier = & w3_instance('/Minifier.php');
 
         if ($type == 'js') {
             $minifier_type = 'application/x-javascript';
@@ -199,22 +205,6 @@ class W3_Minify {
         $cache = & $this->_get_cache();
 
         return $cache->flush();
-    }
-
-    /**
-     * Returns object instance
-     *
-     * @return W3_Minify
-     */
-    function &instance() {
-        static $instances = array();
-
-        if (!isset($instances[0])) {
-            $class = __CLASS__;
-            $instances[0] = & new $class();
-        }
-
-        return $instances[0];
     }
 
     /**
@@ -570,6 +560,7 @@ class W3_Minify {
         $cache_path = sprintf('%s/minify_%s.%s', W3TC_CACHE_FILE_MINIFY_DIR, md5($url), $type);
 
         if (!file_exists($cache_path) || @filemtime($cache_path) < (time() - $lifetime)) {
+            require_once W3TC_INC_DIR . '/http.php';
             w3_download($url, $cache_path);
         }
 
@@ -694,7 +685,7 @@ class W3_Minify {
         $from_email = 'wordpress@' . w3_get_domain($_SERVER['SERVER_NAME']);
         $from_name = get_option('blogname');
         $to_name = $to_email = get_option('admin_email');
-        $body = @file_get_contents(W3TC_DIR . '/inc/email/minify_error_notification.html');
+        $body = @file_get_contents(W3TC_INC_DIR . '/email/minify_error_notification.html');
 
         $headers = array(
             sprintf('From: "%s" <%s>', addslashes($from_name), $from_email),

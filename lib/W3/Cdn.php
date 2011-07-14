@@ -7,11 +7,12 @@ define('W3TC_CDN_FTP', 'ftp');
 define('W3TC_CDN_S3', 's3');
 define('W3TC_CDN_CF_S3', 'cf');
 define('W3TC_CDN_CF_CUSTOM', 'cf2');
+define('W3TC_CDN_RSCF', 'rscf');
+define('W3TC_CDN_AZURE', 'azure');
 define('W3TC_CDN_MIRROR', 'mirror');
 define('W3TC_CDN_NETDNA', 'netdna');
 define('W3TC_CDN_COTENDO', 'cotendo');
-define('W3TC_CDN_RSCF', 'rscf');
-define('W3TC_CDN_AZURE', 'azure');
+define('W3TC_CDN_EDGECAST', 'edgecast');
 
 /**
  * Class W3_Cdn
@@ -74,6 +75,11 @@ class W3_Cdn {
                 case ($engine == W3TC_CDN_COTENDO):
                     require_once W3TC_LIB_W3_DIR . '/Cdn/Mirror/Cotendo.php';
                     $instances[$instance_key] = & new W3_Cdn_Mirror_Cotendo($config);
+                    break;
+
+                case ($engine == W3TC_CDN_EDGECAST):
+                    require_once W3TC_LIB_W3_DIR . '/Cdn/Mirror/Edgecast.php';
+                    $instances[$instance_key] = & new W3_Cdn_Mirror_Edgecast($config);
                     break;
 
                 default :

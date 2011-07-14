@@ -1,4 +1,11 @@
-<?php if (!defined('W3TC')) die(); ?>
+<?php 
+
+if (!defined('W3TC')) 
+    die();
+
+require_once W3TC_INC_DIR . '/file.php';
+ 
+?>
 <h3>Compatibility Test</h3>
 
 <fieldset>

@@ -1,7 +1,7 @@
 <?php if (!defined('W3TC')) die(); ?>
 <form id="support_form" class="w3tc-ignore-change" action="admin.php?page=<?php echo $this->_page; ?>" method="post" enctype="multipart/form-data">
     <div class="metabox-holder">
-        <?php include W3TC_DIR . '/inc/options/support/form/' . $request_type . '.php'; ?>
+        <?php include W3TC_INC_DIR . '/options/support/form/' . $request_type . '.php'; ?>
 
         <?php echo $this->postbox_header('Note(s):'); ?>
         <table class="form-table">

@@ -180,17 +180,6 @@ class W3_Config {
         'cdn.force.rewrite' => 'boolean',
         'cdn.autoupload.enabled' => 'boolean',
         'cdn.autoupload.interval' => 'integer',
-        'cdn.mirror.domain' => 'array',
-        'cdn.mirror.ssl' => 'string',
-        'cdn.netdna.apiid' => 'string',
-        'cdn.netdna.apikey' => 'string',
-        'cdn.netdna.domain' => 'array',
-        'cdn.netdna.ssl' => 'string',
-        'cdn.cotendo.username' => 'string',
-        'cdn.cotendo.password' => 'string',
-        'cdn.cotendo.zones' => 'array',
-        'cdn.cotendo.domain' => 'array',
-        'cdn.cotendo.ssl' => 'string',
         'cdn.ftp.host' => 'string',
         'cdn.ftp.port' => 'integer',
         'cdn.ftp.user' => 'string',
@@ -226,6 +215,21 @@ class W3_Config {
         'cdn.azure.container' => 'string',
         'cdn.azure.cname' => 'array',
         'cdn.azure.ssl' => 'string',
+        'cdn.mirror.domain' => 'array',
+        'cdn.mirror.ssl' => 'string',
+        'cdn.netdna.apiid' => 'string',
+        'cdn.netdna.apikey' => 'string',
+        'cdn.netdna.domain' => 'array',
+        'cdn.netdna.ssl' => 'string',
+        'cdn.cotendo.username' => 'string',
+        'cdn.cotendo.password' => 'string',
+        'cdn.cotendo.zones' => 'array',
+        'cdn.cotendo.domain' => 'array',
+        'cdn.cotendo.ssl' => 'string',
+        'cdn.edgecast.account' => 'string',
+        'cdn.edgecast.token' => 'string',
+        'cdn.edgecast.domain' => 'array',
+        'cdn.edgecast.ssl' => 'string',
         'cdn.reject.admins' => 'boolean',
         'cdn.reject.ua' => 'array',
         'cdn.reject.uri' => 'array',
@@ -533,17 +537,6 @@ class W3_Config {
         'cdn.force.rewrite' => false,
         'cdn.autoupload.enabled' => false,
         'cdn.autoupload.interval' => 3600,
-        'cdn.mirror.domain' => array(),
-        'cdn.mirror.ssl' => 'auto',
-        'cdn.netdna.apiid' => '',
-        'cdn.netdna.apikey' => '',
-        'cdn.netdna.domain' => array(),
-        'cdn.netdna.ssl' => 'auto',
-        'cdn.cotendo.username' => '',
-        'cdn.cotendo.password' => '',
-        'cdn.cotendo.zones' => array(),
-        'cdn.cotendo.domain' => array(),
-        'cdn.cotendo.ssl' => 'auto',
         'cdn.ftp.host' => '',
         'cdn.ftp.port' => 21,
         'cdn.ftp.user' => '',
@@ -579,6 +572,21 @@ class W3_Config {
         'cdn.azure.container' => '',
         'cdn.azure.cname' => array(),
         'cdn.azure.ssl' => 'auto',
+        'cdn.mirror.domain' => array(),
+        'cdn.mirror.ssl' => 'auto',
+        'cdn.netdna.apiid' => '',
+        'cdn.netdna.apikey' => '',
+        'cdn.netdna.domain' => array(),
+        'cdn.netdna.ssl' => 'auto',
+        'cdn.cotendo.username' => '',
+        'cdn.cotendo.password' => '',
+        'cdn.cotendo.zones' => array(),
+        'cdn.cotendo.domain' => array(),
+        'cdn.cotendo.ssl' => 'auto',
+        'cdn.edgecast.account' => '',
+        'cdn.edgecast.token' => '',
+        'cdn.edgecast.domain' => array(),
+        'cdn.edgecast.ssl' => 'auto',
         'cdn.reject.admins' => false,
         'cdn.reject.ua' => array(),
         'cdn.reject.uri' => array(),
@@ -1369,22 +1377,5 @@ class W3_Config {
         }
 
         return $this->write(W3TC_CONFIG_PATH);
-    }
-
-    /**
-     * Returns config instance
-     *
-     * @param boolean $preview
-     * @return W3_Config
-     */
-    function &instance($preview = null) {
-        static $instances = array();
-
-        if (!isset($instances[0])) {
-            $class = __CLASS__;
-            $instances[0] = & new $class($preview);
-        }
-
-        return $instances[0];
     }
 }

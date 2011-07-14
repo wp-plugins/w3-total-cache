@@ -1,5 +1,5 @@
 <?php if (!defined('W3TC')) die(); ?>
-<?php include W3TC_DIR . '/inc/options/common/header.php'; ?>
+<?php include W3TC_INC_DIR . '/options/common/header.php'; ?>
 
 <script type="text/javascript">/*<![CDATA[*/
 var minify_templates = {};
@@ -90,7 +90,7 @@ minify_templates['<?php echo addslashes($theme_key); ?>']['<?php echo addslashes
                         switch ($html_engine) {
                             case 'html':
                             case 'htmltidy':
-                                $html_engine_file = W3TC_DIR . '/inc/options/minify/' . $html_engine . '.php';
+                                $html_engine_file = W3TC_INC_DIR . '/options/minify/' . $html_engine . '.php';
                                 break;
                         }
 
@@ -113,7 +113,7 @@ minify_templates['<?php echo addslashes($theme_key); ?>']['<?php echo addslashes
                 switch ($html_engine_file2) {
                     case 'html':
                     case 'htmltidy':
-                        $html_engine_file = W3TC_DIR . '/inc/options/minify/' . $html_engine . '2.php';
+                        $html_engine_file = W3TC_INC_DIR . '/options/minify/' . $html_engine . '2.php';
                         break;
                 }
 
@@ -149,7 +149,7 @@ minify_templates['<?php echo addslashes($theme_key); ?>']['<?php echo addslashes
                             case 'js':
                             case 'yuijs':
                             case 'ccjs':
-                                $js_engine_file = W3TC_DIR . '/inc/options/minify/' . $js_engine . '.php';
+                                $js_engine_file = W3TC_INC_DIR . '/options/minify/' . $js_engine . '.php';
                                 break;
                         }
 
@@ -166,7 +166,7 @@ minify_templates['<?php echo addslashes($theme_key); ?>']['<?php echo addslashes
                     case 'js':
                     case 'yuijs':
                     case 'ccjs':
-                        $js_engine_file2 = W3TC_DIR . '/inc/options/minify/' . $js_engine . '2.php';
+                        $js_engine_file2 = W3TC_INC_DIR . '/options/minify/' . $js_engine . '2.php';
                         break;
                 }
 
@@ -269,7 +269,7 @@ minify_templates['<?php echo addslashes($theme_key); ?>']['<?php echo addslashes
                             case 'css':
                             case 'yuicss':
                             case 'csstidy':
-                                $css_engine_file = W3TC_DIR . '/inc/options/minify/' . $css_engine . '.php';
+                                $css_engine_file = W3TC_INC_DIR . '/options/minify/' . $css_engine . '.php';
                                 break;
                         }
 
@@ -296,7 +296,7 @@ minify_templates['<?php echo addslashes($theme_key); ?>']['<?php echo addslashes
                     case 'css':
                     case 'yuicss':
                     case 'csstidy':
-                        $css_engine_file2 = W3TC_DIR . '/inc/options/minify/' . $css_engine . '2.php';
+                        $css_engine_file2 = W3TC_INC_DIR . '/options/minify/' . $css_engine . '2.php';
                         break;
                 }
 
@@ -429,4 +429,4 @@ minify_templates['<?php echo addslashes($theme_key); ?>']['<?php echo addslashes
     </div>
 </form>
 
-<?php include W3TC_DIR . '/inc/options/common/footer.php'; ?>
+<?php include W3TC_INC_DIR . '/options/common/footer.php'; ?>

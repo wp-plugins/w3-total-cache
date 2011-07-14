@@ -62,16 +62,18 @@ class W3_CloudFlare {
      * @return array
      */
     function api_request($action, $value = null) {
+        require_once W3TC_INC_DIR . '/http.php';
+
         $url = sprintf('%s?email=%s&tkn=%s&z=%s&a=%s', W3TC_CLOUDFLARE_API_URL, urlencode($this->_config['email']), urlencode($this->_config['key']), urlencode($this->_config['zone']), urlencode($action));
 
         if ($value !== null) {
             $url .= sprintf('&v=%s', urlencode($value));
         }
 
-        $response = w3_http_get($url, '', false);
+        $response = w3_http_get($url);
 
-        if ($response) {
-            return json_decode($response);
+        if (!is_wp_error($response)) {
+            return json_decode($response['body']);
         }
 
         return false;
@@ -85,11 +87,13 @@ class W3_CloudFlare {
      * @return array
      */
     function external_event($type, $value) {
-        $url = sprintf('%s?u=%s&tkn=%s&evnt_t=%s&evnt_v=%s', W3TC_CLOUDFLARE_EXTERNAL_EVENT_URL, urlencode($this->_config['email']), urlencode($this->_config['key']), urlencode($type), urlencode($value));
-        $response = w3_http_get($url, '', false);
+        require_once W3TC_INC_DIR . '/http.php';
 
-        if ($response) {
-            return json_decode($response);
+        $url = sprintf('%s?u=%s&tkn=%s&evnt_t=%s&evnt_v=%s', W3TC_CLOUDFLARE_EXTERNAL_EVENT_URL, urlencode($this->_config['email']), urlencode($this->_config['key']), urlencode($type), urlencode($value));
+        $response = w3_http_get($url);
+
+        if (!is_wp_error($response)) {
+            return json_decode($response['body']);
         }
 
         return false;

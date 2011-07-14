@@ -1,12 +1,12 @@
 <?php if (!defined('W3TC')) die(); ?>
-<?php include W3TC_DIR . '/inc/options/common/header.php'; ?>
+<?php include W3TC_INC_DIR . '/options/common/header.php'; ?>
 
 <div id="install">
     <ol>
         <li>
         	Set the permissions of wp-content/ back to 755, e.g.:
          	<pre class="console"># chmod 755 /var/www/vhosts/domain.com/httpdocs/wp-content/</pre>
-         </li>
+        </li>
         <li>On the "<a href="admin.php?page=w3tc_general">General</a>" tab and select your caching methods for page, database and minify. In most cases, "disk enhanced" mode for page cache, "disk" mode for minify and "disk" mode for database caching are "good" settings.</li>
         <li><em>Recommended:</em> On the "<a href="admin.php?page=w3tc_minify">Minify</a>" tab all of the recommended settings are preset. Use the help button to simplify discovery of your <acronym title="Cascading Style Sheet">CSS</acronym> and <acronym title="JavaScript">JS</acronym> files and groups. Pay close attention to the method and location of your <acronym title="JavaScript">JS</acronym> group embeddings. See the plugin's <a href="admin.php?page=w3tc_faq">FAQ</a> for more information on usage.</li>
         <li><em>Recommended:</em> On the "<a href="admin.php?page=w3tc_browsercache">Browser Cache</a>" tab, HTTP compression is enabled by default. Make sure to enable other options to suit your goals.</li>
@@ -273,4 +273,4 @@
     </div>
 </div>
 
-<?php include W3TC_DIR . '/inc/options/common/footer.php'; ?>
+<?php include W3TC_INC_DIR . '/options/common/footer.php'; ?>

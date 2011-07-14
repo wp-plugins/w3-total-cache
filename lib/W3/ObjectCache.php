@@ -103,12 +103,19 @@ class W3_ObjectCache {
     var $_debug = false;
 
     /**
+     * Returns instance. for backward compatibility with 0.9.2.3 version of /wp-content files
+     *
+     * @return W3_ObjectCache
+     */
+    function &instance() {
+        return w3_instance('/ObjectCache.php');
+    }
+
+    /**
      * PHP5 style constructor
      */
     function __construct() {
-        require_once W3TC_LIB_W3_DIR . '/Config.php';
-
-        $this->_config = & W3_Config::instance();
+        $this->_config = & w3_instance('/Config.php');
         $this->_lifetime = $this->_config->get_integer('objectcache.lifetime');
         $this->_debug = $this->_config->get_boolean('objectcache.debug');
 
@@ -132,22 +139,6 @@ class W3_ObjectCache {
      */
     function W3_ObjectCache() {
         $this->__construct();
-    }
-
-    /**
-     * Returns onject instance
-     *
-     * @return W3_ObjectCache
-     */
-    function &instance() {
-        static $instances = array();
-
-        if (!isset($instances[0])) {
-            $class = __CLASS__;
-            $instances[0] = & new $class();
-        }
-
-        return $instances[0];
     }
 
     /**

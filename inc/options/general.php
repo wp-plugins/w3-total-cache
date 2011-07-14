@@ -1,5 +1,5 @@
 <?php if (!defined('W3TC')) die(); ?>
-<?php include W3TC_DIR . '/inc/options/common/header.php'; ?>
+<?php include W3TC_INC_DIR . '/options/common/header.php'; ?>
 
 <p>
 	The plugin is currently <span class="w3tc-<?php if ($enabled): ?>enabled">enabled<?php else: ?>disabled">disabled<?php endif; ?></span>. If an option is disabled it means that either your current installation is not compatible or software installation is required.
@@ -362,6 +362,7 @@
                         <option value="netdna"<?php selected($this->_config->get_string('cdn.engine'), 'netdna'); ?>>NetDNA / MaxCDN</option>
                         <option value="cotendo"<?php selected($this->_config->get_string('cdn.engine'), 'cotendo'); ?>>Cotendo</option>
                         <option value="cf2"<?php selected($this->_config->get_string('cdn.engine'), 'cf2'); ?><?php if (!W3TC_PHP5 || !$check_curl): ?> disabled="disabled"<?php endif; ?>>Amazon CloudFront</option>
+                        <option value="edgecast"<?php selected($this->_config->get_string('cdn.engine'), 'edgecast'); ?>>EdgeCast</option>
                     </optgroup>
                     <optgroup label="Origin Push:">
                         <option value="rscf"<?php selected($this->_config->get_string('cdn.engine'), 'rscf'); ?><?php if (!W3TC_PHP5 || !$check_curl): ?> disabled="disabled"<?php endif; ?>>Rackspace Cloud Files</option>
@@ -547,4 +548,4 @@
     </div>
 </form>
 
-<?php include W3TC_DIR . '/inc/options/common/footer.php'; ?>
+<?php include W3TC_INC_DIR . '/options/common/footer.php'; ?>

@@ -103,25 +103,11 @@ class W3_Plugin_DbCache extends W3_Plugin {
     }
 
     /**
-     * Returns plugin instance
-     *
-     * @return W3_Plugin_DbCache
-     */
-    function &instance() {
-        static $instances = array();
-
-        if (!isset($instances[0])) {
-            $class = __CLASS__;
-            $instances[0] = & new $class();
-        }
-
-        return $instances[0];
-    }
-
-    /**
      * Activate plugin action
      */
     function activate() {
+        require_once W3TC_INC_DIR . '/functions/activation.php';
+
         if (!$this->locked() && !@copy(W3TC_INSTALL_FILE_DB, W3TC_ADDIN_FILE_DB)) {
             w3_writable_error(W3TC_ADDIN_FILE_DB);
         }
@@ -203,8 +189,8 @@ class W3_Plugin_DbCache extends W3_Plugin {
 
         if (!$flushed) {
             require_once W3TC_LIB_W3_DIR . '/Db.php';
-
             $w3_db = & W3_Db::instance();
+
             $w3_db->flush_cache();
         }
     }

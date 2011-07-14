@@ -18,8 +18,7 @@ class W3_Mobile {
      * PHP5-style constructor
      */
     function __construct() {
-        require_once W3TC_LIB_W3_DIR . '/Config.php';
-        $config = & W3_Config::instance();
+        $config = & w3_instance('/Config.php');
 
         $this->groups = $config->get_array('mobile.rgroups');
     }
@@ -29,22 +28,6 @@ class W3_Mobile {
      */
     function W3_Mobile() {
         $this->__construct();
-    }
-
-    /**
-     * Returns object instance
-     *
-     * @return W3_Mobile
-     */
-    function &instance() {
-        static $instances = array();
-
-        if (!isset($instances[0])) {
-            $class = __CLASS__;
-            $instances[0] = & new $class();
-        }
-
-        return $instances[0];
     }
 
     /**

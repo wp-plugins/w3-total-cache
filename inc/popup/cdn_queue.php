@@ -1,5 +1,5 @@
 <?php if (!defined('W3TC')) die(); ?>
-<?php include W3TC_DIR . '/inc/popup/common/header.php'; ?>
+<?php include W3TC_INC_DIR . '/popup/common/header.php'; ?>
 
 <p>This tool lists the pending file uploads and deletions.</p>
 <p id="w3tc-options-menu">
@@ -98,4 +98,4 @@
 <?php endif; ?>
 </div>
 
-<?php include W3TC_DIR . '/inc/popup/common/footer.php'; ?>
+<?php include W3TC_INC_DIR . '/popup/common/footer.php'; ?>

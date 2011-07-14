@@ -37,7 +37,7 @@
 		<?php else: ?>
 		    &lt;bucket&gt;.s3.amazonaws.com
 		<?php endif; ?> or CNAME:
-		<?php $cnames = $this->_config->get_array('cdn.s3.cname'); include W3TC_DIR . '/inc/options/cdn/common/cnames.php'; ?>
+		<?php $cnames = $this->_config->get_array('cdn.s3.cname'); include W3TC_INC_DIR . '/options/cdn/common/cnames.php'; ?>
         <br /><span class="description">If you have already added a <a href="http://docs.amazonwebservices.com/AmazonS3/latest/DeveloperGuide/VirtualHosting.html#VirtualHostingCustomURLs" target="_blank">CNAME</a> to your <acronym title="Domain Name System">DNS</acronym> Zone, enter it here.</span>
 	</td>
 </tr>

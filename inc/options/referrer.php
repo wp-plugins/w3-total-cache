@@ -1,5 +1,5 @@
 <?php if (!defined('W3TC')) die(); ?>
-<?php include W3TC_DIR . '/inc/options/common/header.php'; ?>
+<?php include W3TC_INC_DIR . '/options/common/header.php'; ?>
 
 <script type="text/javascript">/*<![CDATA[*/
 var referrer_themes = {};
@@ -86,4 +86,4 @@ referrer_themes['<?php echo addslashes($theme_key); ?>'] = '<?php echo addslashe
     </div>
 </form>
 
-<?php include W3TC_DIR . '/inc/options/common/footer.php'; ?>
+<?php include W3TC_INC_DIR . '/options/common/footer.php'; ?>

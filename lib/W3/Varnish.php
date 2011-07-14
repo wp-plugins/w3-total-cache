@@ -33,8 +33,7 @@ class W3_Varnish {
      * PHP5-style constructor
      */
     function __construct() {
-        require_once W3TC_LIB_W3_DIR . '/Config.php';
-        $config = & W3_Config::instance();
+        $config = & w3_instance('/Config.php');
 
         $this->_debug = $config->get_boolean('varnish.debug');
         $this->_servers = $config->get_array('varnish.servers');
@@ -49,28 +48,14 @@ class W3_Varnish {
     }
 
     /**
-     * Returns object instance
-     *
-     * @return W3_Varnish
-     */
-    function &instance() {
-        static $instances = array();
-
-        if (!isset($instances[0])) {
-            $class = __CLASS__;
-            $instances[0] = & new $class();
-        }
-
-        return $instances[0];
-    }
-
-    /**
      * Purge URI
      *
      * @param string $uri
      * @return boolean
      */
     function purge($uri) {
+        require_once W3TC_INC_DIR . '/http.php';
+
         @set_time_limit($this->_timeout);
 
         if (strpos($uri, '/') !== 0) {
@@ -80,15 +65,21 @@ class W3_Varnish {
         foreach ((array) $this->_servers as $server) {
             $url = sprintf('http://%s%s', $server, $uri);
 
-            $response = w3_http_purge($url, '', true);
+            $response = w3_http_request($url, array('method' => 'PURGE'));
 
-            if ($this->_debug) {
-                $this->_log($url, ($response !== false ? 'OK' : 'Bad response code.'));
-            }
+            if (is_wp_error($response)) {
+                $this->_log($url, sprintf('Unable to send request: %s.', implode('; ', $response->get_error_messages())));
 
-            if ($response === false) {
                 return false;
             }
+
+            if ($response['response']['code'] !== 200) {
+                $this->_log($url, 'Bad response code.');
+
+                return false;
+            }
+
+            $this->_log($url, 'OK');
         }
 
         return true;
@@ -102,8 +93,12 @@ class W3_Varnish {
      * @return bool|int
      */
     function _log($url, $error) {
-        $data = sprintf("[%s] [%s] %s\n", date('r'), $url, $error);
+        if ($this->_debug) {
+            $data = sprintf("[%s] [%s] %s\n", date('r'), $url, $error);
 
-        return @file_put_contents(W3TC_VARNISH_LOG_FILE, $data, FILE_APPEND);
+            return @file_put_contents(W3TC_VARNISH_LOG_FILE, $data, FILE_APPEND);
+        }
+
+        return true;
     }
 }

@@ -31,7 +31,7 @@
 <tr>
     <th>Replace site's hostname with:</th>
     <td>
-		<?php $cnames = $this->_config->get_array('cdn.cotendo.domain'); include W3TC_DIR . '/inc/options/cdn/common/cnames.php'; ?>
+		<?php $cnames = $this->_config->get_array('cdn.cotendo.domain'); include W3TC_INC_DIR . '/options/cdn/common/cnames.php'; ?>
         <br /><span class="description">Enter the hostname provided by your <acronym>CDN</acronym> provider, this value will replace your site's hostname in the <acronym title="Hypertext Markup Language">HTML</acronym>.</span>
     </td>
 </tr>

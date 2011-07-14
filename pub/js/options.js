@@ -499,38 +499,6 @@ jQuery(function() {
         };
 
         switch (metadata.type) {
-            case 'mirror':
-                jQuery.extend(params, {
-                    engine: 'mirror'
-                });
-
-                if (cnames.length) {
-                    params['config[domain][]'] = cnames;
-                }
-                break;
-
-            case 'netdna':
-                jQuery.extend(params, {
-                    engine: 'netdna',
-                    'config[apiid]': jQuery('#cdn_netdna_apiid').val(),
-                    'config[apikey]': jQuery('#cdn_netdna_apikey').val()
-                });
-
-                if (cnames.length) {
-                    params['config[domain][]'] = cnames;
-                }
-                break;
-
-            case 'cotendo':
-                jQuery.extend(params, {
-                    engine: 'cotendo'
-                });
-
-                if (cnames.length) {
-                    params['config[domain][]'] = cnames;
-                }
-                break;
-
             case 'ftp':
                 jQuery.extend(params, {
                     engine: 'ftp',
@@ -612,6 +580,62 @@ jQuery(function() {
 
                 if (cnames.length) {
                     params['config[cname][]'] = cnames;
+                }
+                break;
+
+            case 'mirror':
+                jQuery.extend(params, {
+                    engine: 'mirror'
+                });
+
+                if (cnames.length) {
+                    params['config[domain][]'] = cnames;
+                }
+                break;
+
+            case 'netdna':
+                jQuery.extend(params, {
+                    engine: 'netdna',
+                    'config[apiid]': jQuery('#cdn_netdna_apiid').val(),
+                    'config[apikey]': jQuery('#cdn_netdna_apikey').val()
+                });
+
+                if (cnames.length) {
+                    params['config[domain][]'] = cnames;
+                }
+                break;
+
+            case 'cotendo':
+                var zones = [], zones_val = jQuery('#cdn_cotendo_zones').val();
+
+                if (zones_val) {
+                    zones = zones_val.split(/[\r\n,;]+/);
+                }
+
+                jQuery.extend(params, {
+                    engine: 'cotendo',
+                    'config[username]': jQuery('#cdn_cotendo_username').val(),
+                    'config[password]': jQuery('#cdn_cotendo_password').val()
+                });
+
+                if (zones.length) {
+                    params['config[zones][]'] = zones;
+                }
+
+                if (cnames.length) {
+                    params['config[domain][]'] = cnames;
+                }
+                break;
+
+            case 'edgecast':
+                jQuery.extend(params, {
+                    engine: 'edgecast',
+                    'config[account]': jQuery('#cdn_edgecast_account').val(),
+                    'config[token]': jQuery('#cdn_edgecast_token').val()
+                });
+
+                if (cnames.length) {
+                    params['config[domain][]'] = cnames;
                 }
                 break;
         }
@@ -801,7 +825,7 @@ jQuery(function() {
 
     // CDN cnames
     jQuery('#cdn_cname_add').click(function() {
-        jQuery('#cdn_cnames').append('<li><input type="text" name="cdn_cnames[]" value="" size="30" /> <input class="button cdn_cname_delete" type="button" value="Delete" /> <span></span></li>');
+        jQuery('#cdn_cnames').append('<li><input type="text" name="cdn_cnames[]" value="" size="60" /> <input class="button cdn_cname_delete" type="button" value="Delete" /> <span></span></li>');
         w3tc_cdn_cnames_assign();
     });
 

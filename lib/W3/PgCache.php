@@ -93,25 +93,30 @@ class W3_PgCache {
     var $cache_reject_reason = '';
 
     /**
+     * Returns instance. for backward compatibility with 0.9.2.3 version of /wp-content files
+     *
+     * @return W3_PgCache
+     */
+    function &instance() {
+        return w3_instance('/PgCache.php');
+    }
+
+    /**
      * PHP5 Constructor
      */
     function __construct() {
-        require_once W3TC_LIB_W3_DIR . '/Config.php';
-
-        $this->_config = & W3_Config::instance();
+        $this->_config = & w3_instance('/Config.php');
         $this->_debug = $this->_config->get_boolean('pgcache.debug');
         $this->_request_uri = $_SERVER['REQUEST_URI'];
         $this->_lifetime = $this->_config->get_integer('browsercache.html.lifetime');
         $this->_enhanced_mode = ($this->_config->get_string('pgcache.engine') == 'file_generic');
 
         if ($this->_config->get_boolean('mobile.enabled')) {
-            require_once W3TC_LIB_W3_DIR . '/Mobile.php';
-            $this->_mobile = & W3_Mobile::instance();
+            $this->_mobile = & w3_instance('/Mobile.php');
         }
 
         if ($this->_config->get_boolean('referrer.enabled')) {
-            require_once W3TC_LIB_W3_DIR . '/Referrer.php';
-            $this->_referrer = & W3_Referrer::instance();
+            $this->_referrer = & w3_instance('/Referrer.php');
         }
     }
 
@@ -688,9 +693,7 @@ class W3_PgCache {
                  * Purge varnish servers
                  */
                 if ($this->_config->get_boolean('varnish.enabled')) {
-                    require_once W3TC_LIB_W3_DIR . '/Varnish.php';
-
-                    $varnish =& W3_Varnish::instance();
+                    $varnish = & w3_instance('/Varnish.php');
 
                     foreach ($uris as $uri) {
                         $varnish->purge($uri);
@@ -702,22 +705,6 @@ class W3_PgCache {
         }
 
         return false;
-    }
-
-    /**
-     * Returns object instance
-     *
-     * @return W3_PgCache
-     */
-    function &instance() {
-        static $instances = array();
-
-        if (!isset($instances[0])) {
-            $class = __CLASS__;
-            $instances[0] = & new $class();
-        }
-
-        return $instances[0];
     }
 
     /**

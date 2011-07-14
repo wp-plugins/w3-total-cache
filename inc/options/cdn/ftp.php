@@ -46,7 +46,7 @@
 <tr>
 	<th>Replace site's hostname with:</th>
 	<td>
-		<?php $cnames = $this->_config->get_array('cdn.ftp.domain'); include W3TC_DIR . '/inc/options/cdn/common/cnames.php'; ?>
+		<?php $cnames = $this->_config->get_array('cdn.ftp.domain'); include W3TC_INC_DIR . '/options/cdn/common/cnames.php'; ?>
 		<br /><span class="description">Enter the hostname or CNAME(s) of your FTP server configured above, these values will replace your site's hostname in the <acronym title="Hypertext Markup Language">HTML</acronym>.</span>
 	</td>
 </tr>
