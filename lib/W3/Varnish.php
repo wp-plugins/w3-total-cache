@@ -33,7 +33,7 @@ class W3_Varnish {
      * PHP5-style constructor
      */
     function __construct() {
-        $config = & w3_instance('/Config.php');
+        $config = & w3_instance('W3_Config');
 
         $this->_debug = $config->get_boolean('varnish.debug');
         $this->_servers = $config->get_array('varnish.servers');
@@ -54,7 +54,7 @@ class W3_Varnish {
      * @return boolean
      */
     function purge($uri) {
-        require_once W3TC_INC_DIR . '/http.php';
+        require_once W3TC_INC_DIR . '/functions/http.php';
 
         @set_time_limit($this->_timeout);
 

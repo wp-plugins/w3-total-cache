@@ -26,6 +26,47 @@ class Minify_CSS_UriRewriter {
     public static $debugText = '';
 
     /**
+     * Does CSS rewrite
+     *
+     * @static
+     * @param string $css
+     * @param array $options
+     * @return string
+     */
+    public static function rewrite($css, $options)
+    {
+        if (isset($options['prependRelativePath']) || isset($options['currentDir'])) {
+            $browsercache_id = (isset($options['browserCacheId']) ? $options['browserCacheId'] : 0);
+            $browsercache_extensions = (isset($options['browserCacheExtensions']) ? $options['browserCacheExtensions'] : array());
+
+            if ($options['prependRelativePath']) {
+                $css = self::_prepend(
+                    $css,
+                    $options['prependRelativePath'],
+                    $browsercache_id,
+                    $browsercache_extensions
+                );
+            }
+
+            if (isset($options['currentDir'])) {
+                $document_root = (isset($options['docRoot']) ? $options['docRoot'] : $_SERVER['DOCUMENT_ROOT']);
+                $symlinks = (isset($options['symlinks']) ? $options['symlinks'] : array());
+
+                $css = self::_rewrite(
+                    $css,
+                    $options['currentDir'],
+                    $document_root,
+                    $symlinks,
+                    $browsercache_id,
+                    $browsercache_extensions
+                );
+            }
+        }
+
+        return $css;
+    }
+
+    /**
      * Rewrite file relative URIs as root relative in CSS files
      *
      * @param string $css
@@ -51,7 +92,7 @@ class Minify_CSS_UriRewriter {
      *
      * @return string
      */
-    public static function rewrite($css, $currentDir, $docRoot = null, $symlinks = array(), $browserCacheId = 0, $browserCacheExtensions = array())
+    private static function _rewrite($css, $currentDir, $docRoot = null, $symlinks = array(), $browserCacheId = 0, $browserCacheExtensions = array())
     {
         self::$_docRoot = self::_realpath(
             $docRoot ? $docRoot : $_SERVER['DOCUMENT_ROOT']
@@ -98,7 +139,7 @@ class Minify_CSS_UriRewriter {
      *
      * @return string
      */
-    public static function prepend($css, $path, $browserCacheId = 0, $browserCacheExtensions = array())
+    private static function _prepend($css, $path, $browserCacheId = 0, $browserCacheExtensions = array())
     {
         self::$_prependPath = $path;
         self::$_browserCacheId = $browserCacheId;
@@ -200,7 +241,7 @@ class Minify_CSS_UriRewriter {
                    $uri =  self::$_prependPath . $uri;
                 }
             } else {
-                $uri = self::rewriteRelative($uri, self::$_currentDir, self::$_docRoot, self::$_symlinks);
+                $uri = self::_rewriteRelative($uri, self::$_currentDir, self::$_docRoot, self::$_symlinks);
             }
 
             if (self::$_browserCacheId && count(self::$_browserCacheExtensions)) {
@@ -261,7 +302,7 @@ class Minify_CSS_UriRewriter {
      *
      * @return string
      */
-    public static function rewriteRelative($uri, $realCurrentDir, $realDocRoot, $symlinks = array())
+    private static function _rewriteRelative($uri, $realCurrentDir, $realDocRoot, $symlinks = array())
     {
 		if ('/' === $uri[0]) {                 // root-relative
             return $uri;

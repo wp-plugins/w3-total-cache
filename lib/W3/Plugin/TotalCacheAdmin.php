@@ -9,6 +9,7 @@ if (!defined('W3TC')) {
 
 define('W3TC_PLUGIN_TOTALCACHE_REGEXP_COOKIEDOMAIN', '~define\s*\(\s*[\'"]COOKIE_DOMAIN[\'"]\s*,.*?\)~is');
 
+require_once W3TC_INC_DIR . '/functions/rule.php';
 require_once W3TC_LIB_W3_DIR . '/Plugin.php';
 
 /**
@@ -477,7 +478,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
      * @return void
      */
     function in_plugin_update_message() {
-        require_once W3TC_INC_DIR . '/http.php';
+        require_once W3TC_INC_DIR . '/functions/http.php';
 
         $response = w3_http_get(W3TC_README_URL);
 
@@ -845,7 +846,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
             } elseif (!defined('WP_CACHE') || !WP_CACHE) {
                 $this->_errors[] = sprintf('Page caching is not available: please add: <strong>define(\'WP_CACHE\', true);</strong> to <strong>%swp-config.php</strong>. This error message will automatically disappear once the change is successfully made.', ABSPATH);
             } elseif ($this->_config->get_string('pgcache.engine') == 'file_generic' && $this->_config->get_boolean('config.check') && w3_can_check_rules()) {
-                $w3_plugin_pgcache = & w3_instance('/Plugin/PgCacheAdmin.php');
+                $w3_plugin_pgcache = & w3_instance('W3_Plugin_PgCacheAdmin');
 
                 if ($w3_plugin_pgcache->check_rules_core()) {
                     if (!$this->test_rewrite_pgcache()) {
@@ -873,7 +874,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
          * Check for browser cache availability
          */
         if ($this->_config->get_boolean('browsercache.enabled') && $this->_config->get_boolean('config.check') && w3_can_check_rules()) {
-            $w3_plugin_browsercache = & w3_instance('/Plugin/BrowserCache.php');
+            $w3_plugin_browsercache = & w3_instance('W3_Plugin_BrowserCacheAdmin');
 
             if ($this->_config->get_boolean('notes.browsercache_rules_cache') && !$w3_plugin_browsercache->check_rules_cache()) {
                 $this->_errors[] = sprintf('Browser caching is not active. To enable it, add the following rules into the server configuration file (<strong>%s</strong>) of the site %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea>. Or if permission allow this can be done automatically, by clicking here: %s. %s', w3_get_browsercache_rules_cache_path(), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_browsercache->generate_rules_cache()), $this->button_link('auto-install', wp_nonce_url(sprintf('admin.php?page=%s&w3tc_browsercache_write_rules_cache', $this->_page), 'w3tc')), $this->button_hide_note('Hide this message', 'browsercache_rules_cache'));
@@ -889,7 +890,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
          */
         if ($this->_config->get_boolean('minify.enabled')) {
             if ($this->_config->get_boolean('minify.rewrite') && $this->_config->get_boolean('config.check') && w3_can_check_rules()) {
-                $w3_plugin_minify = & w3_instance('/Plugin/MinifyEnabled.php');
+                $w3_plugin_minify = & w3_instance('W3_Plugin_MinifyAdmin');
 
                 if ($w3_plugin_minify->check_rules_core()) {
                     if (!$this->test_rewrite_minify()) {
@@ -1313,6 +1314,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
         }
 
         $debug = ($this->_config->get_boolean('dbcache.debug') || $this->_config->get_boolean('objectcache.debug') || $this->_config->get_boolean('pgcache.debug') || $this->_config->get_boolean('minify.debug') || $this->_config->get_boolean('cdn.debug'));
+        $file_nfs = ($this->_config->get_boolean('pgcache.file.nfs') || $this->_config->get_boolean('minify.file.nfs'));
         $file_locking = ($this->_config->get_boolean('dbcache.file.locking') || $this->_config->get_boolean('objectcache.file.locking') || $this->_config->get_boolean('pgcache.file.locking') || $this->_config->get_boolean('minify.file.locking'));
 
         $support = $this->_config->get_string('common.support');
@@ -1438,7 +1440,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
     function options_mobile() {
         $groups = $this->_config->get_array('mobile.rgroups');
 
-        $w3_mobile = & w3_instance('/Mobile.php');
+        $w3_mobile = & w3_instance('W3_Mobile');
         $themes = $w3_mobile->get_themes();
 
         include W3TC_INC_DIR . '/options/mobile.php';
@@ -1452,7 +1454,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
     function options_referrer() {
         $groups = $this->_config->get_array('referrer.rgroups');
 
-        $w3_referrer = & w3_instance('/Referrer.php');
+        $w3_referrer = & w3_instance('W3_Referrer');
 
         $themes = $w3_referrer->get_themes();
 
@@ -1512,7 +1514,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
 
         if (w3_can_check_rules()) {
             if ($this->_config->get_boolean('minify.enabled') && $this->_config->get_string('minify.engine') == 'file') {
-                $w3_plugin_minify = & w3_instance('/Plugin/MinifyEnabled.php');
+                $w3_plugin_minify = & w3_instance('W3_Plugin_MinifyAdmin');
 
                 $minify_rules_cache_path = w3_get_minify_rules_cache_path();
 
@@ -1524,7 +1526,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
             }
 
             if ($this->_config->get_boolean('pgcache.enabled')) {
-                $w3_plugin_pgcache = & w3_instance('/Plugin/PgCacheAdmin.php');
+                $w3_plugin_pgcache = & w3_instance('W3_Plugin_PgCacheAdmin');
 
                 $pgcache_rules_cache_path = w3_get_pgcache_rules_cache_path();
 
@@ -1536,7 +1538,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
             }
 
             if ($this->_config->get_boolean('browsercache.enabled')) {
-                $w3_plugin_browsercache = & w3_instance('/Plugin/BrowserCache.php');
+                $w3_plugin_browsercache = & w3_instance('W3_Plugin_BrowserCacheAdmin');
 
                 $browsercache_rules_cache_path = w3_get_browsercache_rules_cache_path();
 
@@ -1548,7 +1550,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
             }
 
             if ($this->_config->get_boolean('minify.enabled')) {
-                $w3_plugin_minify = & w3_instance('/Plugin/MinifyEnabled.php');
+                $w3_plugin_minify = & w3_instance('W3_Plugin_MinifyAdmin');
 
                 $minify_rules_core_path = w3_get_minify_rules_core_path();
 
@@ -1560,7 +1562,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
             }
 
             if ($this->_config->get_boolean('pgcache.enabled')) {
-                $w3_plugin_pgcache = & w3_instance('/Plugin/PgCacheAdmin.php');
+                $w3_plugin_pgcache = & w3_instance('W3_Plugin_PgCacheAdmin');
 
                 $pgcache_rules_core_path = w3_get_pgcache_rules_core_path();
 
@@ -1572,7 +1574,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
             }
 
             if ($this->_config->get_boolean('browsercache.enabled') && $this->_config->get_boolean('browsercache.no404wp')) {
-                $w3_plugin_browsercache = & w3_instance('/Plugin/BrowserCache.php');
+                $w3_plugin_browsercache = & w3_instance('W3_Plugin_BrowserCacheAdmin');
 
                 $browsercache_rules_no404wp_path = w3_get_browsercache_rules_no404wp_path();
 
@@ -1584,7 +1586,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
             }
 
             if ($this->_config->get_boolean('browsercache.enabled') && $this->_config->get_boolean('cdn.enabled') && $this->_config->get_string('cdn.engine') == 'ftp') {
-                $w3_plugin_cdn = & w3_instance('/Plugin/CdnEnabled.php');
+                $w3_plugin_cdn = & w3_instance('W3_Plugin_CdnCommon');
                 $cdn = & $w3_plugin_cdn->get_cdn();
 
                 $domain = $cdn->get_domain();
@@ -2382,7 +2384,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
     function action_cdn_queue() {
         require_once W3TC_LIB_W3_DIR . '/Request.php';
 
-        $w3_plugin_cdn = & w3_instance('/Plugin/CdnEnabled.php');
+        $w3_plugin_cdn = & w3_instance('W3_Plugin_CdnAdmin');
         $cdn_queue_action = W3_Request::get_string('cdn_queue_action');
         $cdn_queue_tab = W3_Request::get_string('cdn_queue_tab');
 
@@ -2429,7 +2431,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
      * @return void
      */
     function action_cdn_export_library() {
-        $w3_plugin_cdn = & w3_instance('/Plugin/CdnEnabled.php');
+        $w3_plugin_cdn = & w3_instance('W3_Plugin_CdnAdmin');
 
         $total = $w3_plugin_cdn->get_attachments_count();
         $title = 'Media Library export';
@@ -2445,7 +2447,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
     function action_cdn_export_library_process() {
         require_once W3TC_LIB_W3_DIR . '/Request.php';
 
-        $w3_plugin_cdn = & w3_instance('/Plugin/CdnEnabled.php');
+        $w3_plugin_cdn = & w3_instance('W3_Plugin_CdnAdmin');
 
         $limit = W3_Request::get_integer('limit');
         $offset = W3_Request::get_integer('offset');
@@ -2473,8 +2475,10 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
      * @return void
      */
     function action_cdn_import_library() {
-        $w3_plugin_cdn = & w3_instance('/Plugin/CdnEnabled.php');
-        $cdn = & $w3_plugin_cdn->get_cdn();
+        $w3_plugin_cdn = & w3_instance('W3_Plugin_CdnAdmin');
+        $w3_plugin_cdncommon = & w3_instance('W3_Plugin_CdnCommon');
+
+        $cdn = & $w3_plugin_cdncommon->get_cdn();
 
         $total = $w3_plugin_cdn->get_import_posts_count();
         $cdn_host = $cdn->get_domain();
@@ -2492,7 +2496,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
     function action_cdn_import_library_process() {
         require_once W3TC_LIB_W3_DIR . '/Request.php';
 
-        $w3_plugin_cdn = & w3_instance('/Plugin/CdnEnabled.php');
+        $w3_plugin_cdn = & w3_instance('W3_Plugin_CdnAdmin');
 
         $limit = W3_Request::get_integer('limit');
         $offset = W3_Request::get_integer('offset');
@@ -2520,7 +2524,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
      * @return void
      */
     function action_cdn_rename_domain() {
-        $w3_plugin_cdn = & w3_instance('/Plugin/CdnEnabled.php');
+        $w3_plugin_cdn = & w3_instance('W3_Plugin_CdnAdmin');
 
         $total = $w3_plugin_cdn->get_rename_posts_count();
 
@@ -2537,7 +2541,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
     function action_cdn_rename_domain_process() {
         require_once W3TC_LIB_W3_DIR . '/Request.php';
 
-        $w3_plugin_cdn = & w3_instance('/Plugin/CdnEnabled.php');
+        $w3_plugin_cdn = & w3_instance('W3_Plugin_CdnAdmin');
 
         $limit = W3_Request::get_integer('limit');
         $offset = W3_Request::get_integer('offset');
@@ -2568,7 +2572,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
     function action_cdn_export() {
         require_once W3TC_LIB_W3_DIR . '/Request.php';
 
-        $w3_plugin_cdn = & w3_instance('/Plugin/CdnEnabled.php');
+        $w3_plugin_cdn = & w3_instance('W3_Plugin_Cdn');
 
         $cdn_export_type = W3_Request::get_string('cdn_export_type', 'custom');
 
@@ -2606,7 +2610,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
     function action_cdn_export_process() {
         require_once W3TC_LIB_W3_DIR . '/Request.php';
 
-        $w3_plugin_cdn = & w3_instance('/Plugin/CdnEnabled.php');
+        $w3_plugin_cdn = & w3_instance('W3_Plugin_CdnCommon');
 
         $files = W3_Request::get_array('files');
         $document_root = w3_get_document_root();
@@ -2662,7 +2666,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
         }
 
         if (count($purge)) {
-            $w3_plugin_cdn = & w3_instance('/Plugin/CdnEnabled.php');
+            $w3_plugin_cdn = & w3_instance('W3_Plugin_CdnCommon');
             $w3_plugin_cdn->purge($purge, false, $results);
         } else {
             $errors[] = 'Empty files list.';
@@ -2682,7 +2686,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
         $results = array();
         $attachment_id = W3_Request::get_integer('attachment_id');
 
-        $w3_plugin_cdn = & w3_instance('/Plugin/CdnEnabled.php');
+        $w3_plugin_cdn = & w3_instance('W3_Plugin_CdnAdmin');
 
         if ($w3_plugin_cdn->purge_attachment($attachment_id, $results)) {
             $this->redirect(array(
@@ -2958,7 +2962,11 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
          * General tab
          */
         if ($this->_page == 'w3tc_general') {
+            $file_nfs = W3_Request::get_boolean('file_nfs');
             $file_locking = W3_Request::get_boolean('file_locking');
+
+            $config->set('pgcache.file.nfs', $file_nfs);
+            $config->set('minify.file.nfs', $file_nfs);
 
             $config->set('dbcache.file.locking', $file_locking);
             $config->set('objectcache.file.locking', $file_locking);
@@ -3402,7 +3410,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
 
         $post_id = W3_Request::get_integer('post_id');
 
-        $w3_pgcache = & w3_instance('/PgCache.php');
+        $w3_pgcache = & w3_instance('W3_PgCacheFlush');
 
         if ($w3_pgcache->flush_post($post_id)) {
             $this->redirect(array(
@@ -3425,7 +3433,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
 
         $post_id = W3_Request::get_integer('post_id');
 
-        $w3_pgcache = & w3_instance('/PgCache.php');
+        $w3_pgcache = & w3_instance('W3_PgCacheFlush');
 
         if ($w3_pgcache->flush_post($post_id)) {
             $this->redirect(array(
@@ -3444,7 +3452,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
      * @return void
      */
     function action_pgcache_write_rules_core() {
-        $w3_plugin_pgcache = & w3_instance('/Plugin/PgCacheAdmin.php');
+        $w3_plugin_pgcache = & w3_instance('W3_Plugin_PgCacheAdmin');
 
         if ($w3_plugin_pgcache->write_rules_core()) {
             $this->redirect(array(
@@ -3463,7 +3471,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
      * @return void
      */
     function action_pgcache_write_rules_cache() {
-        $w3_plugin_pgcache = & w3_instance('/Plugin/PgCacheAdmin.php');
+        $w3_plugin_pgcache = & w3_instance('W3_Plugin_PgCacheAdmin');
 
         if ($w3_plugin_pgcache->write_rules_cache()) {
             $this->redirect(array(
@@ -3482,7 +3490,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
      * @return void
      */
     function action_pgcache_remove_rules_legacy() {
-        $w3_plugin_pgcache = & w3_instance('/Plugin/PgCacheAdmin.php');
+        $w3_plugin_pgcache = & w3_instance('W3_Plugin_PgCacheAdmin');
 
         if ($w3_plugin_pgcache->remove_rules_legacy()) {
             $this->redirect(array(
@@ -3501,7 +3509,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
      * @return void
      */
     function action_pgcache_remove_rules_wpsc() {
-        $w3_plugin_pgcache = & w3_instance('/Plugin/PgCacheAdmin.php');
+        $w3_plugin_pgcache = & w3_instance('W3_Plugin_PgCacheAdmin');
 
         if ($w3_plugin_pgcache->remove_rules_wpsc()) {
             $this->redirect(array(
@@ -3520,7 +3528,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
      * @return void
      */
     function action_browsercache_write_rules_cache() {
-        $w3_plugin_browsercache = & w3_instance('/Plugin/BrowserCache.php');
+        $w3_plugin_browsercache = & w3_instance('W3_Plugin_BrowserCacheAdmin');
 
         if ($w3_plugin_browsercache->write_rules_cache()) {
             $this->redirect(array(
@@ -3539,7 +3547,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
      * @return void
      */
     function action_browsercache_write_rules_no404wp() {
-        $w3_plugin_browsercache = & w3_instance('/Plugin/BrowserCache.php');
+        $w3_plugin_browsercache = & w3_instance('W3_Plugin_BrowserCacheAdmin');
 
         if ($w3_plugin_browsercache->write_rules_no404wp()) {
             $this->redirect(array(
@@ -3558,7 +3566,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
      * @return void
      */
     function action_minify_write_rules_core() {
-        $w3_plugin_minify = & w3_instance('/Plugin/MinifyEnabled.php');
+        $w3_plugin_minify = & w3_instance('W3_Plugin_MinifyAdmin');
 
         if ($w3_plugin_minify->write_rules_core()) {
             $this->redirect(array(
@@ -3577,7 +3585,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
      * @return void
      */
     function action_minify_write_rules_cache() {
-        $w3_plugin_minify = & w3_instance('/Plugin/MinifyEnabled.php');
+        $w3_plugin_minify = & w3_instance('W3_Plugin_MinifyAdmin');
 
         if ($w3_plugin_minify->write_rules_cache()) {
             $this->redirect(array(
@@ -3596,7 +3604,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
      * @return void
      */
     function action_minify_remove_rules_legacy() {
-        $w3_plugin_minify = & w3_instance('/Plugin/MinifyEnabled.php');
+        $w3_plugin_minify = & w3_instance('W3_Plugin_MinifyAdmin');
 
         if ($w3_plugin_minify->remove_rules_legacy()) {
             $this->redirect(array(
@@ -4118,14 +4126,14 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
          * Save config
          */
         if ($new_config->save($preview)) {
-            $w3_plugin_pgcache = & w3_instance('/Plugin/PgCacheAdmin.php');
-            $w3_plugin_dbcache = & w3_instance('/Plugin/DbCache.php');
-            $w3_plugin_objectcache = & w3_instance('/Plugin/ObjectCache.php');
-            $w3_plugin_browsercache = & w3_instance('/Plugin/BrowserCache.php');
-            $w3_plugin_cdn = & w3_instance('/Plugin/CdnEnabled.php');
+            $w3_plugin_pgcache = & w3_instance('W3_Plugin_PgCacheAdmin');
+            $w3_plugin_dbcache = & w3_instance('W3_Plugin_DbCache');
+            $w3_plugin_objectcache = & w3_instance('W3_Plugin_ObjectCache');
+            $w3_plugin_browsercache = & w3_instance('W3_Plugin_BrowserCacheAdmin');
+            $w3_plugin_cdn = & w3_instance('W3_Plugin_CdnAdmin');
 
             if (W3TC_PHP5) {
-                $w3_plugin_minify = & w3_instance('/Plugin/MinifyEnabled.php');
+                $w3_plugin_minify = & w3_instance('W3_Plugin_MinifyAdmin');
             }
 
             /**
@@ -4164,8 +4172,8 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
                 $w3_plugin_cdn->unschedule_upload();
             }
 
-            if (W3TC_PHP5 && $old_config->get_integer('minify.file.gc') != $new_config->get_integer('minify.file.gc')) {
-                $w3_plugin_minify->unschedule();
+            if (W3TC_PHP5) {
+                 $w3_plugin_minify->before_config_change($old_config, $new_config);
             }
 
             /**
@@ -4207,10 +4215,6 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
             $w3_plugin_objectcache->schedule();
             $w3_plugin_cdn->after_config_change();
 
-            if (W3TC_PHP5) {
-                $w3_plugin_minify->schedule();
-            }
-
             /**
              * Update support us option
              */
@@ -4247,29 +4251,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
              * Write minify rewrite rules
              */
             if (W3TC_PHP5) {
-                if ($new_config->get_boolean('minify.enabled') && $new_config->get_boolean('minify.rewrite')) {
-                    if (w3_can_modify_rules(w3_get_minify_rules_core_path())) {
-                        $w3_plugin_minify->write_rules_core();
-                    }
-
-                    if ($this->_config->get_string('minify.engine') == 'file') {
-                        if (w3_can_modify_rules(w3_get_minify_rules_cache_path())) {
-                            $w3_plugin_minify->write_rules_cache();
-                        }
-                    } else {
-                        if (w3_can_modify_rules(w3_get_minify_rules_cache_path())) {
-                            $w3_plugin_minify->remove_rules_cache();
-                        }
-                    }
-                } else {
-                    if (w3_can_modify_rules(w3_get_minify_rules_core_path())) {
-                        $w3_plugin_minify->remove_rules_core();
-                    }
-
-                    if (w3_can_modify_rules(w3_get_minify_rules_cache_path())) {
-                        $w3_plugin_minify->remove_rules_cache();
-                    }
-                }
+                $w3_plugin_minify->after_config_change();
             }
 
             /**
@@ -4295,8 +4277,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
              */
             if ($update_cf_cnames) {
                 $error = null;
-                $cdn = $w3_plugin_cdn->get_cdn();
-                $cdn->update_cnames($error);
+                $w3_plugin_cdn->update_cnames($error);
             }
 
             /**
@@ -4401,7 +4382,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
      * @return void
      */
     function flush_pgcache() {
-        $w3_pgcache = & w3_instance('/PgCache.php');
+        $w3_pgcache = & w3_instance('W3_PgCacheFlush');
         $w3_pgcache->flush();
     }
 
@@ -4423,7 +4404,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
      * @return void
      */
     function flush_objectcache() {
-        $w3_objectcache = & w3_instance('/ObjectCache.php');
+        $w3_objectcache = & w3_instance('W3_ObjectCache');
         $w3_objectcache->flush();
     }
 
@@ -4434,7 +4415,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
      */
     function flush_minify() {
         if (W3TC_PHP5) {
-            $w3_minify = & w3_instance('/Minify.php');
+            $w3_minify = & w3_instance('W3_Minify');
             $w3_minify->flush();
         }
     }
@@ -4915,7 +4896,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
             /**
              * Get page contents
              */
-            require_once W3TC_INC_DIR . '/http.php';
+            require_once W3TC_INC_DIR . '/functions/http.php';
 
             $response = w3_http_get($url);
 
@@ -5278,7 +5259,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
         $result = get_transient($key);
 
         if ($result === false) {
-            require_once W3TC_INC_DIR . '/http.php';
+            require_once W3TC_INC_DIR . '/functions/http.php';
 
             $response = w3_http_get($url);
 
@@ -5391,7 +5372,8 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
      * @return void
      */
     function cdn_upload_minify() {
-        $w3_plugin_cdn = & w3_instance('/Plugin/CdnEnabled.php');
+        $w3_plugin_cdn = & w3_instance('W3_Plugin_Cdn');
+        $w3_plugin_cdncommon = & w3_instance('W3_Plugin_CdnCommon');
 
         $files = $w3_plugin_cdn->get_files_minify();
         $document_root = w3_get_document_root();
@@ -5403,7 +5385,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
             $upload[$document_root . '/' . $file] = $file;
         }
 
-        $w3_plugin_cdn->upload($upload, true, $results);
+        $w3_plugin_cdncommon->upload($upload, true, $results);
     }
 
     /**
@@ -5412,8 +5394,8 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
      * @return void
      */
     function cdn_upload_browsercache() {
-        $w3_plugin_cdn = & w3_instance('/Plugin/CdnEnabled.php');
-        $w3_plugin_browsercache = & w3_instance('/Plugin/BrowserCache.php');
+        $w3_plugin_cdn = & w3_instance('W3_Plugin_CdnCommon');
+        $w3_plugin_browsercache = & w3_instance('W3_Plugin_BrowserCacheAdmin');
 
         $rules = $w3_plugin_browsercache->generate_rules_cache(true);
 
@@ -5436,7 +5418,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
      * @return void
      */
     function cdn_delete_browsercache() {
-        $w3_plugin_cdn = & w3_instance('/Plugin/CdnEnabled.php');
+        $w3_plugin_cdn = & w3_instance('W3_Plugin_CdnCommon');
 
         $cdn_path = w3_get_cdn_rules_path();
         $tmp_path = W3TC_TMP_DIR . '/' . $cdn_path;

@@ -19,7 +19,7 @@ class W3_Plugin {
      * PHP5 Constructor
      */
     function __construct() {
-        $this->_config = & w3_instance('/Config.php');
+        $this->_config = & w3_instance('W3_Config');
     }
 
     /**

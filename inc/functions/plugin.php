@@ -40,7 +40,7 @@ function w3tc_do_action($action, $value = null) {
  * @return boolean
  */
 function w3tc_pgcache_flush() {
-    $w3_pgcache = & w3_instance('/PgCache.php');
+    $w3_pgcache = & w3_instance('W3_PgCacheFlush');
     return $w3_pgcache->flush();
 }
 
@@ -51,7 +51,7 @@ function w3tc_pgcache_flush() {
  * @return boolean
  */
 function w3tc_pgcache_flush_post($post_id) {
-    $w3_pgcache = & w3_instance('/PgCache.php');
+    $w3_pgcache = & w3_instance('W3_PgCacheFlush');
 
     return $w3_pgcache->flush_post($post_id);
 }
@@ -75,7 +75,7 @@ function w3tc_dbcache_flush() {
  * @return boolean
  */
 function w3tc_minify_flush() {
-    $w3_minify = & w3_instance('/Minify.php');
+    $w3_minify = & w3_instance('W3_Minify');
 
     return $w3_minify->flush();
 }
@@ -86,7 +86,7 @@ function w3tc_minify_flush() {
  * @return boolean
  */
 function w3tc_objectcache_flush() {
-    $w3_objectcache = & w3_instance('/ObjectCache.php');
+    $w3_objectcache = & w3_instance('W3_ObjectCache');
     return $w3_objectcache->flush();
 }
 
@@ -97,7 +97,7 @@ function w3tc_objectcache_flush() {
  * @retun void
  */
 function w3tc_minify_script_group($location) {
-    $w3_plugin_minify = & w3_instance('/Plugin/MinifyEnabled.php');
+    $w3_plugin_minify = & w3_instance('W3_Plugin_Minify');
     $w3_plugin_minify->printed_scripts[] = $location;
 
     echo $w3_plugin_minify->get_script_group($location);
@@ -110,7 +110,7 @@ function w3tc_minify_script_group($location) {
  * @retun void
  */
 function w3tc_minify_style_group($location) {
-    $w3_plugin_minify = & w3_instance('/Plugin/MinifyEnabled.php');
+    $w3_plugin_minify = & w3_instance('W3_Plugin_Minify');
     $w3_plugin_minify->printed_styles[] = $location;
 
     echo $w3_plugin_minify->get_style_group($location);
@@ -124,7 +124,7 @@ function w3tc_minify_style_group($location) {
  * @return void
  */
 function w3tc_minify_script_custom($files, $blocking = true) {
-    $w3_plugin_minify = & w3_instance('/Plugin/MinifyEnabled.php');
+    $w3_plugin_minify = & w3_instance('W3_Plugin_Minify');
     echo $w3_plugin_minify->get_script_custom($files, $blocking);
 }
 
@@ -136,6 +136,6 @@ function w3tc_minify_script_custom($files, $blocking = true) {
  * @return void
  */
 function w3tc_minify_style_custom($files, $import = false) {
-    $w3_plugin_minify = & w3_instance('/Plugin/MinifyEnabled.php');
+    $w3_plugin_minify = & w3_instance('W3_Plugin_Minify');
     echo $w3_plugin_minify->get_style_custom($files, $import);
 }

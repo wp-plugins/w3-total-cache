@@ -108,14 +108,14 @@ class W3_ObjectCache {
      * @return W3_ObjectCache
      */
     function &instance() {
-        return w3_instance('/ObjectCache.php');
+        return w3_instance('W3_ObjectCache');
     }
 
     /**
      * PHP5 style constructor
      */
     function __construct() {
-        $this->_config = & w3_instance('/Config.php');
+        $this->_config = & w3_instance('W3_Config');
         $this->_lifetime = $this->_config->get_integer('objectcache.lifetime');
         $this->_debug = $this->_config->get_boolean('objectcache.debug');
 

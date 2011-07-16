@@ -19,7 +19,7 @@ class W3_Referrer {
      * PHP5-style constructor
      */
     function __construct() {
-        $config = & w3_instance('/Config.php');
+        $config = & w3_instance('W3_Config');
 
         $this->groups = $config->get_array('referrer.rgroups');
     }

@@ -56,6 +56,7 @@ class W3_Config {
         'pgcache.debug' => 'boolean',
         'pgcache.engine' => 'string',
         'pgcache.file.gc' => 'integer',
+        'pgcache.file.nfs' => 'boolean',
         'pgcache.file.locking' => 'boolean',
         'pgcache.memcached.servers' => 'array',
         'pgcache.memcached.persistant' => 'boolean',
@@ -94,6 +95,7 @@ class W3_Config {
         'minify.debug' => 'boolean',
         'minify.engine' => 'string',
         'minify.file.gc' => 'integer',
+        'minify.file.nfs' => 'boolean',
         'minify.file.locking' => 'boolean',
         'minify.memcached.servers' => 'array',
         'minify.memcached.persistant' => 'boolean',
@@ -385,6 +387,7 @@ class W3_Config {
         'pgcache.debug' => false,
         'pgcache.engine' => 'file_generic',
         'pgcache.file.gc' => 3600,
+        'pgcache.file.nfs' => false,
         'pgcache.file.locking' => false,
         'pgcache.memcached.servers' => array(
             '127.0.0.1:11211'
@@ -442,6 +445,7 @@ class W3_Config {
         'minify.debug' => false,
         'minify.engine' => 'file',
         'minify.file.gc' => 86400,
+        'minify.file.nfs' => false,
         'minify.file.locking' => false,
         'minify.memcached.servers' => array(
             '127.0.0.1:11211'

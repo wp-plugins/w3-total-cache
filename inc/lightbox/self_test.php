@@ -3,7 +3,8 @@
 if (!defined('W3TC')) 
     die();
 
-require_once W3TC_INC_DIR . '/file.php';
+require_once W3TC_INC_DIR . '/functions/file.php';
+require_once W3TC_INC_DIR . '/functions/rule.php';
  
 ?>
 <h3>Compatibility Test</h3>

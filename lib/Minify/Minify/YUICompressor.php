@@ -9,7 +9,12 @@ class Minify_YUICompressor {
     }
 
     public static function minifyCss($css, $options = array()) {
-        return self::_minify('css', $css, $options);
+        require_once W3TC_LIB_MINIFY_DIR . '/Minify/CSS/UriRewriter.php';
+
+        $css = self::_minify('css', $css, $options);
+        $css = Minify_CSS_UriRewriter::rewrite($css, $options);
+
+        return $css;
     }
 
     public static function testJs(&$error) {

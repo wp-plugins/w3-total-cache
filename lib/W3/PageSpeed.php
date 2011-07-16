@@ -20,7 +20,7 @@ class W3_PageSpeed {
      * PHP5-style constructor
      */
     function __construct() {
-        $config = & w3_instance('/Config.php');
+        $config = & w3_instance('W3_Config');
 
         $this->key = $config->get_string('widget.pagespeed.key');
     }
@@ -70,7 +70,7 @@ class W3_PageSpeed {
      * @return string
      */
     function _request($url) {
-        require_once W3TC_INC_DIR . '/http.php';
+        require_once W3TC_INC_DIR . '/functions/http.php';
         require_once W3TC_INC_DIR . '/functions/url.php';
 
         $request_url = w3_url_format(W3TC_PAGESPEED_API_URL, array(

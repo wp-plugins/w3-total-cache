@@ -202,21 +202,6 @@ function w3_is_https() {
 }
 
 /**
- * Check if WP permalink directives exists
- *
- * @return boolean
- */
-function w3_is_permalink_rules() {
-    if (w3_is_apache() && !w3_is_network()) {
-        $path = w3_get_home_root() . '/.htaccess';
-
-        return (($data = @file_get_contents($path)) && strstr($data, W3TC_MARKER_BEGIN_WORDPRESS) !== false);
-    }
-
-    return true;
-}
-
-/**
  * Check if there was database error
  *
  * @param string $content
@@ -776,125 +761,6 @@ function w3_get_host_id() {
 }
 
 /**
- * Returns nginx rules path
- *
- * @return string
- */
-function w3_get_nginx_rules_path() {
-    $config = & w3_instance('/Config.php');
-
-    $path = $config->get_string('config.path');
-
-    if (!$path) {
-        $path = w3_get_document_root() . '/nginx.conf';
-    }
-
-    return $path;
-}
-
-/**
- * Returns path of pagecache core rules file
- *
- * @return string
- */
-function w3_get_pgcache_rules_core_path() {
-    switch (true) {
-        case w3_is_apache():
-            return w3_get_home_root() . '/.htaccess';
-
-        case w3_is_nginx():
-            return w3_get_nginx_rules_path();
-    }
-
-    return false;
-}
-
-/**
- * Returns path of pgcache cache rules file
- *
- * @return string
- */
-function w3_get_pgcache_rules_cache_path() {
-    switch (true) {
-        case w3_is_apache():
-            return W3TC_CACHE_FILE_PGCACHE_DIR . '/.htaccess';
-
-        case w3_is_nginx():
-            return w3_get_nginx_rules_path();
-    }
-
-    return false;
-}
-
-/**
- * Returns path of browsercache cache rules file
- *
- * @return string
- */
-function w3_get_browsercache_rules_cache_path() {
-    switch (true) {
-        case w3_is_apache():
-            return w3_get_home_root() . '/.htaccess';
-
-        case w3_is_nginx():
-            return w3_get_nginx_rules_path();
-    }
-
-    return false;
-}
-
-/**
- * Returns path of browsercache no404wp rules file
- *
- * @return string
- */
-function w3_get_browsercache_rules_no404wp_path() {
-    switch (true) {
-        case w3_is_apache():
-            return w3_get_home_root() . '/.htaccess';
-
-        case w3_is_nginx():
-            return w3_get_nginx_rules_path();
-    }
-
-    return false;
-}
-
-/**
- * Returns path of minify rules file
- *
- * @return string
- */
-function w3_get_minify_rules_core_path() {
-    switch (true) {
-        case w3_is_apache():
-            return W3TC_CACHE_FILE_MINIFY_DIR . '/.htaccess';
-
-        case w3_is_nginx():
-            return w3_get_nginx_rules_path();
-    }
-
-    return false;
-}
-
-/**
- * Returns path of minify rules file
- *
- * @return string
- */
-function w3_get_minify_rules_cache_path() {
-    switch (true) {
-        case w3_is_apache():
-            return W3TC_CACHE_FILE_MINIFY_DIR . '/.htaccess';
-
-        case w3_is_nginx():
-            return w3_get_nginx_rules_path();
-    }
-
-    return false;
-}
-
-/**
  * Returns WP config file path
  *
  * @return string
@@ -942,52 +808,12 @@ function w3_get_theme_key_legacy($theme_root, $template, $stylesheet) {
 }
 
 /**
- * Returns path of minify rules file
- *
- * @return string
- */
-function w3_get_cdn_rules_path() {
-    switch (true) {
-        case w3_is_apache():
-            return '.htaccess';
-
-        case w3_is_nginx():
-            return 'nginx.conf';
-    }
-
-    return false;
-}
-
-/**
  * Returns true if we can check rules
  *
  * @return bool
  */
 function w3_can_check_rules() {
     return (w3_is_apache() || w3_is_nginx());
-}
-
-/**
- * Returns true if we can modify rules
- *
- * @param string $path
- * @return boolean
- */
-function w3_can_modify_rules($path) {
-    if (w3_is_network()) {
-        if (w3_is_apache()) {
-            switch ($path) {
-                case w3_get_pgcache_rules_cache_path():
-                case w3_get_minify_rules_core_path():
-                case w3_get_minify_rules_cache_path():
-                    return true;
-            }
-        }
-
-        return false;
-    }
-
-    return true;
 }
 
 /**
@@ -1174,7 +1000,7 @@ function w3_http_date($time) {
  * @return array
  */
 function w3_upload_info() {
-    require_once W3TC_INC_DIR . '/http.php';
+    require_once W3TC_INC_DIR . '/functions/http.php';
     return w3_upload_info_dynamic();
 }
 
@@ -1267,7 +1093,7 @@ function w3_get_engine_name($engine) {
             break;
 
         case 'edgecast':
-            $engine_name = 'edgecast';
+            $engine_name = 'media template procdn / edgecast';
             break;
 
         default:
@@ -1352,63 +1178,6 @@ function w3_stripslashes($var) {
 }
 
 /**
- * Trim rules
- *
- * @param string $rules
- * @return string
- */
-function w3_trim_rules($rules) {
-    $rules = trim($rules);
-
-    if ($rules != '') {
-        $rules .= "\n";
-    }
-
-    return $rules;
-}
-
-/**
- * Cleanup rewrite rules
- *
- * @param string $rules
- * @return string
- */
-function w3_clean_rules($rules) {
-    $rules = preg_replace('~[\r\n]+~', "\n", $rules);
-    $rules = preg_replace('~^\s+~m', '', $rules);
-    $rules = w3_trim_rules($rules);
-
-    return $rules;
-}
-
-/**
- * Erases text from start to end
- *
- * @param string $rules
- * @param string $start
- * @param string $end
- * @return string
- */
-function w3_erase_rules($rules, $start, $end) {
-    $rules = preg_replace('~' . w3_preg_quote($start) . "\n.*?" . w3_preg_quote($end) . "\n*~s", '', $rules);
-    $rules = w3_trim_rules($rules);
-
-    return $rules;
-}
-
-/**
- * Check if rules exist
- *
- * @param string $rules
- * @param string $start
- * @param string $end
- * @return int
- */
-function w3_has_rules($rules, $start, $end) {
-    return preg_match('~' . w3_preg_quote($start) . "\n.*?" . w3_preg_quote($end) . "\n*~s", $rules);
-}
-
-/**
  * Escapes HTML comment
  *
  * @param string $comment
@@ -1427,16 +1196,16 @@ function w3_escape_comment($comment) {
  *
  * @return object
  */
-function &w3_instance($file) {
+function &w3_instance($class) {
     static $instances = array();
 
-    if (!isset($instances[$file])) {
-        require_once W3TC_LIB_W3_DIR . $file;
-        $class = 'W3_' . str_replace('/', '_', substr($file, 1, strlen($file) - 5));
-        $instances[$file] = & new $class();
+    if (!isset($instances[$class])) {
+        require_once W3TC_LIB_W3_DIR . '/' .
+                str_replace('_', '/', substr($class, 3)) . '.php';
+        $instances[$class] = & new $class();
     }
 
-    return $instances[$file];
+    return $instances[$class];
 }
 
 /**

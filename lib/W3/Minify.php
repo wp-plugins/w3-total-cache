@@ -21,14 +21,14 @@ class W3_Minify {
      * @return W3_Minify
      */
     function &instance() {
-        return w3_instance('/Minify.php');
+        return w3_instance('W3_Minify');
     }
 
     /**
      * PHP5 constructor
      */
     function __construct() {
-        $this->_config = & w3_instance('/Config.php');
+        $this->_config = & w3_instance('W3_Config');
     }
 
     /**
@@ -136,7 +136,7 @@ class W3_Minify {
         /**
          * Set minifier
          */
-        $w3_minifier = & w3_instance('/Minifier.php');
+        $w3_minifier = & w3_instance('W3_Minifier');
 
         if ($type == 'js') {
             $minifier_type = 'application/x-javascript';
@@ -560,7 +560,7 @@ class W3_Minify {
         $cache_path = sprintf('%s/minify_%s.%s', W3TC_CACHE_FILE_MINIFY_DIR, md5($url), $type);
 
         if (!file_exists($cache_path) || @filemtime($cache_path) < (time() - $lifetime)) {
-            require_once W3TC_INC_DIR . '/http.php';
+            require_once W3TC_INC_DIR . '/functions/http.php';
             w3_download($url, $cache_path);
         }
 
@@ -685,7 +685,7 @@ class W3_Minify {
         $from_email = 'wordpress@' . w3_get_domain($_SERVER['SERVER_NAME']);
         $from_name = get_option('blogname');
         $to_name = $to_email = get_option('admin_email');
-        $body = @file_get_contents(W3TC_INC_DIR . '/email/minify_error_notification.html');
+        $body = @file_get_contents(W3TC_INC_DIR . '/email/minify_error_notification.php');
 
         $headers = array(
             sprintf('From: "%s" <%s>', addslashes($from_name), $from_email),

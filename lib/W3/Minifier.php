@@ -45,7 +45,7 @@ class W3_Minifier {
      * @return void
      */
     function __construct() {
-        $this->_config = & w3_instance('/Config.php');
+        $this->_config = & w3_instance('W3_Config');
     }
 
     /**
@@ -269,11 +269,17 @@ class W3_Minifier {
         }
 
         if ($this->_config->get_boolean('browsercache.enabled') && ($this->_config->get_boolean('browsercache.cssjs.replace') || $this->_config->get_boolean('browsercache.html.replace') || $this->_config->get_boolean('browsercache.other.replace'))) {
-            $w3_plugin_browsercache = & w3_instance('/Plugin/BrowserCache.php');
+            $w3_plugin_browsercache = & w3_instance('W3_Plugin_BrowserCache');
 
             $options = array_merge($options, array(
                 'browserCacheId' => $w3_plugin_browsercache->get_replace_id(),
                 'browserCacheExtensions' => $w3_plugin_browsercache->get_replace_extensions()
+            ));
+        }
+
+        if ($this->_config->get_boolean('cdn.enabled')) {
+            $options = array_merge($options, array(
+                'prependRelativePath' => w3_get_domain_url()
             ));
         }
 

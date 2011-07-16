@@ -62,7 +62,7 @@ class W3_CloudFlare {
      * @return array
      */
     function api_request($action, $value = null) {
-        require_once W3TC_INC_DIR . '/http.php';
+        require_once W3TC_INC_DIR . '/functions/http.php';
 
         $url = sprintf('%s?email=%s&tkn=%s&z=%s&a=%s', W3TC_CLOUDFLARE_API_URL, urlencode($this->_config['email']), urlencode($this->_config['key']), urlencode($this->_config['zone']), urlencode($action));
 
@@ -87,7 +87,7 @@ class W3_CloudFlare {
      * @return array
      */
     function external_event($type, $value) {
-        require_once W3TC_INC_DIR . '/http.php';
+        require_once W3TC_INC_DIR . '/functions/http.php';
 
         $url = sprintf('%s?u=%s&tkn=%s&evnt_t=%s&evnt_v=%s', W3TC_CLOUDFLARE_EXTERNAL_EVENT_URL, urlencode($this->_config['email']), urlencode($this->_config['key']), urlencode($type), urlencode($value));
         $response = w3_http_get($url);

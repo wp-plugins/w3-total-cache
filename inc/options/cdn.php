@@ -9,10 +9,10 @@
 
 <?php if ($cdn_mirror): ?>
 <p>
-	Maximize <acronym title="Content Delivery Network">CDN</acronym> usage by <input id="cdn_rename_domain" class="button" type="button" value="modify attachment URLs" /> or
-	<input id="cdn_import_library" class="button" type="button" value="importing attachments into the Media Library" />.
+	Maximize <acronym title="Content Delivery Network">CDN</acronym> usage by <input id="cdn_rename_domain" class="button {nonce: '<?php echo wp_create_nonce('w3tc'); ?>'}" type="button" value="modify attachment URLs" /> or
+	<input id="cdn_import_library" class="button {nonce: '<?php echo wp_create_nonce('w3tc'); ?>'}" type="button" value="importing attachments into the Media Library" />.
     <?php if (w3_can_cdn_purge($cdn_engine)): ?>
-    <input id="cdn_purge" class="button" type="button" value="Purge" /> objects from the CDN using this tool.
+    <input id="cdn_purge" class="button {nonce: '<?php echo wp_create_nonce('w3tc'); ?>'}" type="button" value="Purge" /> objects from the CDN using this tool.
     <?php endif; ?>
 </p>
 <?php else: ?>

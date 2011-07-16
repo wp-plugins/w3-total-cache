@@ -27,7 +27,7 @@ if (!@is_dir(W3TC_DIR) || !file_exists(W3TC_DIR . '/inc/define.php')) {
      * @return void
      */
     function wp_cache_init() {
-        $GLOBALS['wp_object_cache'] = & w3_instance('/ObjectCache.php');
+        $GLOBALS['wp_object_cache'] = & w3_instance('W3_ObjectCache');
     }
 
     /**

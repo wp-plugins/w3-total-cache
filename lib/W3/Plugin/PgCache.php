@@ -17,106 +17,94 @@ class W3_Plugin_PgCache extends W3_Plugin {
      * Runs plugin
      */
     function run() {
-        register_activation_hook(W3TC_FILE, array(
+        add_filter('cron_schedules', array(
             &$this,
-            'activate'
+            'cron_schedules'
         ));
-
-        register_deactivation_hook(W3TC_FILE, array(
-            &$this,
-            'deactivate'
-        ));
-
-        if ($this->_config->get_boolean('pgcache.enabled')) {
-            add_filter('cron_schedules', array(
+    
+        if ($this->_config->get_string('pgcache.engine') == 'file' || 
+                $this->_config->get_string('pgcache.engine') == 'file_generic') {
+            add_action('w3_pgcache_cleanup', array(
                 &$this,
-                'cron_schedules'
+                'cleanup'
             ));
-        
-            if ($this->_config->get_string('pgcache.engine') == 'file' || 
-                    $this->_config->get_string('pgcache.engine') == 'file_generic') {
-                add_action('w3_pgcache_cleanup', array(
-                    &$this,
-                    'cleanup'
-                ));
-            }
-
-            add_action('w3_pgcache_prime', array(
-                &$this,
-                'prime'
-            ));
-
-            add_action('publish_phone', array(
-                &$this,
-                'on_post_edit'
-            ), 0);
-
-            add_action('publish_post', array(
-                &$this,
-                'on_post_edit'
-            ), 0);
-
-            add_action('edit_post', array(
-                &$this,
-                'on_post_change'
-            ), 0);
-
-            add_action('delete_post', array(
-                &$this,
-                'on_post_edit'
-            ), 0);
-
-            add_action('comment_post', array(
-                &$this,
-                'on_comment_change'
-            ), 0);
-
-            add_action('edit_comment', array(
-                &$this,
-                'on_comment_change'
-            ), 0);
-
-            add_action('delete_comment', array(
-                &$this,
-                'on_comment_change'
-            ), 0);
-
-            add_action('wp_set_comment_status', array(
-                &$this,
-                'on_comment_status'
-            ), 0, 2);
-
-            add_action('trackback_post', array(
-                &$this,
-                'on_comment_change'
-            ), 0);
-
-            add_action('pingback_post', array(
-                &$this,
-                'on_comment_change'
-            ), 0);
-
-            add_action('switch_theme', array(
-                &$this,
-                'on_change'
-            ), 0);
-
-            add_action('edit_user_profile_update', array(
-                &$this,
-                'on_change'
-            ), 0);
         }
+
+        add_action('w3_pgcache_prime', array(
+            &$this,
+            'prime'
+        ));
+
+        add_action('publish_phone', array(
+            &$this,
+            'on_post_edit'
+        ), 0);
+
+        add_action('publish_post', array(
+            &$this,
+            'on_post_edit'
+        ), 0);
+
+        add_action('edit_post', array(
+            &$this,
+            'on_post_change'
+        ), 0);
+
+        add_action('delete_post', array(
+            &$this,
+            'on_post_edit'
+        ), 0);
+
+        add_action('comment_post', array(
+            &$this,
+            'on_comment_change'
+        ), 0);
+
+        add_action('edit_comment', array(
+            &$this,
+            'on_comment_change'
+        ), 0);
+
+        add_action('delete_comment', array(
+            &$this,
+            'on_comment_change'
+        ), 0);
+
+        add_action('wp_set_comment_status', array(
+            &$this,
+            'on_comment_status'
+        ), 0, 2);
+
+        add_action('trackback_post', array(
+            &$this,
+            'on_comment_change'
+        ), 0);
+
+        add_action('pingback_post', array(
+            &$this,
+            'on_comment_change'
+        ), 0);
+
+        add_action('switch_theme', array(
+            &$this,
+            'on_change'
+        ), 0);
+
+        add_action('edit_user_profile_update', array(
+            &$this,
+            'on_change'
+        ), 0);
     }
 
     /**
-     * Activate plugin action
+     * Activate plugin action (called by W3_PluginProxy)
      */
     function activate() {
         $this->get_admin()->activate();
     }
 
     /**
-     * Deactivate plugin action
+     * Deactivate plugin action (called by W3_PluginProxy)
      */
     function deactivate() {
         $this->get_admin()->deactivate();
@@ -147,7 +135,7 @@ class W3_Plugin_PgCache extends W3_Plugin {
      * @return W3_Plugin_PgCacheAdmin
      */
     function &get_admin() {
-        return w3_instance('/Plugin/PgCacheAdmin.php');
+        return w3_instance('W3_Plugin_PgCacheAdmin');
     }
 
     /**
@@ -194,7 +182,7 @@ class W3_Plugin_PgCache extends W3_Plugin {
         static $flushed_posts = array();
 
         if (!in_array($post_id, $flushed_posts)) {
-            $w3_pgcache = & w3_instance('/PgCache.php');
+            $w3_pgcache = & w3_instance('W3_PgCacheFlush');
             $w3_pgcache->flush_post($post_id);
 
             $flushed_posts[] = $post_id;
@@ -236,7 +224,7 @@ class W3_Plugin_PgCache extends W3_Plugin {
         static $flushed = false;
 
         if (!$flushed) {
-            $w3_pgcache = & w3_instance('/PgCache.php');
+            $w3_pgcache = & w3_instance('W3_PgCacheFlush');
             $w3_pgcache->flush();
         }
     }

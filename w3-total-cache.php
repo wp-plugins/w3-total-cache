@@ -48,6 +48,6 @@ if (!defined('W3TC_IN_MINIFY')) {
     /**
      * Run plugin
      */
-    $w3_plugin_totalcache = & w3_instance('/Plugin/TotalCache.php');
+    $w3_plugin_totalcache = & w3_instance('W3_Plugin_TotalCache');
     $w3_plugin_totalcache->run();
 }

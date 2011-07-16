@@ -7,6 +7,7 @@ if (!defined('W3TC')) {
     die();
 }
 
+require_once W3TC_INC_DIR . '/functions/rule.php';
 require_once W3TC_LIB_W3_DIR . '/Plugin.php';
 
 /**
@@ -206,7 +207,7 @@ class W3_Plugin_PgCacheAdmin extends W3_Plugin {
         /**
          * Make HTTP requests and prime cache
          */
-        require_once W3TC_INC_DIR . '/http.php';
+        require_once W3TC_INC_DIR . '/functions/http.php';
 
         foreach ($queue as $url) {
             w3_http_get($url);
@@ -220,7 +221,7 @@ class W3_Plugin_PgCacheAdmin extends W3_Plugin {
      * @return array
      */
     function parse_sitemap($url) {
-        require_once W3TC_INC_DIR . '/http.php';
+        require_once W3TC_INC_DIR . '/functions/http.php';
 
         $urls = array();
         $response = w3_http_get($url);
@@ -660,7 +661,7 @@ class W3_Plugin_PgCacheAdmin extends W3_Plugin {
         /**
          * Check if cache file exists
          */
-        $rules .= "    RewriteCond \"%{DOCUMENT_ROOT}" . $cache_path . "/%{REQUEST_URI}/_index%{ENV:W3TC_UA}%{ENV:W3TC_REF}%{ENV:W3TC_SSL}.html%{ENV:W3TC_ENC}\" -" . ($this->_config->get_boolean('pgcache.file.locking') ? 'F' : 'f') . "\n";
+        $rules .= "    RewriteCond \"%{DOCUMENT_ROOT}" . $cache_path . "/%{REQUEST_URI}/_index%{ENV:W3TC_UA}%{ENV:W3TC_REF}%{ENV:W3TC_SSL}.html%{ENV:W3TC_ENC}\" -" . ($this->_config->get_boolean('pgcache.file.nfs') ? 'F' : 'f') . "\n";
 
         /**
          * Make final rewrite

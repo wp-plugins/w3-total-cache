@@ -1,6 +1,6 @@
 <?php
 
-require_once W3TC_INC_DIR . '/file.php';
+require_once W3TC_INC_DIR . '/functions/file.php';
 
 /**
  * Class Minify_Cache_File

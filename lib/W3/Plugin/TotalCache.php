@@ -8,6 +8,7 @@ if (!defined('W3TC')) {
 }
 
 require_once W3TC_LIB_W3_DIR . '/Plugin.php';
+require_once W3TC_LIB_W3_DIR . '/PluginProxy.php';
 
 /**
  * Class W3_Plugin_TotalCache
@@ -39,7 +40,8 @@ class W3_Plugin_TotalCache extends W3_Plugin {
             'admin_bar_menu'
         ), 150);
 
-        if (isset($_REQUEST['w3tc_theme']) && isset($_SERVER['HTTP_USER_AGENT']) && $_SERVER['HTTP_USER_AGENT'] == W3TC_POWERED_BY) {
+        if (isset($_REQUEST['w3tc_theme']) && isset($_SERVER['HTTP_USER_AGENT']) &&
+                $_SERVER['HTTP_USER_AGENT'] == W3TC_POWERED_BY) {
             add_filter('template', array(
                 &$this,
                 'template_preview'
@@ -92,50 +94,26 @@ class W3_Plugin_TotalCache extends W3_Plugin {
         }
 
         /**
-         * Run DbCache plugin
+         * Create plugin proxies, they should live during request since attaches to actions
          */
-        $w3_plugin_dbcache = & w3_instance('/Plugin/DbCache.php');
-        $w3_plugin_dbcache->run();
+        $this->_plugins = array(
+            new W3_PluginProxy('W3_Plugin_DbCache', 'dbcache.enabled'),
+            new W3_PluginProxy('W3_Plugin_ObjectCache', 'objectcache.enabled'),
+            new W3_PluginProxy('W3_Plugin_PgCache', 'pgcache.enabled'),
+            new W3_PluginProxy('W3_Plugin_Cdn', 'cdn.enabled'),
+            new W3_PluginProxy('W3_Plugin_BrowserCache', 'browsercache.enabled'),
+            new W3_PluginProxy('W3_Plugin_Minify', 'minify.enabled'));
 
-        /**
-         * Run ObjectCache plugin
-         */
-        $w3_plugin_objectcache = & w3_instance('/Plugin/ObjectCache.php');
-        $w3_plugin_objectcache->run();
-
-        /**
-         * Run PgCache plugin
-         */
-        $w3_plugin_pgcache = & w3_instance('/Plugin/PgCache.php');
-        $w3_plugin_pgcache->run();
-
-        /**
-         * Run CDN plugin
-         */
-        $w3_plugin_cdn = & w3_instance('/Plugin/Cdn.php');
-        $w3_plugin_cdn->run();
-
-        /**
-         * Run BrowserCache plugin
-         */
-        $w3_plugin_browsercache = & w3_instance('/Plugin/BrowserCache.php');
-        $w3_plugin_browsercache->run();
-
-        /**
-         * Run Minify plugin
-         */
-        if (W3TC_PHP5) {
-            $w3_plugin_minify = & w3_instance('/Plugin/Minify.php');
-            $w3_plugin_minify->run();
-        }
-
-        /**
-         * Run admin plugin
-         */
         if (is_admin()) {
-            $w3_plugin_totalcacheadmin = & w3_instance('/Plugin/TotalCacheAdmin.php');
-            $w3_plugin_totalcacheadmin->run();
+            $plugin_totalcacheadmin = & w3_instance('W3_Plugin_TotalCacheAdmin');
+            array_push($this->_plugins, $plugin_totalcacheadmin);
         }
+
+        /**
+         * Run plugins
+         */
+        foreach ($this->_plugins as $plugin)
+            $plugin->run();
     }
 
     /**
@@ -144,7 +122,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
      * @return void
      */
     function activate() {
-        $activation_worker = & w3_instance('/Plugin/TotalCacheActivation.php');
+        $activation_worker = & w3_instance('W3_Plugin_TotalCacheActivation');
         $activation_worker->activate();
     }
 
@@ -154,7 +132,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
      * @return void
      */
     function deactivate() {
-        $activation_worker = & w3_instance('/Plugin/TotalCacheActivation.php');
+        $activation_worker = & w3_instance('W3_Plugin_TotalCacheActivation');
         $activation_worker->deactivate();
     }
 
@@ -281,14 +259,14 @@ class W3_Plugin_TotalCache extends W3_Plugin {
      * @return string
      */
     function template($template) {
-        $w3_mobile = & w3_instance('/Mobile.php');
+        $w3_mobile = & w3_instance('W3_Mobile');
 
         $mobile_template = $w3_mobile->get_template();
 
         if ($mobile_template) {
             return $mobile_template;
         } else {
-            $w3_referrer = & w3_instance('/Referrer.php');
+            $w3_referrer = & w3_instance('W3_Referrer');
 
             $referrer_template = $w3_referrer->get_template();
 
@@ -307,14 +285,14 @@ class W3_Plugin_TotalCache extends W3_Plugin {
      * @return string
      */
     function stylesheet($stylesheet) {
-        $w3_mobile = & w3_instance('/Mobile.php');
+        $w3_mobile = & w3_instance('W3_Mobile');
 
         $mobile_stylesheet = $w3_mobile->get_stylesheet();
 
         if ($mobile_stylesheet) {
             return $mobile_stylesheet;
         } else {
-            $w3_referrer = & w3_instance('/Referrer.php');
+            $w3_referrer = & w3_instance('W3_Referrer');
 
             $referrer_stylesheet = $w3_referrer->get_stylesheet();
 
@@ -410,13 +388,13 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                     $strings = array();
 
                     if ($this->_config->get_boolean('minify.enabled') && !$this->_config->get_boolean('minify.debug')) {
-                        $w3_plugin_minify = & w3_instance('/Plugin/MinifyEnabled.php');
+                        $w3_plugin_minify = & w3_instance('W3_Plugin_Minify');
 
                         $strings[] = sprintf("Minified using %s%s", w3_get_engine_name($this->_config->get_string('minify.engine')), ($w3_plugin_minify->minify_reject_reason != '' ? sprintf(' (%s)', $w3_plugin_minify->minify_reject_reason) : ''));
                     }
 
                     if ($this->_config->get_boolean('pgcache.enabled') && !$this->_config->get_boolean('pgcache.debug')) {
-                        $w3_pgcache = & w3_instance('/PgCache.php');
+                        $w3_pgcache = & w3_instance('W3_PgCache');
 
                         $strings[] = sprintf("Page Caching using %s%s", w3_get_engine_name($this->_config->get_string('pgcache.engine')), ($w3_pgcache->cache_reject_reason != '' ? sprintf(' (%s)', $w3_pgcache->cache_reject_reason) : ''));
                     }
@@ -432,14 +410,15 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                     }
 
                     if ($this->_config->get_boolean('objectcache.enabled') && !$this->_config->get_boolean('objectcache.debug')) {
-                        $w3_objectcache = & w3_instance('/ObjectCache.php');
+                        $w3_objectcache = & w3_instance('W3_ObjectCache');
 
                         $strings[] = sprintf("Object Caching %d/%d objects using %s", $w3_objectcache->cache_hits, $w3_objectcache->cache_total, w3_get_engine_name($this->_config->get_string('objectcache.engine')));
                     }
 
                     if ($this->_config->get_boolean('cdn.enabled') && !$this->_config->get_boolean('cdn.debug')) {
-                        $w3_plugin_cdn = & w3_instance('/Plugin/CdnEnabled.php');
-                        $cdn = & $w3_plugin_cdn->get_cdn();
+                        $w3_plugin_cdn = & w3_instance('W3_Plugin_Cdn');
+                        $w3_plugin_cdncommon = & w3_instance('W3_Plugin_CdnCommon');
+                        $cdn = & $w3_plugin_cdncommon->get_cdn();
                         $via = $cdn->get_via();
 
                         $strings[] = sprintf("Content Delivery Network via %s%s", ($via ? $via : 'N/A'), ($w3_plugin_cdn->cdn_reject_reason != '' ? sprintf(' (%s)', $w3_plugin_cdn->cdn_reject_reason) : ''));

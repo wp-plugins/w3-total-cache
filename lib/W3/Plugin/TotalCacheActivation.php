@@ -7,7 +7,7 @@ if (!defined('W3TC')) {
     die();
 }
 
-require_once W3TC_INC_DIR . '/file.php';
+require_once W3TC_INC_DIR . '/functions/file.php';
 require_once W3TC_LIB_W3_DIR . '/Plugin.php';
 
 /**

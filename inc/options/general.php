@@ -358,19 +358,19 @@
                 <td>
                     <select name="cdn.engine">
                         <optgroup label="Origin Pull (mirror is best):">
-                        <option value="mirror"<?php selected($this->_config->get_string('cdn.engine'), 'mirror'); ?>>Mirror</option>
-                        <option value="netdna"<?php selected($this->_config->get_string('cdn.engine'), 'netdna'); ?>>NetDNA / MaxCDN</option>
-                        <option value="cotendo"<?php selected($this->_config->get_string('cdn.engine'), 'cotendo'); ?>>Cotendo</option>
-                        <option value="cf2"<?php selected($this->_config->get_string('cdn.engine'), 'cf2'); ?><?php if (!W3TC_PHP5 || !$check_curl): ?> disabled="disabled"<?php endif; ?>>Amazon CloudFront</option>
-                        <option value="edgecast"<?php selected($this->_config->get_string('cdn.engine'), 'edgecast'); ?>>EdgeCast</option>
-                    </optgroup>
-                    <optgroup label="Origin Push:">
-                        <option value="rscf"<?php selected($this->_config->get_string('cdn.engine'), 'rscf'); ?><?php if (!W3TC_PHP5 || !$check_curl): ?> disabled="disabled"<?php endif; ?>>Rackspace Cloud Files</option>
-                        <option value="cf"<?php selected($this->_config->get_string('cdn.engine'), 'cf'); ?><?php if (!W3TC_PHP5 || !$check_curl): ?> disabled="disabled"<?php endif; ?>>Amazon CloudFront</option>
-                        <option value="s3"<?php selected($this->_config->get_string('cdn.engine'), 's3'); ?><?php if (!W3TC_PHP5 || !$check_curl): ?> disabled="disabled"<?php endif; ?>>Amazon Simple Storage Service (S3)</option>
-                        <option value="azure"<?php selected($this->_config->get_string('cdn.engine'), 'azure'); ?><?php if (!W3TC_PHP5): ?> disabled="disabled"<?php endif; ?>>Microsoft Azure Storage</option>
-                        <option value="ftp"<?php selected($this->_config->get_string('cdn.engine'), 'ftp'); ?><?php if (!$check_ftp): ?> disabled="disabled"<?php endif; ?>>Self-hosted / File Transfer Protocol Upload</option>
-                    </optgroup>
+                            <option value="cf2"<?php selected($this->_config->get_string('cdn.engine'), 'cf2'); ?><?php if (!W3TC_PHP5 || !$check_curl): ?> disabled="disabled"<?php endif; ?>>Amazon CloudFront</option>
+                            <option value="cotendo"<?php selected($this->_config->get_string('cdn.engine'), 'cotendo'); ?>>Cotendo</option>
+                            <option value="mirror"<?php selected($this->_config->get_string('cdn.engine'), 'mirror'); ?>>Generic Mirror</option>
+                            <option value="edgecast"<?php selected($this->_config->get_string('cdn.engine'), 'edgecast'); ?>>Media Temple ProCDN / EdgeCast</option>
+                            <option value="netdna"<?php selected($this->_config->get_string('cdn.engine'), 'netdna'); ?>>NetDNA / MaxCDN</option>
+                        </optgroup>
+                        <optgroup label="Origin Push:">
+                            <option value="cf"<?php selected($this->_config->get_string('cdn.engine'), 'cf'); ?><?php if (!W3TC_PHP5 || !$check_curl): ?> disabled="disabled"<?php endif; ?>>Amazon CloudFront</option>
+                            <option value="s3"<?php selected($this->_config->get_string('cdn.engine'), 's3'); ?><?php if (!W3TC_PHP5 || !$check_curl): ?> disabled="disabled"<?php endif; ?>>Amazon Simple Storage Service (S3)</option>
+                            <option value="azure"<?php selected($this->_config->get_string('cdn.engine'), 'azure'); ?><?php if (!W3TC_PHP5): ?> disabled="disabled"<?php endif; ?>>Microsoft Azure Storage</option>
+                            <option value="rscf"<?php selected($this->_config->get_string('cdn.engine'), 'rscf'); ?><?php if (!W3TC_PHP5 || !$check_curl): ?> disabled="disabled"<?php endif; ?>>Rackspace Cloud Files</option>
+                            <option value="ftp"<?php selected($this->_config->get_string('cdn.engine'), 'ftp'); ?><?php if (!$check_ftp): ?> disabled="disabled"<?php endif; ?>>Self-hosted / File Transfer Protocol Upload</option>
+                        </optgroup>
                     </select><br />
                     <span class="description">Select the <acronym title="Content Delivery Network">CDN</acronym> type you wish to use.</span>
                 </td>
@@ -480,8 +480,15 @@
             <tr>
                 <th colspan="2">
                     <input type="hidden" name="file_locking" value="0"<?php if (! $can_empty_file): ?> disabled="disabled"<?php endif; ?> />
-                    <label><input type="checkbox" name="file_locking" value="1"<?php checked($file_locking, true); ?><?php if (! $can_empty_file): ?> disabled="disabled"<?php endif; ?> /> Network based file system</label>
+                    <label><input type="checkbox" name="file_locking" value="1"<?php checked($file_locking, true); ?><?php if (! $can_empty_file): ?> disabled="disabled"<?php endif; ?> /> Enable file locking</label>
                     <br /><span class="description">Not recommended for "slow" network-based file systems.</span>
+                </th>
+            </tr>
+            <tr>
+                <th colspan="2">
+                    <input type="hidden" name="file_nfs" value="0"<?php if (! $can_empty_file): ?> disabled="disabled"<?php endif; ?> />
+                    <label><input type="checkbox" name="file_nfs" value="1"<?php checked($file_nfs, true); ?><?php if (! $can_empty_file): ?> disabled="disabled"<?php endif; ?> /> Optimize disk enhanced page and minify caching for NFS</label>
+                    <br /><span class="description">Try this option if your hosting environment uses a network based file system for a possible performance improvement.</span>
                 </th>
             </tr>
             <tr>

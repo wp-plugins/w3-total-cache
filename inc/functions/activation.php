@@ -52,7 +52,7 @@ function w3_writable_error($path) {
     $reactivate_url = wp_nonce_url('plugins.php?action=activate&plugin=' . W3TC_FILE, 'activate-plugin_' . W3TC_FILE);
     $reactivate_button = sprintf('<input type="button" value="re-activate plugin" onclick="top.location.href = \'%s\'" />', addslashes($reactivate_url));
 
-    require_once W3TC_INC_DIR . '/file.php';
+    require_once W3TC_INC_DIR . '/functions/file.php';
 
     if (w3_check_open_basedir($path)) {
         $error = sprintf('<strong>%s</strong> could not be created, please run following command:<br /><strong style="color: #f00;">chmod 777 %s</strong><br />then %s.', $path, (file_exists($path) ? $path : dirname($path)), $reactivate_button);

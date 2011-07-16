@@ -76,7 +76,7 @@ class W3_Db extends W3_Db_Driver {
      * @param string $dbhost
      */
     function __construct($dbuser, $dbpassword, $dbname, $dbhost) {
-        $this->_config = & w3_instance('/Config.php');
+        $this->_config = & w3_instance('W3_Config');
         $this->_lifetime = $this->_config->get_integer('dbcache.lifetime');
 
         if ($this->_can_ob()) {
