@@ -61,10 +61,6 @@ th.minify-files-add, td.minify-files-add {
     text-align: center;
 }
 
-.minify-files-exists input, .minify-files-exists select {
-    color: red;
-}
-
 #w3tc-self-test {
     top: 170px;
     bottom: 40px;

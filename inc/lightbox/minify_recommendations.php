@@ -27,7 +27,7 @@
             			<th>Template:</th>
             			<th colspan="2">Embed Location:</th>
             		</tr>
-            		<tr<?php if (isset($checked_js[$js_group][$js_file])): ?> class="minify-files-exists"<?php endif; ?>>
+            		<tr>
             			<td class="minify-files-add">
                 			<input type="checkbox" name="recom_js_useit" value="1"<?php checked(isset($checked_js[$js_group][$js_file]), true); ?> />
             			</td>
@@ -87,7 +87,7 @@
             			<th>File URI:</th>
             			<th colspan="2">Template:</th>
             		</tr>
-            		<tr<?php if (isset($checked_css[$css_group][$css_file])): ?> class="minify-files-exists"<?php endif; ?>>
+            		<tr>
             			<td class="minify-files-add">
                         	<input type="checkbox" name="recom_css_useit" value="1"<?php checked(isset($checked_css[$css_group][$css_file]), true); ?> />
                         </td>

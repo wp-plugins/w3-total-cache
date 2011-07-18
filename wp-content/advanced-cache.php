@@ -20,7 +20,10 @@ if (!defined('W3TC_IN_MINIFY')) {
     } else {
         require_once W3TC_DIR . '/inc/define.php';
 
-        $w3_pgcache = & w3_instance('W3_PgCache');
-        $w3_pgcache->process();
+        $config = & w3_instance('W3_Config');
+        if ($config->get_boolean('pgcache.enabled')) {
+            $w3_pgcache = & w3_instance('W3_PgCache');
+            $w3_pgcache->process();
+        }
     }
 }

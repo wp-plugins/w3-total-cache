@@ -277,9 +277,12 @@ class W3_Minifier {
             ));
         }
 
-        if ($this->_config->get_boolean('cdn.enabled')) {
+        if ($this->_config->get_boolean('cdn.enabled') && $this->_config->get_boolean('cdn.minify.enable')) {
+            $w3_plugin_cdn =& w3_instance('W3_Plugin_CdnCommon');
+            $cdn =& $w3_plugin_cdn->get_cdn();
+
             $options = array_merge($options, array(
-                'prependRelativePath' => w3_get_domain_url()
+                'prependAbsolutePathCallback' => array(&$cdn, 'get_prepend_path'),
             ));
         }
 

@@ -33,30 +33,31 @@ class Minify_CSS_UriRewriter {
      * @param array $options
      * @return string
      */
-    public static function rewrite($css, $options)
-    {
+    public static function rewrite($css, $options) {
         if (isset($options['prependRelativePath']) || isset($options['currentDir'])) {
             $browsercache_id = (isset($options['browserCacheId']) ? $options['browserCacheId'] : 0);
             $browsercache_extensions = (isset($options['browserCacheExtensions']) ? $options['browserCacheExtensions'] : array());
 
-            if ($options['prependRelativePath']) {
-                $css = self::_prepend(
-                    $css,
-                    $options['prependRelativePath'],
-                    $browsercache_id,
-                    $browsercache_extensions
-                );
-            }
-
             if (isset($options['currentDir'])) {
                 $document_root = (isset($options['docRoot']) ? $options['docRoot'] : $_SERVER['DOCUMENT_ROOT']);
                 $symlinks = (isset($options['symlinks']) ? $options['symlinks'] : array());
+                $prependAbsolutePath = (isset($options['prependAbsolutePath']) ? $options['prependAbsolutePath'] : '');
+                $prependAbsolutePathCallback = (isset($options['prependAbsolutePathCallback']) ? $options['prependAbsolutePathCallback'] : '');
 
                 $css = self::_rewrite(
                     $css,
                     $options['currentDir'],
+                    $prependAbsolutePath,
+                    $prependAbsolutePathCallback,
                     $document_root,
                     $symlinks,
+                    $browsercache_id,
+                    $browsercache_extensions
+                );
+            } elseif (isset($options['prependRelativePath'])) {
+                $css = self::_prepend(
+                    $css,
+                    $options['prependRelativePath'],
                     $browsercache_id,
                     $browsercache_extensions
                 );
@@ -92,39 +93,36 @@ class Minify_CSS_UriRewriter {
      *
      * @return string
      */
-    private static function _rewrite($css, $currentDir, $docRoot = null, $symlinks = array(), $browserCacheId = 0, $browserCacheExtensions = array())
-    {
-        self::$_docRoot = self::_realpath(
-            $docRoot ? $docRoot : $_SERVER['DOCUMENT_ROOT']
-        );
+    private static function _rewrite($css, $currentDir, $prependAbsolutePath = null, $prependAbsolutePathCallback = null, $docRoot = null, $symlinks = array(), $browserCacheId = 0, $browserCacheExtensions = array()) {
+        self::$_docRoot = self::_realpath($docRoot ? $docRoot : $_SERVER['DOCUMENT_ROOT']);
         self::$_currentDir = self::_realpath($currentDir);
+        self::$_prependAbsolutePath = $prependAbsolutePath;
+        self::$_prependAbsolutePathCallback = $prependAbsolutePathCallback;
         self::$_symlinks = array();
         self::$_browserCacheId = $browserCacheId;
         self::$_browserCacheExtensions = $browserCacheExtensions;
 
         // normalize symlinks
         foreach ($symlinks as $link => $target) {
-            $link = ($link === '//')
-                ? self::$_docRoot
-                : str_replace('//', self::$_docRoot . '/', $link);
+            $link = ($link === '//') ? self::$_docRoot : str_replace('//', self::$_docRoot . '/', $link);
             $link = strtr($link, '/', DIRECTORY_SEPARATOR);
+
             self::$_symlinks[$link] = self::_realpath($target);
         }
 
-        self::$debugText .= "docRoot    : " . self::$_docRoot . "\n"
-                          . "currentDir : " . self::$_currentDir . "\n";
+        self::$debugText .= "docRoot    : " . self::$_docRoot . "\n" . "currentDir : " . self::$_currentDir . "\n";
+
         if (self::$_symlinks) {
             self::$debugText .= "symlinks : " . implode(', ', self::$_symlinks) . "\n";
         }
+
         self::$debugText .= "\n";
 
         $css = self::_trimUrls($css);
 
         // rewrite
-        $css = preg_replace_callback('/@import\\s+([\'"])(.*?)[\'"]/'
-            ,array(self::$className, '_processUriCB'), $css);
-        $css = preg_replace_callback('/url\\(\\s*([^\\)\\s]+)\\s*\\)/'
-            ,array(self::$className, '_processUriCB'), $css);
+        $css = preg_replace_callback('/@import\\s+([\'"])(.*?)[\'"]/', array(self::$className, '_processUriCB'), $css);
+        $css = preg_replace_callback('/url\\(\\s*([^\\)\\s]+)\\s*\\)/', array(self::$className, '_processUriCB'), $css);
 
         return $css;
     }
@@ -134,26 +132,23 @@ class Minify_CSS_UriRewriter {
      *
      * @param string $css
      * @param string $path The path to prepend.
+     * @param string $callback The path to prepend.
      * @param integer $browserCacheId
      * @param array $browserCacheExtensions
      *
      * @return string
      */
-    private static function _prepend($css, $path, $browserCacheId = 0, $browserCacheExtensions = array())
-    {
-        self::$_prependPath = $path;
+    private static function _prepend($css, $path, $browserCacheId = 0, $browserCacheExtensions = array()) {
+        self::$_prependRelativePath = $path;
         self::$_browserCacheId = $browserCacheId;
         self::$_browserCacheExtensions = $browserCacheExtensions;
 
         $css = self::_trimUrls($css);
 
         // append
-        $css = preg_replace_callback('/@import\\s+([\'"])(.*?)[\'"]/'
-            ,array(self::$className, '_processUriCB'), $css);
-        $css = preg_replace_callback('/url\\(\\s*([^\\)\\s]+)\\s*\\)/'
-            ,array(self::$className, '_processUriCB'), $css);
+        $css = preg_replace_callback('/@import\\s+([\'"])(.*?)[\'"]/', array(self::$className, '_processUriCB'), $css);
+        $css = preg_replace_callback('/url\\(\\s*([^\\)\\s]+)\\s*\\)/', array(self::$className, '_processUriCB'), $css);
 
-        self::$_prependPath = null;
         return $css;
     }
 
@@ -162,6 +157,16 @@ class Minify_CSS_UriRewriter {
      * @var string directory of this stylesheet
      */
     private static $_currentDir = '';
+
+    /**
+     * @var string
+     */
+    private static $_prependAbsolutePath = null;
+
+    /**
+     * @var string
+     */
+    private static $_prependAbsolutePathCallback = null;
 
     /**
      * @var string DOC_ROOT
@@ -187,10 +192,9 @@ class Minify_CSS_UriRewriter {
     /**
      * @var string path to prepend
      */
-    private static $_prependPath = null;
+    private static $_prependRelativePath = null;
 
-    private static function _trimUrls($css)
-    {
+    private static function _trimUrls($css) {
         return preg_replace('/
             url\\(      # url(
             \\s*
@@ -200,48 +204,54 @@ class Minify_CSS_UriRewriter {
         /x', 'url($1)', $css);
     }
 
-    private static function _processUriCB($m)
-    {
+    private static function _processUriCB($m) {
         // $m matched either '/@import\\s+([\'"])(.*?)[\'"]/' or '/url\\(\\s*([^\\)\\s]+)\\s*\\)/'
         $isImport = ($m[0][0] === '@');
+
         // determine URI and the quote character (if any)
         if ($isImport) {
             $quoteChar = $m[1];
             $uri = $m[2];
         } else {
             // $m[1] is either quoted or not
-            $quoteChar = ($m[1][0] === "'" || $m[1][0] === '"')
-                ? $m[1][0]
-                : '';
-            $uri = ($quoteChar === '')
-                ? $m[1]
-                : substr($m[1], 1, strlen($m[1]) - 2);
+            $quoteChar = ($m[1][0] === "'" || $m[1][0] === '"') ? $m[1][0] : '';
+            $uri = ($quoteChar === '') ? $m[1] : substr($m[1], 1, strlen($m[1]) - 2);
         }
+
         // analyze URI
-        if (false === strpos($uri, '//')  // protocol (non-data)
-            && 0 !== strpos($uri, 'data:'))   // data protocol
-        {
-            if (self::$_prependPath !== null) {
-                if (w3_is_url(self::$_prependPath)) {
-                    $parse_url = @parse_url(self::$_prependPath);
+        if (false === strpos($uri, '//') && 0 !== strpos($uri, 'data:')) {
+            // prepend
+            if (self::$_prependRelativePath) {
+                if (w3_is_url(self::$_prependRelativePath)) {
+                    $parse_url = @parse_url(self::$_prependRelativePath);
 
                     if ($parse_url && isset($parse_url['host'])) {
                         $scheme = $parse_url['scheme'];
                         $host = $parse_url['host'];
                         $port = (isset($parse_url['port']) && $parse_url['port'] != 80 ? ':' . (int) $parse_url['port'] : '');
-                        $path = (! empty($parse_url['path']) ? $parse_url['path'] : '/');
+                        $path = (!empty($parse_url['path']) ? $parse_url['path'] : '/');
                         $dir_css = preg_replace('~[^/]+$~', '', $path);
                         $dir_obj = preg_replace('~[^/]+$~', '', $uri);
-                        $dir = (ltrim((strpos($dir_obj, '/') === 0 ?  w3_realpath($dir_obj) : w3_realpath($dir_css . $dir_obj)), '/'));
+                        $dir = (ltrim((strpos($dir_obj, '/') === 0 ? w3_realpath($dir_obj) : w3_realpath($dir_css . $dir_obj)), '/'));
                         $file = basename($uri);
 
                         $uri = sprintf('%s://%s%s/%s/%s', $scheme, $host, $port, $dir, $file);
                     }
                 } else {
-                   $uri =  self::$_prependPath . $uri;
+                    $uri = self::$_prependRelativePath . $uri;
                 }
             } else {
                 $uri = self::_rewriteRelative($uri, self::$_currentDir, self::$_docRoot, self::$_symlinks);
+
+                if (self::$_prependAbsolutePath) {
+                    $prependAbsolutePath = self::$_prependAbsolutePath;
+                } elseif (self::$_prependAbsolutePathCallback) {
+                    $prependAbsolutePath = call_user_func(self::$_prependAbsolutePathCallback, $uri);
+                }
+
+                if ($prependAbsolutePath) {
+                    $uri = rtrim($prependAbsolutePath, '/') . $uri;
+                }
             }
 
             if (self::$_browserCacheId && count(self::$_browserCacheExtensions)) {
@@ -259,9 +269,7 @@ class Minify_CSS_UriRewriter {
             }
         }
 
-        return $isImport
-            ? "@import {$quoteChar}{$uri}{$quoteChar}"
-            : "url({$quoteChar}{$uri}{$quoteChar})";
+        return $isImport ? "@import {$quoteChar}{$uri}{$quoteChar}" : "url({$quoteChar}{$uri}{$quoteChar})";
     }
 
     /**
@@ -302,18 +310,15 @@ class Minify_CSS_UriRewriter {
      *
      * @return string
      */
-    private static function _rewriteRelative($uri, $realCurrentDir, $realDocRoot, $symlinks = array())
-    {
-		if ('/' === $uri[0]) {                 // root-relative
+    private static function _rewriteRelative($uri, $realCurrentDir, $realDocRoot, $symlinks = array()) {
+        if ('/' === $uri[0]) { // root-relative
             return $uri;
-		}
+        }
 
         // prepend path with current dir separator (OS-independent)
-        $path = strtr($realCurrentDir, '/', DIRECTORY_SEPARATOR)
-            . DIRECTORY_SEPARATOR . strtr($uri, '/', DIRECTORY_SEPARATOR);
+        $path = strtr($realCurrentDir, '/', DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . strtr($uri, '/', DIRECTORY_SEPARATOR);
 
-        self::$debugText .= "file-relative URI  : {$uri}\n"
-                          . "path prepended     : {$path}\n";
+        self::$debugText .= "file-relative URI  : {$uri}\n" . "path prepended     : {$path}\n";
 
         // "unresolve" a symlink back to doc root
         foreach ($symlinks as $link => $target) {
@@ -338,6 +343,7 @@ class Minify_CSS_UriRewriter {
 
         // remove /./ and /../ where possible
         $uri = str_replace('/./', '/', $uri);
+
         // inspired by patch from Oleg Cherniy
         do {
             $uri = preg_replace('@/[^/]+/\\.\\./@', '/', $uri, 1, $changed);
@@ -358,12 +364,13 @@ class Minify_CSS_UriRewriter {
      *
      * @return mixed path with no trailing slash
      */
-    protected static function _realpath($path)
-    {
+    protected static function _realpath($path) {
         $realPath = realpath($path);
+
         if ($realPath !== false) {
             $path = $realPath;
         }
+
         return rtrim($path, '/\\');
     }
 }

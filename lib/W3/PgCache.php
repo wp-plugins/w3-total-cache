@@ -131,138 +131,136 @@ class W3_PgCache {
      * Do cache logic
      */
     function process() {
-        if ($this->_config->get_boolean('pgcache.enabled')) {
-            /**
-             * Skip caching for some pages
-             */
-            switch (true) {
-                case defined('DONOTCACHEPAGE'):
-                case defined('DOING_AJAX'):
-                case defined('DOING_CRON'):
-                case defined('APP_REQUEST'):
-                case defined('XMLRPC_REQUEST'):
-                case defined('WP_ADMIN'):
-                case (defined('SHORTINIT') && SHORTINIT):
-                    return;
-            }
-
-            /**
-             * Handle mobile or referrer redirects
-             */
-            if ($this->_mobile || $this->_referrer) {
-                $mobile_redirect = $this->_mobile->get_redirect();
-                $referrer_redirect = $this->_referrer->get_redirect();
-
-                $redirect = ($mobile_redirect ? $mobile_redirect : $referrer_redirect);
-
-                if ($redirect) {
-                    w3_redirect($redirect);
-                    exit();
-                }
-            }
-
-            /**
-             * Do page cache logic
-             */
-            if ($this->_debug) {
-                $this->_time_start = w3_microtime();
-            }
-
-            $this->_caching = $this->_can_cache();
-
-            if ($this->_caching && !$this->_enhanced_mode) {
-                $cache = & $this->_get_cache();
-
-                $mobile_group = $this->_get_mobile_group();
-                $referrer_group = $this->_get_referrer_group();
-                $encryption = $this->_get_encryption();
-                $compression = $this->_get_compression();
-                $raw = !$compression;
-                $this->_page_key = $this->_get_page_key($this->_request_uri, $mobile_group, $referrer_group, $encryption, $compression);
-
-                /**
-                 * Check if page is cached
-                 */
-                $data = $cache->get($this->_page_key);
-
-                /**
-                 * Try to get uncompressed version of cache
-                 */
-                if ($compression && !$data) {
-                    $raw = true;
-                    $this->_page_key = $this->_get_page_key($this->_request_uri, $mobile_group, $referrer_group, $encryption, false);
-
-                    $data = $cache->get($this->_page_key);
-                }
-
-                /**
-                 * If cache exists
-                 */
-                if ($data) {
-                    /**
-                     * Do Bad Behavior check
-                     */
-                    $this->_bad_behavior();
-
-                    if ($this->_enhanced_mode) {
-                        $is_404 = false;
-                        $headers = array();
-                        $time = $cache->mtime($this->_page_key);
-                        $content = & $data;
-                    } else {
-                        $is_404 = $data['404'];
-                        $headers = $data['headers'];
-                        $time = $data['time'];
-                        $content = & $data['content'];
-                    }
-
-                    /**
-                     * Calculate content etag
-                     */
-                    $etag = md5($content);
-
-                    /**
-                     * Send headers
-                     */
-                    $this->_send_headers($is_404, $time, $etag, $compression, $headers);
-
-                    /**
-                     * Do manual compression for uncompressed page
-                     */
-                    if ($raw) {
-                        /**
-                         * Append debug info
-                         */
-                        if ($this->_debug) {
-                            $time_total = w3_microtime() - $this->_time_start;
-                            $debug_info = $this->_get_debug_info(true, '', true, $time_total);
-                            $content .= "\r\n\r\n" . $debug_info;
-                        }
-
-                        /**
-                         * Parse dynamic tags
-                         */
-                        $this->_parse_dynamic($content);
-
-                        /**
-                         * Compress content
-                         */
-                        $this->_compress($content, $compression);
-                    }
-
-                    echo $content;
-                    exit();
-                }
-            }
-
-            /**
-             * Start output buffering
-             */
-            ob_start(array(
-                &$this,
-                'ob_callback'
-            ));
+        /**
+         * Skip caching for some pages
+         */
+        switch (true) {
+            case defined('DONOTCACHEPAGE'):
+            case defined('DOING_AJAX'):
+            case defined('DOING_CRON'):
+            case defined('APP_REQUEST'):
+            case defined('XMLRPC_REQUEST'):
+            case defined('WP_ADMIN'):
+            case (defined('SHORTINIT') && SHORTINIT):
+                return;
         }
+
+        /**
+         * Handle mobile or referrer redirects
+         */
+        if ($this->_mobile || $this->_referrer) {
+            $mobile_redirect = $this->_mobile->get_redirect();
+            $referrer_redirect = $this->_referrer->get_redirect();
+
+            $redirect = ($mobile_redirect ? $mobile_redirect : $referrer_redirect);
+
+            if ($redirect) {
+                w3_redirect($redirect);
+                exit();
+            }
+        }
+
+        /**
+         * Do page cache logic
+         */
+        if ($this->_debug) {
+            $this->_time_start = w3_microtime();
+        }
+
+        $this->_caching = $this->_can_cache();
+
+        if ($this->_caching && !$this->_enhanced_mode) {
+            $cache = & $this->_get_cache();
+
+            $mobile_group = $this->_get_mobile_group();
+            $referrer_group = $this->_get_referrer_group();
+            $encryption = $this->_get_encryption();
+            $compression = $this->_get_compression();
+            $raw = !$compression;
+            $this->_page_key = $this->_get_page_key($this->_request_uri, $mobile_group, $referrer_group, $encryption, $compression);
+
+            /**
+             * Check if page is cached
+             */
+            $data = $cache->get($this->_page_key);
+
+            /**
+             * Try to get uncompressed version of cache
+             */
+            if ($compression && !$data) {
+                $raw = true;
+                $this->_page_key = $this->_get_page_key($this->_request_uri, $mobile_group, $referrer_group, $encryption, false);
+
+                $data = $cache->get($this->_page_key);
+            }
+
+            /**
+             * If cache exists
+             */
+            if ($data) {
+                /**
+                 * Do Bad Behavior check
+                 */
+                $this->_bad_behavior();
+
+                if ($this->_enhanced_mode) {
+                    $is_404 = false;
+                    $headers = array();
+                    $time = $cache->mtime($this->_page_key);
+                    $content = & $data;
+                } else {
+                    $is_404 = $data['404'];
+                    $headers = $data['headers'];
+                    $time = $data['time'];
+                    $content = & $data['content'];
+                }
+
+                /**
+                 * Calculate content etag
+                 */
+                $etag = md5($content);
+
+                /**
+                 * Send headers
+                 */
+                $this->_send_headers($is_404, $time, $etag, $compression, $headers);
+
+                /**
+                 * Do manual compression for uncompressed page
+                 */
+                if ($raw) {
+                    /**
+                     * Append debug info
+                     */
+                    if ($this->_debug) {
+                        $time_total = w3_microtime() - $this->_time_start;
+                        $debug_info = $this->_get_debug_info(true, '', true, $time_total);
+                        $content .= "\r\n\r\n" . $debug_info;
+                    }
+
+                    /**
+                     * Parse dynamic tags
+                     */
+                    $this->_parse_dynamic($content);
+
+                    /**
+                     * Compress content
+                     */
+                    $this->_compress($content, $compression);
+                }
+
+                echo $content;
+                exit();
+            }
+        }
+
+        /**
+         * Start output buffering
+         */
+        ob_start(array(
+            &$this,
+            'ob_callback'
+        ));
     }
 
     /**

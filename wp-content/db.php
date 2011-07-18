@@ -21,17 +21,20 @@ if (!@is_dir(W3TC_DIR) || !file_exists(W3TC_DIR . '/inc/define.php')) {
 } else {
     require_once W3TC_DIR . '/inc/define.php';
 
-    if (defined('DB_TYPE')) {
-        $db_driver_path = sprintf('%s/Db/%s.php', W3TC_LIB_W3_DIR, DB_TYPE);
+    $config = & w3_instance('W3_Config');
+    if ($config->get_boolean('dbcache.enabled')) {
+        if (defined('DB_TYPE')) {
+            $db_driver_path = sprintf('%s/Db/%s.php', W3TC_LIB_W3_DIR, DB_TYPE);
 
-        if (file_exists($db_driver_path)) {
-            require_once $db_driver_path;
-        } else {
-            die(sprintf('<strong>W3 Total Cache Error:</strong> database driver doesn\'t exist: %s.', $db_driver_path));
+            if (file_exists($db_driver_path)) {
+                require_once $db_driver_path;
+            } else {
+                die(sprintf('<strong>W3 Total Cache Error:</strong> database driver doesn\'t exist: %s.', $db_driver_path));
+            }
         }
+
+        require_once W3TC_LIB_W3_DIR . '/Db.php';
+
+        $GLOBALS['wpdb'] = & W3_Db::instance();
     }
-
-    require_once W3TC_LIB_W3_DIR . '/Db.php';
-
-    $GLOBALS['wpdb'] = & W3_Db::instance();
 }

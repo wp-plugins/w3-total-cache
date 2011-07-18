@@ -240,6 +240,25 @@ class W3_Cdn_Base {
     }
 
     /**
+     * Returns prepend path
+     *
+     * @param string $path
+     * @return string
+     */
+    function get_prepend_path($path) {
+        $domain = $this->get_domain($path);
+
+        if ($domain) {
+            $scheme = $this->_get_scheme();
+            $url = sprintf('%s://%s', $scheme, $domain);
+
+            return $url;
+        }
+
+        return false;
+    }
+
+    /**
      * Formats URL
      *
      * @param string $path

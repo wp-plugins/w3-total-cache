@@ -3977,7 +3977,8 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
                 'minify.options',
                 'minify.symlinks',
                 'minify.css.enable',
-                'minify.js.enable'
+                'minify.js.enable',
+                'cdn.enabled'
             ));
 
             if ($new_config->get_boolean('minify.css.enable') && ($new_config->get_boolean('minify.auto') || count($new_config->get_array('minify.css.groups')))) {
@@ -4028,6 +4029,12 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
                     'minify.ccjs.path.jar',
                     'minify.ccjs.options.compilation_level',
                     'minify.ccjs.options.formatting'
+                ));
+            }
+
+            if ($new_config->get_boolean('cdn.enabled')) {
+                $minify_dependencies = array_merge($minify_dependencies, array(
+                    'cdn.engine'
                 ));
             }
 
@@ -4173,7 +4180,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
             }
 
             if (W3TC_PHP5) {
-                 $w3_plugin_minify->before_config_change($old_config, $new_config);
+                $w3_plugin_minify->before_config_change($old_config, $new_config);
             }
 
             /**
