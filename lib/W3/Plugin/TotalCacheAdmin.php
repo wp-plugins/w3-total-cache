@@ -144,6 +144,11 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
             'in_plugin_update_message'
         ));
 
+        add_action( 'wp_ajax_w3tc_widget_latest', array(
+            &$this,
+            'widget_latest'
+        ));
+
         if ($this->_config->get_boolean('widget.latest.enabled') || $this->_config->get_boolean('widget.pagespeed.enabled')) {
             add_action('wp_dashboard_setup', array(
                 &$this,
@@ -1624,6 +1629,22 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
      * @return void
      */
     function widget_latest() {
+        $widget_id = 'w3tc_latest';
+        $cache_key = 'dash_' . md5($widget_id);
+        if (false !== ($output = get_transient($cache_key))) {
+            echo $output;
+            return;
+        }
+
+        if ((!defined('DOING_AJAX') || !DOING_AJAX)) {
+            echo '<p class="widget-loading hide-if-no-js">';
+            echo __( 'Loading&#8230;' ) . '</p><p class="hide-if-js">';
+            echo __( 'This widget requires JavaScript.' ) . '</p>';
+            echo $loading;
+            return;
+        }
+
+        // load content of feed
         global $wp_version;
 
         $items = array();
@@ -1653,7 +1674,9 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
             }
         }
 
+        ob_start();
         include W3TC_INC_DIR . '/widget/latest.php';
+        set_transient($cache_key, ob_get_flush(), 43200); // Default lifetime in cache of 12 hours (same as the feeds)
     }
 
     /**
@@ -5742,4 +5765,9 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
 
         return false;
     }
+}
+
+function my_func()
+{
+  echo 'aa';
 }
