@@ -995,16 +995,6 @@ function w3_http_date($time) {
 }
 
 /**
- * Returns upload info
- *
- * @return array
- */
-function w3_upload_info() {
-    require_once W3TC_INC_DIR . '/functions/http.php';
-    return w3_upload_info_dynamic();
-}
-
-/**
  * Redirects to URL
  *
  * @param string $url

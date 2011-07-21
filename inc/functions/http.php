@@ -52,11 +52,11 @@ function w3_download($url, $file) {
 }
 
 /**
- * Returns upload info, function dynamically loaded
+ * Returns upload info
  *
  * @return array
  */
-function w3_upload_info_dynamic() {
+function w3_upload_info() {
     static $upload_info = null;
 
     if ($upload_info === null) {

@@ -14,20 +14,14 @@ jQuery(function() {
         if (e.length) {
             var p = e.parent();
             setTimeout(function() {
-                jQuery.ajax({
-                    url : ajaxurl + '?action=w3tc_widget_latest',
-                    success : 
-                        function (data) {
-                            // cut trailing '0' char in wp response
-                            if (data.length > 0 && data.substr(data.length - 1, 1) == '0')
-                                data = data.substr(0, data.length - 1);
-
-                            p.html(data);
-                            p.hide().slideDown('normal', 
-                                function() {
-                                    jQuery(this).css('display', '');
-                                });
-                        }
+                p.load(
+                    'admin.php?page=w3tc_general&w3tc_widget_latest_ajax&_wpnonce=' +
+                        jQuery(e).metadata().nonce,
+                    function () {
+                        p.hide().slideDown('normal', 
+                            function() {
+                                jQuery(this).css('display', '');
+                            });
                     });
             }, 500);
         }

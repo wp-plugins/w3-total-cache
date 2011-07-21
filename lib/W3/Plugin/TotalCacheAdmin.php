@@ -10,6 +10,7 @@ if (!defined('W3TC')) {
 define('W3TC_PLUGIN_TOTALCACHE_REGEXP_COOKIEDOMAIN', '~define\s*\(\s*[\'"]COOKIE_DOMAIN[\'"]\s*,.*?\)~is');
 
 require_once W3TC_INC_DIR . '/functions/rule.php';
+require_once W3TC_INC_DIR . '/functions/http.php';
 require_once W3TC_LIB_W3_DIR . '/Plugin.php';
 
 /**
@@ -142,11 +143,6 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
         add_action('in_plugin_update_message-' . W3TC_FILE, array(
             &$this,
             'in_plugin_update_message'
-        ));
-
-        add_action( 'wp_ajax_w3tc_widget_latest', array(
-            &$this,
-            'widget_latest'
         ));
 
         if ($this->_config->get_boolean('widget.latest.enabled') || $this->_config->get_boolean('widget.pagespeed.enabled')) {
@@ -483,8 +479,6 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
      * @return void
      */
     function in_plugin_update_message() {
-        require_once W3TC_INC_DIR . '/functions/http.php';
-
         $response = w3_http_get(W3TC_README_URL);
 
         if (!is_wp_error($response) && $response['response']['code'] == 200) {
@@ -1624,26 +1618,32 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
     }
 
     /**
+     * Returns key for transient cache of "widget latest"
+     *
+     * @return string
+     */
+    function _widget_latest_cache_key() {
+        return 'dash_' . md5('w3tc_latest');
+    }
+
+    /**
      * Prints latest widget contents
      *
      * @return void
      */
     function widget_latest() {
-        $widget_id = 'w3tc_latest';
-        $cache_key = 'dash_' . md5($widget_id);
-        if (false !== ($output = get_transient($cache_key))) {
+        if (false !== ($output = get_transient($this->_widget_latest_cache_key())))
             echo $output;
-            return;
-        }
+        else 
+            include W3TC_INC_DIR . '/widget/latest.php';
+    }
 
-        if ((!defined('DOING_AJAX') || !DOING_AJAX)) {
-            echo '<p class="widget-loading hide-if-no-js">';
-            echo __( 'Loading&#8230;' ) . '</p><p class="hide-if-js">';
-            echo __( 'This widget requires JavaScript.' ) . '</p>';
-            echo $loading;
-            return;
-        }
-
+    /**
+     * Prints latest widget contents 
+     *
+     * @return void
+     */
+    function action_widget_latest_ajax() {
         // load content of feed
         global $wp_version;
 
@@ -1675,8 +1675,10 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
         }
 
         ob_start();
-        include W3TC_INC_DIR . '/widget/latest.php';
-        set_transient($cache_key, ob_get_flush(), 43200); // Default lifetime in cache of 12 hours (same as the feeds)
+        include W3TC_INC_DIR . '/widget/latest_ajax.php';
+
+        // Default lifetime in cache of 12 hours (same as the feeds)
+        set_transient($this->_widget_latest_cache_key(), ob_get_flush(), 43200); 
     }
 
     /**
@@ -4926,8 +4928,6 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
             /**
              * Get page contents
              */
-            require_once W3TC_INC_DIR . '/functions/http.php';
-
             $response = w3_http_get($url);
 
             if (!is_wp_error($response) && ($response['response']['code'] == 200 || ($response['response']['code'] == 404 && $template == '404'))) {
@@ -5289,8 +5289,6 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
         $result = get_transient($key);
 
         if ($result === false) {
-            require_once W3TC_INC_DIR . '/functions/http.php';
-
             $response = w3_http_get($url);
 
             $result = (!is_wp_error($response) && $response['response']['code'] == 200 && trim($response['body']) == 'OK');
@@ -5765,9 +5763,4 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
 
         return false;
     }
-}
-
-function my_func()
-{
-  echo 'aa';
 }

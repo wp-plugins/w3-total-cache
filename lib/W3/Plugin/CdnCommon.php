@@ -21,7 +21,7 @@ class W3_Plugin_CdnCommon extends W3_Plugin {
      * @param string $remote_path
      * @param integer $command
      * @param string $last_error
-     * @return ingteer
+     * @return integer
      */
     function queue_add($local_path, $remote_path, $command, $last_error) {
         global $wpdb;
@@ -47,6 +47,8 @@ class W3_Plugin_CdnCommon extends W3_Plugin {
      * @return array
      */
     function get_files_for_upload($file) {
+        require_once W3TC_INC_DIR . '/functions/http.php';
+
         $files = array();
         $upload_info = w3_upload_info();
 
@@ -243,6 +245,8 @@ class W3_Plugin_CdnCommon extends W3_Plugin {
      * @return string
      */
     function normalize_attachment_file($file) {
+        require_once W3TC_INC_DIR . '/functions/http.php';
+
         $upload_info = w3_upload_info();
         if ($upload_info) {
             $file = ltrim(str_replace($upload_info['basedir'], '', $file), '/\\');

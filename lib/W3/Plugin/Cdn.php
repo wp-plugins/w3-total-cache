@@ -296,6 +296,8 @@ class W3_Plugin_Cdn extends W3_Plugin {
                 $domain_url_regexp = w3_get_domain_url_regexp();
 
                 if ($this->_config->get_boolean('cdn.uploads.enable')) {
+                    require_once W3TC_INC_DIR . '/functions/http.php';
+
                     $upload_info = w3_upload_info();
 
                     if ($upload_info) {

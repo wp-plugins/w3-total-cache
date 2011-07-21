@@ -8,11 +8,12 @@ class Minify_HTMLTidy {
             'wrap' => 0,
             'input-encoding' => 'utf8',
             'output-encoding' => 'utf8',
+            'preserve-entities' => true
         ), $options, array(
             'show-errors' => 0,
             'show-warnings' => false,
             'force-output' => true,
-            'tidy-mark' => false,
+            'tidy-mark' => false
         ));
 
         $tidy = new tidy();

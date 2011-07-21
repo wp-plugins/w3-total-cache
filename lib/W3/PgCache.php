@@ -93,12 +93,15 @@ class W3_PgCache {
     var $cache_reject_reason = '';
 
     /**
-     * Returns instance. for backward compatibility with 0.9.2.3 version of /wp-content files
+     * Returns instance. 
+     * For backward compatibility with 0.9.2.3 version of /wp-content files
      *
      * @return W3_PgCache
      */
     function &instance() {
-        return w3_instance('W3_PgCache');
+        $i = & w3_instance('W3_PgCache');
+        $i->_legacy = true;
+        return $i;
     }
 
     /**
@@ -145,19 +148,12 @@ class W3_PgCache {
                 return;
         }
 
-        /**
-         * Handle mobile or referrer redirects
+        /*
+         * Legacy mode with 0.9.2.3 version of /wp-content add-ins
          */
-        if ($this->_mobile || $this->_referrer) {
-            $mobile_redirect = $this->_mobile->get_redirect();
-            $referrer_redirect = $this->_referrer->get_redirect();
-
-            $redirect = ($mobile_redirect ? $mobile_redirect : $referrer_redirect);
-
-            if ($redirect) {
-                w3_redirect($redirect);
-                exit();
-            }
+        if (isset($this->_legacy)) {
+            $redirect = & w3_instance('W3_Redirect');
+            $redirect->process();
         }
 
         /**

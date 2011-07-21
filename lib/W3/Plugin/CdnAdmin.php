@@ -8,6 +8,7 @@ if (!defined('W3TC')) {
 }
 
 require_once W3TC_INC_DIR . '/functions/file.php';
+require_once W3TC_INC_DIR . '/functions/http.php';
 require_once W3TC_LIB_W3_DIR . '/Plugin.php';
 
 /**
@@ -504,8 +505,6 @@ class W3_Plugin_CdnAdmin extends W3_Plugin {
                                              * Download file
                                              */
                                             if ($import_external) {
-                                                require_once W3TC_INC_DIR . '/functions/http.php';
-
                                                 $download_result = w3_download($src, $dst);
 
                                                 if (!$download_result) {
