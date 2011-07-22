@@ -130,7 +130,7 @@ class W3_Plugin_BrowserCache extends W3_Plugin {
         if ($buffer != '' && w3_is_xml($buffer)) {
             $domain_url_regexp = w3_get_domain_url_regexp();
 
-            $buffer = preg_replace_callback('~(href|src|action)=[\'"]((' . $domain_url_regexp . ')?(/[^\'"]*\.([a-z-_]+)(\?[\'"]*)?))[\'"]~Ui', array(
+            $buffer = preg_replace_callback('~(href|src|action)=[\'"]((' . $domain_url_regexp . ')?(/[^\'"]*\.([a-z-_]+)(\?[^\'"]*)?))[\'"]~Ui', array(
                 &$this,
                 'link_replace_callback'
             ), $buffer);
