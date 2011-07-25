@@ -103,6 +103,14 @@ class W3_Request {
      * @return array
      */
     function get_request() {
+        if (!isset($_GET)) {
+            $_GET = array();
+        }
+
+        if (!isset($_POST)) {
+            $_POST = array();
+        }
+
         return array_merge($_GET, $_POST);
     }
 }

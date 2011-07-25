@@ -598,6 +598,23 @@ class W3_Plugin_PgCacheAdmin extends W3_Plugin {
         $rules .= "    RewriteCond %{SERVER_PORT} =443\n";
         $rules .= "    RewriteRule .* - [E=W3TC_SSL:_ssl]\n";
 
+        $cache_path = str_replace(w3_get_document_root(), '', $cache_dir);
+
+        /**
+         * Check if cache file exists
+         */
+        $path_pre = "\"%{DOCUMENT_ROOT}" . $cache_path . "/%{REQUEST_URI}/_index%{ENV:W3TC_UA}%{ENV:W3TC_REF}%{ENV:W3TC_SSL}";
+        $path_post = "%{ENV:W3TC_ENC}\" -" . ($this->_config->get_boolean('pgcache.file.nfs') ? 'F' : 'f');
+
+        // .html file is present
+        $rules .= "    RewriteCond " . $path_pre . ".html" . $path_post . "\n";
+        $rules .= "    RewriteRule .* - [E=W3TC_EXT:.html]\n";
+        
+        // .xml file is present
+        $rules .= "    RewriteCond %{ENV:W3TC_EXT} =\"\"\n";
+        $rules .= "    RewriteCond " . $path_pre . ".xml" . $path_post . "\n";
+        $rules .= "    RewriteRule .* - [E=W3TC_EXT:.xml]\n";
+
         /**
          * Set Accept-Encoding
          */
@@ -656,17 +673,15 @@ class W3_Plugin_PgCacheAdmin extends W3_Plugin {
             $rules .= "    RewriteCond %{HTTP_USER_AGENT} !(" . implode('|', array_map('w3_preg_quote', $reject_user_agents)) . ") [NC]\n";
         }
 
-        $cache_path = str_replace(w3_get_document_root(), '', $cache_dir);
-
         /**
-         * Check if cache file exists
+         * File must exists
          */
-        $rules .= "    RewriteCond \"%{DOCUMENT_ROOT}" . $cache_path . "/%{REQUEST_URI}/_index%{ENV:W3TC_UA}%{ENV:W3TC_REF}%{ENV:W3TC_SSL}.html%{ENV:W3TC_ENC}\" -" . ($this->_config->get_boolean('pgcache.file.nfs') ? 'F' : 'f') . "\n";
+        $rules .= "    RewriteCond %{ENV:W3TC_EXT} !=\"\"\n";
 
         /**
          * Make final rewrite
          */
-        $rules .= "    RewriteRule .* \"" . $cache_path . "/%{REQUEST_URI}/_index%{ENV:W3TC_UA}%{ENV:W3TC_REF}%{ENV:W3TC_SSL}.html%{ENV:W3TC_ENC}\" [L]\n";
+        $rules .= "    RewriteRule .* \"" . $cache_path . "/%{REQUEST_URI}/_index%{ENV:W3TC_UA}%{ENV:W3TC_REF}%{ENV:W3TC_SSL}%{ENV:W3TC_EXT}%{ENV:W3TC_ENC}\" [L]\n";
         $rules .= "</IfModule>\n";
         $rules .= W3TC_MARKER_END_PGCACHE_CORE . "\n";
 

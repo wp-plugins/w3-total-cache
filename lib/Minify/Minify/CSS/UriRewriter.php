@@ -74,6 +74,10 @@ class Minify_CSS_UriRewriter {
      *
      * @param string $currentDir The directory of the current CSS file.
      *
+     * @param string $prependAbsolutePath
+     *
+     * @param string $prependAbsolutePathCallback
+     *
      * @param string $docRoot The document root of the web site in which
      * the CSS file resides (default = $_SERVER['DOCUMENT_ROOT']).
      *
@@ -247,6 +251,8 @@ class Minify_CSS_UriRewriter {
                     $prependAbsolutePath = self::$_prependAbsolutePath;
                 } elseif (self::$_prependAbsolutePathCallback) {
                     $prependAbsolutePath = call_user_func(self::$_prependAbsolutePathCallback, $uri);
+                } else {
+                    $prependAbsolutePath = '';
                 }
 
                 if ($prependAbsolutePath) {

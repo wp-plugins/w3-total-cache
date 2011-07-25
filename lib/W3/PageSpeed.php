@@ -81,7 +81,7 @@ class W3_PageSpeed {
         $response = w3_http_get($request_url);
 
         if (!is_wp_error($response) && $response['response']['code'] == 200) {
-            return $response['response']['body'];
+            return $response['body'];
         }
 
         return false;

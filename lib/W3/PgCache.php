@@ -291,9 +291,13 @@ class W3_PgCache {
                     $compressions = $this->_get_compressions();
                 }
 
+                $content_type = '';
+
                 if ($this->_enhanced_mode) {
                     $is_404 = false;
                     $headers = array();
+                    $cached_headers = $this->_get_cached_headers();
+                    $content_type = $cached_headers['Content-Type'];
                 } else {
                     $is_404 = (function_exists('is_404') ? is_404() : false);
                     $headers = $this->_get_cached_headers();
@@ -308,7 +312,9 @@ class W3_PgCache {
                 $buffers = array();
 
                 foreach ($compressions as $_compression) {
-                    $_page_key = $this->_get_page_key($this->_request_uri, $mobile_group, $referrer_group, $encryption, $_compression);
+                    $_page_key = $this->_get_page_key($this->_request_uri, 
+                        $mobile_group, $referrer_group, $encryption, $_compression,
+                        $content_type);
 
                     /**
                      * Compress content
@@ -356,7 +362,10 @@ class W3_PgCache {
                         /**
                          * Set page key for debug
                          */
-                        $this->_page_key = $this->_get_page_key($this->_request_uri, $mobile_group, $referrer_group, $encryption, $compression);
+                        $this->_page_key = $this->_get_page_key(
+                            $this->_request_uri, $mobile_group, 
+                            $referrer_group, $encryption, $compression,
+                            $content_type);
 
                         /**
                          * Append debug info
@@ -889,7 +898,8 @@ class W3_PgCache {
      * @param string $compression
      * @return string
      */
-    function _get_page_key($request_uri, $mobile_group = '', $referrer_group = '', $encryption = false, $compression = false) {
+    function _get_page_key($request_uri, $mobile_group = '', $referrer_group = '', 
+        $encryption = false, $compression = false, $content_type = false) {
         // replace fragment
         $key = preg_replace('~#.*$~', '', $request_uri);
 
@@ -943,7 +953,10 @@ class W3_PgCache {
             /**
              * Append HTML extension
              */
-            $key .= '.html';
+            if (substr($content_type, 0, 8) == 'text/xml')
+                $key .= '.xml';
+            else
+                $key .= '.html';
 
             /**
              * Append compression extension

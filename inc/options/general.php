@@ -487,7 +487,7 @@
             <tr>
                 <th colspan="2">
                     <input type="hidden" name="file_nfs" value="0"<?php if (! $can_empty_file): ?> disabled="disabled"<?php endif; ?> />
-                    <label><input type="checkbox" name="file_nfs" value="1"<?php checked($file_nfs, true); ?><?php if (! $can_empty_file): ?> disabled="disabled"<?php endif; ?> /> Optimize disk enhanced page and minify caching for NFS</label>
+                    <label><input type="checkbox" name="file_nfs" value="1"<?php checked($file_nfs, true); ?><?php if (! $can_empty_file): ?> disabled="disabled"<?php endif; ?> /> Optimize disk enhanced page and minify caching for <acronym title="Network File System">NFS</acronym></label>
                     <br /><span class="description">Try this option if your hosting environment uses a network based file system for a possible performance improvement.</span>
                 </th>
             </tr>

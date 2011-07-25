@@ -942,15 +942,6 @@ class W3_Plugin_Minify extends W3_Plugin {
             return false;
         }
 
-        /**
-         * Check feed
-         */
-        if ($this->_config->get_boolean('minify.html.reject.feed') && function_exists('is_feed') && is_feed()) {
-            $this->minify_reject_reason = 'Feed is rejected';
-
-            return false;
-        }
-
         return true;
     }
 
@@ -975,6 +966,15 @@ class W3_Plugin_Minify extends W3_Plugin {
          */
         if (defined('DONOTMINIFY') && DONOTMINIFY) {
             $this->minify_reject_reason = 'DONOTMINIFY constant is defined';
+
+            return false;
+        }
+
+        /**
+         * Check feed minify
+         */
+        if ($this->_config->get_boolean('minify.html.reject.feed') && function_exists('is_feed') && is_feed()) {
+            $this->minify_reject_reason = 'Feed is rejected';
 
             return false;
         }

@@ -360,6 +360,10 @@ class W3_Cdn_Base {
                 $headers['X-Powered-By'] = W3TC_POWERED_BY;
             }
 
+            if ($this->cache_config[$mime_type]['lifetime']) {
+                $headers['Expires'] = w3_http_date(time() + $this->cache_config[$mime_type]['lifetime']);
+            }
+
             switch ($this->cache_config[$mime_type]['cache_control']) {
                 case 'cache':
                     $headers = array_merge($headers, array(
