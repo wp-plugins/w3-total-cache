@@ -540,7 +540,7 @@ class W3_Plugin_CdnAdmin extends W3_Plugin {
                                             $guid = ltrim($upload_info['baseurlpath'] . $title, ',');
                                             $mime_type = w3_get_mime_type($dst);
 
-                                            $GLOBALS['wp_rewrite'] = & new WP_Rewrite();
+                                            @$GLOBALS['wp_rewrite'] = & new WP_Rewrite();
 
                                             /**
                                              * Insert attachment

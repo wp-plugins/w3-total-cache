@@ -378,13 +378,15 @@ class W3_PgCacheFlush extends W3_PgCache {
      * Workaround for get_comments_pagenum_link function
      *
      * @param integer $post_id
+     * @param integer $pagenum
+     * @param integer $max_page
      * @return string
      */
     function _get_comments_pagenum_link($post_id, $pagenum = 1, $max_page = 0) {
         if (isset($GLOBALS['post']) && is_object($GLOBALS['post'])) {
             $old_post = &$GLOBALS['post'];
         } else {
-            $GLOBALS['post'] = & new stdClass();
+            @$GLOBALS['post'] = & new stdClass();
             $old_post = null;
         }
 

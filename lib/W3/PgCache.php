@@ -292,15 +292,17 @@ class W3_PgCache {
                 }
 
                 $content_type = '';
+                $cached_headers = $this->_get_cached_headers();
 
                 if ($this->_enhanced_mode) {
                     $is_404 = false;
                     $headers = array();
-                    $cached_headers = $this->_get_cached_headers();
-                    $content_type = $cached_headers['Content-Type'];
+                    if (isset($cached_headers['Content-Type'])) {
+                        $content_type = $cached_headers['Content-Type'];
+                    }
                 } else {
                     $is_404 = (function_exists('is_404') ? is_404() : false);
-                    $headers = $this->_get_cached_headers();
+                    $headers = $cached_headers;
                 }
 
                 $time = time();
@@ -957,20 +959,13 @@ class W3_PgCache {
                 $key .= '.xml';
             else
                 $key .= '.html';
+        }
 
-            /**
-             * Append compression extension
-             */
-            if ($compression) {
-                $key .= '.' . $compression;
-            }
-        } else {
-            /**
-             * Append compression
-             */
-            if ($compression) {
-                $key .= '_' . $compression;
-            }
+        /**
+         * Append compression
+         */
+        if ($compression) {
+            $key .= '_' . $compression;
         }
 
         /**

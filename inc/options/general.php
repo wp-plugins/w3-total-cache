@@ -70,8 +70,8 @@
                 <td>
                     <select name="pgcache.engine">
                         <optgroup label="Shared Server (disk enhanced is best):">
-                            <option value="file_generic"<?php selected($this->_config->get_string('pgcache.engine'), 'file_generic'); ?><?php if (! $check_rules): ?> disabled="disabled"<?php endif; ?>>Disk (enhanced)</option>
-                            <option value="file"<?php selected($this->_config->get_string('pgcache.engine'), 'file'); ?>>Disk (basic)</option>
+                            <option value="file_generic"<?php selected($this->_config->get_string('pgcache.engine'), 'file_generic'); ?><?php if (! $check_rules): ?> disabled="disabled"<?php endif; ?>>Disk: enhanced</option>
+                            <option value="file"<?php selected($this->_config->get_string('pgcache.engine'), 'file'); ?>>Disk: basic</option>
                         </optgroup>
                         <optgroup label="Dedicated / Virtual Server:">
                             <option value="apc"<?php selected($this->_config->get_string('pgcache.engine'), 'apc'); ?><?php if (! $check_apc): ?> disabled="disabled"<?php endif; ?>>Opcode: Alternative PHP Cache (APC)</option>

@@ -598,38 +598,38 @@ class W3_Minify {
                 case 'memcached':
                     require_once W3TC_LIB_W3_DIR . '/Cache/Memcached.php';
                     require_once W3TC_LIB_MINIFY_DIR . '/Minify/Cache/Memcache.php';
-                    $w3_cache_memcached = & new W3_Cache_Memcached(array(
+                    @$w3_cache_memcached = & new W3_Cache_Memcached(array(
                         'servers' => $this->_config->get_array('minify.memcached.servers'),
                         'persistant' => $this->_config->get_boolean('minify.memcached.persistant')
                     ));
-                    $cache[0] = & new Minify_Cache_Memcache($w3_cache_memcached);
+                    @$cache[0] = & new Minify_Cache_Memcache($w3_cache_memcached);
                     break;
 
                 case 'apc':
                     require_once W3TC_LIB_MINIFY_DIR . '/Minify/Cache/APC.php';
-                    $cache[0] = & new Minify_Cache_APC();
+                    @$cache[0] = & new Minify_Cache_APC();
                     break;
 
                 case 'eaccelerator':
                     require_once W3TC_LIB_MINIFY_DIR . '/Minify/Cache/Eaccelerator.php';
-                    $cache[0] = & new Minify_Cache_Eaccelerator();
+                    @$cache[0] = & new Minify_Cache_Eaccelerator();
                     break;
 
                 case 'xcache':
                     require_once W3TC_LIB_MINIFY_DIR . '/Minify/Cache/XCache.php';
-                    $cache[0] = & new Minify_Cache_XCache();
+                    @$cache[0] = & new Minify_Cache_XCache();
                     break;
 
                 case 'wincache':
                     require_once W3TC_LIB_MINIFY_DIR . '/Minify/Cache/Wincache.php';
-                    $cache[0] = & new Minify_Cache_Wincache();
+                    @$cache[0] = & new Minify_Cache_Wincache();
                     break;
 
                 case 'file':
                 default:
                     require_once W3TC_LIB_MINIFY_DIR . '/Minify/Cache/File.php';
 
-                    $cache[0] = & new Minify_Cache_File(
+                    @$cache[0] = & new Minify_Cache_File(
                         W3TC_CACHE_FILE_MINIFY_DIR,
                         array(
                             '.htaccess',

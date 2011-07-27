@@ -133,7 +133,7 @@ class W3_Plugin_PgCacheAdmin extends W3_Plugin {
             case 'file':
                 require_once W3TC_LIB_W3_DIR . '/Cache/File/Cleaner.php';
 
-                $w3_cache_file_cleaner = & new W3_Cache_File_Cleaner(array(
+                @$w3_cache_file_cleaner = & new W3_Cache_File_Cleaner(array(
                     'cache_dir' => W3TC_CACHE_FILE_PGCACHE_DIR,
                     'clean_timelimit' => $this->_config->get_integer('timelimit.cache_gc')
                 ));
@@ -144,7 +144,7 @@ class W3_Plugin_PgCacheAdmin extends W3_Plugin {
             case 'file_generic':
                 require_once W3TC_LIB_W3_DIR . '/Cache/File/Cleaner/Generic.php';
 
-                $w3_cache_file_cleaner_generic = & new W3_Cache_File_Cleaner_Generic(array(
+                @$w3_cache_file_cleaner_generic = & new W3_Cache_File_Cleaner_Generic(array(
                     'exclude' => array(
                         '.htaccess'
                     ),
@@ -601,26 +601,11 @@ class W3_Plugin_PgCacheAdmin extends W3_Plugin {
         $cache_path = str_replace(w3_get_document_root(), '', $cache_dir);
 
         /**
-         * Check if cache file exists
-         */
-        $path_pre = "\"%{DOCUMENT_ROOT}" . $cache_path . "/%{REQUEST_URI}/_index%{ENV:W3TC_UA}%{ENV:W3TC_REF}%{ENV:W3TC_SSL}";
-        $path_post = "%{ENV:W3TC_ENC}\" -" . ($this->_config->get_boolean('pgcache.file.nfs') ? 'F' : 'f');
-
-        // .html file is present
-        $rules .= "    RewriteCond " . $path_pre . ".html" . $path_post . "\n";
-        $rules .= "    RewriteRule .* - [E=W3TC_EXT:.html]\n";
-        
-        // .xml file is present
-        $rules .= "    RewriteCond %{ENV:W3TC_EXT} =\"\"\n";
-        $rules .= "    RewriteCond " . $path_pre . ".xml" . $path_post . "\n";
-        $rules .= "    RewriteRule .* - [E=W3TC_EXT:.xml]\n";
-
-        /**
          * Set Accept-Encoding
          */
         if ($this->_config->get_boolean('browsercache.enabled') && $this->_config->get_boolean('browsercache.html.compression')) {
             $rules .= "    RewriteCond %{HTTP:Accept-Encoding} gzip\n";
-            $rules .= "    RewriteRule .* - [E=W3TC_ENC:.gzip]\n";
+            $rules .= "    RewriteRule .* - [E=W3TC_ENC:_gzip]\n";
         }
 
         /**
@@ -674,14 +659,24 @@ class W3_Plugin_PgCacheAdmin extends W3_Plugin {
         }
 
         /**
-         * File must exists
+         * Note that rewrite can happen
          */
-        $rules .= "    RewriteCond %{ENV:W3TC_EXT} !=\"\"\n";
+        $rules .= "    RewriteRule .* - [E=W3TC_PGCACHE:1]\n";
 
         /**
-         * Make final rewrite
+         * Make final rewrites for specific files
          */
-        $rules .= "    RewriteRule .* \"" . $cache_path . "/%{REQUEST_URI}/_index%{ENV:W3TC_UA}%{ENV:W3TC_REF}%{ENV:W3TC_SSL}%{ENV:W3TC_EXT}%{ENV:W3TC_ENC}\" [L]\n";
+        $uri_pre =  $cache_path . "/%{REQUEST_URI}/_index%{ENV:W3TC_UA}%{ENV:W3TC_REF}%{ENV:W3TC_SSL}";
+        $switch = " -" . ($this->_config->get_boolean('pgcache.file.nfs') ? 'F' : 'f');
+
+        foreach (array('.html', '.xml') as $ext) {
+            $rules .= "    RewriteCond %{W3TC_PGCACHE} =\"1\"\n";
+            $rules .= "    RewriteCond \"%{DOCUMENT_ROOT}" . $uri_pre . $ext .
+                "%{ENV:W3TC_ENC}\"" . $switch . "\n";
+            $rules .= "    RewriteRule .* \"" . $uri_pre . $ext . 
+                "%{ENV:W3TC_ENC}\" [L]\n";
+        }
+
         $rules .= "</IfModule>\n";
         $rules .= W3TC_MARKER_END_PGCACHE_CORE . "\n";
 
@@ -1003,11 +998,14 @@ class W3_Plugin_PgCacheAdmin extends W3_Plugin {
 
         if ($compression) {
             $rules .= "<IfModule mod_mime.c>\n";
-            $rules .= "    AddType text/html .gzip\n";
-            $rules .= "    AddEncoding gzip .gzip\n";
+            $rules .= "    AddType text/html .html_gzip\n";
+            $rules .= "    AddEncoding gzip .html_gzip\n";
+            $rules .= "    AddType text/xml .xml_gzip\n";
+            $rules .= "    AddEncoding gzip .xml_gzip\n";
             $rules .= "</IfModule>\n";
             $rules .= "<IfModule mod_deflate.c>\n";
-            $rules .= "    SetEnvIfNoCase Request_URI \\.gzip$ no-gzip\n";
+            $rules .= "    SetEnvIfNoCase Request_URI \\.html_gzip$ no-gzip\n";
+            $rules .= "    SetEnvIfNoCase Request_URI \\.xml_gzip$ no-gzip\n";
             $rules .= "</IfModule>\n";
         }
 

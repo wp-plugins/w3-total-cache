@@ -144,7 +144,7 @@ class W3_Plugin_DbCache extends W3_Plugin {
     function cleanup() {
         require_once W3TC_LIB_W3_DIR . '/Cache/File/Cleaner.php';
         
-        $w3_cache_file_cleaner = & new W3_Cache_File_Cleaner(array(
+        @$w3_cache_file_cleaner = & new W3_Cache_File_Cleaner(array(
             'cache_dir' => W3TC_CACHE_FILE_DBCACHE_DIR,
             'clean_timelimit' => $this->_config->get_integer('timelimit.cache_gc')
         ));
@@ -155,7 +155,7 @@ class W3_Plugin_DbCache extends W3_Plugin {
     /**
      * Cron schedules filter
      *
-     * @paran array $schedules
+     * @param array $schedules
      * @return array
      */
     function cron_schedules($schedules) {

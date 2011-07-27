@@ -74,7 +74,7 @@ class W3_Cdn_S3 extends W3_Cdn_Base {
             return false;
         }
 
-        $this->_s3 = & new S3($this->_config['key'], $this->_config['secret'], false);
+        @$this->_s3 = & new S3($this->_config['key'], $this->_config['secret'], false);
 
         return true;
     }

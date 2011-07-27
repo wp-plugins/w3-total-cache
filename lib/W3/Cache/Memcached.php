@@ -26,7 +26,7 @@ class W3_Cache_Memcached extends W3_Cache_Base {
      * @param array $config
      */
     function __construct($config) {
-        $this->_memcache = & new Memcache();
+        @$this->_memcache = & new Memcache();
 
         if (!empty($config['servers'])) {
             $persistant = isset($config['persistant']) ? (boolean) $config['persistant'] : false;

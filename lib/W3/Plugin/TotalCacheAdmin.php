@@ -864,7 +864,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
                 }
 
                 if ($this->_config->get_boolean('notes.pgcache_rules_cache') && !$w3_plugin_pgcache->check_rules_cache()) {
-                    $this->_errors[] = sprintf('Disk enhanced page caching is not active. To enable it, add the following rules into the server configuration file (<strong>%s</strong>) of the site %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea>. This can be done automatically, by clicking here: %s. %s', w3_get_pgcache_rules_cache_path(), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_pgcache->generate_rules_cache()), $this->button_link('auto-install', wp_nonce_url(sprintf('admin.php?page=%s&w3tc_pgcache_write_rules_cache', $this->_page), 'w3tc'), $this->button_hide_note('Hide this message', 'pgcache_rules_cache')));
+                    $this->_errors[] = sprintf('Disk enhanced page caching is not active. To enable it, add the following rules into the server configuration file (<strong>%s</strong>) of the site %s <textarea class="w3tc-rules" cols="120" rows="10" readonly="readonly">%s</textarea>. This can be done automatically, by clicking here: %s. %s', w3_get_pgcache_rules_cache_path(), $this->button('view code', '', 'w3tc-show-rules'), htmlspecialchars($w3_plugin_pgcache->generate_rules_cache()), $this->button_link('auto-install', wp_nonce_url(sprintf('admin.php?page=%s&w3tc_pgcache_write_rules_cache', $this->_page), 'w3tc')), $this->button_hide_note('Hide this message', 'pgcache_rules_cache'));
                 }
             }
         }
@@ -1875,7 +1875,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
     function action_config_import() {
         $error = '';
 
-        $config = & new W3_Config();
+        @$config = & new W3_Config();
 
         if (!isset($_FILES['config_file']['error']) || $_FILES['config_file']['error'] == UPLOAD_ERR_NO_FILE) {
             $error = 'config_import_no_file';
@@ -1926,7 +1926,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
      * @return void
      */
     function action_config_reset() {
-        $config = & new W3_Config();
+        @$config = & new W3_Config();
         $config->load_defaults();
         $config->set_defaults();
 
@@ -1963,7 +1963,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
                 ));
             }
         } else {
-            $config = & new W3_Config(false);
+            @$config = & new W3_Config(false);
 
             if (@unlink(W3TC_CONFIG_PREVIEW_PATH) && $this->config_save($this->_config, $config, false)) {
                 $this->redirect(array(
@@ -2980,7 +2980,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
          * Read config
          * We should use new instance of WP_Config object here
          */
-        $config = & new W3_Config();
+        @$config = & new W3_Config();
         $config->read_request();
 
         /**
@@ -3339,7 +3339,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
 
                         if (($cloudflare_seclvl_old != $cloudflare_seclvl_new) || ($cloudflare_devmode_old != $cloudflare_devmode_new)) {
                             require_once W3TC_LIB_W3_DIR . '/CloudFlare.php';
-                            $w3_cloudflare =& new W3_CloudFlare(array(
+                            @$w3_cloudflare =& new W3_CloudFlare(array(
                                 'email' => $this->_config->get_string('cloudflare.email'),
                                 'key' => $this->_config->get_string('cloudflare.key'),
                                 'zone' => $this->_config->get_string('cloudflare.zone')
@@ -3746,7 +3746,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
             );
 
             require_once W3TC_LIB_W3_DIR . '/CloudFlare.php';
-            $w3_cloudflare =& new W3_CloudFlare($config);
+            @$w3_cloudflare =& new W3_CloudFlare($config);
 
             @set_time_limit($this->_config->get_integer('timelimit.cloudflare_api_request'));
 
@@ -5241,7 +5241,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
         if (!isset($results[$key])) {
             require_once W3TC_LIB_W3_DIR . '/Cache/Memcached.php';
 
-            $memcached = & new W3_Cache_Memcached(array(
+            @$memcached = & new W3_Cache_Memcached(array(
                 'servers' => $servers,
                 'persistant' => false
             ));
@@ -5737,7 +5737,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
         );
 
         require_once W3TC_LIB_W3_DIR . '/CloudFlare.php';
-        $w3_cloudflare =& new W3_CloudFlare($config);
+        @$w3_cloudflare =& new W3_CloudFlare($config);
 
         $response = $w3_cloudflare->api_request('stats');
 

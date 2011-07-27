@@ -199,7 +199,7 @@ class W3_Db extends W3_Db_Driver {
 
         if (!isset($instances[0])) {
             $class = __CLASS__;
-            $instances[0] = & new $class(DB_USER, DB_PASSWORD, DB_NAME, DB_HOST);
+            @$instances[0] = & new $class(DB_USER, DB_PASSWORD, DB_NAME, DB_HOST);
         }
 
         return $instances[0];

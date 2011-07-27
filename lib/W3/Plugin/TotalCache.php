@@ -73,7 +73,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
             ), 1, 2);
 
             require_once W3TC_LIB_W3_DIR . '/CloudFlare.php';
-            $w3_cloudflare =& new W3_CloudFlare();
+            @$w3_cloudflare =& new W3_CloudFlare();
 
             $w3_cloudflare->fix_remote_addr();
 
@@ -539,7 +539,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
 
             if ($email && $key) {
                 require_once W3TC_LIB_W3_DIR . '/CloudFlare.php';
-                $w3_cloudflare =& new W3_CloudFlare(array(
+                @$w3_cloudflare =& new W3_CloudFlare(array(
                     'email' => $email,
                     'key' => $key
                 ));

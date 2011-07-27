@@ -51,7 +51,7 @@
         		<th>
         			<input type="hidden" name="pgcache.cache.404" value="0" />
         			<label><input type="checkbox" name="pgcache.cache.404" value="1"<?php checked($this->_config->get_boolean('pgcache.cache.404'), true); ?> /> Cache 404 (not found) pages</label><br />
-    				<span class="description">Reduce server load by caching 404 pages. The "Do not process 404 errors for static objects with WordPress" <a href="admin.php?page=w3tc_browsercache">Browser Cache</a> option is also recommended.</span>
+    				<span class="description">Reduce server load by caching 404 pages. If the disk enhanced method of disk caching is used, 404 pages will be returned with a 200 response code. Use at your own risk.</span>
         		</th>
         	</tr>
         </table>

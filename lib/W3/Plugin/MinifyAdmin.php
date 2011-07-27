@@ -90,7 +90,7 @@ class W3_Plugin_MinifyAdmin extends W3_Plugin {
     function cleanup() {
         require_once W3TC_LIB_W3_DIR . '/Cache/File/Cleaner/Generic.php';
 
-        $w3_cache_file_cleaner_generic = & new W3_Cache_File_Cleaner_Generic(array(
+        @$w3_cache_file_cleaner_generic = & new W3_Cache_File_Cleaner_Generic(array(
             'exclude' => array(
                 '*.files',
                 '.htaccess',
@@ -108,6 +108,8 @@ class W3_Plugin_MinifyAdmin extends W3_Plugin {
      * Called from admin interface before configuration is changed
      *
      * @param object $old_config
+     * @param object $new_config
+     * @return void
      */
     function before_config_change(&$old_config, &$new_config) {
         if ($old_config->get_integer('minify.file.gc') !=

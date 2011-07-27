@@ -1184,6 +1184,7 @@ function w3_escape_comment($comment) {
 /**
  * Returns instance of singleton class
  *
+ * @param string $class
  * @return object
  */
 function &w3_instance($class) {
@@ -1192,10 +1193,11 @@ function &w3_instance($class) {
     if (!isset($instances[$class])) {
         require_once W3TC_LIB_W3_DIR . '/' .
                 str_replace('_', '/', substr($class, 3)) . '.php';
-        $instances[$class] = & new $class();
+        @$instances[$class] = & new $class();
     }
 
-    return $instances[$class];
+    $v = $instances[$class];   // dont return reference
+    return $v;
 }
 
 /**

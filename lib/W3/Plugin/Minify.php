@@ -461,7 +461,7 @@ class W3_Plugin_Minify extends W3_Plugin {
         if (count($ignored_comments)) {
             require_once W3TC_LIB_MINIFY_DIR . '/Minify/IgnoredCommentPreserver.php';
 
-            $ignored_comments_preserver =& new Minify_IgnoredCommentPreserver();
+            @$ignored_comments_preserver =& new Minify_IgnoredCommentPreserver();
             $ignored_comments_preserver->setIgnoredComments($ignored_comments);
 
             $ignored_comments_preserver->search($html);
