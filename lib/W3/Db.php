@@ -251,7 +251,7 @@ class W3_Db extends W3_Db_Driver {
             }
 
             require_once W3TC_LIB_W3_DIR . '/Cache.php';
-            $cache[0] = & W3_Cache::instance($engine, $engineConfig);
+            @$cache[0] = & W3_Cache::instance($engine, $engineConfig);
         }
 
         return $cache[0];

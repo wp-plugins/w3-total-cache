@@ -41,8 +41,6 @@ class W3_Minifier {
 
     /**
      * PHP5-style constructor
-     *
-     * @return void
      */
     function __construct() {
         $this->_config = & w3_instance('W3_Config');
@@ -50,8 +48,6 @@ class W3_Minifier {
 
     /**
      * PHP4-style constructor
-     *
-     * @return void
      */
     function W3_Minifier() {
         $this->__construct();
@@ -71,7 +67,7 @@ class W3_Minifier {
      * Returns true if minifier available
      *
      * @param string $engine
-     * @return void
+     * @return boolean
      */
     function available($engine) {
         switch ($engine) {

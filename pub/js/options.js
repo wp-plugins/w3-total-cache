@@ -948,50 +948,44 @@ jQuery(function() {
         return true;
     });
 
-    function w3tc_support_request_type_change() {
-        jQuery('#support_request_type').change(function() {
-            var request_type = jQuery(this);
+    jQuery('#support_request_type').live('change', function() {
+        var request_type = jQuery(this);
 
-            if (request_type.val() == '') {
-                alert('Please select request type.');
-                request_type.focus();
+        if (request_type.val() == '') {
+            alert('Please select request type.');
+            request_type.focus();
 
-                return false;
-            }
+            return false;
+        }
 
-            var type = request_type.val(), action = '';
+        var type = request_type.val(), action = '';
 
-            switch (type) {
-                case 'bug_report':
-                case 'new_feature':
-                    action = 'support_form';
-                    break;
+        switch (type) {
+            case 'bug_report':
+            case 'new_feature':
+                action = 'support_form';
+                break;
 
-                case 'email_support':
-                case 'phone_support':
-                case 'plugin_config':
-                case 'theme_config':
-                case 'linux_config':
-                    action = 'support_payment';
-                    break;
-            }
+            case 'email_support':
+            case 'phone_support':
+            case 'plugin_config':
+            case 'theme_config':
+            case 'linux_config':
+                action = 'support_payment';
+                break;
+        }
 
-            if (action) {
-                jQuery('#support_container').html('<div id="support_loading">Loading...</div>').load('admin.php?page=w3tc_support&w3tc_' + action + '&request_type=' + type);
+        if (action) {
+            jQuery('#support_container').html('<div id="support_loading">Loading...</div>').load('admin.php?page=w3tc_support&w3tc_' + action + '&request_type=' + type + '&_wpnonce=' + request_type.metadata().nonce);
 
-                return false;
-            }
+            return false;
+        }
 
-            return true;
-        });
-    }
-
-    w3tc_support_request_type_change();
+        return true;
+    });
 
     jQuery('#support_cancel').live('click', function() {
-        jQuery('#support_container').html('<div id="support_loading">Loading...</div>').load('admin.php?page=w3tc_support&w3tc_support_select', function() {
-            w3tc_support_request_type_change();
-        });
+        jQuery('#support_container').html('<div id="support_loading">Loading...</div>').load('admin.php?page=w3tc_support&w3tc_support_select&_wpnonce=' + jQuery(this).metadata().nonce);
     });
 
     // mobile tab

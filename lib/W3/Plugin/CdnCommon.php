@@ -389,7 +389,7 @@ class W3_Plugin_CdnCommon extends W3_Plugin {
             ));
 
             require_once W3TC_LIB_W3_DIR . '/Cdn.php';
-            $cdn[0] = & W3_Cdn::instance($engine, $engine_config);
+            @$cdn[0] = & W3_Cdn::instance($engine, $engine_config);
 
             /**
              * Set cache config for CDN

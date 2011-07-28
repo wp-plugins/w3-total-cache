@@ -177,7 +177,7 @@ class W3_Plugin_DbCache extends W3_Plugin {
 
         if (!$flushed) {
             require_once W3TC_LIB_W3_DIR . '/Db.php';
-            $w3_db = & W3_Db::instance();
+            @$w3_db = & W3_Db::instance();
 
             $w3_db->flush_cache();
         }

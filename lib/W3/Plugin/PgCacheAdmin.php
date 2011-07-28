@@ -952,18 +952,25 @@ class W3_Plugin_PgCacheAdmin extends W3_Plugin {
 
         if ($this->_config->get_boolean('browsercache.enabled') && $this->_config->get_boolean('browsercache.html.compression')) {
             $rules .= "if (\$http_accept_encoding ~ gzip) {\n";
-            $rules .= "    set \$w3tc_enc .gzip;\n";
+            $rules .= "    set \$w3tc_enc _gzip;\n";
             $rules .= "}\n";
         }
 
         $cache_path = str_replace(w3_get_document_root(), '', $cache_dir);
 
-        $rules .= "if (!-f \"\$document_root" . $cache_path . "/\$request_uri/_index\$w3tc_ua\$w3tc_ref\$w3tc_ssl.html\$w3tc_enc\") {\n";
-        $rules .= "    set \$w3tc_rewrite 0;\n";
+        $rules .= "set \$w3tc_ext \"\";\n";
+        $rules .= "if (-f \"\$document_root" . $cache_path . "/\$request_uri/_index\$w3tc_ua\$w3tc_ref\$w3tc_ssl.html\$w3tc_enc\") {\n";
+        $rules .= "    set \$w3tc_ext .html;\n";
+        $rules .= "}\n";
+        $rules .= "if (-f \"\$document_root" . $cache_path . "/\$request_uri/_index\$w3tc_ua\$w3tc_ref\$w3tc_ssl.xml\$w3tc_enc\") {\n";
+        $rules .= "    set \$w3tc_ext .xml;\n";
+        $rules .= "}\n";
+        $rules .= "if (\$w3tc_ext = \"\") {\n";
+        $rules .= "  set \$w3tc_rewrite 0;\n";
         $rules .= "}\n";
 
         $rules .= "if (\$w3tc_rewrite = 1) {\n";
-        $rules .= "    rewrite .* \"" . $cache_path . "/\$request_uri/_index\$w3tc_ua\$w3tc_ref\$w3tc_ssl.html\$w3tc_enc\" last;\n";
+        $rules .= "    rewrite .* \"" . $cache_path . "/\$request_uri/_index\$w3tc_ua\$w3tc_ref\$w3tc_ssl\$w3tc_ext\$w3tc_enc\" last;\n";
         $rules .= "}\n";
         $rules .= W3TC_MARKER_END_PGCACHE_CORE . "\n";
 

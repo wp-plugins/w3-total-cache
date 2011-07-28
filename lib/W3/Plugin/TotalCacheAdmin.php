@@ -2748,7 +2748,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
         }
 
         if ($result) {
-            $w3_cdn = & W3_Cdn::instance($engine, $config);
+            @$w3_cdn = & W3_Cdn::instance($engine, $config);
             $error = null;
 
             @set_time_limit($this->_config->get_integer('timelimit.cdn_test'));
@@ -2801,7 +2801,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
         }
 
         if ($result) {
-            $w3_cdn = & W3_Cdn::instance($engine, $config);
+            @$w3_cdn = & W3_Cdn::instance($engine, $config);
 
             @set_time_limit($this->_config->get_integer('timelimit.cdn_container_create'));
 
@@ -4425,7 +4425,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
      */
     function flush_dbcache() {
         require_once W3TC_LIB_W3_DIR . '/Db.php';
-        $w3_db = & W3_Db::instance();
+        @$w3_db = & W3_Db::instance();
 
         $w3_db->flush_cache();
     }

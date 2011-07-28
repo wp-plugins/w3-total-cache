@@ -136,7 +136,6 @@ class Minify_CSS_UriRewriter {
      *
      * @param string $css
      * @param string $path The path to prepend.
-     * @param string $callback The path to prepend.
      * @param integer $browserCacheId
      * @param array $browserCacheExtensions
      *

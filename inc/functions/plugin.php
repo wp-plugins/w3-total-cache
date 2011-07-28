@@ -64,7 +64,7 @@ function w3tc_pgcache_flush_post($post_id) {
 function w3tc_dbcache_flush() {
     require_once W3TC_LIB_W3_DIR . '/Db.php';
 
-    $w3_db = & W3_Db::instance();
+    @$w3_db = & W3_Db::instance();
 
     return $w3_db->flush_cache();
 }

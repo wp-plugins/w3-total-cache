@@ -18,7 +18,7 @@
             <input type="hidden" name="return" value="<?php echo htmlspecialchars($return_url); ?>" />
             <input type="hidden" name="cancel_return" value="<?php echo htmlspecialchars($cancel_url); ?>" />
             <input type="submit" class="button-primary" value="Buy now" />
-            <input id="support_cancel" type="button" value="Cancel" class="button-primary" />
+            <input id="support_cancel" class="{nonce: '<?php echo wp_create_nonce('w3tc'); ?>'}" type="button" value="Cancel" class="button-primary" />
         </p>
         <?php echo $this->postbox_footer(); ?>
     </div>
