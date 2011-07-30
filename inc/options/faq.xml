@@ -546,7 +546,7 @@
 					<li>define('DONOTCACHEDB', true);<br />Disables database caching for given page.</li>
 					<li>define('DONOTMINIFY', true);<br />Disables minify for a given page.</li>
 					<li>define('DONOTCDN', true);<br />Disables content delivery network for a given page.</li>
-					<li>define('DONOTCACHCEOBJECT', true);<br />Disables object cache for a given page.</li>
+					<li>define('DONOTCACHEOBJECT', true);<br />Disables object cache for a given page.</li>
 				</ul>
 			]]></answer>
 		</entry>

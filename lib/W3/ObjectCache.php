@@ -128,9 +128,9 @@ class W3_ObjectCache {
 
         if ($this->_can_ob()) {
             ob_start(array(
-                &$this,
-                'ob_callback'
-            ));
+                          &$this,
+                          'ob_callback'
+                     ));
         }
     }
 
@@ -166,7 +166,7 @@ class W3_ObjectCache {
                 $value = $this->cache[$key];
             }
         } else {
-            $caching = $this->_can_cache2($id, $group, $reason);
+            $caching = $this->_can_cache_read($id, $group, $reason);
             $internal = false;
 
             if ($caching) {
@@ -247,7 +247,7 @@ class W3_ObjectCache {
 
         $reason = '';
 
-        if ($this->_can_cache2($id, $group, $reason)) {
+        if ($this->_can_cache_write($id, $group, $reason)) {
             $cache = & $this->_get_cache();
 
             return $cache->set($key, $data, ($expire ? $expire : $this->_lifetime));
@@ -270,7 +270,7 @@ class W3_ObjectCache {
 
         $reason = '';
 
-        if ($this->_can_cache2($id, $group, $reason)) {
+        if ($this->_can_cache_write($id, $group, $reason)) {
             $cache = & $this->_get_cache();
 
             return $cache->delete($key);
@@ -463,19 +463,10 @@ class W3_ObjectCache {
         }
 
         /**
-         * Check for DONOTCACHCEOBJECT constant
+         * Check for DONOTCACHEOBJECT constant
          */
-        if (defined('DONOTCACHCEOBJECT') && DONOTCACHCEOBJECT) {
-            $this->_cache_reject_reason = 'DONOTCACHCEOBJECT constant is defined';
-
-            return false;
-        }
-
-        /**
-         * Skip if admin
-         */
-        if ($this->_config->get_boolean('objectcache.reject.admin') && defined('WP_ADMIN')) {
-            $this->_cache_reject_reason = 'wp-admin';
+        if (defined('DONOTCACHEOBJECT') && DONOTCACHEOBJECT) {
+            $this->_cache_reject_reason = 'DONOTCACHEOBJECT constant is defined';
 
             return false;
         }
@@ -493,14 +484,42 @@ class W3_ObjectCache {
     }
 
     /**
-     * Check if caching allowed runtime
+     * Check if persistent cache reading is allowed
      *
      * @param string $id
      * @param string $group
      * @param string $cache_reject_reason
      * @return boolean
      */
-    function _can_cache2($id, $group, &$cache_reject_reason) {
+    function _can_cache_read($id, $group, &$cache_reject_reason) {
+        /**
+         * Skip if writing is disabled
+         */
+        if (!$this->_can_cache_write($id, $group, $cache_reject_reason)) {
+            return false;
+        }
+
+        /**
+         * Skip if admin
+         */
+        if ($this->_config->get_boolean('objectcache.reject.admin') && defined('WP_ADMIN')) {
+            $this->_cache_reject_reason = 'wp-admin';
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if persistent cache writing is allowed
+     *
+     * @param $id
+     * @param $group
+     * @param $cache_reject_reason
+     * @return bool
+     */
+    function _can_cache_write($id, $group, &$cache_reject_reason) {
         /**
          * Skip if disabled
          */
@@ -511,10 +530,10 @@ class W3_ObjectCache {
         }
 
         /**
-         * Check for DONOTCACHCEOBJECT constant
+         * Check for DONOTCACHEOBJECT constant
          */
-        if (defined('DONOTCACHCEOBJECT') && DONOTCACHCEOBJECT) {
-            $cache_reject_reason = 'DONOTCACHCEOBJECT constant is defined';
+        if (defined('DONOTCACHEOBJECT') && DONOTCACHEOBJECT) {
+            $cache_reject_reason = 'DONOTCACHEOBJECT constant is defined';
 
             return false;
         }
