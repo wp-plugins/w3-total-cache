@@ -678,9 +678,14 @@ class W3_PgCache {
      * @return boolean
      */
     function _check_ua() {
-        $uas = array_merge($this->_config->get_array('pgcache.reject.ua'), array(
-            W3TC_POWERED_BY
-        ));
+        require_once W3TC_LIB_W3_DIR . '/Request.php';
+
+        $uas = $this->_config->get_array('pgcache.reject.ua');
+        $preload = W3_Request::get_boolean('w3tc_preload');
+
+        if (! $preload) {
+            $uas = array_merge($uas, array(W3TC_POWERED_BY));
+        }
 
         foreach ($uas as $ua) {
             if (isset($_SERVER['HTTP_USER_AGENT']) && stristr($_SERVER['HTTP_USER_AGENT'], $ua) !== false) {

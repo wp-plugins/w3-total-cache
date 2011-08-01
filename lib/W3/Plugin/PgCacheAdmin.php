@@ -210,6 +210,8 @@ class W3_Plugin_PgCacheAdmin extends W3_Plugin {
         require_once W3TC_INC_DIR . '/functions/http.php';
 
         foreach ($queue as $url) {
+            $url = w3_url_format($url, array('w3tc_preload' => 1));
+
             w3_http_get($url);
         }
     }
@@ -217,7 +219,7 @@ class W3_Plugin_PgCacheAdmin extends W3_Plugin {
     /**
      * Parses sitemap
      *
-     * @param string $xml
+     * @param string $url
      * @return array
      */
     function parse_sitemap($url) {

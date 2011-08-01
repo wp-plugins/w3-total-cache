@@ -36,7 +36,9 @@ if (!@is_dir(W3TC_DIR) || !file_exists(W3TC_DIR . '/inc/define.php')) {
      * @return boolean
      */
     function wp_cache_reset() {
-        return true;
+        global $wp_object_cache;
+
+        return $wp_object_cache->reset();
     }
 
     /**

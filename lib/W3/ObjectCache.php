@@ -261,9 +261,14 @@ class W3_ObjectCache {
      *
      * @param string $id
      * @param string $group
+     * @param bool $force
      * @return boolean
      */
-    function delete($id, $group = 'default') {
+    function delete($id, $group = 'default', $force = false) {
+        if (!$force && false === $this->get($id, $group)) {
+            return false;
+        }
+
         $key = $this->_get_cache_key($id, $group);
 
         unset($this->cache[$key]);
@@ -311,6 +316,15 @@ class W3_ObjectCache {
         }
 
         return $this->set($id, $data, $group, $expire);
+    }
+
+    /**
+     * Reset keys
+     *
+     * @return boolean
+     */
+    function reset() {
+        return $this->flush();
     }
 
     /**
@@ -600,7 +614,7 @@ class W3_ObjectCache {
         /**
          * Debug should be enabled
          */
-        if (!$this->_config->get_boolean('objectcache.debug')) {
+        if (!$this->_debug) {
             return false;
         }
 
