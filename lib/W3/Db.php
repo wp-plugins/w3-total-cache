@@ -681,6 +681,16 @@ class W3_Db extends W3_Db_Driver {
 class W3_Db_Nocache extends W3_Db_Driver {
     function __construct($object_doing_query) {
         $this->_object_doing_query = $object_doing_query;
+
+        # _real_escape is called on that object, 
+        # which requires those inst. vars
+        if (isset($object_doing_query->$real_escape)) {
+            $this->$real_escape = $object_doing_query->$real_escape;
+        }
+        if (isset($object_doing_query->$dbh)) {
+            $this->$dbh = $object_doing_query->$dbh;
+        }
+
     }
 
     /**

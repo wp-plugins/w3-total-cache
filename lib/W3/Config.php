@@ -391,7 +391,7 @@ class W3_Config {
         'pgcache.memcached.persistant' => true,
         'pgcache.cache.query' => true,
         'pgcache.cache.home' => true,
-        'pgcache.cache.feed' => true,
+        'pgcache.cache.feed' => false,
         'pgcache.cache.404' => false,
         'pgcache.cache.flush' => false,
         'pgcache.cache.headers' => array(
