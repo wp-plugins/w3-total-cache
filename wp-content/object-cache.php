@@ -31,17 +31,6 @@ if (!@is_dir(W3TC_DIR) || !file_exists(W3TC_DIR . '/inc/define.php')) {
     }
 
     /**
-     * Reset cache
-     *
-     * @return boolean
-     */
-    function wp_cache_reset() {
-        global $wp_object_cache;
-
-        return $wp_object_cache->reset();
-    }
-
-    /**
      * Close cache
      *
      * @return boolean
@@ -119,6 +108,17 @@ if (!@is_dir(W3TC_DIR) || !file_exists(W3TC_DIR . '/inc/define.php')) {
         global $wp_object_cache;
 
         return $wp_object_cache->replace($id, $data, $group, $expire);
+    }
+
+    /**
+     * Reset cache
+     *
+     * @return boolean
+     */
+    function wp_cache_reset() {
+        global $wp_object_cache;
+
+        return $wp_object_cache->reset();
     }
 
     /**

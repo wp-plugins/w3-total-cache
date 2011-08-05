@@ -46,8 +46,6 @@ class W3_Config {
         'objectcache.file.locking' => 'boolean',
         'objectcache.memcached.servers' => 'array',
         'objectcache.memcached.persistant' => 'boolean',
-        'objectcache.reject.admin' => 'boolean',
-        'objectcache.reject.uri' => 'array',
         'objectcache.groups.global' => 'array',
         'objectcache.groups.nonpersistent' => 'array',
         'objectcache.lifetime' => 'integer',
@@ -361,8 +359,6 @@ class W3_Config {
             '127.0.0.1:11211'
         ),
         'objectcache.memcached.persistant' => true,
-        'objectcache.reject.admin' => true,
-        'objectcache.reject.uri' => array(),
         'objectcache.groups.global' => array(
             'users',
             'userlogins',
@@ -644,7 +640,7 @@ class W3_Config {
         'mobile.rgroups' => array(
             'high' => array(
                 'theme' => '',
-                'enabled' => true,
+                'enabled' => false,
                 'redirect' => '',
                 'agents' => array(
                     'acer\ s100',
@@ -688,7 +684,7 @@ class W3_Config {
             ),
             'low' => array(
                 'theme' => '',
-                'enabled' => true,
+                'enabled' => false,
                 'redirect' => '',
                 'agents' => array(
                     '2\.0\ mmp',
@@ -801,7 +797,7 @@ class W3_Config {
         'referrer.rgroups' => array(
             'search_engines' => array(
                 'theme' => '',
-                'enabled' => true,
+                'enabled' => false,
                 'redirect' => '',
                 'referrers' => array(
                     'google\.com',

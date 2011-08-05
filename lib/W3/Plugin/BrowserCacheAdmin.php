@@ -84,6 +84,7 @@ class W3_Plugin_BrowserCacheAdmin extends W3_Plugin {
     function generate_rules_cache($cdn = false) {
         switch (true) {
             case w3_is_apache():
+            case w3_is_litespeed():
                 return $this->generate_rules_cache_apache($cdn);
 
             case w3_is_nginx():
@@ -431,6 +432,7 @@ class W3_Plugin_BrowserCacheAdmin extends W3_Plugin {
     function generate_rules_no404wp() {
         switch (true) {
             case w3_is_apache():
+            case w3_is_litespeed():
                 return $this->generate_rules_no404wp_apache();
 
             case w3_is_nginx():

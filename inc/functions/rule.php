@@ -6,7 +6,7 @@
  * @return boolean
  */
 function w3_is_permalink_rules() {
-    if (w3_is_apache() && !w3_is_network()) {
+    if ((w3_is_apache() || w3_is_litespeed()) && !w3_is_network()) {
         $path = w3_get_home_root() . '/.htaccess';
 
         return (($data = @file_get_contents($path)) && strstr($data, W3TC_MARKER_BEGIN_WORDPRESS) !== false);
@@ -40,6 +40,7 @@ function w3_get_nginx_rules_path() {
 function w3_get_pgcache_rules_core_path() {
     switch (true) {
         case w3_is_apache():
+        case w3_is_litespeed():
             return w3_get_home_root() . '/.htaccess';
 
         case w3_is_nginx():
@@ -57,6 +58,7 @@ function w3_get_pgcache_rules_core_path() {
 function w3_get_pgcache_rules_cache_path() {
     switch (true) {
         case w3_is_apache():
+        case w3_is_litespeed():
             return W3TC_CACHE_FILE_PGCACHE_DIR . '/.htaccess';
 
         case w3_is_nginx():
@@ -74,6 +76,7 @@ function w3_get_pgcache_rules_cache_path() {
 function w3_get_browsercache_rules_cache_path() {
     switch (true) {
         case w3_is_apache():
+        case w3_is_litespeed():
             return w3_get_home_root() . '/.htaccess';
 
         case w3_is_nginx():
@@ -91,6 +94,7 @@ function w3_get_browsercache_rules_cache_path() {
 function w3_get_browsercache_rules_no404wp_path() {
     switch (true) {
         case w3_is_apache():
+        case w3_is_litespeed():
             return w3_get_home_root() . '/.htaccess';
 
         case w3_is_nginx():
@@ -108,6 +112,7 @@ function w3_get_browsercache_rules_no404wp_path() {
 function w3_get_minify_rules_core_path() {
     switch (true) {
         case w3_is_apache():
+        case w3_is_litespeed():
             return W3TC_CACHE_FILE_MINIFY_DIR . '/.htaccess';
 
         case w3_is_nginx():
@@ -125,6 +130,7 @@ function w3_get_minify_rules_core_path() {
 function w3_get_minify_rules_cache_path() {
     switch (true) {
         case w3_is_apache():
+        case w3_is_litespeed():
             return W3TC_CACHE_FILE_MINIFY_DIR . '/.htaccess';
 
         case w3_is_nginx():
@@ -142,6 +148,7 @@ function w3_get_minify_rules_cache_path() {
 function w3_get_cdn_rules_path() {
     switch (true) {
         case w3_is_apache():
+        case w3_is_litespeed():
             return '.htaccess';
 
         case w3_is_nginx():
@@ -159,7 +166,7 @@ function w3_get_cdn_rules_path() {
  */
 function w3_can_modify_rules($path) {
     if (w3_is_network()) {
-        if (w3_is_apache()) {
+        if (w3_is_apache() || w3_is_litespeed()) {
             switch ($path) {
                 case w3_get_pgcache_rules_cache_path():
                 case w3_get_minify_rules_core_path():

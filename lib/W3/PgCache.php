@@ -297,7 +297,11 @@ class W3_PgCache {
                 if ($this->_enhanced_mode) {
                     $is_404 = false;
                     $headers = array();
-                    if (isset($cached_headers['Content-Type'])) {
+                    /*
+                     * If feeds are cached - we can store cache files as .xml
+                     */
+                    if ($this->_config->get_boolean('pgcache.cache.feed') &&
+                            isset($cached_headers['Content-Type'])) {
                         $content_type = $cached_headers['Content-Type'];
                     }
                 } else {

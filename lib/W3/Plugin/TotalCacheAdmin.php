@@ -4135,8 +4135,6 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
          */
         if ($this->_config->get_boolean('objectcache.enabled')) {
             $objectcache_dependencies = array(
-                'objectcache.reject.admin',
-                'objectcache.reject.uri',
                 'objectcache.groups.global',
                 'objectcache.groups.nonpersistent'
             );

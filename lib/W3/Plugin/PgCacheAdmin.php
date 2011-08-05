@@ -389,6 +389,7 @@ class W3_Plugin_PgCacheAdmin extends W3_Plugin {
     function generate_rules_core() {
         switch (true) {
             case w3_is_apache():
+            case w3_is_litespeed():
                 return $this->generate_rules_core_apache();
 
             case w3_is_nginx():
@@ -406,6 +407,7 @@ class W3_Plugin_PgCacheAdmin extends W3_Plugin {
     function generate_rules_cache() {
         switch (true) {
             case w3_is_apache():
+            case w3_is_litespeed():
                 return $this->generate_rules_cache_apache();
 
             case w3_is_nginx():
@@ -610,60 +612,56 @@ class W3_Plugin_PgCacheAdmin extends W3_Plugin {
             $rules .= "    RewriteRule .* - [E=W3TC_ENC:_gzip]\n";
         }
 
+        $use_cache_rules = '';
         /**
          * Don't accept POSTs
          */
-        $rules .= "    RewriteCond %{REQUEST_METHOD} !=POST\n";
+        $use_cache_rules .= "    RewriteCond %{REQUEST_METHOD} !=POST\n";
 
         /**
          * Query string should be empty
          */
-        $rules .= "    RewriteCond %{QUERY_STRING} =\"\"\n";
+        $use_cache_rules .= "    RewriteCond %{QUERY_STRING} =\"\"\n";
 
         /**
          * Check permalink structure trailing slash
          */
         if (substr($permalink_structure, -1) == '/') {
-            $rules .= "    RewriteCond %{REQUEST_URI} \\/$";
+            $use_cache_rules .= "    RewriteCond %{REQUEST_URI} \\/$";
 
             if (count($accept_uris)) {
-                $rules .= " [OR]\n";
-                $rules .= "    RewriteCond %{REQUEST_URI} (" . implode('|', $accept_uris) . ") [NC]\n";
+                $use_cache_rules .= " [OR]\n";
+                $use_cache_rules .= "    RewriteCond %{REQUEST_URI} (" . implode('|', $accept_uris) . ") [NC]\n";
             } else {
-                $rules .= "\n";
+                $use_cache_rules .= "\n";
             }
         }
 
         /**
          * Don't accept rejected URIs
          */
-        $rules .= "    RewriteCond %{REQUEST_URI} !(" . implode('|', $reject_uris) . ")";
+        $use_cache_rules .= "    RewriteCond %{REQUEST_URI} !(" . implode('|', $reject_uris) . ")";
 
         /**
          * Exclude files from rejected URIs list
          */
         if (count($accept_files)) {
-            $rules .= " [NC,OR]\n    RewriteCond %{REQUEST_URI} (" . implode('|', array_map('w3_preg_quote', $accept_files)) . ") [NC]\n";
+            $use_cache_rules .= " [NC,OR]\n    RewriteCond %{REQUEST_URI} (" . implode('|', array_map('w3_preg_quote', $accept_files)) . ") [NC]\n";
         } else {
-            $rules .= " [NC]\n";
+            $use_cache_rules .= " [NC]\n";
         }
 
         /**
          * Check for rejected cookies
          */
-        $rules .= "    RewriteCond %{HTTP_COOKIE} !(" . implode('|', array_map('w3_preg_quote', $reject_cookies)) . ") [NC]\n";
+        $use_cache_rules .= "    RewriteCond %{HTTP_COOKIE} !(" . implode('|', array_map('w3_preg_quote', $reject_cookies)) . ") [NC]\n";
 
         /**
          * Check for rejected user agents
          */
         if (count($reject_user_agents)) {
-            $rules .= "    RewriteCond %{HTTP_USER_AGENT} !(" . implode('|', array_map('w3_preg_quote', $reject_user_agents)) . ") [NC]\n";
+            $use_cache_rules .= "    RewriteCond %{HTTP_USER_AGENT} !(" . implode('|', array_map('w3_preg_quote', $reject_user_agents)) . ") [NC]\n";
         }
-
-        /**
-         * Note that rewrite can happen
-         */
-        $rules .= "    RewriteRule .* - [E=W3TC_PGCACHE:1]\n";
 
         /**
          * Make final rewrites for specific files
@@ -671,8 +669,14 @@ class W3_Plugin_PgCacheAdmin extends W3_Plugin {
         $uri_pre =  $cache_path . "/%{REQUEST_URI}/_index%{ENV:W3TC_UA}%{ENV:W3TC_REF}%{ENV:W3TC_SSL}";
         $switch = " -" . ($this->_config->get_boolean('pgcache.file.nfs') ? 'F' : 'f');
 
-        foreach (array('.html', '.xml') as $ext) {
-            $rules .= "    RewriteCond %{W3TC_PGCACHE} =\"1\"\n";
+        $extensions = array('.html');
+
+        if ($this->_config->get_boolean('pgcache.cache.feed')) {
+            $extensions[] = '.xml';
+        }
+
+        foreach ($extensions as $ext) {
+            $rules .= $use_cache_rules;
             $rules .= "    RewriteCond \"%{DOCUMENT_ROOT}" . $uri_pre . $ext .
                 "%{ENV:W3TC_ENC}\"" . $switch . "\n";
             $rules .= "    RewriteRule .* \"" . $uri_pre . $ext . 
@@ -964,9 +968,13 @@ class W3_Plugin_PgCacheAdmin extends W3_Plugin {
         $rules .= "if (-f \"\$document_root" . $cache_path . "/\$request_uri/_index\$w3tc_ua\$w3tc_ref\$w3tc_ssl.html\$w3tc_enc\") {\n";
         $rules .= "    set \$w3tc_ext .html;\n";
         $rules .= "}\n";
-        $rules .= "if (-f \"\$document_root" . $cache_path . "/\$request_uri/_index\$w3tc_ua\$w3tc_ref\$w3tc_ssl.xml\$w3tc_enc\") {\n";
-        $rules .= "    set \$w3tc_ext .xml;\n";
-        $rules .= "}\n";
+
+        if ($this->_config->get_boolean('pgcache.cache.feed')) {
+            $rules .= "if (-f \"\$document_root" . $cache_path . "/\$request_uri/_index\$w3tc_ua\$w3tc_ref\$w3tc_ssl.xml\$w3tc_enc\") {\n";
+            $rules .= "    set \$w3tc_ext .xml;\n";
+            $rules .= "}\n";
+        }
+
         $rules .= "if (\$w3tc_ext = \"\") {\n";
         $rules .= "  set \$w3tc_rewrite 0;\n";
         $rules .= "}\n";

@@ -17,23 +17,6 @@
 
 <form action="admin.php?page=<?php echo $this->_page; ?>" method="post">
     <div class="metabox-holder">
-		<?php echo $this->postbox_header('General'); ?>
-        <table class="form-table">
-        	<tr>
-        		<th>
-        			<input type="hidden" name="objectcache.reject.admin" value="0" />
-        			<label><input type="checkbox" name="objectcache.reject.admin" value="1"<?php checked($this->_config->get_boolean('objectcache.reject.admin'), true); ?> /> Don't cache WordPress Admin</label>
-					<br /><span class="description">Leave this option checked to maintain default WordPress Admin behavior.</span>
-        		</th>
-        	</tr>
-        </table>
-
-        <p class="submit">
-            <?php echo $this->nonce_field('w3tc'); ?>
-        	<input type="submit" name="w3tc_save_options" class="w3tc-button-save button-primary" value="Save all settings" />
-        </p>
-    	<?php echo $this->postbox_footer(); ?>
-
 		<?php echo $this->postbox_header('Advanced'); ?>
         <table class="form-table">
         	<?php if ($this->_config->get_string('objectcache.engine') == 'memcached'): ?>
@@ -60,13 +43,6 @@
         			<input id="objectcache_file_gc" type="text" name="objectcache.file.gc" value="<?php echo $this->_config->get_integer('objectcache.file.gc'); ?>" size="8" /> seconds
         			<br /><span class="description">If caching to disk, specify how frequently expired cache data is removed. For busy sites, a lower value is best.</span>
     			</td>
-        	</tr>
-        	<tr>
-        		<th><label for="objectcache_reject_uri">Never cache the following pages:</label></th>
-        		<td>
-        			<textarea id="objectcache_reject_uri" name="objectcache.reject.uri" cols="40" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('objectcache.reject.uri'))); ?></textarea>
-        			<br /><span class="description">Always ignore the specified pages / directories.</span>
-        		</td>
         	</tr>
         	<tr>
         		<th><label for="objectcache_groups_global">Global groups:</label></th>

@@ -436,18 +436,18 @@
             <tr>
                 <th>Debug Mode:</th>
                 <td>
-                    <input type="hidden" name="pgcache.debug" value="0" />
-                    <input type="hidden" name="minify.debug" value="0" />
-                    <input type="hidden" name="dbcache.debug" value="0" />
-                    <input type="hidden" name="objectcache.debug" value="0" />
-                    <input type="hidden" name="cdn.debug" value="0" />
-                    <input type="hidden" name="varnish.debug" value="0" />
-                    <label><input type="checkbox" name="pgcache.debug" value="pgcache"<?php checked($this->_config->get_boolean('pgcache.debug'), true); ?> /> Page Cache</label><br />
-                    <label><input type="checkbox" name="minify.debug" value="minify"<?php checked($this->_config->get_boolean('minify.debug'), true); ?> /> Minify</label><br />
-                    <label><input type="checkbox" name="dbcache.debug" value="dbcache"<?php checked($this->_config->get_boolean('dbcache.debug'), true); ?> /> Database Cache</label><br />
-                    <label><input type="checkbox" name="objectcache.debug" value="objectcache"<?php checked($this->_config->get_boolean('objectcache.debug'), true); ?> /> Object Cache</label><br />
-                    <label><input type="checkbox" name="cdn.debug" value="cdn"<?php checked($this->_config->get_boolean('cdn.debug'), true); ?> /> Content Delivery Network</label><br />
-                    <label><input type="checkbox" name="varnish.debug" value="varnish"<?php checked($this->_config->get_boolean('varnish.debug'), true); ?> /> Varnish</label><br />
+                    <input type="hidden" name="pgcache.debug" value="<?php echo ((!$this->_config->get_boolean('pgcache.enabled') && $this->_config->get_boolean('pgcache.debug')) ? "1" : "0") ?>" />
+                    <input type="hidden" name="minify.debug" value="<?php echo ((!$this->_config->get_boolean('minify.enabled') && $this->_config->get_boolean('minify.debug')) ? "1" : "0") ?>" />
+                    <input type="hidden" name="dbcache.debug" value="<?php echo ((!$this->_config->get_boolean('dbcache.enabled') && $this->_config->get_boolean('dbcache.debug')) ? "1" : "0") ?>" />
+                    <input type="hidden" name="objectcache.debug" value="<?php echo ((!$this->_config->get_boolean('objectcache.enabled') && $this->_config->get_boolean('objectcache.debug')) ? "1" : "0") ?>" />
+                    <input type="hidden" name="cdn.debug" value="<?php echo ((!$this->_config->get_boolean('cdn.enabled') && $this->_config->get_boolean('cdn.debug')) ? "1" : "0") ?>" />
+                    <input type="hidden" name="varnish.debug" value="<?php echo ((!$this->_config->get_boolean('varnish.enabled') && $this->_config->get_boolean('varnish.debug')) ? "1" : "0") ?>" />
+                    <label><input type="checkbox" name="pgcache.debug" value="pgcache"<?php checked($this->_config->get_boolean('pgcache.debug') && $this->_config->get_boolean('pgcache.enabled'), true); ?> <?php if (!$this->_config->get_boolean('pgcache.enabled')): ?> disabled="disabled"<?php endif; ?>/> Page Cache</label><br />
+                    <label><input type="checkbox" name="minify.debug" value="minify"<?php checked($this->_config->get_boolean('minify.debug') && $this->_config->get_boolean('minify.enabled'), true); ?> <?php if (!$this->_config->get_boolean('minify.enabled')): ?> disabled="disabled"<?php endif; ?>/> Minify</label><br />
+                    <label><input type="checkbox" name="dbcache.debug" value="dbcache"<?php checked($this->_config->get_boolean('dbcache.debug') && $this->_config->get_boolean('dbcache.enabled'), true); ?> <?php if (!$this->_config->get_boolean('dbcache.enabled')): ?> disabled="disabled"<?php endif; ?>/> Database Cache</label><br />
+                    <label><input type="checkbox" name="objectcache.debug" value="objectcache"<?php checked($this->_config->get_boolean('objectcache.debug') && $this->_config->get_boolean('objectcache.enabled'), true); ?> <?php if (!$this->_config->get_boolean('objectcache.enabled')): ?> disabled="disabled"<?php endif; ?>/> Object Cache</label><br />
+                    <label><input type="checkbox" name="cdn.debug" value="cdn"<?php checked($this->_config->get_boolean('cdn.debug') && $this->_config->get_boolean('cdn.enabled'), true); ?> <?php if (!$this->_config->get_boolean('cdn.enabled')): ?> disabled="disabled"<?php endif; ?>/> Content Delivery Network</label><br />
+                    <label><input type="checkbox" name="varnish.debug" value="varnish"<?php checked($this->_config->get_boolean('varnish.debug') && $this->_config->get_boolean('varnish.enabled'), true); ?> <?php if (!$this->_config->get_boolean('varnish.enabled')): ?> disabled="disabled"<?php endif; ?>/> Varnish</label><br />
                     <span class="description">If selected, detailed caching information will be appear at the end of each page in a <acronym title="Hypertext Markup Language">HTML</acronym> comment. View a page's source code to review.</span>
                 </td>
             </tr>

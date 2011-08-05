@@ -235,7 +235,16 @@ function w3_is_preview_mode() {
  * @return boolean
  */
 function w3_is_apache() {
-    return (isset($_SERVER['SERVER_SOFTWARE']) && stristr($_SERVER['SERVER_SOFTWARE'], 'apache') !== false);
+    return (isset($_SERVER['SERVER_SOFTWARE']) && stristr($_SERVER['SERVER_SOFTWARE'], 'Apache') !== false);
+}
+
+/**
+ * Check whether server is LiteSpeed
+ *
+ * @return bool
+ */
+function w3_is_litespeed() {
+    return (isset($_SERVER['SERVER_SOFTWARE']) && stristr($_SERVER['SERVER_SOFTWARE'], 'LiteSpeed') !== false);
 }
 
 /**
@@ -813,7 +822,7 @@ function w3_get_theme_key_legacy($theme_root, $template, $stylesheet) {
  * @return bool
  */
 function w3_can_check_rules() {
-    return (w3_is_apache() || w3_is_nginx());
+    return (w3_is_apache() || w3_is_litespeed() || w3_is_nginx());
 }
 
 /**

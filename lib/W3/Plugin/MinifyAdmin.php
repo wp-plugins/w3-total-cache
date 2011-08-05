@@ -158,6 +158,7 @@ class W3_Plugin_MinifyAdmin extends W3_Plugin {
     function generate_rules_core() {
         switch (true) {
             case w3_is_apache():
+            case w3_is_litespeed():
                 return $this->generate_rules_core_apache();
 
             case w3_is_nginx():
@@ -257,6 +258,7 @@ class W3_Plugin_MinifyAdmin extends W3_Plugin {
     function generate_rules_cache() {
         switch (true) {
             case w3_is_apache():
+            case w3_is_litespeed():
                 return $this->generate_rules_cache_apache();
 
             case w3_is_nginx():
