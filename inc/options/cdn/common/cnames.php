@@ -13,19 +13,19 @@ foreach ($cnames as $index => $cname):
     if ($count > 1):
     	switch ($index):
             case 0:
-                $label = '(reserved for CSS)';
+                $label = '(reserved for <acronym title="Cascading Style Sheet">CSS</acronym>)';
                 break;
 
             case 1:
-                $label = '(reserved for JS in <head>)';
+                $label = '(reserved for <acronym title="JavaScript">JS</acronym> in <head>)';
                 break;
 
             case 2:
-                $label = '(reserved for JS after <body>)';
+                $label = '(reserved for <acronym title="JavaScript">JS</acronym> after <body>)';
                 break;
 
             case 3:
-                $label = '(reserved for JS before </body>)';
+                $label = '(reserved for <acronym title="JavaScript">JS</acronym> before </body>)';
                 break;
 
             default:

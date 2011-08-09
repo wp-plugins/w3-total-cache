@@ -9,7 +9,7 @@
         </li>
         <li>On the "<a href="admin.php?page=w3tc_general">General</a>" tab and select your caching methods for page, database and minify. In most cases, "disk enhanced" mode for page cache, "disk" mode for minify and "disk" mode for database caching are "good" settings.</li>
         <li><em>Recommended:</em> On the "<a href="admin.php?page=w3tc_minify">Minify</a>" tab all of the recommended settings are preset. Use the help button to simplify discovery of your <acronym title="Cascading Style Sheet">CSS</acronym> and <acronym title="JavaScript">JS</acronym> files and groups. Pay close attention to the method and location of your <acronym title="JavaScript">JS</acronym> group embeddings. See the plugin's <a href="admin.php?page=w3tc_faq">FAQ</a> for more information on usage.</li>
-        <li><em>Recommended:</em> On the "<a href="admin.php?page=w3tc_browsercache">Browser Cache</a>" tab, HTTP compression is enabled by default. Make sure to enable other options to suit your goals.</li>
+        <li><em>Recommended:</em> On the "<a href="admin.php?page=w3tc_browsercache">Browser Cache</a>" tab, <acronym title="Hypertext Transfer Protocol">HTTP</acronym> compression is enabled by default. Make sure to enable other options to suit your goals.</li>
         <li><em>Recommended:</em> If you already have a content delivery network (<acronym title="Content Delivery Network">CDN</acronym>) provider, proceed to the "<a href="admin.php?page=w3tc_cdn">Content Delivery Network</a>" tab and populate the fields and set your preferences. If you do not use the Media Library, you will need to import your images etc into the default locations. Use the Media Library Import Tool on the "Content Delivery Network" tab to perform this task. If you do not have a <acronym title="Content Delivery Network">CDN</acronym> provider, you can still improve your site's performance using the "Self-hosted" method. On your own server, create a subdomain and matching <acronym title="Domain Name System">DNS</acronym> Zone record; e.g. static.domain.com and configure <acronym title="File Transfer Protocol">FTP</acronym> options on the "Content Delivery Network" tab accordingly. Be sure to <acronym title="File Transfer Protocol">FTP</acronym> upload the appropriate files, using the available upload buttons.</li>
         <li><em>Optional:</em> On the "<a href="admin.php?page=w3tc_dbcache">Database Cache</a>" tab the recommended settings are preset. If using a shared hosting account use the "disk" method with caution; in either of these cases the response time of the disk may not be fast enough, so this option is disabled by default.</li>
         <li><em>Optional:</em> On the "<a href="admin.php?page=w3tc_objectcache">Object Cache</a>" tab the recommended settings are preset. If using a shared hosting account use the "disk" method with caution, the response time of the disk may not be fast enough, so this option is disabled by default. Test this option with and without database cache to ensure that it provides a performance increase.</li>
@@ -78,7 +78,7 @@
         	<pre class="console"># yum install libevent libevent-devel</pre>
 
 	        If this succeeds skip to #5. If this fails, then let's compile. Download and extract the <a href="http://www.monkey.org/~provos/libevent/" target="_blank">latest stable version</a>:
-        	<pre class="console"># cd /usr/local/src &amp;&amp; wget <a href="http://www.monkey.org/~provos/libevent-1.4.13-stable.tar.gz" target="_blank">http://monkey.org/~provos/libevent-1.4.13-stable.tar.gz</a> &amp;&amp; tar -xzf libevent-1.4.13-stable.tar.gz &amp;&amp; cd libevent-1.4.13-stable</pre>
+        	<pre class="console"># cd /usr/local/src &amp;&amp; wget <a href="http://www.monkey.org/~provos/libevent-2.0.12-stable.tar.gz" target="_blank">http://monkey.org/~provos/libevent-2.0.14-stable.tar.gz</a> &amp;&amp; tar -xzf libevent-2.0.12-stable.tar.gz &amp;&amp; cd libevent-2.0.12-stable</pre>
         </li>
         <li>
         	Let's compile:
@@ -95,8 +95,8 @@
         	<pre class="console"># ldconfig -v</pre>
         </li>
         <li>
-        	Now find the <a href="http://www.danga.com/memcached/download.bml" target="_blank">latest stable memcached</a>, download and extract:
-        	<pre class="console"># cd /usr/local/src &amp;&amp; wget <a href="http://memcached.googlecode.com/files/memcached-1.4.4.tar.gz" target="_blank">http://memcached.googlecode.com/files/memcached-1.4.4.tar.gz</a> &amp;&amp; tar -xzf memcached-1.4.4.tar.gz &amp;&amp; cd memcached-1.4.4</pre>
+        	Now find the <a href="http://memcached.org/" target="_blank">latest stable memcached</a>, download and extract:
+        	<pre class="console"># cd /usr/local/src &amp;&amp; wget <a href="http://memcached.googlecode.com/files/memcached-1.4.6.tar.gz" target="_blank">http://memcached.googlecode.com/files/memcached-1.4.6.tar.gz</a> &amp;&amp; tar -xzf memcached-1.4.6.tar.gz &amp;&amp; cd memcached-1.4.6</pre>
         </li>
         <li>
         	Let's compile:
@@ -127,7 +127,7 @@
         </li>
         <li>
         	Or via compilation. Download the <a href="http://pecl.php.net/package/memcache" target="_blank">latest stable version</a> and extract:
-        	<pre class="console"># cd /usr/local/src/ &amp;&amp; wget <a href="http://pecl.php.net/get/memcache-2.2.5.tgz" target="_blank">http://pecl.php.net/get/memcache-2.2.5.tgz</a> &amp;&amp; tar -xzf memcache-2.2.5.tgz &amp;&amp; cd memcache-2.2.5</pre>
+        	<pre class="console"># cd /usr/local/src/ &amp;&amp; wget <a href="http://pecl.php.net/get/memcache-2.2.6.tgz" target="_blank">http://pecl.php.net/get/memcache-2.2.6.tgz</a> &amp;&amp; tar -xzf memcache-2.2.6.tgz &amp;&amp; cd memcache-2.2.6</pre>
         </li>
         <li>
         	Now we start to compile:
@@ -158,7 +158,7 @@
         </li>
         <li>
         	Or via compilation. Download the <a href="http://pecl.php.net/package/APC" target="_blank">latest stable version</a> and extract:
-			<pre class="console"># cd /usr/local/src &amp;&amp; wget <a href="http://pecl.php.net/get/APC-3.1.6.tgz" target="_blank">http://pecl.php.net/get/APC-3.1.6.tgz</a> &amp;&amp; tar -xzf APC-3.0.19.tgz &amp;&amp; cd APC-3.1.6</pre>
+			<pre class="console"># cd /usr/local/src &amp;&amp; wget <a href="http://pecl.php.net/get/APC-3.1.9.tgz" target="_blank">http://pecl.php.net/get/APC-3.1.9.tgz</a> &amp;&amp; tar -xzf APC-3.1.9.tgz &amp;&amp; cd APC-3.1.9</pre>
 		</li>
 		<li>
 			Note the paths returned for the following commands:
@@ -192,7 +192,7 @@
     <ol>
         <li>
         	Download the <a href="http://xcache.lighttpd.net/wiki/ReleaseArchive" target="_blank">latest compatible version</a> and extract:
-			<pre class="console"># cd /usr/local/src &amp;&amp; wget <a href="http://xcache.lighttpd.net/pub/Releases/1.3.0/xcache-1.3.0.tar.gz" target="_blank">http://xcache.lighttpd.net/pub/Releases/1.3.0/xcache-1.3.0.tar.gz</a> &amp;&amp; tar -xzf xcache-1.3.0.tar.gz &amp;&amp; cd xcache-1.3.0</pre>
+			<pre class="console"># cd /usr/local/src &amp;&amp; wget <a href="http://xcache.lighttpd.net/pub/Releases/1.3.2/xcache-1.3.2.tar.gz" target="_blank">http://xcache.lighttpd.net/pub/Releases/1.3.2/xcache-1.3.2.tar.gz</a> &amp;&amp; tar -xzf xcache-1.3.2.tar.gz &amp;&amp; cd xcache-1.3.2</pre>
 		</li>
 		<li>
 			Note the path returned for the following command:
@@ -225,7 +225,7 @@
     <ol>
         <li>
         	If using <acronym title="Hypertext Preprocessor">PHP</acronym> v5+, download the <a href="http://eaccelerator.net/" target="_blank">lastest compatible version</a> and extract. Remember v0.9.5.3 is the last version that supports user objects, later versions only support opcode caching.
-			<pre class="console"># cd /usr/local/src &amp;&amp; wget <a href="http://bart.eaccelerator.net/source/0.9.5.3/eaccelerator-0.9.5.3.tar.bz2" target="_blank">http://bart.eaccelerator.net/source/0.9.5.3/eaccelerator-0.9.5.3.tar.bz2</a> &amp;&amp; tar -xjf eaccelerator-0.9.5.3.tar.bz2 &amp;&amp; cd eaccelerator-0.9.5.3</pre>
+			<pre class="console"># cd /usr/local/src &amp;&amp; wget <a href="http://autosetup1.googlecode.com/files/eaccelerator-0.9.5.3.tar.bz2" target="_blank">http://autosetup1.googlecode.com/files/eaccelerator-0.9.5.3.tar.bz2</a> &amp;&amp; tar -xjf eaccelerator-0.9.5.3.tar.bz2 &amp;&amp; cd eaccelerator-0.9.5.3</pre>
 		</li>
 		<li>
 			Note the path returned for the following command:

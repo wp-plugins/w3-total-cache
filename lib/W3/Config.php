@@ -61,6 +61,7 @@ class W3_Config {
         'pgcache.cache.query' => 'boolean',
         'pgcache.cache.home' => 'boolean',
         'pgcache.cache.feed' => 'boolean',
+        'pgcache.cache.ssl' => 'boolean',
         'pgcache.cache.404' => 'boolean',
         'pgcache.cache.flush' => 'boolean',
         'pgcache.cache.headers' => 'array',
@@ -392,6 +393,7 @@ class W3_Config {
         'pgcache.cache.query' => true,
         'pgcache.cache.home' => true,
         'pgcache.cache.feed' => false,
+        'pgcache.cache.ssl' => true,
         'pgcache.cache.404' => false,
         'pgcache.cache.flush' => false,
         'pgcache.cache.headers' => array(
@@ -528,7 +530,8 @@ class W3_Config {
         'cdn.custom.files' => array(
             'favicon.ico',
             'wp-content/gallery/*',
-            'wp-content/uploads/avatars/*'
+            'wp-content/uploads/avatars/*',
+            'wp-content/plugins/wordpress-seo/css/xml-sitemap.xsl'
         ),
         'cdn.import.external' => false,
         'cdn.import.files' => '*.jpg;*.png;*.gif;*.avi;*.wmv;*.mpg;*.wav;*.mp3;*.txt;*.rtf;*.doc;*.xls;*.rar;*.zip;*.tar;*.gz;*.exe',
@@ -1357,6 +1360,7 @@ class W3_Config {
      */
     function set_defaults() {
         $this->set('pgcache.enabled', true);
+        $this->set('pgcache.cache.ssl', false);
         $this->set('minify.auto', true);
         $this->set('browsercache.enabled', true);
     }

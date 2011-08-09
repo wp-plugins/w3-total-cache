@@ -1048,11 +1048,11 @@ function w3_get_engine_name($engine) {
             break;
 
         case 'file':
-            $engine_name = 'disk';
+            $engine_name = 'disk: basic';
             break;
 
         case 'file_generic':
-            $engine_name = 'disk (enhanced)';
+            $engine_name = 'disk: enhanced';
             break;
 
         case 'ftp':
@@ -1205,7 +1205,7 @@ function &w3_instance($class) {
         @$instances[$class] = & new $class();
     }
 
-    $v = $instances[$class];   // dont return reference
+    $v = $instances[$class];   // Don't return reference
     return $v;
 }
 

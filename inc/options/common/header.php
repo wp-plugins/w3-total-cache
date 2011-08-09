@@ -38,7 +38,7 @@ jQuery(function($) {
         <a href="?page=w3tc_browsercache"<?php if ($this->_page == 'w3tc_browsercache'): ?> class="w3tc-options-menu-selected"<?php endif; ?>>Browser Cache</a> |
         <a href="?page=w3tc_mobile"<?php if ($this->_page == 'w3tc_mobile'): ?> class="w3tc-options-menu-selected"<?php endif; ?>>User Agent Groups</a> |
         <a href="?page=w3tc_referrer"<?php if ($this->_page == 'w3tc_referrer'): ?> class="w3tc-options-menu-selected"<?php endif; ?>>Referrer Groups</a> |
-    	<a href="?page=w3tc_cdn"<?php if ($this->_page == 'w3tc_cdn'): ?> class="w3tc-options-menu-selected"<?php endif; ?>>Content Delivery Network</a> |
+    	<a href="?page=w3tc_cdn"<?php if ($this->_page == 'w3tc_cdn'): ?> class="w3tc-options-menu-selected"<?php endif; ?>><acronym title="Content Delivery Network">CDN</acronym></a> |
     	<a href="?page=w3tc_faq"<?php if ($this->_page == 'w3tc_faq'): ?> class="w3tc-options-menu-selected"<?php endif; ?>><acronym title="Frequently Asked Questions">FAQ</acronym></a> |
     	<a href="?page=w3tc_support"<?php if ($this->_page == 'w3tc_support'): ?> class="w3tc-options-menu-selected"<?php endif; ?> style="color: red;">Support</a> |
     	<a href="?page=w3tc_install"<?php if ($this->_page == 'w3tc_install'): ?> class="w3tc-options-menu-selected"<?php endif; ?>>Install</a> |

@@ -12,7 +12,7 @@
 	Maximize <acronym title="Content Delivery Network">CDN</acronym> usage by <input id="cdn_rename_domain" class="button {nonce: '<?php echo wp_create_nonce('w3tc'); ?>'}" type="button" value="modify attachment URLs" /> or
 	<input id="cdn_import_library" class="button {nonce: '<?php echo wp_create_nonce('w3tc'); ?>'}" type="button" value="importing attachments into the Media Library" />.
     <?php if (w3_can_cdn_purge($cdn_engine)): ?>
-    <input id="cdn_purge" class="button {nonce: '<?php echo wp_create_nonce('w3tc'); ?>'}" type="button" value="Purge" /> objects from the CDN using this tool.
+    <input id="cdn_purge" class="button {nonce: '<?php echo wp_create_nonce('w3tc'); ?>'}" type="button" value="Purge" /> objects from the <acronym title="Content Delivery Network">CDN</acronym> using this tool.
     <?php endif; ?>
 </p>
 <?php else: ?>
@@ -135,7 +135,7 @@
             <tr>
                 <th colspan="2">
                     <input type="hidden" name="cdn.reject.admins" value="0" />
-                    <label><input type="checkbox" name="cdn.reject.admins" value="1"<?php checked($this->_config->get_boolean('cdn.reject.admins'), true); ?> /> Don't replace URLs for logged in administrators</label><br />
+                    <label><input type="checkbox" name="cdn.reject.admins" value="1"<?php checked($this->_config->get_boolean('cdn.reject.admins'), true); ?> /> Don't replace <acronym title="Uniform Resource Indicator">URL</acronym>s for logged in administrators</label><br />
                     <span class="description">Authenticated administrators will use the origin server exclusively when this option is selected.</span>
                 </th>
             </tr>
@@ -223,7 +223,7 @@
         			<input type="hidden" name="set_cookie_domain_old" value="<?php echo (int) $set_cookie_domain; ?>" />
         			<input type="hidden" name="set_cookie_domain_new" value="0" />
         			<label><input type="checkbox" name="set_cookie_domain_new" value="1"<?php checked($set_cookie_domain, true); ?> /> Set cookie domain to &quot;<?php echo htmlspecialchars($cookie_domain); ?>&quot;</label>
-					<br /><span class="description">If using subdomain for CDN functionality, this setting helps prevent new users from sending cookies in requests to the CDN subdomain.</span>
+					<br /><span class="description">If using subdomain for <acronym title="Content Delivery Network">CDN</acronym> functionality, this setting helps prevent new users from sending cookies in requests to the <acronym title="Content Delivery Network">CDN</acronym> subdomain.</span>
         		</th>
         	</tr>
         </table>

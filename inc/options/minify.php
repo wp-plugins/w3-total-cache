@@ -129,7 +129,7 @@ minify_templates['<?php echo addslashes($theme_key); ?>']['<?php echo addslashes
         </p>
     	<?php echo $this->postbox_footer(); ?>
 
-		<?php echo $this->postbox_header('JavaScript'); ?>
+		<?php echo $this->postbox_header('<acronym title="JavaScript">JS</acronym>'); ?>
         <table class="form-table">
             <tr>
                 <th><acronym title="JavaScript">JS</acronym> minify settings:</th>
@@ -253,7 +253,7 @@ minify_templates['<?php echo addslashes($theme_key); ?>']['<?php echo addslashes
         </p>
     	<?php echo $this->postbox_footer(); ?>
 
-		<?php echo $this->postbox_header('Cascading Style Sheets'); ?>
+		<?php echo $this->postbox_header('<acronym title="Cascading Style Sheet">CSS</acronym>'); ?>
         <table class="form-table">
         	<tr>
         		<th><acronym title="Cascading Style Sheet">CSS</acronym> minify settings:</th>

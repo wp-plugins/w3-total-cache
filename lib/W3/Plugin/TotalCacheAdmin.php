@@ -4929,8 +4929,8 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
             $response = w3_http_get($url);
 
             if (!is_wp_error($response) && ($response['response']['code'] == 200 || ($response['response']['code'] == 404 && $template == '404'))) {
-                $js_files = $this->get_recommendations_js($content);
-                $css_files = $this->get_recommendations_css($content);
+                $js_files = $this->get_recommendations_js($response['body']);
+                $css_files = $this->get_recommendations_css($response['body']);
 
                 $js_groups[$template] = $js_files;
                 $css_groups[$template] = $css_files;

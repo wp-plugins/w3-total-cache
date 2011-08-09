@@ -42,6 +42,13 @@
         	</tr>
         	<tr>
         		<th>
+        			<input type="hidden" name="pgcache.cache.ssl" value="0" />
+        			<label><input type="checkbox" name="pgcache.cache.ssl" value="1"<?php checked($this->_config->get_boolean('pgcache.cache.ssl'), true); ?> /> Create separate cache for HTTPS pages</label><br />
+    				<span class="description">Once set, http and https pages will be stored in separate cache entries.</span>
+        		</th>
+        	</tr>
+        	<tr>
+        		<th>
         			<input type="hidden" name="pgcache.cache.query" value="0"<?php if ($this->_config->get_string('pgcache.engine') == 'file_generic'): ?> disabled="disabled"<?php endif; ?> />
         			<label><input type="checkbox" name="pgcache.cache.query" value="1"<?php checked($this->_config->get_boolean('pgcache.cache.query'), true); ?><?php if ($this->_config->get_string('pgcache.engine') == 'file_generic'): ?> disabled="disabled"<?php endif; ?> /> Cache <acronym title="Uniform Resource Identifier">URI</acronym>s with query string variables</label><br />
     				<span class="description">Search result (and similar) pages will be cached if enabled.</span>

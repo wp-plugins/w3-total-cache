@@ -69,8 +69,8 @@
         </p>
         <?php echo $this->postbox_footer(); ?>
 
-        <?php echo $this->postbox_header('Cascading Style Sheets &amp; JavaScript'); ?>
-        <p>Specify browser cache policy for cascading style sheets and JavaScript files.</p>
+        <?php echo $this->postbox_header('<acronym title="Cascading Style Sheet">CSS</acronym> &amp; <acronym title="JavaScript">JS</acronym>'); ?>
+        <p>Specify browser cache policy for Cascading Style Sheets and JavaScript files.</p>
 
         <table class="form-table">
             <tr>
@@ -146,7 +146,7 @@
         </p>
         <?php echo $this->postbox_footer(); ?>
 
-        <?php echo $this->postbox_header('<acronym title="Hypertext Markup Language">HTML</acronym>'); ?>
+        <?php echo $this->postbox_header('<acronym title="Hypertext Markup Language">HTML</acronym> &amp; <acronym title="Extensible Markup Language">XML</acronym>'); ?>
         <p>Specify browser cache policy for posts, pages, feeds and text-based files.</p>
 
         <table class="form-table">

@@ -684,11 +684,11 @@ class W3_Db_Nocache extends W3_Db_Driver {
 
         # _real_escape is called on that object, 
         # which requires those inst. vars
-        if (isset($object_doing_query->$real_escape)) {
-            $this->$real_escape = $object_doing_query->$real_escape;
+        if (isset($object_doing_query->real_escape)) {
+            $this->real_escape = $object_doing_query->real_escape;
         }
-        if (isset($object_doing_query->$dbh)) {
-            $this->$dbh = $object_doing_query->$dbh;
+        if (isset($object_doing_query->dbh)) {
+            $this->dbh = $object_doing_query->dbh;
         }
 
     }

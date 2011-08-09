@@ -597,10 +597,12 @@ class W3_Plugin_PgCacheAdmin extends W3_Plugin {
         /**
          * Set HTTPS
          */
-        $rules .= "    RewriteCond %{HTTPS} =on\n";
-        $rules .= "    RewriteRule .* - [E=W3TC_SSL:_ssl]\n";
-        $rules .= "    RewriteCond %{SERVER_PORT} =443\n";
-        $rules .= "    RewriteRule .* - [E=W3TC_SSL:_ssl]\n";
+        if ($this->_config->get_boolean('pgcache.cache.ssl')) {
+            $rules .= "    RewriteCond %{HTTPS} =on\n";
+            $rules .= "    RewriteRule .* - [E=W3TC_SSL:_ssl]\n";
+            $rules .= "    RewriteCond %{SERVER_PORT} =443\n";
+            $rules .= "    RewriteRule .* - [E=W3TC_SSL:_ssl]\n";
+        }
 
         $cache_path = str_replace(w3_get_document_root(), '', $cache_dir);
 
@@ -951,9 +953,12 @@ class W3_Plugin_PgCacheAdmin extends W3_Plugin {
         }
 
         $rules .= "set \$w3tc_ssl \"\";\n";
-        $rules .= "if (\$scheme = https) {\n";
-        $rules .= "    set \$w3tc_ssl _ssl;\n";
-        $rules .= "}\n";
+        if ($this->_config->get_boolean('pgcache.cache.ssl')) {
+            $rules .= "if (\$scheme = https) {\n";
+            $rules .= "    set \$w3tc_ssl _ssl;\n";
+            $rules .= "}\n";
+        }
+
         $rules .= "set \$w3tc_enc \"\";\n";
 
         if ($this->_config->get_boolean('browsercache.enabled') && $this->_config->get_boolean('browsercache.html.compression')) {
