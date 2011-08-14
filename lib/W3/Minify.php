@@ -59,7 +59,7 @@ class W3_Minify {
         $file = W3_Request::get_string('file');
 
         if (!$file) {
-            $this->error('File param is missing');
+            $this->error('File param is missing', false);
             return;
         }
 
@@ -71,7 +71,7 @@ class W3_Minify {
         } elseif (preg_match('~^([a-f0-9]+)\\/(.+)\\.(include(\\-(footer|body))?(-nb)?)\\.[a-f0-9]+\\.(css|js)$~', $file, $matches)) {
             list(, $theme, $template, $location, , , , $type) = $matches;
         } else {
-            $this->error(sprintf('Bad file param format: "%s"', $file));
+            $this->error(sprintf('Bad file param format: "%s"', $file), false);
             return;
         }
 
@@ -100,8 +100,8 @@ class W3_Minify {
          */
         require_once W3TC_LIB_MINIFY_DIR . '/Minify/Logger.php';
         Minify_Logger::setLogger(array(
-            &$this,
-            'error')
+                                      &$this,
+                                      'error')
         );
 
         /**
@@ -110,18 +110,18 @@ class W3_Minify {
         $browsercache = $this->_config->get_boolean('browsercache.enabled');
 
         $serve_options = array_merge($this->_config->get_array('minify.options'), array(
-            'debug' => $this->_config->get_boolean('minify.debug'),
-            'maxAge' => $this->_config->get_integer('browsercache.cssjs.lifetime'),
-            'encodeOutput' => ($browsercache && $this->_config->get_boolean('browsercache.cssjs.compression')),
-            'bubbleCssImports' => ($this->_config->get_string('minify.css.imports') == 'bubble'),
-            'processCssImports' => ($this->_config->get_string('minify.css.imports') == 'process'),
-            'cacheHeaders' => array(
-                'use_etag' => ($browsercache && $this->_config->get_boolean('browsercache.cssjs.etag')),
-                'expires_enabled' => ($browsercache && $this->_config->get_boolean('browsercache.cssjs.expires')),
-                'cacheheaders_enabled' => ($browsercache && $this->_config->get_boolean('browsercache.cssjs.cache.control')),
-                'cacheheaders' => $this->_config->get_string('browsercache.cssjs.cache.policy')
-            )
-        ));
+                                                                                       'debug' => $this->_config->get_boolean('minify.debug'),
+                                                                                       'maxAge' => $this->_config->get_integer('browsercache.cssjs.lifetime'),
+                                                                                       'encodeOutput' => ($browsercache && $this->_config->get_boolean('browsercache.cssjs.compression')),
+                                                                                       'bubbleCssImports' => ($this->_config->get_string('minify.css.imports') == 'bubble'),
+                                                                                       'processCssImports' => ($this->_config->get_string('minify.css.imports') == 'process'),
+                                                                                       'cacheHeaders' => array(
+                                                                                           'use_etag' => ($browsercache && $this->_config->get_boolean('browsercache.cssjs.etag')),
+                                                                                           'expires_enabled' => ($browsercache && $this->_config->get_boolean('browsercache.cssjs.expires')),
+                                                                                           'cacheheaders_enabled' => ($browsercache && $this->_config->get_boolean('browsercache.cssjs.cache.control')),
+                                                                                           'cacheheaders' => $this->_config->get_string('browsercache.cssjs.cache.policy')
+                                                                                       )
+                                                                                  ));
 
         /**
          * Set sources
@@ -210,7 +210,7 @@ class W3_Minify {
     /**
      * Log
      *
-     * @param mixed $object
+     * @param string $msg
      * @return bool
      */
     function log($msg) {
@@ -511,8 +511,7 @@ class W3_Minify {
         if ($files) {
             $files = array_map('w3_normalize_file_minify2', (array) $files);
         } else {
-            $this->error(sprintf('Unable to fetch custom files list: "%s.%s"', $hash, $type));
-            $files = array();
+            $this->error(sprintf('Unable to fetch custom files list: "%s.%s"', $hash, $type), false, 404);
         }
 
         return $files;
@@ -522,19 +521,23 @@ class W3_Minify {
      * Sends error response
      *
      * @param string $error
+     * @param boolean $handle
+     * @param integer $status
      * @return void
      */
-    function error($error) {
+    function error($error, $handle = true, $status = 400) {
         $debug = $this->_config->get_boolean('minify.debug');
 
         if ($debug) {
             $this->log($error);
         }
 
-        $this->_handle_error($error);
+        if ($handle) {
+            $this->_handle_error($error);
+        }
 
         if (defined('W3TC_IN_MINIFY')) {
-            header('HTTP/1.0 400 Bad Request');
+            status_header($status);
 
             echo '<h1>W3TC Minify Error</h1>';
 
@@ -578,11 +581,11 @@ class W3_Minify {
         require_once W3TC_LIB_MINIFY_DIR . '/Minify/Source.php';
 
         return new Minify_Source(array(
-            'filepath' => $file_path,
-            'minifyOptions' => array(
-                'prependRelativePath' => $url
-            )
-        ));
+                                      'filepath' => $file_path,
+                                      'minifyOptions' => array(
+                                          'prependRelativePath' => $url
+                                      )
+                                 ));
     }
 
     /**
@@ -599,9 +602,9 @@ class W3_Minify {
                     require_once W3TC_LIB_W3_DIR . '/Cache/Memcached.php';
                     require_once W3TC_LIB_MINIFY_DIR . '/Minify/Cache/Memcache.php';
                     @$w3_cache_memcached = & new W3_Cache_Memcached(array(
-                        'servers' => $this->_config->get_array('minify.memcached.servers'),
-                        'persistant' => $this->_config->get_boolean('minify.memcached.persistant')
-                    ));
+                                                                         'servers' => $this->_config->get_array('minify.memcached.servers'),
+                                                                         'persistant' => $this->_config->get_boolean('minify.memcached.persistant')
+                                                                    ));
                     @$cache[0] = & new Minify_Cache_Memcache($w3_cache_memcached);
                     break;
 
@@ -632,8 +635,8 @@ class W3_Minify {
                     @$cache[0] = & new Minify_Cache_File(
                         W3TC_CACHE_FILE_MINIFY_DIR,
                         array(
-                            '.htaccess',
-                            'index.php'
+                             '.htaccess',
+                             'index.php'
                         ),
                         $this->_config->get_boolean('minify.file.locking'),
                         $this->_config->get_integer('timelimit.cache_flush')
@@ -648,7 +651,7 @@ class W3_Minify {
     /**
      * Handle minify error
      *
-     * @param string
+     * @param string $error
      * @return void
      */
     function _handle_error($error) {
@@ -735,28 +738,28 @@ class W3_Minify {
             switch ($engine) {
                 case 'js':
                     $keys = array_merge($keys, array(
-                        'minify.js.combine.header',
-                        'minify.js.combine.body',
-                        'minify.js.combine.footer',
-                        'minify.js.strip.comments',
-                        'minify.js.strip.crlf',
-                    ));
+                                                    'minify.js.combine.header',
+                                                    'minify.js.combine.body',
+                                                    'minify.js.combine.footer',
+                                                    'minify.js.strip.comments',
+                                                    'minify.js.strip.crlf',
+                                               ));
                     break;
 
                 case 'yuijs':
                     $keys = array_merge($keys, array(
-                        'minify.yuijs.options.line-break',
-                        'minify.yuijs.options.nomunge',
-                        'minify.yuijs.options.preserve-semi',
-                        'minify.yuijs.options.disable-optimizations',
-                    ));
+                                                    'minify.yuijs.options.line-break',
+                                                    'minify.yuijs.options.nomunge',
+                                                    'minify.yuijs.options.preserve-semi',
+                                                    'minify.yuijs.options.disable-optimizations',
+                                               ));
                     break;
 
                 case 'ccjs':
                     $keys = array_merge($keys, array(
-                        'minify.ccjs.options.compilation_level',
-                        'minify.ccjs.options.formatting',
-                    ));
+                                                    'minify.ccjs.options.compilation_level',
+                                                    'minify.ccjs.options.formatting',
+                                               ));
                     break;
             }
         } elseif ($type == 'css') {
@@ -765,37 +768,37 @@ class W3_Minify {
             switch ($engine) {
                 case 'css':
                     $keys = array_merge($keys, array(
-                        'minify.css.combine',
-                        'minify.css.strip.comments',
-                        'minify.css.strip.crlf',
-                        'minify.css.imports',
-                    ));
+                                                    'minify.css.combine',
+                                                    'minify.css.strip.comments',
+                                                    'minify.css.strip.crlf',
+                                                    'minify.css.imports',
+                                               ));
                     break;
 
                 case 'yuicss':
                     $keys = array_merge($keys, array(
-                        'minify.yuicss.options.line-break',
-                    ));
+                                                    'minify.yuicss.options.line-break',
+                                               ));
                     break;
 
                 case 'csstidy':
                     $keys = array_merge($keys, array(
-                        'minify.csstidy.options.remove_bslash',
-                        'minify.csstidy.options.compress_colors',
-                        'minify.csstidy.options.compress_font-weight',
-                        'minify.csstidy.options.lowercase_s',
-                        'minify.csstidy.options.optimise_shorthands',
-                        'minify.csstidy.options.remove_last_;',
-                        'minify.csstidy.options.case_properties',
-                        'minify.csstidy.options.sort_properties',
-                        'minify.csstidy.options.sort_selectors',
-                        'minify.csstidy.options.merge_selectors',
-                        'minify.csstidy.options.discard_invalid_properties',
-                        'minify.csstidy.options.css_level',
-                        'minify.csstidy.options.preserve_css',
-                        'minify.csstidy.options.timestamp',
-                        'minify.csstidy.options.template',
-                    ));
+                                                    'minify.csstidy.options.remove_bslash',
+                                                    'minify.csstidy.options.compress_colors',
+                                                    'minify.csstidy.options.compress_font-weight',
+                                                    'minify.csstidy.options.lowercase_s',
+                                                    'minify.csstidy.options.optimise_shorthands',
+                                                    'minify.csstidy.options.remove_last_;',
+                                                    'minify.csstidy.options.case_properties',
+                                                    'minify.csstidy.options.sort_properties',
+                                                    'minify.csstidy.options.sort_selectors',
+                                                    'minify.csstidy.options.merge_selectors',
+                                                    'minify.csstidy.options.discard_invalid_properties',
+                                                    'minify.csstidy.options.css_level',
+                                                    'minify.csstidy.options.preserve_css',
+                                                    'minify.csstidy.options.timestamp',
+                                                    'minify.csstidy.options.template',
+                                               ));
                     break;
             }
         }

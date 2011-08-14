@@ -1014,6 +1014,8 @@ class W3_Plugin_PgCacheAdmin extends W3_Plugin {
 
         if ($etag) {
             $rules .= "FileETag MTime Size\n";
+        } else {
+            $rules .= "FileETag None\n";
         }
 
         $rules .= "AddDefaultCharset " . ($charset ? $charset : 'UTF-8') . "\n";

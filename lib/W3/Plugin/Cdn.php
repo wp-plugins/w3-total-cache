@@ -34,11 +34,6 @@ class W3_Plugin_Cdn extends W3_Plugin {
         $cdn_engine = $this->_config->get_string('cdn.engine');
 
         if (!w3_is_cdn_mirror($cdn_engine)) {
-            add_action('add_attachment', array(
-                &$this,
-                'add_attachment'
-            ));
-
             add_action('delete_attachment', array(
                 &$this,
                 'delete_attachment'
@@ -47,11 +42,6 @@ class W3_Plugin_Cdn extends W3_Plugin {
             add_filter('update_attached_file', array(
                 &$this,
                 'update_attached_file'
-            ));
-
-            add_filter('wp_generate_attachment_metadata', array(
-                &$this,
-                'generate_attachment_metadata'
             ));
 
             add_filter('wp_update_attachment_metadata', array(
@@ -149,25 +139,6 @@ class W3_Plugin_Cdn extends W3_Plugin {
     }
 
     /**
-     * On attachment add action
-     *
-     * Upload _wp_attached_file
-     *
-     * @param integer $attachment_id
-     * @return void
-     */
-    function add_attachment($attachment_id) {
-        $attached_file = get_post_meta($attachment_id, '_wp_attached_file', true);
-
-        $files = $this->_get_common()->get_files_for_upload($attached_file);
-        $files = apply_filters('w3tc_cdn_add_attachment', $files);
-
-        $results = array();
-
-        $this->_get_common()->upload($files, true, $results);
-    }
-
-    /**
      * Update attachment file
      *
      * Upload _wp_attached_file
@@ -200,25 +171,6 @@ class W3_Plugin_Cdn extends W3_Plugin {
         $results = array();
 
         $this->_get_common()->delete($files, true, $results);
-    }
-
-    /**
-     * Generate attachment metadata filter
-     *
-     * Upload _wp_attachment_metadata
-     *
-     * @param array $metadata
-     * @return array
-     */
-    function generate_attachment_metadata($metadata) {
-        $files = $this->_get_common()->get_metadata_files($metadata);
-        $files = apply_filters('w3tc_cdn_generate_attachment_metadata', $files);
-
-        $results = array();
-
-        $this->_get_common()->upload($files, true, $results);
-
-        return $metadata;
     }
 
     /**

@@ -180,6 +180,15 @@ require_once W3TC_INC_DIR . '/functions/rule.php';
             <?php endif; ?>
         </li>
 
+        <li>
+            set_time_limit:
+            <?php if (function_exists('set_time_limit')): ?>
+            <code>Available</code>
+            <?php else: ?>
+            <code>Not available</code>
+            <?php endif; ?>
+        </li>
+
         <?php
         if (w3_is_apache()):
             $apache_modules = (function_exists('apache_get_modules') ? apache_get_modules() : false);

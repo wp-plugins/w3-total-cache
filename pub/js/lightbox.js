@@ -200,6 +200,8 @@ function w3tc_lightbox_minify_recommendations(nonce) {
         width: 1000,
         url: 'admin.php?page=w3tc_minify&w3tc_minify_recommendations&_wpnonce=' + nonce,
         callback: function(lightbox) {
+            jQuery('select', this.container).chosen();
+
             var theme = jQuery('#recom_theme').val();
 
             if (jQuery.ui && jQuery.ui.sortable) {
@@ -322,6 +324,8 @@ function w3tc_lightbox_cdn_s3_bucket_location(type, nonce) {
         height: 130,
         url: 'admin.php?page=w3tc_general&w3tc_cdn_s3_bucket_location&type=' + type + '&_wpnonce=' + nonce,
         callback: function(lightbox) {
+            jQuery('select', this.container).chosen();
+
             jQuery('.button', lightbox.container).click(function() {
                 lightbox.close();
             });

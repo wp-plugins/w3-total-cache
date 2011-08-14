@@ -265,6 +265,9 @@ function w3tc_beforeunload() {
 }
 
 jQuery(function() {
+    // chosen
+    jQuery('#w3tc select').chosen();
+
     // general page
     w3tc_toggle('enabled');
 
@@ -716,6 +719,7 @@ jQuery(function() {
                     engine: 'rscf',
                     'config[user]': jQuery('#cdn_rscf_user').val(),
                     'config[key]': jQuery('#cdn_rscf_key').val(),
+                    'config[location]': jQuery('#cdn_rscf_location').val(),
                     'config[container]': jQuery('#cdn_rscf_container').val()
                 });
 

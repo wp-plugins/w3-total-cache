@@ -202,6 +202,7 @@ return array(
     'hpid' => 'application/vnd.hp-hpid',
     'hps' => 'application/vnd.hp-hps',
     'hqx' => 'application/mac-binhex40',
+    'htc' => 'text/x-component',
     'htke' => 'application/vnd.kenameaapp',
     'html|htm' => 'text/html',
     'hvd' => 'application/vnd.yamaha.hv-dic',

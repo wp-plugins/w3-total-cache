@@ -362,7 +362,7 @@ class W3_Plugin_TotalCache extends W3_Plugin {
 
         if ($buffer != '' && w3_is_xml($buffer)) {
             if (w3_is_database_error($buffer)) {
-                @header('HTTP/1.1 503 Service Unavailable');
+                status_header(503);
             } else {
                 /**
                  * Replace links for preview mode

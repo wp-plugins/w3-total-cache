@@ -21,13 +21,6 @@
         <table class="form-table">
         	<tr>
         		<th>
-        			<input type="hidden" name="pgcache.reject.logged" value="0" />
-        			<label><input type="checkbox" name="pgcache.reject.logged" value="1"<?php checked($this->_config->get_boolean('pgcache.reject.logged'), true); ?> /> Don't cache pages for logged in users</label><br />
-    				<span class="description">Users that have signed in to WordPress (e.g. administrators) will never view cached pages if enabled.</span>
-        		</th>
-        	</tr>
-        	<tr>
-        		<th>
         			<input type="hidden" name="pgcache.cache.home" value="0" />
         			<label><input type="checkbox" name="pgcache.cache.home" value="1"<?php checked($this->_config->get_boolean('pgcache.cache.home'), true); ?> /> Cache home page</label><br />
     				<span class="description">For many blogs this is your most visited page, it is recommended that you cache it.</span>
@@ -43,8 +36,8 @@
         	<tr>
         		<th>
         			<input type="hidden" name="pgcache.cache.ssl" value="0" />
-        			<label><input type="checkbox" name="pgcache.cache.ssl" value="1"<?php checked($this->_config->get_boolean('pgcache.cache.ssl'), true); ?> /> Create separate cache for HTTPS pages</label><br />
-    				<span class="description">Once set, http and https pages will be stored in separate cache entries.</span>
+        			<label><input type="checkbox" name="pgcache.cache.ssl" value="1"<?php checked($this->_config->get_boolean('pgcache.cache.ssl'), true); ?> /> Cache <acronym titlte="Secure Socket Layer">SSL</acronym> (<acronym title="HyperText Transfer Protocol over SSL">https</acronym>) requests</label><br />
+    				<span class="description">Cache <acronym titlte="Secure Socket Layer">SSL</acronym> requests (uniquely) for improved performance.</span>
         		</th>
         	</tr>
         	<tr>
@@ -59,6 +52,13 @@
         			<input type="hidden" name="pgcache.cache.404" value="0" />
         			<label><input type="checkbox" name="pgcache.cache.404" value="1"<?php checked($this->_config->get_boolean('pgcache.cache.404'), true); ?> /> Cache 404 (not found) pages</label><br />
     				<span class="description">Reduce server load by caching 404 pages. If the disk enhanced method of disk caching is used, 404 pages will be returned with a 200 response code. Use at your own risk.</span>
+        		</th>
+        	</tr>
+        	<tr>
+        		<th>
+        			<input type="hidden" name="pgcache.reject.logged" value="0" />
+        			<label><input type="checkbox" name="pgcache.reject.logged" value="1"<?php checked($this->_config->get_boolean('pgcache.reject.logged'), true); ?> /> Don't cache pages for logged in users</label><br />
+    				<span class="description">Users that have signed in to WordPress (e.g. administrators) will never view cached pages if enabled.</span>
         		</th>
         	</tr>
         </table>

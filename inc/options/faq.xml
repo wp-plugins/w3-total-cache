@@ -622,7 +622,7 @@
 	<section name="Requirements">
 		<entry>
 			<question><![CDATA[ Which web servers do you support? ]]></question>
-			<answer><![CDATA[ <p>We are aware of no incompatibilities with <a href="http://httpd.apache.org/" target="_blank">apache</a> 1.3+, <a href="http://www.iis.net/" target="_blank">IIS</a> 5+ or <a href="http://litespeedtech.com/products/webserver/overview/" target="_blank">litespeed</a> 4.0.2+. If there's a web server you feel we should be actively testing (e.g. <a href="http://www.lighttpd.net/" target="_blank">lighttpd</a>), we're <a href="mailto:wordpressexperts@w3-edge.com">interested in hearing</a>.</p> ]]></answer>
+			<answer><![CDATA[ <p>We are aware of no incompatibilities with <a href="http://httpd.apache.org/" target="_blank">apache</a> 1.3+, <a href="http://wiki.nginx.org/" target="_blank">nginx 0.7+</a>, , <a href="http://www.iis.net/" target="_blank">IIS</a> 5+ or <a href="http://litespeedtech.com/products/webserver/overview/" target="_blank">litespeed</a> 4.0.2+. If there's a web server you feel we should be actively testing (e.g. <a href="http://www.lighttpd.net/" target="_blank">lighttpd</a>), we're <a href="mailto:wordpressexperts@w3-edge.com">interested in hearing</a>.</p> ]]></answer>
 		</entry>
 		<entry>
 			<question><![CDATA[ Do I need to enable mod_gzip, mod_rewrite or install any <acronym title="Hypertext Transfer Protocol">HTTP</acronym> compression software on my server? ]]></question>
