@@ -70,8 +70,8 @@
                 <td>
                     <select name="pgcache.engine">
                         <optgroup label="Shared Server (disk enhanced is best):">
-                            <option value="file_generic"<?php selected($this->_config->get_string('pgcache.engine'), 'file_generic'); ?><?php if (! $check_rules): ?> disabled="disabled"<?php endif; ?>>Disk: enhanced</option>
-                            <option value="file"<?php selected($this->_config->get_string('pgcache.engine'), 'file'); ?>>Disk: basic</option>
+                            <option value="file"<?php selected($this->_config->get_string('pgcache.engine'), 'file'); ?>>Disk: Basic</option>
+                            <option value="file_generic"<?php selected($this->_config->get_string('pgcache.engine'), 'file_generic'); ?><?php if (! $check_rules): ?> disabled="disabled"<?php endif; ?>>Disk: Enhanced</option>
                         </optgroup>
                         <optgroup label="Dedicated / Virtual Server:">
                             <option value="apc"<?php selected($this->_config->get_string('pgcache.engine'), 'apc'); ?><?php if (! $check_apc): ?> disabled="disabled"<?php endif; ?>>Opcode: Alternative PHP Cache (APC)</option>
@@ -251,10 +251,96 @@
         </p>
         <?php echo $this->postbox_footer(); ?>
 
+        <?php echo $this->postbox_header('Browser Cache'); ?>
+        <p>Reduce server load and decrease response time by using the cache available in site visitor's web browser.</p>
+
+        <table class="form-table">
+            <tr>
+                <th>Browser Cache:</th>
+                <td>
+                    <input type="hidden" name="browsercache.enabled" value="0" />
+                    <label><input class="enabled" type="checkbox" name="browsercache.enabled" value="1"<?php checked($browsercache_enabled, true); ?> />&nbsp;<strong>Enable</strong></label>
+                    <br /><span class="description">Enable <acronym title="Hypertext Transfer Protocol">HTTP</acronym> compression and add headers to reduce server load and decrease file load time.</span>
+                </td>
+            </tr>
+        </table>
+
+        <p class="submit">
+            <?php echo $this->nonce_field('w3tc'); ?>
+            <input type="submit" name="w3tc_save_options" class="w3tc-button-save button-primary" value="Save all settings" />
+        </p>
+        <?php echo $this->postbox_footer(); ?>
+
+        <?php echo $this->postbox_header('<acronym title="Content Delivery Network">CDN</acronym>'); ?>
+        <p>Host static files with your content delivery network provider to reduce page load time.</p>
+
+        <table class="form-table">
+            <tr>
+                <th><acronym title="Content Delivery Network">CDN</acronym>:</th>
+                <td>
+                    <input type="hidden" name="cdn.enabled" value="0" />
+                    <label><input class="enabled" type="checkbox" name="cdn.enabled" value="1"<?php checked($cdn_enabled, true); ?> />&nbsp;<strong>Enable</strong></label>
+                    <br /><span class="description">Theme files, media library attachments, <acronym title="Cascading Style Sheet">CSS</acronym>, <acronym title="JavaScript">JS</acronym> files etc will appear to load instantly for site visitors.</span>
+                </td>
+            </tr>
+            <tr>
+                <th><acronym title="Content Delivery Network">CDN</acronym> Type:</th>
+                <td>
+                    <select name="cdn.engine">
+                        <optgroup label="Origin Pull (mirror is best):">
+                            <option value="cf2"<?php selected($this->_config->get_string('cdn.engine'), 'cf2'); ?><?php if (!W3TC_PHP5 || !$check_curl): ?> disabled="disabled"<?php endif; ?>>Amazon CloudFront</option>
+                            <option value="cotendo"<?php selected($this->_config->get_string('cdn.engine'), 'cotendo'); ?>>Cotendo</option>
+                            <option value="mirror"<?php selected($this->_config->get_string('cdn.engine'), 'mirror'); ?>>Generic Mirror</option>
+                            <option value="edgecast"<?php selected($this->_config->get_string('cdn.engine'), 'edgecast'); ?>>Media Temple ProCDN / EdgeCast</option>
+                            <option value="netdna"<?php selected($this->_config->get_string('cdn.engine'), 'netdna'); ?>>NetDNA / MaxCDN</option>
+                        </optgroup>
+                        <optgroup label="Origin Push:">
+                            <option value="cf"<?php selected($this->_config->get_string('cdn.engine'), 'cf'); ?><?php if (!W3TC_PHP5 || !$check_curl): ?> disabled="disabled"<?php endif; ?>>Amazon CloudFront</option>
+                            <option value="s3"<?php selected($this->_config->get_string('cdn.engine'), 's3'); ?><?php if (!W3TC_PHP5 || !$check_curl): ?> disabled="disabled"<?php endif; ?>>Amazon Simple Storage Service (S3)</option>
+                            <option value="azure"<?php selected($this->_config->get_string('cdn.engine'), 'azure'); ?><?php if (!W3TC_PHP5): ?> disabled="disabled"<?php endif; ?>>Microsoft Azure Storage</option>
+                            <option value="rscf"<?php selected($this->_config->get_string('cdn.engine'), 'rscf'); ?><?php if (!W3TC_PHP5 || !$check_curl): ?> disabled="disabled"<?php endif; ?>>Rackspace Cloud Files</option>
+                            <option value="ftp"<?php selected($this->_config->get_string('cdn.engine'), 'ftp'); ?><?php if (!$check_ftp): ?> disabled="disabled"<?php endif; ?>>Self-hosted / File Transfer Protocol Upload</option>
+                        </optgroup>
+                    </select><br />
+                    <span class="description">Select the <acronym title="Content Delivery Network">CDN</acronym> type you wish to use.</span>
+                </td>
+            </tr>
+        </table>
+
+        <p class="submit">
+            <?php echo $this->nonce_field('w3tc'); ?>
+            <input type="submit" name="w3tc_save_options" class="w3tc-button-save button-primary" value="Save all settings" />
+            <input id="cdn_purge" type="button" value="Purge cache"<?php if (!$cdn_enabled || !w3_can_cdn_purge($this->_config->get_string('cdn.engine'))): ?> disabled="disabled"<?php endif; ?> class="button" />
+        </p>
+        <?php echo $this->postbox_footer(); ?>
+
+        <?php echo $this->postbox_header('Varnish'); ?>
+        <table class="form-table">
+            <tr>
+                <th colspan="2">
+                    <input type="hidden" name="varnish.enabled" value="0" />
+                    <label><input class="enabled" type="checkbox" name="varnish.enabled" value="1"<?php checked($varnish_enabled, true); ?> /> Enable varnish cache purging</label><br />
+                </th>
+            </tr>
+             <tr>
+                 <th><label for="pgcache_varnish_servers">Varnish servers:</label></th>
+                 <td>
+                    <textarea id="pgcache_varnish_servers" name="varnish.servers" cols="40" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('varnish.servers'))); ?></textarea><br />
+                    <span class="description">Specify the IP addresses of your varnish instances above. Your <acronym title="Varnish Configuration Language">VCL</acronym>'s <acronym title="Access Control List">ACL</acronym> must allow this request.</span>
+                </td>
+            </tr>
+        </table>
+
+        <p class="submit">
+            <?php echo $this->nonce_field('w3tc'); ?>
+            <input type="submit" name="w3tc_save_options" class="w3tc-button-save button-primary" value="Save all settings" />
+        </p>
+        <?php echo $this->postbox_footer(); ?>
+
         <?php echo $this->postbox_header('Network Performance &amp; Security powered by CloudFlare'); ?>
         <p>
             CloudFlare protects and accelerates websites. <a href="https://www.cloudflare.com/sign-up.html?affiliate=w3edge&amp;seed_domain=<?php echo w3_get_host(); ?>&amp;email=<?php echo htmlspecialchars($cloudflare_signup_email); ?>&amp;username=<?php echo htmlspecialchars($cloudflare_signup_user); ?>" target="_blank">Sign up now for free</a> to get started,
-            or if you have an account simply log in to obtain your <acronym title="Application Programming Interface">API</acronym> key from the <a href="https://www.cloudflare.com/my-account.html">Account Page</a> to enter it below.
+            or if you have an account simply log in to obtain your <acronym title="Application Programming Interface">API</acronym> key from the <a href="https://www.cloudflare.com/my-account.html">account page</a> to enter it below.
             Contact the CloudFlare <a href="http://www.cloudflare.com/help.html" target="_blank">support team</a> with any questions.
         </p>
 
@@ -318,92 +404,6 @@
         </p>
         <?php echo $this->postbox_footer(); ?>
 
-        <?php echo $this->postbox_header('Varnish'); ?>
-        <table class="form-table">
-            <tr>
-                <th colspan="2">
-                    <input type="hidden" name="varnish.enabled" value="0" />
-                    <label><input class="enabled" type="checkbox" name="varnish.enabled" value="1"<?php checked($varnish_enabled, true); ?> /> Enable varnish cache purging</label><br />
-                </th>
-            </tr>
-             <tr>
-                 <th><label for="pgcache_varnish_servers">Varnish servers:</label></th>
-                 <td>
-                    <textarea id="pgcache_varnish_servers" name="varnish.servers" cols="40" rows="5"><?php echo htmlspecialchars(implode("\r\n", $this->_config->get_array('varnish.servers'))); ?></textarea><br />
-                    <span class="description">Specify the IP addresses of your varnish instances above. Your <acronym title="Varnish Configuration Language">VCL</acronym>'s <acronym title="Access Control List">ACL</acronym> must allow this request.</span>
-                </td>
-            </tr>
-        </table>
-
-        <p class="submit">
-            <?php echo $this->nonce_field('w3tc'); ?>
-            <input type="submit" name="w3tc_save_options" class="w3tc-button-save button-primary" value="Save all settings" />
-        </p>
-        <?php echo $this->postbox_footer(); ?>
-
-        <?php echo $this->postbox_header('Content Delivery Network'); ?>
-        <p>Host static files with your content delivery network provider to reduce page load time.</p>
-
-        <table class="form-table">
-            <tr>
-                <th><acronym title="Content Delivery Network">CDN</acronym>:</th>
-                <td>
-                    <input type="hidden" name="cdn.enabled" value="0" />
-                    <label><input class="enabled" type="checkbox" name="cdn.enabled" value="1"<?php checked($cdn_enabled, true); ?> />&nbsp;<strong>Enable</strong></label>
-                    <br /><span class="description">Theme files, media library attachments, <acronym title="Cascading Style Sheet">CSS</acronym>, <acronym title="JavaScript">JS</acronym> files etc will appear to load instantly for site visitors.</span>
-                </td>
-            </tr>
-            <tr>
-                <th><acronym title="Content Delivery Network">CDN</acronym> Type:</th>
-                <td>
-                    <select name="cdn.engine">
-                        <optgroup label="Origin Pull (mirror is best):">
-                            <option value="cf2"<?php selected($this->_config->get_string('cdn.engine'), 'cf2'); ?><?php if (!W3TC_PHP5 || !$check_curl): ?> disabled="disabled"<?php endif; ?>>Amazon CloudFront</option>
-                            <option value="cotendo"<?php selected($this->_config->get_string('cdn.engine'), 'cotendo'); ?>>Cotendo</option>
-                            <option value="mirror"<?php selected($this->_config->get_string('cdn.engine'), 'mirror'); ?>>Generic Mirror</option>
-                            <option value="edgecast"<?php selected($this->_config->get_string('cdn.engine'), 'edgecast'); ?>>Media Temple ProCDN / EdgeCast</option>
-                            <option value="netdna"<?php selected($this->_config->get_string('cdn.engine'), 'netdna'); ?>>NetDNA / MaxCDN</option>
-                        </optgroup>
-                        <optgroup label="Origin Push:">
-                            <option value="cf"<?php selected($this->_config->get_string('cdn.engine'), 'cf'); ?><?php if (!W3TC_PHP5 || !$check_curl): ?> disabled="disabled"<?php endif; ?>>Amazon CloudFront</option>
-                            <option value="s3"<?php selected($this->_config->get_string('cdn.engine'), 's3'); ?><?php if (!W3TC_PHP5 || !$check_curl): ?> disabled="disabled"<?php endif; ?>>Amazon Simple Storage Service (S3)</option>
-                            <option value="azure"<?php selected($this->_config->get_string('cdn.engine'), 'azure'); ?><?php if (!W3TC_PHP5): ?> disabled="disabled"<?php endif; ?>>Microsoft Azure Storage</option>
-                            <option value="rscf"<?php selected($this->_config->get_string('cdn.engine'), 'rscf'); ?><?php if (!W3TC_PHP5 || !$check_curl): ?> disabled="disabled"<?php endif; ?>>Rackspace Cloud Files</option>
-                            <option value="ftp"<?php selected($this->_config->get_string('cdn.engine'), 'ftp'); ?><?php if (!$check_ftp): ?> disabled="disabled"<?php endif; ?>>Self-hosted / File Transfer Protocol Upload</option>
-                        </optgroup>
-                    </select><br />
-                    <span class="description">Select the <acronym title="Content Delivery Network">CDN</acronym> type you wish to use.</span>
-                </td>
-            </tr>
-        </table>
-
-        <p class="submit">
-            <?php echo $this->nonce_field('w3tc'); ?>
-            <input type="submit" name="w3tc_save_options" class="w3tc-button-save button-primary" value="Save all settings" />
-            <input id="cdn_purge" type="button" value="Purge cache"<?php if (!$cdn_enabled || !w3_can_cdn_purge($this->_config->get_string('cdn.engine'))): ?> disabled="disabled"<?php endif; ?> class="button" />
-        </p>
-        <?php echo $this->postbox_footer(); ?>
-
-        <?php echo $this->postbox_header('Browser Cache'); ?>
-        <p>Reduce server load and decrease response time by using the cache available in site visitor's web browser.</p>
-
-        <table class="form-table">
-            <tr>
-                <th>Browser Cache:</th>
-                <td>
-                    <input type="hidden" name="browsercache.enabled" value="0" />
-                    <label><input class="enabled" type="checkbox" name="browsercache.enabled" value="1"<?php checked($browsercache_enabled, true); ?> />&nbsp;<strong>Enable</strong></label>
-                    <br /><span class="description">Enable <acronym title="Hypertext Transfer Protocol">HTTP</acronym> compression and add headers to reduce server load and decrease file load time.</span>
-                </td>
-            </tr>
-        </table>
-
-        <p class="submit">
-            <?php echo $this->nonce_field('w3tc'); ?>
-            <input type="submit" name="w3tc_save_options" class="w3tc-button-save button-primary" value="Save all settings" />
-        </p>
-        <?php echo $this->postbox_footer(); ?>
-
         <?php echo $this->postbox_header('Support Us'); ?>
         <p>We're working to make WordPress better. Please support us, here's how:</p>
 
@@ -428,37 +428,6 @@
             <input type="submit" name="w3tc_save_options" class="w3tc-button-save button-primary" value="Save all settings" />
         </p>
         <?php echo $this->postbox_footer(); ?>
-
-        <?php echo $this->postbox_header('Debug'); ?>
-        <p>Detailed information about each cache will be appended in (publicly available) <acronym title="Hypertext Markup Language">HTML</acronym> comments in the page's source code. Performance in this mode will not be optimal, use sparingly and disable when not in use.</p>
-
-        <table class="form-table">
-            <tr>
-                <th>Debug Mode:</th>
-                <td>
-                    <input type="hidden" name="pgcache.debug" value="<?php echo ((!$this->_config->get_boolean('pgcache.enabled') && $this->_config->get_boolean('pgcache.debug')) ? "1" : "0") ?>" />
-                    <input type="hidden" name="minify.debug" value="<?php echo ((!$this->_config->get_boolean('minify.enabled') && $this->_config->get_boolean('minify.debug')) ? "1" : "0") ?>" />
-                    <input type="hidden" name="dbcache.debug" value="<?php echo ((!$this->_config->get_boolean('dbcache.enabled') && $this->_config->get_boolean('dbcache.debug')) ? "1" : "0") ?>" />
-                    <input type="hidden" name="objectcache.debug" value="<?php echo ((!$this->_config->get_boolean('objectcache.enabled') && $this->_config->get_boolean('objectcache.debug')) ? "1" : "0") ?>" />
-                    <input type="hidden" name="cdn.debug" value="<?php echo ((!$this->_config->get_boolean('cdn.enabled') && $this->_config->get_boolean('cdn.debug')) ? "1" : "0") ?>" />
-                    <input type="hidden" name="varnish.debug" value="<?php echo ((!$this->_config->get_boolean('varnish.enabled') && $this->_config->get_boolean('varnish.debug')) ? "1" : "0") ?>" />
-                    <label><input type="checkbox" name="pgcache.debug" value="pgcache"<?php checked($this->_config->get_boolean('pgcache.debug') && $this->_config->get_boolean('pgcache.enabled'), true); ?> <?php if (!$this->_config->get_boolean('pgcache.enabled')): ?> disabled="disabled"<?php endif; ?>/> Page Cache</label><br />
-                    <label><input type="checkbox" name="minify.debug" value="minify"<?php checked($this->_config->get_boolean('minify.debug') && $this->_config->get_boolean('minify.enabled'), true); ?> <?php if (!$this->_config->get_boolean('minify.enabled')): ?> disabled="disabled"<?php endif; ?>/> Minify</label><br />
-                    <label><input type="checkbox" name="dbcache.debug" value="dbcache"<?php checked($this->_config->get_boolean('dbcache.debug') && $this->_config->get_boolean('dbcache.enabled'), true); ?> <?php if (!$this->_config->get_boolean('dbcache.enabled')): ?> disabled="disabled"<?php endif; ?>/> Database Cache</label><br />
-                    <label><input type="checkbox" name="objectcache.debug" value="objectcache"<?php checked($this->_config->get_boolean('objectcache.debug') && $this->_config->get_boolean('objectcache.enabled'), true); ?> <?php if (!$this->_config->get_boolean('objectcache.enabled')): ?> disabled="disabled"<?php endif; ?>/> Object Cache</label><br />
-                    <label><input type="checkbox" name="cdn.debug" value="cdn"<?php checked($this->_config->get_boolean('cdn.debug') && $this->_config->get_boolean('cdn.enabled'), true); ?> <?php if (!$this->_config->get_boolean('cdn.enabled')): ?> disabled="disabled"<?php endif; ?>/> Content Delivery Network</label><br />
-                    <label><input type="checkbox" name="varnish.debug" value="varnish"<?php checked($this->_config->get_boolean('varnish.debug') && $this->_config->get_boolean('varnish.enabled'), true); ?> <?php if (!$this->_config->get_boolean('varnish.enabled')): ?> disabled="disabled"<?php endif; ?>/> Varnish</label><br />
-                    <span class="description">If selected, detailed caching information will be appear at the end of each page in a <acronym title="Hypertext Markup Language">HTML</acronym> comment. View a page's source code to review.</span>
-                </td>
-            </tr>
-        </table>
-
-        <p class="submit">
-            <?php echo $this->nonce_field('w3tc'); ?>
-            <input type="submit" name="w3tc_save_options" class="w3tc-button-save button-primary" value="Save all settings" />
-        </p>
-        <?php echo $this->postbox_footer(); ?>
-
         <?php echo $this->postbox_header('Miscellaneous'); ?>
         <table class="form-table">
             <?php if (w3_is_nginx()): ?>
@@ -511,6 +480,36 @@
                     <input id="widget_pagespeed_key" type="text" name="widget.pagespeed.key" value="<?php echo $this->_config->get_string('widget.pagespeed.key'); ?>" size="60" /><br />
                     <span class="description">To acquire an <acronym title="Application Programming Interface">API</acronym> key, visit the <a href="https://code.google.com/apis/console" target="_blank"><acronym title="Application Programming Interface">API</acronym>s Console</a>. Go to the Project Home tab, activate the Page Speed Online <acronym title="Application Programming Interface">API</acronym>, and accept the Terms of Service.
                     Then go to the <acronym title="Application Programming Interface">API</acronym> Access tab. The <acronym title="Application Programming Interface">API</acronym> key is in the Simple <acronym title="Application Programming Interface">API</acronym> Access section.</span>
+                </td>
+            </tr>
+        </table>
+
+        <p class="submit">
+            <?php echo $this->nonce_field('w3tc'); ?>
+            <input type="submit" name="w3tc_save_options" class="w3tc-button-save button-primary" value="Save all settings" />
+        </p>
+        <?php echo $this->postbox_footer(); ?>
+
+        <?php echo $this->postbox_header('Debug'); ?>
+        <p>Detailed information about each cache will be appended in (publicly available) <acronym title="Hypertext Markup Language">HTML</acronym> comments in the page's source code. Performance in this mode will not be optimal, use sparingly and disable when not in use.</p>
+
+        <table class="form-table">
+            <tr>
+                <th>Debug Mode:</th>
+                <td>
+                    <input type="hidden" name="pgcache.debug" value="<?php echo ((!$this->_config->get_boolean('pgcache.enabled') && $this->_config->get_boolean('pgcache.debug')) ? "1" : "0") ?>" />
+                    <input type="hidden" name="minify.debug" value="<?php echo ((!$this->_config->get_boolean('minify.enabled') && $this->_config->get_boolean('minify.debug')) ? "1" : "0") ?>" />
+                    <input type="hidden" name="dbcache.debug" value="<?php echo ((!$this->_config->get_boolean('dbcache.enabled') && $this->_config->get_boolean('dbcache.debug')) ? "1" : "0") ?>" />
+                    <input type="hidden" name="objectcache.debug" value="<?php echo ((!$this->_config->get_boolean('objectcache.enabled') && $this->_config->get_boolean('objectcache.debug')) ? "1" : "0") ?>" />
+                    <input type="hidden" name="cdn.debug" value="<?php echo ((!$this->_config->get_boolean('cdn.enabled') && $this->_config->get_boolean('cdn.debug')) ? "1" : "0") ?>" />
+                    <input type="hidden" name="varnish.debug" value="<?php echo ((!$this->_config->get_boolean('varnish.enabled') && $this->_config->get_boolean('varnish.debug')) ? "1" : "0") ?>" />
+                    <label><input type="checkbox" name="pgcache.debug" value="pgcache"<?php checked($this->_config->get_boolean('pgcache.debug') && $this->_config->get_boolean('pgcache.enabled'), true); ?> <?php if (!$this->_config->get_boolean('pgcache.enabled')): ?> disabled="disabled"<?php endif; ?>/> Page Cache</label><br />
+                    <label><input type="checkbox" name="minify.debug" value="minify"<?php checked($this->_config->get_boolean('minify.debug') && $this->_config->get_boolean('minify.enabled'), true); ?> <?php if (!$this->_config->get_boolean('minify.enabled')): ?> disabled="disabled"<?php endif; ?>/> Minify</label><br />
+                    <label><input type="checkbox" name="dbcache.debug" value="dbcache"<?php checked($this->_config->get_boolean('dbcache.debug') && $this->_config->get_boolean('dbcache.enabled'), true); ?> <?php if (!$this->_config->get_boolean('dbcache.enabled')): ?> disabled="disabled"<?php endif; ?>/> Database Cache</label><br />
+                    <label><input type="checkbox" name="objectcache.debug" value="objectcache"<?php checked($this->_config->get_boolean('objectcache.debug') && $this->_config->get_boolean('objectcache.enabled'), true); ?> <?php if (!$this->_config->get_boolean('objectcache.enabled')): ?> disabled="disabled"<?php endif; ?>/> Object Cache</label><br />
+                    <label><input type="checkbox" name="cdn.debug" value="cdn"<?php checked($this->_config->get_boolean('cdn.debug') && $this->_config->get_boolean('cdn.enabled'), true); ?> <?php if (!$this->_config->get_boolean('cdn.enabled')): ?> disabled="disabled"<?php endif; ?>/> Content Delivery Network</label><br />
+                    <label><input type="checkbox" name="varnish.debug" value="varnish"<?php checked($this->_config->get_boolean('varnish.debug') && $this->_config->get_boolean('varnish.enabled'), true); ?> <?php if (!$this->_config->get_boolean('varnish.enabled')): ?> disabled="disabled"<?php endif; ?>/> Varnish</label><br />
+                    <span class="description">If selected, detailed caching information will be appear at the end of each page in a <acronym title="Hypertext Markup Language">HTML</acronym> comment. View a page's source code to review.</span>
                 </td>
             </tr>
         </table>

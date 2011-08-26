@@ -257,13 +257,11 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
      * @return void
      */
     function admin_init() {
-        wp_register_style('w3tc-chosen', plugins_url('pub/css/chosen.css', W3TC_FILE));
         wp_register_style('w3tc-options', plugins_url('pub/css/options.css', W3TC_FILE));
         wp_register_style('w3tc-lightbox', plugins_url('pub/css/lightbox.css', W3TC_FILE));
         wp_register_style('w3tc-widget', plugins_url('pub/css/widget.css', W3TC_FILE));
 
         wp_register_script('w3tc-metadata', plugins_url('pub/js/metadata.js', W3TC_FILE));
-        wp_register_script('w3tc-chosen', plugins_url('pub/js/chosen.js', W3TC_FILE));
         wp_register_script('w3tc-options', plugins_url('pub/js/options.js', W3TC_FILE));
         wp_register_script('w3tc-lightbox', plugins_url('pub/js/lightbox.js', W3TC_FILE));
         wp_register_script('w3tc-widget', plugins_url('pub/js/widget.js', W3TC_FILE));
@@ -382,7 +380,6 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
      * @return void
      */
     function admin_print_styles() {
-        wp_enqueue_style('w3tc-chosen');
         wp_enqueue_style('w3tc-options');
         wp_enqueue_style('w3tc-lightbox');
     }
@@ -394,7 +391,6 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
      */
     function admin_print_scripts() {
         wp_enqueue_script('w3tc-metadata');
-        wp_enqueue_script('w3tc-chosen');
         wp_enqueue_script('w3tc-options');
         wp_enqueue_script('w3tc-lightbox');
 

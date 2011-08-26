@@ -1,9 +1,9 @@
 === Plugin Name ===
 Contributors: fredericktownes
-Tags: user experience, cache, caching, page cache, css cache, js cache, db cache, disk cache, disk caching, database cache, http compression, gzip, deflate, minify, cdn, content delivery network, media library, performance, speed, multiple hosts, css, merge, combine, unobtrusive javascript, compress, optimize, optimizer, javascript, js, cascading style sheet, plugin, yslow, yui, google, google rank, google page speed, mod_pagespeed, s3, cloudfront, aws, amazon web services, cloud files, rackspace, cotendo, max cdn, limelight, cloudflare, microsoft, microsoft azure, iis, nginx, apache, varnish, xcache, apc, eacclerator, wincache, mysql, w3 total cache, batcache, wp cache, wp super cache, buddypress
+Tags: user experience, cache, caching, page cache, css cache, js cache, db cache, disk cache, disk caching, database cache, http compression, gzip, deflate, minify, cdn, content delivery network, media library, performance, speed, multiple hosts, css, merge, combine, unobtrusive javascript, compress, optimize, optimizer, javascript, js, cascading style sheet, plugin, yslow, yui, google, google rank, google page speed, mod_pagespeed, s3, cloudfront, aws, amazon web services, cloud files, rackspace, cotendo, max cdn, limelight, cloudflare, microsoft, microsoft azure, iis, nginx, litespeed, apache, varnish, xcache, apc, eacclerator, wincache, mysql, w3 total cache, batcache, wp cache, wp super cache, buddypress
 Requires at least: 2.8
 Tested up to: 3.2.1
-Stable tag: 0.9.2.3
+Stable tag: 0.9.2.4
 
 Improve site performance and user experience via caching: browser, page, object, database, minify and content delivery network support.
 
@@ -84,6 +84,19 @@ We are aware of no incompatibilities with [apache](http://httpd.apache.org/) 1.3
 
 To use all features in the suite, a minimum of version WordPress 2.8 with PHP 5 is required. Earlier versions will benefit from our Media Library Importer to get them back on the upgrade path and into a CDN of their choosing.
 
+= Who do you recommend as a CDN (Content Delivery Network) provider? =
+
+That depends on how you use your site and where most of your readers read your site (regionally). Here's a short list:
+
+* [MaxCDN](http://bit.ly/pXZ4t1)
+* [EdgeCast](http://bit.ly/bIjSWC)
+* [Amazon Cloudfront](http://bit.ly/ao1sGt)
+* [Rackspace Cloud Files](http://bit.ly/9hpX8T)
+* [VPS NET (Level 3)](http://bit.ly/d5hfFt)
+* [Cotendo](http://bit.ly/bnVs0a)
+* [Limelight Networks](http://bit.ly/aCW04j)
+* [Akamai](http://bit.ly/a5GBLV)
+
 = What about comments? Does the plugin slow down the rate at which comments appear? =
 
 On the contrary, as with any other action a user can perform on a site, faster performance will encourage more of it. The cache is so quickly rebuilt in memory that it's no trouble to show visitors the most current version of a post that's experiencing Digg, Slashdot, Drudge Report, Yahoo Buzz or Twitter effect.
@@ -127,20 +140,6 @@ Use the "Help" button available on the Minify settings tab. Once open, the tool 
 = I don't understand what a CDN has to do with caching, that's completely different, no? =
 
 Technically no, a CDN is a high performance cache that stores static assets (your theme files, media library etc) in various locations throughout the world in order to provide low latency access to them by readers in those regions.
-
-= Who do you recommend as a CDN (Content Delivery Network) provider? =
-
-That depends on how you use your site and where most of your readers read your site (regionally). Here's a short list:
-
-* [Amazon Cloudfront](http://bit.ly/ao1sGt)
-* [Rackspace Cloud Files](http://bit.ly/9hpX8T)
-* [MaxCDN](http://bit.ly/acaXXt)
-* [VPS NET (Level 3)](http://bit.ly/d5hfFt)
-* [EdgeCast](http://bit.ly/bIjSWC)
-* [Cotendo](http://bit.ly/bnVs0a)
-* [Limelight Networks](http://bit.ly/aCW04j)
-* [Akamai](http://bit.ly/a5GBLV)
-* [SimpleCDN](http://bit.ly/93EAKK)
 
 = What if I don't want to work with a CDN right now, is there any other use for this feature? =
 
@@ -253,8 +252,14 @@ Install the plugin to read the full FAQ.
 
 == Press: Mentions, Tutorials &amp; Reviews ==
 
+** Auguest 2011 **
+
+* [Matt Mullenweg: State of the Word 2011 (4:49)](http://wordpress.tv/2011/08/14/matt-mullenweg-state-of-the-word-2011/), Matt Mullenweg
+* [W3 Total Cache Setup with CloudFlare and CDN : Complete Tutorial Guide](http://thecustomizewindows.com/2011/08/w3-total-cache-setup-with-cloudflare-and-cdn-complete-tutorial-guide/), Abhishek Ghosh
+
 **July 2011:**
 
+* [Speeding Up Your Blog – Part II: WordPress & Cloudflare Integration](http://www.thewebhostinghero.com/tutorials/wordpress-cloudflare.html)
 * [How Your Website Loses 7% of Potential Conversions](http://www.clickz.com/clickz/column/2097323/website-loses-potential-conversions), Bryan Eisenberg
 * [How to Integrate Google Page Speed with W3 Total Cache](http://geekscalling.com/google/how-to-integrate-google-page-speed-with-w3-total-cache), Anish
 * [22 WordPress Plugins for Content Marketers](http://www.business2community.com/content-marketing/22-wordpress-plugins-for-content-marketers-040787), Brody Dorland
@@ -460,6 +465,10 @@ Please reach out to all of these people and support their projects if you're so 
 = 0.9.2.4 =
 * Added support for Microsoft SQL Server
 * Added API support for MediaTemple ProCDN (EdgeCast)
+* Added set_time_limit to self test
+* Fixed LiteSpeed web server support
+* Fixed native hostname 301 redirect
+* Fixed redundant object origin push export
 * Fixed WSOD (white screen of death) caused by minify in some hosting configurations
 * Fixed text encoding in feeds
 * Fixed incorrect mime-type in feeds (which caused feedburner anomalies)
@@ -468,6 +477,8 @@ Please reach out to all of these people and support their projects if you're so 
 * Fixed minification of font-family
 * Fixed object cache write issue in WP Admin
 * Improved (reduced) memory utilization by up to 70%
+* Improved disk enhanced page caching performance
+* Improved object caching performance
 * Improved activation reliability
 * Improved reliability of minify auto mode
 * Improved security (added nonces, no directory indexing, prevent direct file access)

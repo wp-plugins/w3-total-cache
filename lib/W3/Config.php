@@ -58,6 +58,7 @@ class W3_Config {
         'pgcache.file.locking' => 'boolean',
         'pgcache.memcached.servers' => 'array',
         'pgcache.memcached.persistant' => 'boolean',
+        'pgcache.check.domain' => 'boolean',
         'pgcache.cache.query' => 'boolean',
         'pgcache.cache.home' => 'boolean',
         'pgcache.cache.feed' => 'boolean',
@@ -390,6 +391,7 @@ class W3_Config {
             '127.0.0.1:11211'
         ),
         'pgcache.memcached.persistant' => true,
+        'pgcache.check.domain' => true,
         'pgcache.cache.query' => true,
         'pgcache.cache.home' => true,
         'pgcache.cache.feed' => false,

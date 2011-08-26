@@ -265,9 +265,6 @@ function w3tc_beforeunload() {
 }
 
 jQuery(function() {
-    // chosen
-    jQuery('#w3tc select').chosen();
-
     // general page
     w3tc_toggle('enabled');
 

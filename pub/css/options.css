@@ -194,7 +194,7 @@
 }
 
 #cdn_cnames li:hover {
-    background: #f9f9f9;
+    background: #e9e9e9;
 }
 
 #cdn_cnames li span {
@@ -205,7 +205,7 @@
 #referrer_groups li {
     cursor: ns-resize;
     list-style: none;
-    background: #f9f9f9;
+    background: #f0f0f0;
     margin-bottom: 1em;
     border-radius: 8px;
     -webkit-border-radius: 8px;
@@ -214,7 +214,7 @@
 
 #mobile_groups li:hover,
 #referrer_groups li:hover {
-    background: #eee;
+    background: #e9e9e9;
 }
 
 #mobile_groups li table,
@@ -241,7 +241,7 @@
 .minify-files li {
     padding: 2px;
     list-style: none;
-    background: #f9f9f9;
+    background: #f0f0f0;
     cursor: ns-resize;
     border-radius: 8px;
     -webkit-border-radius: 8px;
@@ -250,7 +250,7 @@
 }
 
 .minify-files li:hover {
-    background: #eee;
+    background: #e9e9e9;
 }
 
 .minify-files th,

@@ -54,6 +54,13 @@
     				<span class="description">Reduce server load by caching 404 pages. If the disk enhanced method of disk caching is used, 404 pages will be returned with a 200 response code. Use at your own risk.</span>
         		</th>
         	</tr>
+            <tr>
+                <th>
+                    <input type="hidden" name="pgcache.check.domain" value="0" />
+                    <label><input type="checkbox" name="pgcache.check.domain" value="1"<?php checked($this->_config->get_boolean('pgcache.check.domain'), true); ?> /> Cache requests only for <?php echo w3_get_home_domain(); ?> hostname</label><br />
+                    <span class="description">Cache only requests with the same <acronym title="Uniform Resource Indicator">URL</acronym> as the site's <a href="options-general.php">site address</a>.</span>
+                </th>
+            </tr>
         	<tr>
         		<th>
         			<input type="hidden" name="pgcache.reject.logged" value="0" />

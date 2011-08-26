@@ -626,6 +626,13 @@ class W3_Plugin_PgCacheAdmin extends W3_Plugin {
         $use_cache_rules .= "    RewriteCond %{QUERY_STRING} =\"\"\n";
 
         /**
+         * Check hostname
+         */
+        if ($this->_config->get_boolean('pgcache.check.domain')) {
+            $use_cache_rules .= "    RewriteCond %{HTTP_HOST} =" . w3_get_home_domain() . "\n";
+        }
+
+        /**
          * Check permalink structure trailing slash
          */
         if (substr($permalink_structure, -1) == '/') {
@@ -814,6 +821,15 @@ class W3_Plugin_PgCacheAdmin extends W3_Plugin {
         $rules .= "if (\$query_string != \"\") {\n";
         $rules .= "    set \$w3tc_rewrite 0;\n";
         $rules .= "}\n";
+
+        /**
+         * Check hostname
+         */
+        if ($this->_config->get_boolean('pgcache.check.domain')) {
+            $rules .= "if (\$http_host != \"" . w3_get_home_domain() . "\") {\n";
+            $rules .= "    set \$w3tc_rewrite 0;\n";
+            $rules .= "}\n";
+        }
 
         /**
          * Check permalink structure trailing slash

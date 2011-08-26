@@ -558,6 +558,15 @@ class W3_PgCache {
         }
 
         /**
+         * Check hostname
+         */
+        if ($this->_config->get_boolean('pgcache.check.domain') && w3_get_host() != w3_get_home_domain()) {
+            $this->cache_reject_reason = 'Hostname mismatch';
+
+            return false;
+        }
+
+        /**
          * Don't cache 404 pages
          */
         if (!$this->_config->get_boolean('pgcache.cache.404') && function_exists('is_404') && is_404()) {
