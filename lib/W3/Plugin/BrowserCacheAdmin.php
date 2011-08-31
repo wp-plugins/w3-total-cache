@@ -355,7 +355,7 @@ class W3_Plugin_BrowserCacheAdmin extends W3_Plugin {
         }
 
         $this->_generate_rules_cache_nginx($rules, $cssjs_types, 'cssjs');
-        $this->_generate_rules_cache_nginx($rules, $html_types, 'html');
+        $this->_generate_rules_cache_nginx($rules, $html_types, 'html', true);
         $this->_generate_rules_cache_nginx($rules, $other_types, 'other');
 
         $rules .= W3TC_MARKER_END_BROWSERCACHE_CACHE . "\n";
@@ -371,7 +371,7 @@ class W3_Plugin_BrowserCacheAdmin extends W3_Plugin {
      * @param string $section
      * @return void
      */
-    function _generate_rules_cache_nginx(&$rules, $mime_types, $section) {
+    function _generate_rules_cache_nginx(&$rules, $mime_types, $section, $write_location = false) {
         $expires = $this->_config->get_boolean('browsercache.' . $section . '.expires');
         $cache_control = $this->_config->get_boolean('browsercache.' . $section . '.cache.control');
         $w3tc = $this->_config->get_boolean('browsercache.' . $section . '.w3tc');
@@ -418,6 +418,9 @@ class W3_Plugin_BrowserCacheAdmin extends W3_Plugin {
 
             if ($w3tc) {
                 $rules .= "    add_header X-Powered-By \"" . W3TC_POWERED_BY . "\";\n";
+            }
+            if ($write_location) {
+                $rules .= '    try_files $uri $uri/ $uri.html /index.php?$args;' . "\n";
             }
 
             $rules .= "}\n";

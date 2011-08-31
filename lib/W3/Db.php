@@ -68,8 +68,22 @@ class W3_Db extends W3_Db_Driver {
     var $_lifetime = null;
 
     /**
-     * PHP5 constructor
+     * Request-global cache reject reason
+     * null until filled
      *
+     * @var string
+     */
+    var $cache_reject_reason = null;
+
+    /**
+     * Result of check if caching is possible at the level of current http request
+     * null until filled
+     *
+     * @var boolean
+     */
+    var $_can_cache_once_per_request_result = null;
+
+    /*
      * @param string $dbuser
      * @param string $dbpassword
      * @param string $dbname
@@ -324,19 +338,32 @@ class W3_Db extends W3_Db_Driver {
      */
     function _can_cache($sql, &$cache_reject_reason) {
         /**
-         * Skip if disabled
+         * Skip if request-wide reject reason specified. 
+         * Note - as a result requedt-wide checks are done only once per request
          */
-        if (!$this->_config->get_boolean('dbcache.enabled')) {
-            $cache_reject_reason = 'Database caching is disabled';
+        if (!is_null($this->cache_reject_reason)) {
+            $cache_reject_reason = 'Request-wide ' . $this->cache_reject_reason;
 
             return false;
+        }
+       
+        /**
+         * Do once-per-request check if needed
+         */
+        if (is_null($this->_can_cache_once_per_request_result)) {
+            $this->_can_cache_once_per_request_result = $this->_can_cache_once_per_request();
+            if (!$this->_can_cache_once_per_request_result) {
+                $cache_reject_reason = 'Request-wide ' . $this->cache_reject_reason;
+                return false;
+            }
         }
 
         /**
          * Check for DONOTCACHEDB constant
          */
         if (defined('DONOTCACHEDB') && DONOTCACHEDB) {
-            $cache_reject_reason = 'DONOTCACHEDB constant is defined';
+            $this->cache_reject_reason = 'DONOTCACHEDB constant is defined';
+            $cache_reject_reason = $this->cache_reject_reason;
 
             return false;
         }
@@ -345,7 +372,8 @@ class W3_Db extends W3_Db_Driver {
          * Skip if doint AJAX
          */
         if (defined('DOING_AJAX')) {
-            $cache_reject_reason = 'Doing AJAX';
+            $this->cache_reject_reason = 'Doing AJAX';
+            $cache_reject_reason = $this->cache_reject_reason;
 
             return false;
         }
@@ -354,7 +382,8 @@ class W3_Db extends W3_Db_Driver {
          * Skip if doing cron
          */
         if (defined('DOING_CRON')) {
-            $cache_reject_reason = 'Doing cron';
+            $this->cache_reject_reason = 'Doing cron';
+            $cache_reject_reason = $this->cache_reject_reason;
 
             return false;
         }
@@ -363,7 +392,8 @@ class W3_Db extends W3_Db_Driver {
          * Skip if APP request
          */
         if (defined('APP_REQUEST')) {
-            $cache_reject_reason = 'Application request';
+            $this->cache_reject_reason = 'Application request';
+            $cache_reject_reason = $this->cache_reject_reason;
 
             return false;
         }
@@ -372,7 +402,8 @@ class W3_Db extends W3_Db_Driver {
          * Skip if XMLRPC request
          */
         if (defined('XMLRPC_REQUEST')) {
-            $cache_reject_reason = 'XMLRPC request';
+            $this->cache_reject_reason = 'XMLRPC request';
+            $cache_reject_reason = $this->cache_reject_reason;
 
             return false;
         }
@@ -381,7 +412,8 @@ class W3_Db extends W3_Db_Driver {
          * Skip if admin
          */
         if (defined('WP_ADMIN')) {
-            $cache_reject_reason = 'wp-admin';
+            $this->cache_reject_reason = 'wp-admin';
+            $cache_reject_reason = $this->cache_reject_reason;
 
             return false;
         }
@@ -405,10 +437,38 @@ class W3_Db extends W3_Db_Driver {
         }
 
         /**
+         * Skip if user is logged in
+         */
+        if ($this->_config->get_boolean('dbcache.reject.logged') && !$this->_check_logged_in()) {
+            $this->cache_reject_reason = 'User is logged in';
+            $cache_reject_reason = $this->cache_reject_reason;
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if can cache sql, checks which have constant results during whole request
+     *
+     * @return boolean
+     */
+    function _can_cache_once_per_request() {
+        /**
+         * Skip if disabled
+         */
+        if (!$this->_config->get_boolean('dbcache.enabled')) {
+            $this->cache_reject_reason = 'Database caching is disabled';
+
+            return false;
+        }
+
+        /**
          * Skip if request URI is rejected
          */
         if (!$this->_check_request_uri()) {
-            $cache_reject_reason = 'Request URI is rejected';
+            $this->cache_reject_reason = 'Request URI is rejected';
 
             return false;
         }
@@ -417,16 +477,7 @@ class W3_Db extends W3_Db_Driver {
          * Skip if cookie is rejected
          */
         if (!$this->_check_cookies()) {
-            $cache_reject_reason = 'Cookie is rejected';
-
-            return false;
-        }
-
-        /**
-         * Skip if user is logged in
-         */
-        if ($this->_config->get_boolean('dbcache.reject.logged') && !$this->_check_logged_in()) {
-            $cache_reject_reason = 'User is logged in';
+            $this->cache_reject_reason = 'Cookie is rejected';
 
             return false;
         }

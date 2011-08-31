@@ -690,6 +690,28 @@ class W3_Plugin_MinifyAdmin extends W3_Plugin {
     }
 
     /**
+     * Check if core rules exists
+     *
+     * @return boolean
+     */
+    function check_rules_has_core() {
+        $path = w3_get_minify_rules_core_path();
+
+        return (($data = @file_get_contents($path)) && w3_has_rules(w3_clean_rules($data), W3TC_MARKER_BEGIN_MINIFY_CORE, W3TC_MARKER_END_MINIFY_CORE));
+    }
+
+    /**
+     * Check if legacy rules exists
+     *
+     * @return boolean
+     */
+    function check_rules_has_legacy() {
+        $path = w3_get_minify_rules_core_path();
+
+        return (($data = @file_get_contents($path)) && w3_has_rules(w3_clean_rules($data), W3TC_MARKER_BEGIN_MINIFY_LEGACY, W3TC_MARKER_END_MINIFY_LEGACY));
+    }
+
+    /**
      * Checks if core rules exists
      *
      * @return boolean
@@ -711,17 +733,5 @@ class W3_Plugin_MinifyAdmin extends W3_Plugin {
         $search = $this->generate_rules_cache();
 
         return (($data = @file_get_contents($path)) && strstr(w3_clean_rules($data), w3_clean_rules($search)) !== false);
-    }
-
-
-    /**
-     * Check if legacy rules exists
-     *
-     * @return boolean
-     */
-    function check_rules_legacy() {
-        $path = w3_get_minify_rules_core_path();
-
-        return (($data = @file_get_contents($path)) && w3_has_rules(w3_clean_rules($data), W3TC_MARKER_BEGIN_MINIFY_LEGACY, W3TC_MARKER_END_MINIFY_LEGACY));
     }
 }

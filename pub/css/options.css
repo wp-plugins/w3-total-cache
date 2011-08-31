@@ -227,6 +227,10 @@
     font-weight: bold;
 }
 
+.w3tc-rule-error-details {
+	display: none;
+}
+
 .w3tc-rules {
     display: none;
     margin: 1em 0;

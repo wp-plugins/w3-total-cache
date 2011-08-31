@@ -19,6 +19,26 @@ jQuery(function($) {
     </div>
 	<?php endforeach; ?>
 
+    <?php if (count($this->_rule_errors) > 0): ?>
+    <div class="error">
+        <p>
+        	The following configuration changes are needed to ensure optimal performance:<br />
+        	If permission allow this can be done automatically, by clicking here:
+        	<?php echo $this->_rule_errors_autoinstall ?>.
+        	<?php echo $this->_rule_errors_hide ?>
+        </p>
+       	<input type="button" class="button w3tc-show-rule-error-details" value="show details" />
+	    <div class="w3tc-rule-error-details">
+	        <ul style="padding-left: 20px">
+		    	<?php foreach ($this->_rule_errors as $error): ?>
+			    	<li><?php echo $error[0]; ?></li>
+				<?php endforeach; ?>
+			</ul>
+		</div>
+		<p></p>
+	</div>
+	<?php endif; ?>
+
 	<?php foreach ($this->_notes as $note): ?>
 	<div class="updated fade">
 		<p><?php echo $note; ?></p>

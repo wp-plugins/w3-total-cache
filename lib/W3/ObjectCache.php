@@ -86,7 +86,7 @@ class W3_ObjectCache {
      *
      * @var string
      */
-    var $_cache_reject_reason = '';
+    var $cache_reject_reason = '';
 
     /**
      * Lifetime
@@ -381,7 +381,7 @@ class W3_ObjectCache {
         echo '<strong>Caching</strong>: ' . ($this->_caching ? 'enabled' : 'disabled') . '<br />';
 
         if (!$this->_caching) {
-            echo '<strong>Reject reason</strong>: ' . $this->_cache_reject_reason . '<br />';
+            echo '<strong>Reject reason</strong>: ' . $this->cache_reject_reason . '<br />';
         }
 
         echo '<strong>Total calls</strong>: ' . $this->cache_total . '<br />';
@@ -500,7 +500,7 @@ class W3_ObjectCache {
          * Skip if disabled
          */
         if (!$this->_config->get_boolean('objectcache.enabled')) {
-            $this->_cache_reject_reason = 'Object caching is disabled';
+            $this->cache_reject_reason = 'Object caching is disabled';
 
             return false;
         }
@@ -509,7 +509,7 @@ class W3_ObjectCache {
          * Check for DONOTCACHEOBJECT constant
          */
         if (defined('DONOTCACHEOBJECT') && DONOTCACHEOBJECT) {
-            $this->_cache_reject_reason = 'DONOTCACHEOBJECT constant is defined';
+            $this->cache_reject_reason = 'DONOTCACHEOBJECT constant is defined';
 
             return false;
         }
@@ -593,7 +593,7 @@ class W3_ObjectCache {
         $debug_info .= sprintf("%s%s\r\n", str_pad('Caching: ', 20), ($this->_caching ? 'enabled' : 'disabled'));
 
         if (!$this->_caching) {
-            $debug_info .= sprintf("%s%s\r\n", str_pad('Reject reason: ', 20), $this->_cache_reject_reason);
+            $debug_info .= sprintf("%s%s\r\n", str_pad('Reject reason: ', 20), $this->cache_reject_reason);
         }
 
         $debug_info .= sprintf("%s%d\r\n", str_pad('Total calls: ', 20), $this->cache_total);

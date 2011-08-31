@@ -73,8 +73,16 @@ class W3_CloudFlare {
         $response = w3_http_get($url);
 
         if (!is_wp_error($response)) {
-            return json_decode($response['body']);
-        }
+            $response = json_decode($response['body']);
+            if (isset($response->result) && $response->result == 'error') {
+                $this->_set_last_error(isset($response->msg) ? $response->msg : 'Unknown error');
+            } else {
+                $this->clear_last_error();
+            }
+            return $response;
+        } else {
+        	$this->_set_last_error($response->get_error_message());
+    	}
 
         return false;
     }
@@ -113,6 +121,18 @@ class W3_CloudFlare {
                 }
             }
         }
+    }
+
+    function get_last_error() {
+        return get_option('w3tc_clourflare_last_error');
+    }
+
+    function clear_last_error() {
+        update_option('w3tc_clourflare_last_error', false);
+    }
+
+    function _set_last_error($message) {
+        update_option('w3tc_clourflare_last_error', $message);
     }
 
     /**

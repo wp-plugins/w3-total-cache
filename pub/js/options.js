@@ -1241,6 +1241,19 @@ jQuery(function() {
         }
     });
 
+    // show hide error details
+    jQuery('.w3tc-show-rule-error-details').click(function() {
+        var btn = jQuery(this), rules = btn.parent().find('.w3tc-rule-error-details');
+
+        if (rules.is(':visible')) {
+            rules.css('display', 'none');
+            btn.val('show details');
+        } else {
+            rules.css('display', 'block');
+            btn.val('hide details');
+        }
+    });
+    
     // check for unsaved changes
     jQuery('#w3tc input,#w3tc select,#w3tc textarea').live('change', function() {
         var ignore = false;

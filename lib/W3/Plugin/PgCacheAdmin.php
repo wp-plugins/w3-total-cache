@@ -208,6 +208,7 @@ class W3_Plugin_PgCacheAdmin extends W3_Plugin {
          * Make HTTP requests and prime cache
          */
         require_once W3TC_INC_DIR . '/functions/http.php';
+        require_once W3TC_INC_DIR . '/functions/url.php';
 
         foreach ($queue as $url) {
             $url = w3_url_format($url, array('w3tc_preload' => 1));
@@ -1450,6 +1451,28 @@ class W3_Plugin_PgCacheAdmin extends W3_Plugin {
     }
 
     /**
+     * Check if legacy rules exists
+     *
+     * @return boolean
+     */
+    function check_rules_has_legacy() {
+        $path = w3_get_pgcache_rules_core_path();
+
+        return (($data = @file_get_contents($path)) && w3_has_rules(w3_clean_rules($data), W3TC_MARKER_BEGIN_PGCACHE_LEGACY, W3TC_MARKER_END_PGCACHE_LEGACY));
+    }
+    
+    /**
+     * Check if legacy rules exists
+     *
+     * @return boolean
+     */
+    function check_rules_has_core() {
+        $path = w3_get_pgcache_rules_core_path();
+
+        return (($data = @file_get_contents($path)) && w3_has_rules(w3_clean_rules($data), W3TC_MARKER_BEGIN_PGCACHE_CORE, W3TC_MARKER_END_PGCACHE_CORE));
+    }
+    
+    /**
      * Checks if core rules exists
      *
      * @return boolean
@@ -1471,17 +1494,6 @@ class W3_Plugin_PgCacheAdmin extends W3_Plugin {
         $search = $this->generate_rules_cache();
 
         return (($data = @file_get_contents($path)) && strstr(w3_clean_rules($data), w3_clean_rules($search)) !== false);
-    }
-
-    /**
-     * Check if legacy rules exists
-     *
-     * @return boolean
-     */
-    function check_rules_legacy() {
-        $path = w3_get_pgcache_rules_core_path();
-
-        return (($data = @file_get_contents($path)) && w3_has_rules(w3_clean_rules($data), W3TC_MARKER_BEGIN_PGCACHE_LEGACY, W3TC_MARKER_END_PGCACHE_LEGACY));
     }
 
     /**

@@ -399,20 +399,36 @@ class W3_Plugin_TotalCache extends W3_Plugin {
                         $strings[] = sprintf("Page Caching using %s%s", w3_get_engine_name($this->_config->get_string('pgcache.engine')), ($w3_pgcache->cache_reject_reason != '' ? sprintf(' (%s)', $w3_pgcache->cache_reject_reason) : ''));
                     }
 
-                    if ($this->_config->get_boolean('dbcache.enabled') && !$this->_config->get_boolean('dbcache.debug') && is_a($wpdb, 'W3_Db')) {
-                        $append = (is_user_logged_in() ? ' (user is logged in)' : '');
+                    if ($this->_config->get_boolean('dbcache.enabled') &&
+                            !$this->_config->get_boolean('dbcache.debug') &&
+                            is_a($wpdb, 'W3_Db')) {
+                        $append = (!is_null($wpdb->cache_reject_reason) ?
+                            sprintf(' (%s)', $wpdb->cache_reject_reason) :
+                            '');
 
                         if ($wpdb->query_hits) {
-                            $strings[] = sprintf("Database Caching %d/%d queries in %.3f seconds using %s%s", $wpdb->query_hits, $wpdb->query_total, $wpdb->time_total, w3_get_engine_name($this->_config->get_string('dbcache.engine')), $append);
+                            $strings[] = sprintf("Database Caching %d/%d queries in %.3f seconds using %s%s",
+                                $wpdb->query_hits, $wpdb->query_total, $wpdb->time_total,
+                                w3_get_engine_name($this->_config->get_string('dbcache.engine')),
+                                $append);
                         } else {
-                            $strings[] = sprintf("Database Caching using %s%s", w3_get_engine_name($this->_config->get_string('dbcache.engine')), $append);
+                            $strings[] = sprintf("Database Caching using %s%s",
+                                w3_get_engine_name($this->_config->get_string('dbcache.engine')),
+                                $append);
                         }
                     }
 
                     if ($this->_config->get_boolean('objectcache.enabled') && !$this->_config->get_boolean('objectcache.debug')) {
                         $w3_objectcache = & w3_instance('W3_ObjectCache');
+                        
+                        $append = ($w3_objectcache->cache_reject_reason != '' ?
+                            sprintf(' (%s)', $w3_objectcache->cache_reject_reason) :
+                            '');
 
-                        $strings[] = sprintf("Object Caching %d/%d objects using %s", $w3_objectcache->cache_hits, $w3_objectcache->cache_total, w3_get_engine_name($this->_config->get_string('objectcache.engine')));
+                        $strings[] = sprintf("Object Caching %d/%d objects using %s%s",
+                            $w3_objectcache->cache_hits, $w3_objectcache->cache_total,
+                            w3_get_engine_name($this->_config->get_string('objectcache.engine')),
+                            $append);
                     }
 
                     if ($this->_config->get_boolean('cdn.enabled') && !$this->_config->get_boolean('cdn.debug')) {
