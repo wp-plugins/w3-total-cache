@@ -1,6 +1,6 @@
 === Plugin Name ===
 Contributors: fredericktownes
-Tags: wpo, web performance optimization, performance, availability, scaling, scalability, user experience, cache, caching, page cache, css cache, js cache, db cache, disk cache, disk caching, database cache, http compression, gzip, deflate, minify, cdn, content delivery network, media library, performance, speed, multiple hosts, css, merge, combine, unobtrusive javascript, compress, optimize, optimizer, javascript, js, cascading style sheet, plugin, yslow, yui, google, google rank, google page speed, mod_pagespeed, new relic, newrelic, aws, s3, cloudfront, sns, elasticache, rds, flash media server, amazon web services, cloud files, rackspace, akamai, max cdn, netdna, limelight, cloudflare, microsoft, microsoft azure, iis, nginx, litespeed, apache, varnish, xcache, apc, eacclerator, wincache, mysql, w3 total cache, batcache, wp cache, wp super cache, quick cache, wp minify, bwp-minify, buddypress
+Tags: wpo, web performance optimization, performance, availability, scaling, scalability, user experience, cache, caching, page cache, css cache, js cache, db cache, disk cache, disk caching, database cache, http compression, gzip, deflate, minify, cdn, content delivery network, media library, performance, speed, multiple hosts, css, merge, combine, unobtrusive javascript, compress, optimize, optimizer, javascript, js, cascading style sheet, plugin, yslow, yui, google, google rank, google page speed, mod_pagespeed, new relic, newrelic, aws, s3, cloudfront, sns, elasticache, rds, flash media server, amazon web services, cloud files, rackspace, akamai, max cdn, netdna, limelight, cloudflare, mod_cloudflare, microsoft, microsoft azure, iis, nginx, litespeed, apache, varnish, xcache, apc, eacclerator, wincache, mysql, w3 total cache, batcache, wp cache, wp super cache, quick cache, wp minify, bwp-minify, buddypress
 Requires at least: 2.8
 Tested up to: 3.5.1
 Stable tag: 0.9.2.6
@@ -272,31 +272,38 @@ Install the plugin to read the full FAQ on the plugins FAQ tab.
 == Press: Mentions, Tutorials &amp; Reviews ==
 
 **January 2013:**
+
 * [How to Speed Up Your WordPress Site (Quickly and Easily)](http://www.wpexplorer.com/how-to-speed-up-wordpress), Tom Ewer
 * [The Periodic Table of WordPress Plugins](http://www.wpexplorer.com/the-periodic-table-of-wordpress-plugins-and-my-top-5/), Tom Ewer
 * [WordPress Optimization Guide](http://gtmetrix.com/wordpress-optimization-guide.html)
 
 **December 2012:**
+
 * [The 25 Best WordPress Plugins Ever](http://www.websitemagazine.com/content/blogs/posts/archive/2012/12/05/the-25-best-wordpress-plugins-ever.aspx), Michael Garrity
 
 **November 2012:**
+
 * [What You Should Know About Using a CDN With WordPress](http://themefuse.com/blog/what-you-should-know-about-using-a-cdn-with-wordpress/), Karol Krol
 
 **October 2012:**
+
 * [The ManageWP Guide to Speeding Up Your WordPress Site with Plugins](http://managewp.com/how-to-speed-up-your-wordpress-website), Tom Ewer
 
 
 **September 2012:**
+
 * [Secrets Of High-Traffic WordPress Blogs](http://wp.smashingmagazine.com/2012/09/12/secrets-high-traffic-wordpress-blogs/), Siobhan McKeown
 * [10 essential WordPress plugins](http://www.computerworld.com/s/article/9230638/10_essential_WordPress_plugins), Ken Gagne
 
 **August 2012:**
+
 * [#114: Let’s Do Simple Stuff to Make Our Websites Faster](http://css-tricks.com/video-screencasts/114-lets-do-simple-stuff-to-make-our-websites-faster/), Chris Coyier
 * [The Plugins I Run](http://pippinsplugins.com/the-plugins-i-run/), Pippin Williamson
 * [WordPress Cache: WP Super Cache vs W3 Total Cache](http://www.wpbrix.com/wordpress-seo/wordpress-cache-wp-super-cache-vs-w3-total-cache/)
 * [15 Tips to Speed Up Your Website](http://www.seomoz.org/blog/15-tips-to-speed-up-your-website), Armin Jalili
 
 **July 2012:**
+
 * [Using Liquid Web's CDN with WordPress via W3 Total Cache](http://lw.rrfaae.com/2012/07/using-liquid-webs-cdn-with-wordpress-via-w3-total-cache/), Jason Gillman Jr.
 * [Tips for Server Admins &amp; Website Owners](http://www.tharunpkarun.com/2012/07/tips-for-server-admins-website-owners/), Tharun Karun
 * [Step-by-Step guide to WordPress Optimization using W3 Total Cache](http://pthakkar.com/category/website-optimization/w3-total-cache/),Pankaj Thakkar
@@ -305,14 +312,17 @@ Install the plugin to read the full FAQ on the plugins FAQ tab.
 * [How to Install and Configure W3 Total Cache](http://www.techlila.com/wordpress-plugins/how-to-install-configure-w3-total-cache-worpress/)
 
 **June 2012:**
+
 * [The Meaning of Plugins and The Best WordPress Plugins](http://www.bloggersdeck.com/the-meaning-of-plugins-and-the-best-wordpress-plugins/), Reginald Chan
 * [6 Essential Plugins for New WordPress Sites](http://www.presstrends.io/6-essential-plugins-for-new-wordpress-sites/), Mitch Monsen
 
 **May 2012:**
+
 * [﻿W3 Total Cache Settings](﻿http://techod.com/w3-total-cache-settings/), ﻿Jason Graham
 * [Leverage Browser Caching with W3 Total Cache](http://www.mvestormedia.com/leverage-browser-caching-w3-total-cache/), Ian Rogers
 
 **April 2012:**
+
 * [Apache Traffic Server as a Reverse Proxy](http://kpayne.me/2012/04/10/apache-traffic-server-as-a-reverse-proxy/), Kurt Payne
 * [Essential WordPress Plugins For Every WordPress Blog](http://www.softlovers.com/essential-wordpress-plugins-for-every-wordpress-blog/), Shashank Johri
 * [First Steps On A Fresh WordPress Install](http://wpshout.com/first-steps-on-a-fresh-install/), Alex Denning
