@@ -330,7 +330,7 @@ Install the plugin to read the full FAQ on the plugins FAQ tab.
 * [Speeding Up WordPress Websites](http://designershq.net/wordpress-plugins/speeding-up-wordpress-websites/), Craig Butcher
 * [How I Increased My Blog Loading Speed by 500%](http://www.asiogroups.com/how-i-increased-my-blog-loading-speed/)
 * [5 WordPress Plugins I Can’t Live Without – 2012 Edition](http://bit51.com/5-wordpress-plugins-i-cant-live-without-2012-edition/), Chris Wiegman
-* [Setting Up and Optimizing W3 Total Cache (Up to v0.9.2.4)](http://tentblogger.com/w3-total-cache/)
+* [Setting Up and Optimizing W3 Total Cache - Up to v0.9.2.4](http://tentblogger.com/w3-total-cache/)
 * [W3 Total Cache hilft bei WordPress Optimierung](http://blog.stenki.eu/2012/04/wordpress-optimierung-mit-w3-total-cache/)
 
 **March 2012:**
@@ -717,9 +717,9 @@ Please reach out to all of these people and support their projects if you're so 
 = 0.9.2.6 =
 * Added support for grouping cache entries for easier flushing
 * Added more options for placing minified files on pages. Custom placements using HTML comments.
-* * CSS inclusion for auto/manual. If present its used: <!-- W3TC-include-css -->
-* * JS inclusion for auto mode. If present its used: <!-- W3TC-include-js-head -->,
-* * JS inclusion for manual mode. If present they are used when selecting correspong location in placement dropdown: <!-- W3TC-include-js-head -->, <!-- W3TC-include-js-body-start -->, <!-- W3TC-include-js-body-end -->
+* Added CSS inclusion for auto / manual minify. If present its used: <!-- W3TC-include-css -->
+* Added JS inclusion for minify auto mode. If present its used: <!-- W3TC-include-js-head -->,
+* Added JS inclusion for minify manual mode. If present they are used when selecting correspong location in placement dropdown: <!-- W3TC-include-js-head -->, <!-- W3TC-include-js-body-start -->, <!-- W3TC-include-js-body-end -->
 * Added new minification inclusion options, async, defer, extsrc and asyncsrc
 * Added flushing sitemaps
 * Added flushing custom pages
