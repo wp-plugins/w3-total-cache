@@ -840,7 +840,9 @@ class W3_PgCache {
             return;
 
         $plugin = w3_instance('W3_Plugin_PgCacheAdmin');
-        $plugin->write_rules_cache();
+        try {
+            $plugin->write_rules_cache();
+        } catch (Exception $ex) {}
     }
 
     /**

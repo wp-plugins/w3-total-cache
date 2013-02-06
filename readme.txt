@@ -3,7 +3,7 @@ Contributors: fredericktownes
 Tags: wpo, web performance optimization, performance, availability, scaling, scalability, user experience, cache, caching, page cache, css cache, js cache, db cache, disk cache, disk caching, database cache, http compression, gzip, deflate, minify, cdn, content delivery network, media library, performance, speed, multiple hosts, css, merge, combine, unobtrusive javascript, compress, optimize, optimizer, javascript, js, cascading style sheet, plugin, yslow, yui, google, google rank, google page speed, mod_pagespeed, new relic, newrelic, aws, s3, cloudfront, sns, elasticache, rds, flash media server, amazon web services, cloud files, rackspace, akamai, max cdn, netdna, limelight, cloudflare, mod_cloudflare, microsoft, microsoft azure, iis, nginx, litespeed, apache, varnish, xcache, apc, eacclerator, wincache, mysql, w3 total cache, batcache, wp cache, wp super cache, quick cache, wp minify, bwp-minify, buddypress
 Requires at least: 2.8
 Tested up to: 3.5.1
-Stable tag: 0.9.2.6
+Stable tag: 0.9.2.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -229,6 +229,14 @@ Add `/.+` to page cache "Never cache the following pages" option on the page cac
 = I'm getting blank pages or 500 error codes when trying to upgrade on WordPress in network mode =
 
 First, make sure the plugin is not active (disabled) network-wide. Then make sure it's deactivated network-wide. Now you should be able to successful upgrade without breaking your site.
+
+= A notification about file owner appears along with an FTP form, how can I resolve this? =
+
+The plugin uses WordPress FileSystem functionality to write to files. It checks if the file owner, file owner group of created files match process owner. If this is not the case it cannot write or modify files.
+
+Typically, you should tell your web host about the permission issue and they should be able to resolve it.
+
+You can however try adding <em>define('FS_METHOD', 'direct');</em> to wp-config.php to circumvent the file and folder checks.
 
 = This is too good to be true, how can I test the results? =
 You will be able to see it instantly on each page load, but for tangible metrics, consider the following tools:
@@ -723,6 +731,15 @@ It's quite difficult to recall all of the innovators that have shared their thou
 Please reach out to all of these people and support their projects if you're so inclined.
 
 == Changelog ==
+= 0.9.2.7 =
+* Fixed config file write in more hosting environments
+* Fixed legacy config file import on servers with hardened file permissions
+* Fixed page cache write cache rules in some environments
+* Fixed retina images
+* Fixed false positive notifications when permissions are not changed or same
+* Fixed minify help
+* Improved upgrade notifications
+* Improved page cache and minify notifications
 
 = 0.9.2.6 =
 * Added support for grouping cache entries for easier flushing
@@ -1208,4 +1225,4 @@ Please reach out to all of these people and support their projects if you're so 
 == Upgrade Notice ==
 
 = 0.9.2.6 =
-Thanks for using W3 Total Cache! This update is very strongly recommended. This release contains more than 140 improvements, enhancements and bug fixes. If you have any issues please send us an email so that we can address them quickly.
+Thanks for using W3 Total Cache! As always, this update is very strongly recommended. This release contains fixes for users improving compatibility across more hosting environments. We appreciate your patience and help as we move toward making updates more seamless. Unfortunately, it's not easy to upgrade "low level" functionality like server configurations. We do it because we're trying to give you the advantages that large corporations have, for free.

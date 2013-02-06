@@ -723,7 +723,18 @@ add_filter('w3tc_referrer_groups', 'my_w3tc_referrer_groups');</pre>
                 </p>
             ]]></answer>
         </entry>
-	</section>
+        <entry>
+            <question><![CDATA[ Sitemaps are not cached. How do I solve this? ]]></question>
+            <answer><![CDATA[ <p>Enable "Cache feeds: site, categories, tags, comments" on the "Page Cache" settings tab. Some sitemap implementations are considered by WordPress to be "feeds."</p> ]]></answer>
+        </entry>
+        <entry>
+            <question><![CDATA[ A notification about file owner appears along with an <acronym title="File Transfer Protocol">FTP</acronym> form, how can I resolve this? ]]></question>
+            <answer><![CDATA[ <p>The plugin uses WordPress FileSystem functionality to write to files. It checks if file owner, file owner group of created files match process owner. If this is not the case it cannot write or modify files.<br />
+            Typically, you should tell your web host about the permission issue and they should be able to resolve it.<br />
+            You can however try adding <em>define('FS_METHOD', 'direct');</em> to wp-config.php to circumvent the file and folder checks.</p>
+            ]]></answer>
+        </entry>
+    </section>
 	<section name="Requirements">
 		<entry>
 			<question><![CDATA[ Which web servers do you support? ]]></question>

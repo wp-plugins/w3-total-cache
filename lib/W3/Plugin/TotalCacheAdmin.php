@@ -166,7 +166,9 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
     function run() {
 
         if (!$this->_config->own_config_exists()) {
-           $this->update();
+            try {
+                $this->update();
+            } catch(Exception $ex) {}
         }
 
         $this->_config_admin = w3_instance('W3_ConfigAdmin');
@@ -406,10 +408,13 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
         #toplevel_page_w3tc_dashboard .wp-menu-image {
             background: url(<?php echo plugins_url('w3-total-cache/pub/img/w3tc-sprite.png')?>) no-repeat 0px -32px !important;
         }
-        #toplevel_page_w3tc_dashboard:hover .wp-menu-image, #toplevel_page_w3tc_dashboard.wp-has-current-submenu .wp-menu-image {
+        #toplevel_page_w3tc_dashboard:hover .wp-menu-image,
+        #toplevel_page_w3tc_dashboard.wp-has-current-submenu .wp-menu-image {
             background-position:0px 0px !important;
         }
-        #icon-edit.icon32-posts-casestudy {background: url(<?php echo plugins_url('w3-total-cache/pub/img/w3tc-sprite.png') ?>) no-repeat;}
+        #icon-edit.icon32-posts-casestudy {
+            background: url(<?php echo plugins_url('w3-total-cache/pub/img/w3tc-sprite.png') ?>) no-repeat;
+        }
         /**
         * HiDPI Displays
         */
@@ -417,13 +422,19 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
         (-o-min-device-pixel-ratio: 5/4),
         (-webkit-min-device-pixel-ratio: 1.25),
         (min-resolution: 120dpi) {
+            
             #toplevel_page_w3tc_dashboard .wp-menu-image {
-                background: url(<?php echo plugins_url('w3-total-cache/pub/img/w3tc-sprite-retina.png')?>) no-repeat 0px -32px !important;
+                background-image: url(<?php echo plugins_url('w3-total-cache/pub/img/w3tc-sprite-retina.png')?>) !important;
+                background-size: 30px 64px !important;
             }
-            #toplevel_page_w3tc_dashboard:hover .wp-menu-image, #toplevel_page_w3tc_dashboard.wp-has-current-submenu .wp-menu-image {
+            #toplevel_page_w3tc_dashboard:hover .wp-menu-image,
+            #toplevel_page_w3tc_dashboard.wp-has-current-submenu .wp-menu-image {
                 background-position:0px 0px !important;
             }
-            #icon-edit.icon32-posts-casestudy {background: url(<?php echo plugins_url('w3-total-cache/pub/img/w3tc-sprite-retina.png') ?>) no-repeat;}
+            #icon-edit.icon32-posts-casestudy {
+                background-image: url(<?php echo plugins_url('w3-total-cache/pub/img/w3tc-sprite-retina.png') ?>) !important;
+                background-size: 30px 64px !important;
+            }
         }
     </style>
 
@@ -1293,7 +1304,9 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
             w3_require_once(W3TC_INC_DIR . '/functions/update.php');
             $folders = w3_find_old_folders();
             $folders = array_map('basename', $folders);
-            $notes[] = 'You can remove old w3tc directories: ' . implode(', ',$folders) . '. Do not remove <em>w3tc-config</em>. ' . $this->button_hide_note('Hide this message', 'remove_w3tc', '', true);
+            $notes[] = sprintf('The directory w3tc can be deleted. %s: %s. However, <em>do not remove the w3tc-config directory</em>. %s'
+                                , WP_CONTENT_DIR, implode(', ',$folders)
+                                , $this->button_hide_note('Hide this message', 'remove_w3tc', '', true));
         }
 
         if (W3_Request::get_string('action') == 'w3tc_deactivate_plugin') {
@@ -1402,7 +1415,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
                             $tech_message .= 'Unfortunately disk enhanced page caching will not function without custom rewrite rules. Please ask your server administrator for assistance. Also refer to <a href="%s">the install page</a>  for the rules for your server.';
                             $tech_message = sprintf($tech_message, w3_is_nginx()?'nginx configuration file' : '.htaccess file',
                                                           w3_get_home_url(), $result, admin_url('admin.php?page=w3tc_install'));
-                            $error = 'It appears Page Cache <acronym title="Uniform Resource Locator">URL</acronym> rewriting is not working. If using apache, verify that the server configuration allows .htaccess or if using nginx verify all configuration files are included in the configuration.';
+                            $error = 'It appears Page Cache <acronym title="Uniform Resource Locator">URL</acronym> rewriting is not working. If using apache, verify that the server configuration allows .htaccess. Or if using nginx verify all configuration files are included in the configuration file (and that you have reloaded / restarted nginx).';
                             $error .= ' <br /><a id="w3tc_read_technical_info" href="#">Technical info</a><div id="w3tc_technical_info">' . $tech_message . '</div>';
                             $this->_errors[] = $error;
                         }
@@ -1522,7 +1535,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
 
                 if ($w3_plugin_minify->check_rules_core()) {
                     if (!$this->test_rewrite_minify()) {
-                        $this->_errors[] = 'It appears Minify <acronym title="Uniform Resource Locator">URL</acronym> rewriting is not working. If using apache, verify that the server configuration allows .htaccess or if using nginx verify all configuration files are included in the configuration.';
+                        $this->_errors[] = 'It appears Minify <acronym title="Uniform Resource Locator">URL</acronym> rewriting is not working. If using apache, verify that the server configuration allows .htaccess. Or if using nginx verify all configuration files are included in the main configuration fail (and that you have reloaded / restarted nginx).';
                     }
 
                     if ($w3_plugin_minify->check_rules_has_legacy()) {
@@ -1675,7 +1688,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
             if ($this->_config->get_boolean('notes.browsercache_rules_no404wp') && $this->_config->get_boolean('browsercache.no404wp') && !$w3_plugin_browsercache->check_rules_no404wp()) {
                 try {
                     $w3_plugin_browsercache->write_rules_no404wp();
-                } catch(FilesystemCredentialException $e) {
+                } catch(Exception $e) {
                     $ftp_message = '';
                     if (!isset($this->_ftp_form) && $e instanceof FilesystemCredentialException) {
                         $this->_ftp_form = $e->ftp_form();
@@ -3291,9 +3304,9 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
         $nonce =  wp_create_nonce('w3tc_support_request');
         if (is_network_admin()) {
             update_site_option('w3tc_support_request', $nonce);
-        } /*else {
+        } else {
             update_option('w3tc_support_request', $nonce);
-        }*/
+        }
         $post['file_access'] = WP_PLUGIN_URL . '/' . dirname(W3TC_FILE) . '/pub/files.php';
         $post['nonce'] = $nonce;
         $post['request_data_url'] = $request_data_url;
@@ -4587,9 +4600,7 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
                 switch ($command) {
                     case 'browsercache_write_rules_cache':
                         $w3_plugin_browsercache = w3_instance('W3_Plugin_BrowserCacheAdmin');
-                        try{
-                            $w3_plugin_browsercache->write_rules_cache();
-                        } catch (FilesystemCredentialException $e) {}
+                        $w3_plugin_browsercache->write_rules_cache();
 
                         if ($w3_plugin_browsercache->check_rules_cache()) {
                             $notes[] = 'Browser cache directives have been successfully written.';
@@ -4651,9 +4662,8 @@ class W3_Plugin_TotalCacheAdmin extends W3_Plugin {
 
                     case 'pgcache_write_rules_core':
                         $w3_plugin_pgcache = w3_instance('W3_Plugin_PgCacheAdmin');
-                        try {
-                            $w3_plugin_pgcache->write_rules_core();
-                        } catch(Exception $e) {}
+                        $w3_plugin_pgcache->write_rules_core();
+
                         if ($w3_plugin_pgcache->check_rules_core()) {
                             $notes[] = 'Page cache rewrite rules have been successfully written.';
                         } else {

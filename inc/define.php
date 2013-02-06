@@ -5,7 +5,7 @@ if (!defined('ABSPATH')) {
 }
 
 define('W3TC', true);
-define('W3TC_VERSION', '0.9.2.6');
+define('W3TC_VERSION', '0.9.2.7');
 define('W3TC_POWERED_BY', 'W3 Total Cache/' . W3TC_VERSION);
 define('W3TC_EMAIL', 'w3tc@w3-edge.com');
 define('W3TC_PAYPAL_URL', 'https://www.paypal.com/cgi-bin/webscr');
@@ -1367,7 +1367,7 @@ function w3_require_once($path) {
 
     if (!isset($files[$path])) {
         $files[$path] = 1;
-        require $path;
+        require_once $path;
     }
 }
 
@@ -1456,10 +1456,13 @@ function file_put_contents_atomic($filename, $content) {
         @unlink($filename);
         @rename($temp, $filename);
     }
-
+    $chmod = 0644;
+    if (defined('FS_CHMOD_FILE'))
+        $chmod = FS_CHMOD_FILE;
+    @chmod($filename, $chmod);
     return true;
-
 }
+
 /**
  * Takes seconds and converts to array('Nh ','Nm ', 'Ns ', 'Nms ') or "Nh Nm Ns Nms"
  * @param $input

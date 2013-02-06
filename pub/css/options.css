@@ -379,6 +379,7 @@
     -webkit-box-shadow: 0 1px 0 white;
     box-shadow: 0 1px 0 white;
 }
+
 #w3tc-dashboard-widgets #postbox-container-left h3.hndle span:first-child{
     display: inline-block;
     padding-left: 50px;
@@ -417,25 +418,30 @@ only screen and (        min-device-pixel-ratio: 2),
 only screen and (                min-resolution: 192dpi),
 only screen and (                min-resolution: 2dppx)  {
     #w3tc h2.logo {
-        background: url("../img/W3TC_dashboard_logo_title-retina.png") top right no-repeat;
+        background-image: url("../img/W3TC_dashboard_logo_title-retina.png");
+        background-size: 224px 44px;
     }
 
     #w3tc_spreadtheword h3.hndle span{
-        background: url("../img/w3tc_w3tc-logo-retina.png") 0 0 no-repeat;
+        background-image: url("../img/w3tc_w3tc-logo-retina.png");
+        background-size: 41px 34px;
     }
 
     #w3tc_services h3.hndle span {
-        background: url("../img/w3tc_w3edge-logo-retina.png") 0 0 no-repeat;
+        background-image: url("../img/w3tc_w3edge-logo-retina.png");
+        background-size: 37px 35px;
     }
 
     #w3tc-dashboard-widgets #postbox-container-left #w3tc_pagespeed h3.hndle span:first-child{
         padding-left: 110px;
-        background: url("../img/w3tc_google-logo-retina.png") 0 3px no-repeat;
+        background-image: url("../img/w3tc_google-logo-retina.png");
+        background-size: 97px 33px;
     }
 
     #w3tc-dashboard-widgets #postbox-container-left #w3tc_new_relic h3.hndle span:first-child{
         padding-left: 300px;
-        background: url("../img/w3tc_newrelic-logo-retina.png") 0 3px no-repeat;
+        background-image: url("../img/w3tc_newrelic-logo-retina.png");
+        background-size: 144px 26px;
     }
 }
 

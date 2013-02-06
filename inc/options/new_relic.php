@@ -94,9 +94,8 @@
             <tr>
                 <th colspan="2">
                     <?php $this->checkbox('newrelic.accept.logged_roles') ?> <?php _e('Use <acronym title="Real User Monitoring">RUM</acronym> only for following user roles', 'w3-total-cache') ?></label><br />
-                    <p>
                     <span class="description"><?php _e('Select user roles that <acronym title="Real User Monitoring">RUM</acronym> should be enabled for:', 'w3-total-cache') ?></span>
-                    </p>
+
                     <div id="newrelic_accept_roles">
                         <?php $saved_roles = $this->_config->get_array('newrelic.accept.roles'); ?>
                         <input type="hidden" name="newrelic.accept.roles" value="" /><br />
@@ -145,7 +144,7 @@
                 <th><label for="newrelic_enable_xmit"><?php _e('Enable XMIT', 'w3-total-cache') ?></label></th>
                 <td><input name="" type="hidden" value="0" />
                 <input id="newrelic_enable_xmit" name="newrelic.enable_xmit" type="checkbox" value="1" <?php checked($this->_config->get_boolean('newrelic.enable_xmit')) ?> <?php $this->sealing_disabled('newrelic') ?>/>
-                    <p><span class="description"><?php _e(sprintf('Enable this if you want to record the metric and transaction data up to the point when application name is changed using PHP function, you can specify a value of true for this argument to make the agent send the transaction to the daemon. This has a very slight performance impact as it takes a few milliseconds for the agent to dump its data. <em>From %s</em>',
+                    <p><span class="description"><?php _e(sprintf('Enable this if you want to record the metric and transaction data (until the name is changed using PHP function), specify a value of true for this argument to make the agent send the transaction to the daemon. There is a slight performance impact as it takes a few milliseconds for the agent to dump its data. <em>From %s</em>',
                         '<a href="https://newrelic.com/docs/php/the-php-api">New Relic PHP API doc</a>')
                         , 'w3-total-cache')?></span></p>
                 </td>

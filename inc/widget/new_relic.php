@@ -47,7 +47,7 @@
         <?php endforeach ?>
         </table>
         <?php else: ?>
-            <?php if ($can_use_metric): ?>
+            <?php if ($can_use_metrics): ?>
                 <p><?php _e('Not enough data', 'w3-total-cache')?></p>
                 <?php else: ?>
                 <p><?php _e('Data not available to this subscription level.', 'w3-total-cache')?></p>
@@ -66,7 +66,7 @@
             <?php endforeach ?>
         </table>
             <?php else: ?>
-            <?php if ($can_use_metric): ?>
+            <?php if ($can_use_metrics): ?>
                 <p><?php _e('Not enough data', 'w3-total-cache')?></p>
                 <?php else: ?>
                 <p><?php _e('Data not available to this subscription level.', 'w3-total-cache')?></p>
@@ -84,7 +84,7 @@
             <?php endforeach ?>
         </table>
             <?php else: ?>
-            <?php if ($can_use_metric): ?>
+            <?php if ($can_use_metrics): ?>
             <p><?php _e('Not enough data', 'w3-total-cache')?></p>
             <?php else: ?>
             <p><?php _e('Data not available to this subscription level.', 'w3-total-cache')?></p>
@@ -97,8 +97,9 @@
     <?php endif; ?>
     <hr>
     <p>
-<?php _e('PHP agent:', 'w3-total-cache')?> <span class="w3tc-<?php if ($new_relic_running): ?>enabled"><?php _e('enabled', 'w3-total-cache')?><?php else: ?>disabled"><?php _e('disabled', 'w3-total-cache')?><?php endif; ?></span>.
-<?php _e('Subscription level:', 'w3-total-cache')?> <?php echo $subscription_lvl ?><?php if (!$can_use_metrics): ?><?php _e('Upgrade your New Relic account to enable more metrics.', 'w3-total-cache')?><?php endif; ?>
+<?php _e('PHP agent:', 'w3-total-cache')?> <span class="w3tc-<?php if ($new_relic_running): ?>enabled"><?php _e('enabled', 'w3-total-cache')?><?php else: ?>disabled"><?php _e('disabled', 'w3-total-cache')?><?php endif; ?></span><br />
+<?php _e('Subscription level:', 'w3-total-cache')?> <strong><?php echo $subscription_lvl ?></strong>
+<?php if (!$can_use_metrics): ?><p><a href="<?php echo NEWRELIC_SIGNUP_URL; ?>" target="_blank"><?php _e('Upgrade your New Relic account to enable more metrics.', 'w3-total-cache')?></a></p><?php endif; ?>
     </p>
 <?php endif; ?>
 </div>

@@ -50,9 +50,9 @@ class W3_Widget_Services extends W3_Plugin {
         $this->_request_types = array(
             'email_support' => sprintf(__('Less than 15 Minute Email Support Response %s', 'w3-total-cache'), '<br /><span>(M-F 9AM - 5PM EDT): $75 USD</span>'),
             'phone_support' => sprintf(__('Less than 15 Minute Phone Support Response %s', 'w3-total-cache'), '<br /><span>(M-F 9AM - 5PM EDT): $150 USD</span>'),
-            'plugin_config' => sprintf(__('Professional Plugin Configuration: %s', 'w3-total-cache'),'<br /><span>Starting @ $100 USD</span>'),
-            'theme_config' => sprintf(__('Theme Performance Optimization & Plugin Configuration: %s', 'w3-total-cache'),'<br /><span>Starting @ $150 USD</span>'),
-            'linux_config' => sprintf(__('Linux Server Optimization & Plugin Configuration: %s', 'w3-total-cache'), '<br /><span>Starting @ $200 USD</span>')
+            'plugin_config' => sprintf(__('Professional Plugin Configuration %s', 'w3-total-cache'),'<br /><span>Starting @ $100 USD</span>'),
+            'theme_config' => sprintf(__('Theme Performance Optimization & Plugin Configuration %s', 'w3-total-cache'),'<br /><span>Starting @ $150 USD</span>'),
+            'linux_config' => sprintf(__('Linux Server Optimization & Plugin Configuration %s', 'w3-total-cache'), '<br /><span>Starting @ $200 USD</span>')
         );
         add_action('w3tc_dashboard_setup', array(
             &$this,

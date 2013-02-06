@@ -112,7 +112,7 @@ class W3_Widget_NewRelic extends W3_Plugin {
                   'Errors' => 'N/A','Response Time' => 'N/A','DB' => 'N/A','CPU' => 'N/A','Memory' => 'N/A');
             $metric_data = array('EndUser' => 'N/A', 'WebTransaction' => 'N/A', 'Database' => 'N/A');
             $metric_formatted = NewRelicPresentation::format_metrics_dashboard($metric_data);
-            $can_use_metric = false;
+            $can_use_metrics = false;
         }
 
         include W3TC_INC_WIDGET_DIR . '/new_relic.php';

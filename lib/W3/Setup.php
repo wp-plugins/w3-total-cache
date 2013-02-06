@@ -208,13 +208,17 @@ class W3_Setup {
 
     private function _try_create_missing_folders($folders, $url) {
         $permissions = array(0755, 0775, 0777);
-        $prev_perm = substr(decoct(fileperms(WP_CONTENT_DIR)),2);
+        $prev_perm = w3_get_file_permissions(WP_CONTENT_DIR);
         foreach ($permissions as $permission) {
+            $result = true;
+            if ($permission == $prev_perm)
+                continue;
             if (!($result = @chmod(WP_CONTENT_DIR, $permission)))
                 $result = w3_chmod_dir(WP_CONTENT_DIR, $permission);
             if ($result) {
                 try {
                     w3_create_folders($folders, '', $url);
+                    return true;
                 }catch (Exception $ex) {}
             }
             if (!@chmod(WP_CONTENT_DIR, $prev_perm))
@@ -227,11 +231,15 @@ class W3_Setup {
         $permissions = array(0755, 0775, 0777);
         $prev_perm = w3_get_file_permissions(WP_CONTENT_DIR);
         foreach ($permissions as $permission) {
+            $result = true;
+            if ($permission == $prev_perm)
+                continue;
             if (!($result = @chmod(WP_CONTENT_DIR, $permission)))
                 $result = w3_chmod_dir(WP_CONTENT_DIR, $permission);
             if ($result) {
                 try {
                     w3_create_files($files, '', $url);
+                    return true;
                 }catch (Exception $ex) {}
             }
             if (!@chmod(WP_CONTENT_DIR, $prev_perm))
@@ -249,6 +257,8 @@ class W3_Setup {
             w3_require_once(W3TC_INC_DIR . '/functions/file.php');
             $prev_perm = w3_get_file_permissions(W3TC_CACHE_DIR);
             foreach ($permissions as $permission) {
+                if ($permission == $prev_perm)
+                    continue;
                 $result = w3_chmod_dir(W3TC_CACHE_DIR, $permission, true);
                 if ($result) {
                     $test_result1 = $this->_test_cache_file_creation();
@@ -272,8 +282,10 @@ class W3_Setup {
         if (!$test_result2['success']) {
             w3_require_once(W3TC_INC_DIR . '/functions/activation.php');
             w3_require_once(W3TC_INC_DIR . '/functions/file.php');
-            $prev_perm = w3_get_file_permissions(W3TC_CACHE_DIR);
+            $prev_perm = w3_get_file_permissions(W3TC_CONFIG_DIR);
             foreach ($permissions as $permission) {
+                if ($permission == $prev_perm)
+                    continue;
                 $result = w3_chmod_dir(W3TC_CONFIG_DIR, $permission);
                 if ($result) {
                     $test_result2 = $this->_test_w3tc_config_creation();
@@ -283,7 +295,7 @@ class W3_Setup {
 
                         $results['permissions'][] = sprintf('Plugin changed permissions on: %s to %d from %s. <br />' .
                                 'Default file owner is %s, plugin created files is owned by %s.',
-                            W3TC_CACHE_DIR, decoct($permission), $prev_perm,
+                            W3TC_CONFIG_DIR, decoct($permission), $prev_perm,
                             $d_fileowngrp, $c_fileowngrp);
                         break;
                     }

@@ -62,27 +62,17 @@ if (!function_exists('fnmatch')) {
         return (boolean) preg_match($pattern, $string);
     }
 }
-function w3tc_get_theme($theme) {
+function w3tc_get_theme($themename) {
     global $wp_version;
     if (version_compare($wp_version,'3.4', '<'))
-        return get_theme($theme);
+        return get_theme($themename);
 
-    global $wp_themes;
-    if ( isset( $wp_themes ) )
-        return $wp_themes;
+    $wp_themes = w3tc_get_themes();
 
-    $themes = wp_get_themes();
-    $wp_themes = array();
 
-    foreach ( $themes as $theme ) {
-        $name = $theme->get('Name');
-        if ( isset( $wp_themes[ $name ] ) )
-            $wp_themes[ $name . '/' . $theme->get_stylesheet() ] = $theme;
-        else
-            $wp_themes[ $name ] = $theme;
-    }
-
-    return $wp_themes[$theme];
+    if ( is_array( $wp_themes ) && array_key_exists( $themename, $wp_themes ) )
+        return $wp_themes[ $themename ];
+    return array();
 }
 function w3tc_get_current_theme_name() {
     global $wp_version;

@@ -150,7 +150,8 @@
         <table class="form-table">
             <tr>
                 <th colspan="2">
-                    <?php $this->checkbox('cdn.reject.ssl') ?> <?php _e('Disable <acronym title="Content Delivery Network">CDN</acronym> on <acronym title="Secure Sockets Layer">SSL</acronym> pages', 'w3-total-cache') ?></label>
+                    <?php $this->checkbox('cdn.reject.ssl') ?> <?php _e('Disable <acronym title="Content Delivery Network">CDN</acronym> on <acronym title="Secure Sockets Layer">SSL</acronym> pages', 'w3-total-cache') ?></label><br />
+                    <span class="description">When <acronym title="Secure Sockets Layer">SSL</acronym> pages are returned no <acronym title="Content Delivery Network">CDN</acronym> <acronym title="Uniform Resource Indicator">URL</acronym>s will appear in HTML pages.</span>
                 </th>
             </tr>
             <tr>

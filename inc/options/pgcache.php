@@ -148,7 +148,7 @@
         <table class="form-table">
             <tr>
                 <th colspan="2">
-                    <p>Specify the pages and feeds to purge when posts are created, edited, or comments posted. The defaults are recommended because additional options may reduce server performance:</p>
+                    Specify the pages and feeds to purge when posts are created, edited, or comments posted. The defaults are recommended because additional options may reduce server performance:
 
                     <table border="0" cellpadding="0" cellspacing="0">
                         <tr>
@@ -181,7 +181,7 @@
             </tr>
             <tr>
                 <th colspan="2">
-                    <p>Specify the feed types to purge:</p>
+                    Specify the feed types to purge:<br />
                     <input type="hidden" name="pgcache.purge.feed.types" value="" />
                     <?php foreach($feeds as $feed): ?>
                         <label>
@@ -217,7 +217,6 @@
                     <input id="pgcache_purge_sitemap_regex" name="pgcache.purge.sitemap_regex" <?php $this->sealing_disabled('pgcache') ?> value="<?php echo esc_attr($this->_config->get_string('pgcache.purge.sitemap_regex')) ?>" type="text" /><br />
                     <span class="description">Specify a regular expression that matches your sitemaps.</span>
                 </td>
-                <span class="description">Write a regex that matches your sitemaps.</span>
             </tr>
         </table>
 
@@ -250,7 +249,7 @@
                 <th><label>Compatibility mode</label></th>
                 <td>
                     <?php $this->checkbox('pgcache.compatibility') ?> Enable compatibility mode</label><br />
-                    <span class="description">Tries to be compatible with more server configurations. By the cost of speed.</span>
+                    <span class="description">Decreases performance by ~20% at scale in exchange for increasing interoperability with more hosting environemtns and WordPress idiosyncracies. This option should be enabled for most sites.</span>
                 </td>
             </tr>
             <?php endif; ?>
