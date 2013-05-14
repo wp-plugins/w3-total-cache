@@ -899,7 +899,7 @@ jQuery(function() {
             case 'maxcdn':
                 jQuery.extend(params, {
                     engine: 'maxcdn',
-                    'config[authorization_key]': jQuery('#cdn_naxcdn_authorization_key').val()
+                    'config[authorization_key]': jQuery('#cdn_maxcdn_authorization_key').val()
                 });
 
                 if (cnames.length) {
