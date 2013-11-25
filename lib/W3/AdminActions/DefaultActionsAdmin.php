@@ -35,7 +35,8 @@ class W3_AdminActions_DefaultActionsAdmin {
         $this->_config_master = new W3_Config(true);
         w3_require_once(W3TC_LIB_W3_DIR . '/Request.php');
 
-        $this->_page = W3_Request::get_string('page');
+        w3_require_once(W3TC_INC_FUNCTIONS_DIR . '/admin.php');
+        $this->_page = w3tc_get_current_page();
     }
 
     /**
@@ -66,7 +67,12 @@ class W3_AdminActions_DefaultActionsAdmin {
         switch($module) {
             case 'pgcache':
                 w3_wp_delete_file(W3TC_ADDIN_FILE_ADVANCED_CACHE);
-                break;
+                $src = W3TC_INSTALL_FILE_ADVANCED_CACHE;
+                $dst = W3TC_ADDIN_FILE_ADVANCED_CACHE;
+                try {
+                    w3_wp_copy_file($src, $dst);
+                } catch (FilesystemOperationException $ex) {}
+				break;
             case 'dbcache':
                 w3_wp_delete_file(W3TC_ADDIN_FILE_DB);
                 break;

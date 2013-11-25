@@ -14,7 +14,8 @@ class W3_AdminActions_CdnActionsAdmin {
     function __construct() {
         $this->_config = w3_instance('W3_Config');
         w3_require_once(W3TC_LIB_W3_DIR . '/Request.php');
-        $this->_page = W3_Request::get_string('page');
+		w3_require_once(W3TC_INC_FUNCTIONS_DIR . '/admin.php');
+        $this->_page = w3tc_get_current_page();
     }
 
     /**
@@ -366,8 +367,8 @@ class W3_AdminActions_CdnActionsAdmin {
         $engine = W3_Request::get_string('engine');
         $config = W3_Request::get_array('config');
 
-        //TODO: Workaround to support test case cdn/a04
-        if (!isset($config['host'])) {
+		//TODO: Workaround to support test case cdn/a04
+        if ($engine == 'ftp' && !isset($config['host'])) {
             $config = W3_Request::get_string('config');
             $config = json_decode($config, true);
         }

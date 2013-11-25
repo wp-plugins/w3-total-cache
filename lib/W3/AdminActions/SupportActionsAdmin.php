@@ -51,8 +51,14 @@ class W3_AdminActions_SupportActionsAdmin extends W3_UI_PluginView {
      * @var W3_Config
      */
     public $_config;
-
-    function __construct() {
+	/**
+    * Current page
+    *
+    * @var string
+    */
+    var $_page = 'w3tc_support';
+    
+	function __construct() {
         $this->_config = w3_instance('W3_Config');
         $this->_request_types = array(
             'bug_report' => __('Submit a Bug Report', 'w3-total-cache'),
@@ -63,6 +69,8 @@ class W3_AdminActions_SupportActionsAdmin extends W3_UI_PluginView {
             'theme_config' => __('Theme Performance Optimization & Plugin Configuration: Starting @ $150 USD', 'w3-total-cache'),
             'linux_config' => __('Linux Server Optimization & Plugin Configuration: Starting @ $200 USD', 'w3-total-cache')
         );
+		w3_require_once(W3TC_INC_FUNCTIONS_DIR . '/admin.php');
+        $this->_page = w3tc_get_current_page();
     }
 
     /**

@@ -641,3 +641,38 @@ function w3_get_cookie_domain() {
 
     return $_SERVER['HTTP_HOST'];
 }
+
+/*
+ * Returns current w3tc admin page
+ */
+function w3tc_get_current_page() {
+    w3_require_once(W3TC_LIB_W3_DIR . '/Request.php');
+
+    $page = W3_Request::get_string('page');
+
+    switch (true) {
+        case ($page == 'w3tc_dashboard'):
+        case ($page == 'w3tc_general'):
+        case ($page == 'w3tc_pgcache'):
+        case ($page == 'w3tc_minify'):
+        case ($page == 'w3tc_dbcache'):
+        case ($page == 'w3tc_objectcache'):
+        case ($page == 'w3tc_fragmentcache'):
+        case ($page == 'w3tc_browsercache'):
+        case ($page == 'w3tc_mobile'):
+        case ($page == 'w3tc_referrer'):
+        case ($page == 'w3tc_cdn'):
+        case ($page == 'w3tc_monitoring'):
+        case ($page == 'w3tc_extensions'):
+        case ($page == 'w3tc_install'):
+        case ($page == 'w3tc_faq'):
+        case ($page == 'w3tc_about'):
+        case ($page == 'w3tc_support'):
+            break;
+
+        default:
+            $page = 'w3tc_dashboard';
+    }
+
+    return $page;
+}

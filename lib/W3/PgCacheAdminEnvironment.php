@@ -411,15 +411,11 @@ class W3_PgCacheAdminEnvironment {
 
         $data = $original_data;
 
-        $new_data = w3_erase_rules($data, W3TC_MARKER_BEGIN_PGCACHE_LEGACY,
-            W3TC_MARKER_END_PGCACHE_LEGACY);
-        $has_legacy = strlen($new_data) < strlen($data);
-        $data = $new_data;
-
-        $new_data = w3_erase_rules($data, W3TC_MARKER_BEGIN_PGCACHE_WPSC,
-            W3TC_MARKER_END_PGCACHE_WPSC);
-        $has_wpsc = strlen($new_data) < strlen($data);
-        $data = $new_data;
+        if ($has_legacy = w3_has_rules($data, W3TC_MARKER_BEGIN_PGCACHE_LEGACY, W3TC_MARKER_END_PGCACHE_LEGACY))
+            $data = w3_erase_rules($data, W3TC_MARKER_BEGIN_PGCACHE_LEGACY, W3TC_MARKER_END_PGCACHE_LEGACY);
+			
+		if ($has_wpsc = w3_has_rules($data, W3TC_MARKER_BEGIN_PGCACHE_WPSC, W3TC_MARKER_END_PGCACHE_WPSC))
+			$data = w3_erase_rules($data, W3TC_MARKER_BEGIN_PGCACHE_WPSC, W3TC_MARKER_END_PGCACHE_WPSC);
 
         $rules = $this->rules_core_generate($config);
         $rules_missing = (strstr(w3_clean_rules($data), w3_clean_rules($rules)) === false);

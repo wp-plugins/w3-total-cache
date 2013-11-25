@@ -81,6 +81,9 @@ class W3_GenericAdminEnvironment {
      * @throws SelfTestExceptions
      */
     private function create_required_files($config, $exs) {
+	    w3_require_once(W3TC_INC_FUNCTIONS_DIR . '/other.php');
+		w3_require_once(W3TC_INC_FUNCTIONS_DIR . '/ui.php');
+
         $src = W3TC_INSTALL_FILE_ADVANCED_CACHE;
         $dst = W3TC_ADDIN_FILE_ADVANCED_CACHE;
 
@@ -90,9 +93,10 @@ class W3_GenericAdminEnvironment {
                 if ($script_data == @file_get_contents($src))
                     return;
             } else {
-                $remove_url = is_network_admin() ?
-                              network_admin_url('admin.php?page=' . $_GET['page'] . '&amp;w3tc_default_remove_add_in=pgcache') :
-                    admin_url('admin.php?page=' . $_GET['page'] . '&amp;w3tc_default_remove_add_in=pgcache');
+                w3_require_once(W3TC_INC_FUNCTIONS_DIR . '/other.php');
+                w3_require_once(W3TC_INC_FUNCTIONS_DIR . '/ui.php');
+                $remove_url = w3_admin_url('admin.php?page=w3tc_dashboard&amp;w3tc_default_remove_add_in=pgcache');
+
                 $exs->push(new FilesystemOperationException(
                     sprintf(__('The Page Cache add-in file advanced-cache.php is not a W3 Total Cache drop-in.
                     It should be removed. %s', 'w3-total-cache'),

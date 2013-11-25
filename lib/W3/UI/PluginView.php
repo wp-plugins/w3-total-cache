@@ -115,6 +115,9 @@ abstract class W3_UI_PluginView {
         $this->_config = w3_instance('W3_Config');
         $this->_config_master = new W3_Config(true);
         $this->_config_admin = w3_instance('W3_ConfigAdmin');
+		w3_require_once(W3TC_LIB_W3_DIR . '/Request.php');
+        w3_require_once(W3TC_INC_FUNCTIONS_DIR . '/admin.php');
+        $this->_page = w3tc_get_current_page();
     }
 
     function options() {
